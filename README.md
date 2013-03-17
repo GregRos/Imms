@@ -22,6 +22,7 @@ Besides the standard interface for manipulating the data structures, there are (
 ```CSharp
  Sequence<T> result = from item in Enumerable.Range(0, 100).DelaySequence() where item % 2 == 0 orderby item select item
 ```
+This is made possible by the `DelaySequence()` method which returns an object of type `DelayedSequence<T>`, for which the various query methods have been re-implemented. It will also have some caching logic (e.g. the `DelayedSequence<T>` will not needlessly construct the same data structure twice).
 For F# there will exist computation expressions that work as follows.
 ```FSharp
  let x = Sequence {for item in {0 .. 100} -> i.ToString()}
