@@ -1,7 +1,10 @@
 Solid
 =====
 
-Solid is a library of _immutable_ or _persistent_ data structures for .NET languages, mainly C# and F#. These are data structures that cannot be modified in-place. Instead, operations such as `Add`, `Remove`, `Set`, and so forth return new versions of the data structure that share some of the structure with the old one.
+Solid is a library of _immutable_ or _persistent_ data structures for .NET languages, mainly C# and F#. 
+They are written in C# (I chose not to write them in F# mainly due to performance reasons -- F# abstracts the IL much more deeply than C# does, and makes it inconvinient to take certain (normally unwise) design choices that maximize performance. 
+
+These are data structures that cannot be modified in-place. Instead, operations such as `Add`, `Remove`, `Set`, and so forth return new versions of the data structure that share some of the structure with the old one.
 
 Right now, it consists of three usable data structures.
 * `Sequence<T>` (name change pending), a high performance _double-ended queue_ data structure that offers many fast operations. This is pretty much complete, aside from additional testing.
