@@ -283,7 +283,7 @@ let solid_xlist count= SOLID.TestXList.Empty.FromSeq [0 .. count]
 let core_flist count= FSHARP.TestFSList.Empty.FromSeq [0 .. count];
 let fsharpx_realdeque count = FSHARPX.TestRealDeque.Empty.FromSeq [0 .. count]
 let all_test_targets n= 
-    [solid_xlist; solid_vector; fsharpx_deque; fsharpx_skewlist; fsharpx_vector; fsharpx_realdeque; core_list; core_queue;core_stack;core_seq;core_flist]
+    [solid_xlist; solid_vector; fsharpx_deque; fsharpx_skewlist; fsharpx_vector; core_list; core_queue;core_stack;core_seq;core_flist]
     |> List.map (fun f -> f n)
 
 

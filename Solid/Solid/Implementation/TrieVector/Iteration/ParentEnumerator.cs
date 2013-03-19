@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Solid.TrieVector
+namespace Solid.TrieVector.Iteration
 {
 	internal class ParentEnumerator<T> : IEnumerator<T>
 	{

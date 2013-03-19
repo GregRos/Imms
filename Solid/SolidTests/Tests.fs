@@ -111,7 +111,7 @@ let test_iter_length iter (o : TestTarget<_>) =
         o.Length |> ignore
     o
 
-let test_iter_first iter (o : TestTarget<_>) = 
+let     test_iter_first iter (o : TestTarget<_>) = 
     let mutable o=o
     for i = 0 to iter do
         o.First |> ignore
@@ -140,9 +140,17 @@ let test_get_rnd iter (o : TestTarget<_>) =
 
 let test_set_each (o : TestTarget<_>)  = 
     let mutable o=o
-    for i = 0 to o.Length() do
+    for i = 0 to o.Length()-1 do
         o <- o.Set i i
     o
+
+let test_iter_take_last iter (o : TestTarget<_>) = 
+    let mutable r= o
+    let len = o.Length()
+    for i = 0 to o.Length() - 1 do
+        let rndI = rnd.Next(1,len)
+        r <- o.TakeLast(rndI)
+    r
 
 let test_set_rnd iter (o : TestTarget<_>) = 
     let mutable o=o
@@ -166,6 +174,14 @@ let test_random_access iter ratio (o : TestTarget<_>)=
                 o <- o.Set rndIndex i
         o
 
+let test_iterate_take iter (o : TestTarget<_>) = 
+    let mutable r=o
+    
+    let len = o.Length()
+    for i = 0 to iter do
+        let rndI = rnd.Next(1,len)
+        r <- o.TakeFirst(rndI)
+    r
 let test_insert_ascending iter (o : TestTarget<_>)=  
     let len = o.Length()
     let mutable o = o
@@ -261,4 +277,47 @@ let Test_concat_self iter =
         Name = "Concat Self Iterate"
         Parameter = iter
         Test = test_concat_self iter
+    }
+
+let Test_iter_first iter= 
+    {
+        Name = "Iterate First"
+        Parameter = iter
+        Test = test_iter_first iter
+    }
+
+let Test_iter_last iter= 
+    {
+        Name = "Iterate First"
+        Parameter = iter
+        Test = test_iter_last iter
+    }
+
+let Test_mixed_add_drop iter = 
+    {
+        Name = "Iterate Mixed Add/Drop"
+        Parameter = iter
+        Test = test_mixed_add_drop iter
+    }
+
+let Test_iter_length iter = 
+    {
+        Name = "Iterate Length"
+        Parameter = iter
+        Test = test_iter_length iter
+    }
+
+let Test_iter_take_first iter = 
+    {
+        Name = "Iterate TakeFirst rnd"
+        Parameter = iter
+        Test = test_iterate_take iter
+    }
+
+let Test_iter_take_last iter =  
+    {
+        Name = "Iterate TakeLast rnd"
+        Parameter = iter
+        Test = test_iter_take_last iter
+
     }

@@ -23,13 +23,13 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Gets an empty DelaySequence.
+		///   Gets an empty Sequence.
 		/// </summary>
 		/// <typeparam name="T"> </typeparam>
 		/// <returns> </returns>
 		/// <remarks>
-		///   All empty DelaySequence objects of the same generic type are guaranteed to be reference equal.
-		///   Empty DelaySequence objects of different generic types may or may not be reference equal."/>
+		///   All empty Sequence objects of the same generic type are guaranteed to be reference equal.
+		///   Empty Sequence objects of different generic types may or may not be reference equal."/>
 		/// </remarks>
 		public static Sequence<T> Empty<T>()
 		{
@@ -37,7 +37,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Creates a DelaySequence from a number of items.
+		///   Creates a Sequence from a number of items.
 		/// </summary>
 		/// <typeparam name="T"> The type of the sequence. </typeparam>
 		/// <param name="items"> The items from which to construct the sequence. </param>
@@ -63,7 +63,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Gets the item with the specified index from the DelaySequence.
+		///   Gets the item with the specified index from the Sequence.
 		/// </summary>
 		/// <param name="index"> The index of the item to get. </param>
 		/// <returns> </returns>
@@ -85,7 +85,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Gets the number of items in the DelaySequence.
+		///   Gets the number of items in the Sequence.
 		/// </summary>
 		/// <remarks>
 		///   This member has no impact on performance.
@@ -99,7 +99,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Gets the first item in the DelaySequence.
+		///   Gets the first item in the Sequence.
 		/// </summary>
 		/// <remarks>
 		///   This member has no impact on performance.
@@ -123,7 +123,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Gets the last item in the DelaySequence.
+		///   Gets the last item in the Sequence.
 		/// </summary>
 		/// <remarks>
 		///   This member has no impact on performance.
@@ -142,12 +142,12 @@ namespace Solid
 		{
 			get
 			{
-				return string.Format("DelaySequence, Count = {0}", Count);
+				return string.Format("Sequence, Count = {0}", Count);
 			}
 		}
 
 		/// <summary>
-		///   Adds the specified item at the beginning of the DelaySequence.
+		///   Adds the specified item at the beginning of the Sequence.
 		/// </summary>
 		/// <param name="item"> The item to add. </param>
 		/// <returns> </returns>
@@ -160,7 +160,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Adds the specified item at the end of the DelaySequence.
+		///   Adds the specified item at the end of the Sequence.
 		/// </summary>
 		/// <param name="item"> The item to add. </param>
 		/// <returns> </returns>
@@ -232,7 +232,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Applies a transformation on every item in the DelaySequence.
+		///   Applies a transformation on every item in the Sequence.
 		/// </summary>
 		/// <typeparam name="TOut"> The output type of the transformation. </typeparam>
 		/// <param name="transform"> </param>
@@ -263,7 +263,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Removes the last item from the DelaySequence.
+		///   Removes the last item from the Sequence.
 		/// </summary>
 		/// <returns> </returns>
 		/// <exception cref="InvalidOperationException">Thrown if the collection is empty.</exception>
@@ -283,7 +283,7 @@ namespace Solid
 		/// <param name="forEach"> </param>
 		/// <exception cref="ArgumentNullException">Thrown if the argument is null.</exception>
 		/// <remarks>
-		///   This member iterates over the entire DelaySequence and may have a substantial impact on performance..
+		///   This member iterates over the entire Sequence and may have a substantial impact on performance..
 		/// </remarks>
 		public void ForEach(Action<T> forEach)
 		{
@@ -296,7 +296,7 @@ namespace Solid
 		/// </summary>
 		/// <param name="forEach"> </param>
 		/// <remarks>
-		///   This member iterates over the entire DelaySequence and may have a substantial impact on performance.
+		///   This member iterates over the entire Sequence and may have a substantial impact on performance.
 		/// </remarks>
 		public void ForEachBack(Action<T> forEach)
 		{
@@ -377,7 +377,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Reverses the DelaySequence.
+		///   Reverses the Sequence.
 		/// </summary>
 		/// <returns> </returns>
 		/// <remarks>
@@ -439,7 +439,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Splits the DelaySequence at the specified index.
+		///   Splits the Sequence at the specified index.
 		/// </summary>
 		/// <param name="index"> </param>
 		/// <param name="first"> An output parameter that returns the first part of the sequence. </param>

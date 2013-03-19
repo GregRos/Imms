@@ -85,6 +85,7 @@ namespace Solid
 
 		public Vector<T> AddLastRange(IEnumerable<T> items)
 		{
+			//TODO: Naive implementation. Implement with efficient bulk loading.
 			Vector<T> vec = this;
 			foreach (T item in items)
 			{

@@ -65,9 +65,9 @@
     <Compile Include="Wrappers\Sequence.cs" />
     <Compile Include="Implementation\TrieMap\HashedKey.cs" />
     <Compile Include="Wrappers\HashMap.cs" />
-    <Compile Include="Implementation\TrieMap\LeafIterator.cs" />
+    <Compile Include="Implementation\TrieMap\Iteration\LeafIterator.cs" />
     <Compile Include="Implementation\TrieMap\NodeType.cs" />
-    <Compile Include="Implementation\TrieMap\ParentIterator.cs" />
+    <Compile Include="Implementation\TrieMap\Iteration\ParentIterator.cs" />
     <Compile Include="Implementation\TrieMap\Result.cs" />
     <Compile Include="Implementation\TrieMap\MapEmpty.cs" />
     <Compile Include="Implementation\TrieMap\MapLeaf.cs" />
@@ -78,8 +78,8 @@
     <Compile Include="Implementation\TrieVector\VectorNode.cs" />
     <Compile Include="Implementation\TrieVector\VectorParent.cs" />
     <Compile Include="Wrappers\Vector.cs" />
-    <Compile Include="Implementation\TrieVector\ParentEnumerator.cs" />
-    <Compile Include="Implementation\TrieVector\LeafEnumerator.cs" />
+    <Compile Include="Implementation\TrieVector\Iteration\ParentEnumerator.cs" />
+    <Compile Include="Implementation\TrieVector\Iteration\LeafEnumerator.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

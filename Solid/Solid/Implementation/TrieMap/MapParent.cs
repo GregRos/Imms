@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using NUnit.Framework;
 using Solid.Common;
+using Solid.TrieMap.Iteration;
 
 namespace Solid.TrieMap
 {
@@ -16,7 +18,7 @@ namespace Solid.TrieMap
 		public MapParent(int height, int count,MapNode<TKey,TValue>[] arr,uint population) : 
 			base(height, count,NodeType.Parent)
 		{
-
+			
 			Arr = arr;
 			myCount = (25 - Height*5);
 			Population = population;

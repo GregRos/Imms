@@ -80,7 +80,26 @@ let main argv =
     let lst2 = MutableList<int>()
     let sw = Stopwatch()
     let iterations = 10**5
-    let all_tests = [Test_insert_ascending iterations]
+    System.Console.BufferHeight <- Console.BufferHeight * 3
+    let all_tests = 
+        [Test_insert_ascending iterations; 
+        Test_add_first iterations; 
+        Test_add_last iterations;
+        Test_drop_first;
+        Test_drop_last;
+        Test_get_rnd iterations;
+        Test_get_each;
+        Test_set_each;
+        Test_set_rnd iterations;
+        Test_random_access iterations;
+        Test_add_mixed iterations 0.5;
+        Test_insert_ascending iterations;
+        Test_iter_take_first iterations;
+        Test_concat_self iterations;
+        Test_iter_first iterations;
+        Test_iter_last iterations;
+        Test_iter_length iterations;
+        Test_iter_take_last iterations]
     let results = run_test_sequence all_tests (delay1 all_test_targets (10**5))
     results |> Seq.iter print
     

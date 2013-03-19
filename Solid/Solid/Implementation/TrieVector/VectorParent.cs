@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using Solid.Common;
+using Solid.TrieVector.Iteration;
 
 namespace Solid.TrieVector
 {

@@ -1,8 +1,7 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Solid.TrieMap
+namespace Solid.TrieMap.Iteration
 {
 	internal sealed class ParentIterator<TKey, TValue> : IEnumerator<KeyValuePair<TKey, TValue>>
 	{

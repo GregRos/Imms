@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Solid.TrieVector
+namespace Solid.TrieVector.Iteration
 {
 	internal class LeafEnumerator<T> : IEnumerator<T>
 	{
