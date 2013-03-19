@@ -24,7 +24,10 @@ internal static class Program
 		var x = Enumerable.Range(0, 100).ToSequence();
 		x = x.Append(x);
 
-		x = x.Set(199, 5);
+		for (int i = 0; i < x.Count; i++)
+		{
+			x = x.Set(i, 0);
+		}
 
 
 

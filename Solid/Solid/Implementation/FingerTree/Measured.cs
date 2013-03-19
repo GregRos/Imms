@@ -28,5 +28,8 @@ namespace Solid.FingerTree
 
 
 		public abstract void Iter(Action<Measured> action);
+
+		public abstract TObject Set<TObject>(int index, object value)
+			where TObject : Measured;
 	}
 }

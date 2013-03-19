@@ -138,6 +138,8 @@ namespace Solid
 			}
 		}
 
+		
+
 		private string DebuggerDisplay
 		{
 			get
@@ -403,12 +405,7 @@ namespace Solid
 			if (index >= root.Measure || index < 0) throw Errors.Index_out_of_range;
 			if (index == 0) return DropFirst().AddFirst(item);
 			if (index == root.Measure - 1) return DropLast().AddLast(item);
-			FTree<Value<T>> part1, part2;
-			root.Split(index + 1, out part1, out part2);
-			part1 = part1.DropRight();
-			part1 = part1.AddRight(new Value<T>(item));
-			part1 = FTree<Value<T>>.Concat(part1, part2);
-			return new Sequence<T>(part1);
+			return new Sequence<T>(root.Set(index, new Value<T>(item)));
 		}
 
 		public Sequence<T> Skip(int count)

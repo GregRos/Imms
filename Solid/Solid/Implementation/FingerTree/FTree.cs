@@ -69,6 +69,7 @@ namespace Solid.FingerTree
 	
 		public abstract IEnumerator<Measured> GetEnumerator();
 
+		public abstract FTree<T> Set(int index, object value);
 
 		public static FTree<T> Concat(FTree<T> first, FTree<T> last)
 		{

@@ -331,6 +331,33 @@ namespace Solid.FingerTree
 			}
 		}
 
+		public override TObject Set<TObject>(int index, object value)
+		{
+			var code = SplitWhere(index);
+			T res;
+			switch (code)
+			{
+				case 0:
+				case 1:
+					res = First.Set<T>(index, value);
+					return CreateCheckNull(Measure, res, Second, Third, Fourth) as TObject;
+				case 2:
+				case 3:
+					res = Second.Set<T>(index - First.Measure, value);
+					return CreateCheckNull(Measure, First, res, Third, Fourth) as TObject;
+				case 4:
+				case 5:
+					res = Third.Set<T>(index - First.Measure - Second.Measure, value);
+					return CreateCheckNull(Measure, First, Second, res, Fourth) as TObject;
+				case 6:
+				case 7:
+					res = Fourth.Set<T>(index - First.Measure - Second.Measure - Third.Measure, value);
+					return CreateCheckNull(Measure, First, Second, Third, res) as TObject;
+				default:
+					throw Errors.Invalid_execution_path;
+			}
+		}
+
 		/* Here is an ASCII diagram for what the next function does.
 		 * X, X      => XX
 		 * X, XX     => XXX

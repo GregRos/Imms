@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using NUnit.Framework;
 using Solid.FingerTree.Iteration;
 
 namespace Solid.FingerTree
@@ -46,6 +47,12 @@ namespace Solid.FingerTree
 		public override void Iter(Action<Measured> action)
 		{
 			action(this);
+		}
+
+		public override TObject Set<TObject>(int index, object value)
+		{
+			value.IsInstanceOf<Value<T>>();
+			return value as TObject;
 		}
 	}
 }

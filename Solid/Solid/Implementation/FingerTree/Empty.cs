@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Solid.Common;
 using Solid.FingerTree.Iteration;
 
 namespace Solid.FingerTree
@@ -72,6 +73,11 @@ namespace Solid.FingerTree
 		public override IEnumerator<Measured> GetEnumerator()
 		{
 			return EmptyEnumerator<T>.Instance;
+		}
+
+		public override FTree<T> Set(int index, object value)
+		{
+			throw Errors.Is_empty;
 		}
 	}
 }

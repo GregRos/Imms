@@ -103,5 +103,10 @@ namespace Solid.FingerTree
 		{
 			return CenterDigit.GetEnumerator();
 		}
+
+		public override FTree<T> Set(int index, object value)
+		{
+			return new Single<T>(Measure, CenterDigit.Set<Digit<T>>(index, value));
+		}
 	}
 }

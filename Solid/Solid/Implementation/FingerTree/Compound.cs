@@ -252,5 +252,28 @@ namespace Solid.FingerTree
 		{
 			return new CompoundEnumerator<T>(this);
 		}
+
+		public override FTree<T> Set(int index, object value)
+		{
+			int splitCode = WhereToSpit(index);
+			switch (splitCode)
+			{
+				case 0:
+				case 1:
+					var new_left = LeftDigit.Set<Digit<T>>(index, value);
+					return new Compound<T>(Measure, new_left, DeepTree, RightDigit);
+				case 2:
+				case 3:
+					if (DeepTree.Measure == 0) goto case 4;
+					var new_deep = DeepTree.Set(index - LeftDigit.Measure, value);
+					return new Compound<T>(Measure, LeftDigit, new_deep, RightDigit);
+				case 4:
+				case 5:
+					var new_right = RightDigit.Set<Digit<T>>(index - LeftDigit.Measure - DeepTree.Measure, value);
+					return new Compound<T>(Measure, LeftDigit, DeepTree, new_right);
+				default:
+					throw Errors.Index_out_of_range;
+			}
+		}
 	}
 }
