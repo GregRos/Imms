@@ -145,7 +145,7 @@ namespace Solid.FingerTree
 
 
 	
-		private int WhereToSpit(int count)
+		private int WhereToSplit(int count)
 		{
 			count.Is(i => i < Measure);
 			if (count == 0) return 0;
@@ -204,7 +204,7 @@ namespace Solid.FingerTree
 
 		public override void Split(int count, out FTree<T> leftmost, out FTree<T> rightmost)
 		{
-			int splitCode = WhereToSpit(count);
+			int splitCode = WhereToSplit(count);
 			count.Is(i => i < Measure && i >= 0);
 			
 			switch (splitCode)
@@ -255,7 +255,7 @@ namespace Solid.FingerTree
 
 		public override FTree<T> Set(int index, object value)
 		{
-			int splitCode = WhereToSpit(index);
+			int splitCode = WhereToSplit(index);
 			switch (splitCode)
 			{
 				case 0:
@@ -274,6 +274,39 @@ namespace Solid.FingerTree
 				default:
 					throw Errors.Index_out_of_range;
 			}
+		}
+
+		public override FTree<T> Insert(int index, object value)
+		{
+			int splitCode = WhereToSplit(index);
+			
+			switch (splitCode)
+			{
+				case 0:
+				case 1:
+					Digit<T> left_l, left_r;
+					LeftDigit.Insert(index, value, out left_l, out left_r);
+					if (left_r != null)
+					{
+						return new Compound<T>(Measure + 1, left_l, DeepTree.AddLeft(left_r), RightDigit);
+					}
+					return new Compound<T>(Measure + 1, left_l, DeepTree, RightDigit);
+				case 2:
+				case 3:
+					return new Compound<T>(Measure + 1, LeftDigit, DeepTree.Insert(index - LeftDigit.Measure, value), RightDigit);
+				case 4:
+				case 5:
+					Digit<T> right_l, right_r;
+					RightDigit.Insert(index - LeftDigit.Measure - DeepTree.Measure, value, out right_l, out right_r);
+					if (right_r != null)
+					{
+						return new Compound<T>(Measure + 1, LeftDigit, DeepTree.AddRight(right_l), right_r);
+					}
+					return new Compound<T>(Measure + 1, LeftDigit, DeepTree, right_l);
+				default:
+					throw Errors.Invalid_execution_path;
+			}
+
 		}
 	}
 }

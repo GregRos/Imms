@@ -215,6 +215,17 @@ namespace Solid.FingerTree
 					return new Digit<T>(item2, item3, item4, measure);
 				case 1 << 2 | 1 << 3:
 					return new Digit<T>(item3, item4, measure);
+				case 1 << 0 | 1 << 2:
+					return new Digit<T>(item1, item3, measure);
+				case 1 << 0 | 1 << 2 | 1 << 3:
+					return new Digit<T>(item1, item3, item4, measure);
+				case 1 << 1 | 1 << 3:
+					return new Digit<T>(item2, item4, measure);
+				case 1 << 0 | 1 << 3:
+					return new Digit<T>(item1, item4, measure);
+				case 1 << 0 | 1 << 1 | 1 << 3:
+					return new Digit<T>(item1, item2, item4, measure);
+			
 				default:
 					throw Errors.Invalid_execution_path;
 			}
@@ -329,6 +340,76 @@ namespace Solid.FingerTree
 				default:
 					throw Errors.Invalid_execution_path;
 			}
+		}
+
+		public override void Insert<TObject>(int index, object value, out TObject leftmost, out TObject rightmost)
+		{
+			value.IsNotNull();
+			
+			var code = SplitWhere(index);
+			T my_leftmost;
+			T my_rightmost;
+			switch (code)
+			{
+				case 0:
+				case 1:
+					First.Insert(index, value, out my_leftmost, out my_rightmost);
+					if (Size == 4 && my_rightmost != null)
+					{
+						leftmost = new Digit<T>(my_leftmost,my_rightmost,Second,First.Measure + Second.Measure+1) as TObject;
+						rightmost = new Digit<T>(Third, Fourth, Measure - leftmost.Measure) as TObject;
+						return;
+					}
+					leftmost = my_rightmost != null ?
+							CreateCheckNull(Measure + 1, my_leftmost, my_rightmost, Second, Third) as TObject
+							: CreateCheckNull(Measure + 1, my_leftmost, Second, Third, Fourth) as TObject;
+					rightmost = null;
+					return;
+				case 2:
+				case 3:
+					Second.Insert(index - First.Measure, value, out my_leftmost, out my_rightmost);
+					if (Size == 4 && my_rightmost != null)
+					{
+						leftmost = new Digit<T>(First,my_leftmost,my_rightmost, First.Measure + Second.Measure + 1) as TObject;
+						rightmost = new Digit<T>(Third, Fourth, Third.Measure + Fourth.Measure) as TObject;
+						return;
+					}
+					leftmost = my_rightmost != null ?
+							CreateCheckNull(Measure + 1, First, my_leftmost, my_rightmost,Third) as TObject
+							: CreateCheckNull(Measure + 1, First, my_leftmost,Third, Fourth) as TObject;
+					rightmost = null;
+					return;
+				case 4:
+				case 5:
+					Third.Insert(index - First.Measure - Second.Measure, value, out my_leftmost, out my_rightmost);
+					if (Size == 4 && my_rightmost != null)
+					{
+						leftmost = new Digit<T>(First, Second, my_leftmost, First.Measure + Second.Measure + my_leftmost.Measure) as TObject;
+						rightmost = new Digit<T>(my_rightmost, Fourth, my_rightmost.Measure + Fourth.Measure) as TObject;
+						return;
+					}
+					leftmost =
+						my_rightmost != null ?
+							CreateCheckNull(Measure + 1, First, Second, my_leftmost, my_rightmost) as TObject
+							: CreateCheckNull(Measure + 1, First, Second, my_leftmost, Fourth) as TObject;
+					rightmost = null;
+					return;
+				case 6:
+				case 7:
+					Fourth.Insert(index - Measure + Fourth.Measure, value, out my_leftmost, out my_rightmost);
+					if (Size == 4 && my_rightmost != null)
+					{
+						leftmost = new Digit<T>(First, Second, Third, Measure - Fourth.Measure) as TObject;
+						rightmost = new Digit<T>(my_leftmost,my_rightmost, Measure - leftmost.Measure + 1) as TObject;
+						return;
+					}
+					leftmost = new Digit<T>(First, Second, Third, my_leftmost, Measure + 1) as TObject;
+					rightmost = null;
+					return;
+				default:
+					throw Errors.Invalid_execution_path;
+			}
+		
 		}
 
 		public override TObject Set<TObject>(int index, object value)

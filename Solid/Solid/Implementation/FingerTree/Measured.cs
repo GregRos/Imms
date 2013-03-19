@@ -31,5 +31,10 @@ namespace Solid.FingerTree
 
 		public abstract TObject Set<TObject>(int index, object value)
 			where TObject : Measured;
+
+
+		public abstract void Insert<TObject>(int index, object value, out TObject leftmost, out TObject rightmost)
+			where TObject : Measured;
+
 	}
 }

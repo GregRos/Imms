@@ -54,5 +54,12 @@ namespace Solid.FingerTree
 			value.IsInstanceOf<Value<T>>();
 			return value as TObject;
 		}
+
+		public override void Insert<TObject>(int index, object value, out TObject leftmost, out TObject rightmost)
+		{
+			value.IsInstanceOf<Value<T>>();
+			leftmost = value as TObject;
+			rightmost = this as TObject;
+		}
 	}
 }

@@ -69,9 +69,8 @@ namespace Solid
 		/// <returns> </returns>
 		/// <exception cref="IndexOutOfRangeException">Thrown if the index doesn't exist.</exception>
 		/// <remarks>
-		///   This member has a low-moderate impact on performance. O(logn).
+		///   This member has a low impact on performance. O(logn).
 		/// </remarks>
-		[Pure]
 		public T this[int index]
 		{
 			get
@@ -322,11 +321,15 @@ namespace Solid
 			if (index == 0) return AddFirst(item);
 			;
 			if (index >= root.Measure || index < 0) throw Errors.Index_out_of_range;
+			/*
 			FTree<Value<T>> part1, part2;
 			root.Split(index + 1, out part1, out part2);
 			part1 = part1.AddRight(new Value<T>(item));
 			FTree<Value<T>> result = FTree<Value<T>>.Concat(part1, part2);
+			
 			return new Sequence<T>(result);
+			 **/
+			return new Sequence<T>(root.Insert(index, new Value<T>(item)));
 		}
 
 
@@ -398,7 +401,7 @@ namespace Solid
 		/// <returns> </returns>
 		/// <exception cref="IndexOutOfRangeException">Thrown if the index doesn't exist.</exception>
 		/// <remarks>
-		///   This member has a moderate-high impact on performance.
+		///   This member has a low impact on performance.
 		/// </remarks>
 		public Sequence<T> Set(int index, T item)
 		{

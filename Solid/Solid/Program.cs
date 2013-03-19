@@ -22,11 +22,11 @@ internal static class Program
 	{
 
 		var x = Enumerable.Range(0, 100).ToSequence();
-		x = x.Append(x);
+		//x = x.Append(x);
 
-		for (int i = 0; i < x.Count; i++)
+		for (int i = 0; i < 50; i++)
 		{
-			x = x.Set(i, 0);
+			x = x.Insert(i * 2, 0);
 		}
 
 

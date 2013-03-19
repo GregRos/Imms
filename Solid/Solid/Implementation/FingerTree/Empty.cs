@@ -79,5 +79,10 @@ namespace Solid.FingerTree
 		{
 			throw Errors.Is_empty;
 		}
+
+		public override FTree<T> Insert(int index, object value)
+		{
+			return this.AddRight(value as T);
+		}
 	}
 }

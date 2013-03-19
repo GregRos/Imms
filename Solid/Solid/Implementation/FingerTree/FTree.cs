@@ -71,6 +71,7 @@ namespace Solid.FingerTree
 
 		public abstract FTree<T> Set(int index, object value);
 
+		public abstract FTree<T> Insert(int index, object value);
 		public static FTree<T> Concat(FTree<T> first, FTree<T> last)
 		{
 			int status = first.Kind << 3 | last.Kind;

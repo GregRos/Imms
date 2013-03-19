@@ -108,5 +108,16 @@ namespace Solid.FingerTree
 		{
 			return new Single<T>(Measure, CenterDigit.Set<Digit<T>>(index, value));
 		}
+
+		public override FTree<T> Insert(int index, object value)
+		{
+			Digit<T> leftmost, rightmost;
+			CenterDigit.Insert(index, value, out leftmost, out rightmost);
+			if (rightmost == null)
+			{
+				return new Single<T>(Measure+1,leftmost);
+			}
+			return new Compound<T>(Measure + 1, leftmost, Empty<Digit<T>>.Instance, rightmost);
+		}
 	}
 }
