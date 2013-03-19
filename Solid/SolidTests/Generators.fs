@@ -1,4 +1,4 @@
-﻿module SolidTesting.Generators
+﻿module SolidTests.Generators
 open System
 let chars = ['0' .. '9'] @ ['a' .. 'z'] @ ['A' .. 'Z'] |> List.toArray
 let rnd = Random()

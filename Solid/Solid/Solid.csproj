@@ -18,7 +18,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -27,7 +27,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -41,49 +41,45 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChainingAssertion.NUnit.cs" />
-    <Compile Include="Common\ArrayExt.cs" />
-    <Compile Include="Common\Errors.cs" />
-    <Compile Include="Convertion\Converters.cs" />
-    <Compile Include="DelayedSequence.cs" />
-    <Compile Include="FingerTree\Enumeration\CompoundEnumerator.cs" />
-    <Compile Include="FingerTree\Enumeration\DigitEnumerator.cs" />
-    <Compile Include="FingerTree\Enumeration\EmptyEnumerator.cs" />
-    <Compile Include="FingerTree\TreeExt.cs" />
-    <Compile Include="FingerTree\Enumeration\EnumeratorWrapper.cs" />
-    <Compile Include="FingerTree\Errors.cs" />
-    <Compile Include="FingerTree\Compound.cs" />
-    <Compile Include="FingerTree\Digit.cs" />
-    <Compile Include="FingerTree\Empty.cs" />
-    <Compile Include="FingerTree\FTree.cs" />
-    <Compile Include="FingerTree\Measured.cs" />
-    <Compile Include="FingerTree\Single.cs" />
-    <Compile Include="FingerTree\TreeType.cs" />
-    <Compile Include="FingerTree\Value.cs" />
-    <Compile Include="FingerTree\Enumeration\ValueEnumerator.cs" />
+    <Compile Include="Implementation\Common\ArrayExt.cs" />
+    <Compile Include="Implementation\Common\Errors.cs" />
+    <Compile Include="Wrappers\Convertion\DelayedSequence.cs" />
+    <Compile Include="Wrappers\Convertion\Convertion.cs" />
+    <Compile Include="Implementation\FingerTree\Iteration\CompoundEnumerator.cs" />
+    <Compile Include="Implementation\FingerTree\Iteration\DigitEnumerator.cs" />
+    <Compile Include="Implementation\FingerTree\Iteration\EmptyEnumerator.cs" />
+    <Compile Include="Implementation\FingerTree\TreeExt.cs" />
+    <Compile Include="Implementation\FingerTree\Iteration\EnumeratorWrapper.cs" />
+    <Compile Include="Implementation\FingerTree\Errors.cs" />
+    <Compile Include="Implementation\FingerTree\Compound.cs" />
+    <Compile Include="Implementation\FingerTree\Digit.cs" />
+    <Compile Include="Implementation\FingerTree\Empty.cs" />
+    <Compile Include="Implementation\FingerTree\FTree.cs" />
+    <Compile Include="Implementation\FingerTree\Measured.cs" />
+    <Compile Include="Implementation\FingerTree\Single.cs" />
+    <Compile Include="Implementation\FingerTree\TreeType.cs" />
+    <Compile Include="Implementation\FingerTree\Value.cs" />
+    <Compile Include="Implementation\FingerTree\Iteration\ValueEnumerator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Sequence.cs" />
-    <Compile Include="TrieMap\HashedKey.cs" />
-    <Compile Include="HashMap.cs" />
-    <Compile Include="TrieMap\LeafIterator.cs" />
-    <Compile Include="TrieMap\NodeType.cs" />
-    <Compile Include="TrieMap\ParentIterator.cs" />
-    <Compile Include="TrieMap\Result.cs" />
-    <Compile Include="TrieMap\MapEmpty.cs" />
-    <Compile Include="TrieMap\MapLeaf.cs" />
-    <Compile Include="TrieMap\MapNode.cs" />
-    <Compile Include="TrieMap\MapParent.cs" />
-    <Compile Include="TrieMap\WriteBehavior.cs" />
-    <Compile Include="TrieVector\VectorLeaf.cs" />
-    <Compile Include="TrieVector\VectorNode.cs" />
-    <Compile Include="TrieVector\VectorParent.cs" />
-    <Compile Include="Vector.cs" />
-    <Compile Include="TrieVector\ParentEnumerator.cs" />
-    <Compile Include="TrieVector\LeafEnumerator.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-    <None Include="packages.config" />
+    <Compile Include="Wrappers\Sequence.cs" />
+    <Compile Include="Implementation\TrieMap\HashedKey.cs" />
+    <Compile Include="Wrappers\HashMap.cs" />
+    <Compile Include="Implementation\TrieMap\LeafIterator.cs" />
+    <Compile Include="Implementation\TrieMap\NodeType.cs" />
+    <Compile Include="Implementation\TrieMap\ParentIterator.cs" />
+    <Compile Include="Implementation\TrieMap\Result.cs" />
+    <Compile Include="Implementation\TrieMap\MapEmpty.cs" />
+    <Compile Include="Implementation\TrieMap\MapLeaf.cs" />
+    <Compile Include="Implementation\TrieMap\MapNode.cs" />
+    <Compile Include="Implementation\TrieMap\MapParent.cs" />
+    <Compile Include="Implementation\TrieMap\WriteBehavior.cs" />
+    <Compile Include="Implementation\TrieVector\VectorLeaf.cs" />
+    <Compile Include="Implementation\TrieVector\VectorNode.cs" />
+    <Compile Include="Implementation\TrieVector\VectorParent.cs" />
+    <Compile Include="Wrappers\Vector.cs" />
+    <Compile Include="Implementation\TrieVector\ParentEnumerator.cs" />
+    <Compile Include="Implementation\TrieVector\LeafEnumerator.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

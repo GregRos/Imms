@@ -1,4 +1,4 @@
-﻿module SolidTesting.Targets
+﻿module SolidTests.Targets
 open System
 open System.Collections
 open System.Collections.Generic
@@ -8,10 +8,19 @@ type MutableDict<'t> = Generic.Dictionary<'t,'t>
 type FSMap<'t when 't : comparison> = Map<'t,'t>
 type FSList<'t> = list<'t>
 type MutableQueue<'t> = Generic.Queue<'t>
-open Solid.Ops
+open SolidFS.Operators
+open SolidFS.Expressions
+open Solid
 
-[<AbstractClass>]
-type TestTarget<'a>(name) as this = 
+
+
+type TestNotAvailableException<'a>(target : TestTarget<'a>) = 
+    inherit Exception( "The test is not available for the object.")
+
+
+and [<AbstractClass>] 
+    TestTarget<'a>(name) as this = 
+    let not_available = TestNotAvailableException(this)
     abstract member Name : string
     abstract member AddLast : 'a -> TestTarget<'a>
     abstract member AddFirst : 'a -> TestTarget<'a>
@@ -22,8 +31,8 @@ type TestTarget<'a>(name) as this =
     abstract member Set : int -> 'a -> TestTarget<'a>
     abstract member First : unit -> 'a
     abstract member Last : unit -> 'a
-    abstract member AddManyLast : seq<'a> -> TestTarget<'a>
-    abstract member AddManyFirst : seq<'a> -> TestTarget<'a>
+    abstract member AddRangeLast : seq<'a> -> TestTarget<'a>
+    abstract member AddRangeFirst : seq<'a> -> TestTarget<'a>
     abstract member InsertAt : int -> 'a -> TestTarget<'a>
     abstract member RemoveAt : int -> TestTarget<'a>
     abstract member InsertManyAt : int -> seq<'a> -> TestTarget<'a>
@@ -33,25 +42,27 @@ type TestTarget<'a>(name) as this =
     abstract member AsSeq : unit -> seq<'a>
     abstract member FromSeq : seq<'a> -> TestTarget<'a>
     abstract member IsEmpty : bool
+    abstract member Append : TestTarget<'a> -> TestTarget<'a>
     default __.Name = name
-    default __.AddLast _ = this
-    default __.AddFirst _ = this
-    default __.Length() = 0
-    default __.DropFirst () = this
-    default __.DropLast () = this
-    default __.Get _ = Unchecked.defaultof<'a>
-    default __.Set _ _ = this
-    default __.First() = Unchecked.defaultof<'a>
-    default __.Last() = Unchecked.defaultof<'a>
-    default __.AddManyFirst _ = this
-    default __.AddManyLast _ = this
-    default __.InsertAt _ _ = this
-    default __.RemoveAt _ = this
-    default __.InsertManyAt _ _ = this
-    default __.TakeFirst _ = this
-    default __.TakeLast _ = this
-    default __.Concat _ = this
-    default __.AsSeq () = Seq.empty
+    default __.AddLast _ = raise not_available
+    default __.AddFirst _ = raise not_available
+    default __.Length() = raise not_available
+    default __.DropFirst () = raise not_available
+    default __.DropLast () = raise not_available
+    default __.Get _ = raise not_available
+    default __.Set _ _ = raise not_available
+    default __.First() = raise not_available
+    default __.Last() = raise not_available
+    default __.AddRangeFirst _ = raise not_available
+    default __.AddRangeLast _ = raise not_available
+    default __.InsertAt _ _ = raise not_available
+    default __.RemoveAt _ = raise not_available
+    default __.InsertManyAt _ _ = raise not_available
+    default __.TakeFirst _ = raise not_available
+    default __.TakeLast _ = raise not_available
+    default __.Concat _ = raise not_available
+    default __.AsSeq () = raise not_available
+    default __.Append t = raise not_available
 
 
 
@@ -73,7 +84,7 @@ module FSHARPX =
         override this.AsSeq () = inner :> _
         override this.IsEmpty = inner.IsEmpty
         override this.FromSeq vs = vs |> Vector.ofSeq |> cns
-        override this.AddManyLast vs = 
+        override this.AddRangeLast vs = 
             let mutable x = inner
             for i in vs do
                 x <- x |> FSharpx.Collections.Vector.conj i
@@ -135,7 +146,7 @@ module CORE =
         let cns x = TestList<'a>(x) :> TestTarget<'a>
 
         override this.AddLast v= inner.Add v |> cns
-        override this.AddManyLast vs = inner.AddRange vs |> cns
+        override this.AddRangeLast vs = inner.AddRange vs |> cns
         override this.Last () = inner.[inner.Count - 1]
         override this.First() = inner.[0]
         override this.Get i = inner.[i]
@@ -178,12 +189,12 @@ module CORE =
         override this.AddLast v= Seq.singleton v |> Seq.append inner |> cns
         override this.AddFirst v = inner |> Seq.append (Seq.singleton v) |> cns
 
-        override this.AddManyLast vs = vs |> Seq.append inner |> cns
-        override this.AddManyFirst vs = inner |> Seq.append vs |> cns
+        override this.AddRangeLast vs = vs |> Seq.append inner |> cns
+        override this.AddRangeFirst vs = inner |> Seq.append vs |> cns
         override this.IsEmpty = inner |> Seq.isEmpty
         override this.First () = inner |> Seq.head
-        override this.DropFirst() = inner |> Seq.skip 1 |> cns
-        override this.DropLast() = inner |> Seq.take ((inner |> Seq.length) - 1) |> cns
+
+        //override this.DropLast() = inner |> Seq.take ((inner |> Seq.length) - 1) |> cns
         override this.Last() = inner |> Seq.last
         override this.TakeFirst i = inner |> Seq.take i |> cns
         override this.TakeLast i = inner |> Seq.skip ((inner |> Seq.length) - i) |> cns
@@ -202,7 +213,7 @@ module FSHARP =
 
         override this.First ()= inner.Head
         override this.IsEmpty = inner.IsEmpty
-        override this.Get i = inner.[i]
+
 
         override this.Length ()= inner |> List.length
 
@@ -213,42 +224,51 @@ module FSHARP =
         static member Empty = TestFSList<'a>([])  :> TestTarget<'a>
 
 module SOLID = 
-    type TestVector<'a>(inner : Solid.Collections.Vector<'a>) = 
+    type TestVector<'a>(inner : Solid.Vector<'a>) = 
         inherit TestTarget<'a>("Solid...Vector")
         let cns x = TestVector<'a>(x) :> TestTarget<'a>
-        override __.AddFirst v = inner.AddFirst v |> cns
+        
         override __.AddLast v = inner.AddLast v |> cns
         override __.First() = inner.[0]
-        override __.Last() = inner.[inner.Length-1]
-        override __.DropLast() = inner.DropLast |> cns
+        override __.Last() = inner.[inner.Count-1]
+        override __.DropLast() = inner.DropLast() |> cns
         
-        override __.Length() = inner.Length
-        override __.IsEmpty = inner.IsEmpty
+        override __.Length() = inner.Count
+        override __.IsEmpty = inner.Count = 0
         override __.Get i = inner.[i]
-        override __.Set i v = inner.Set i v |> cns
-        override __.TakeFirst i = inner.TakeFirst i |> cns
+        override __.Set i v = inner.Set(i, v)|> cns
+        override __.TakeFirst i = inner.Take i |> cns
         override __.AsSeq () = inner :>_
-        override __.FromSeq vs = Solid.Collections.Vector<'a>.FromSeq vs |> cns
-        static member Empty = TestVector<'a>(Solid.Collections.Vector.Empty)
-    type TestXList<'a>(inner : Solid.Collections.XList<'a>) = 
-        inherit TestTarget<'a>("Solid...XList")
+        override __.FromSeq vs = vs.ToVector() |> cns
+        
+        static member Empty = TestVector<'a>(Solid.Vector.Empty())
+    type TestXList<'a>(inner : Solid.Sequence<'a>) = 
+        inherit TestTarget<'a>("Solid...Sequence")
         let cns x = TestXList<'a>(x) :> TestTarget<'a>
+        member __.Inner = inner
         override __.AddFirst v = inner.AddFirst v |> cns
         override __.AddLast v = inner.AddLast v |> cns
         override __.Get i = inner.[i]
-        override __.TakeFirst i = inner.TakeFirst i |> cns
-        override __.IsEmpty = inner.Length=0
+        override __.TakeFirst i = inner.Take i |> cns
+        override __.IsEmpty = inner.IsEmpty
         override __.DropFirst() = inner.DropFirst() |> cns
         override __.DropLast() = inner.DropLast() |> cns
         override __.TakeLast i = inner.TakeLast i |> cns
         override __.AsSeq() = inner :>_
-        override __.Length() = inner.Length
-        override __.FromSeq vs = Solid.Collections.XList<'a>.FromSeq vs |> cns
+        override __.Length() = inner.Count
+        override __.FromSeq vs = vs.ToSequence() |> cns
         override __.First() = inner.First
         override __.Last() = inner.Last
-        override __.AddManyLast vs = inner.AddManyLast vs |> cns
-        override __.AddManyFirst vs = inner.AddManyFirst vs |> cns
-        static member Empty = TestXList<'a>(Solid.Collections.XList.Empty)
+        override __.InsertAt i v = inner.Insert(i,v) |> cns
+        override __.AddRangeLast vs = inner.AddRangeLast vs |> cns
+        override __.AddRangeFirst vs = inner.AddRangeFirst vs |> cns
+        override __.Set i v = inner.Set(i,v) |> cns
+        override __.Append t = 
+            let t = t :?> TestXList<'a>
+            inner.Append(t.Inner) |> cns
+        static member Empty = TestXList<'a>(Solid.Sequence.Empty())
+
+
 
 
 let fsharpx_deque (count : int)= FSHARPX.TestDeque.Empty.FromSeq [0 .. count]
@@ -261,7 +281,9 @@ let core_seq count= CORE.TestSeq.Empty.FromSeq [0 .. count];
 let solid_vector count= SOLID.TestVector.Empty.FromSeq [0 .. count];
 let solid_xlist count= SOLID.TestXList.Empty.FromSeq [0 .. count]
 let core_flist count= FSHARP.TestFSList.Empty.FromSeq [0 .. count];
-
-
+let fsharpx_realdeque count = FSHARPX.TestRealDeque.Empty.FromSeq [0 .. count]
+let all_test_targets n= 
+    [solid_xlist; solid_vector; fsharpx_deque; fsharpx_skewlist; fsharpx_vector; fsharpx_realdeque; core_list; core_queue;core_stack;core_seq;core_flist]
+    |> List.map (fun f -> f n)
 
 

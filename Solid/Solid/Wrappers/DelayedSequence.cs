@@ -4,7 +4,6 @@ using System.Linq;
 
 namespace Solid
 {
-	[Obsolete("This class is experimental.")]
 	internal struct DelayedSequence<T>
 	{
 		public readonly IEnumerable<T> Inner;

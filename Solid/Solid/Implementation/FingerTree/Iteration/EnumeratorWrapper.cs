@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Solid.FingerTree
+namespace Solid.FingerTree.Iteration
 {
 	internal class EnumeratorWrapper<T> : IEnumerator<T>,IEnumerable<T>
 	{

@@ -1,7 +1,7 @@
-﻿module Solid.Expressions
+﻿module SolidFS.Expressions
 open Solid
-open Solid.Convertion;
-open Solid.Operators
+
+open SolidFS.Operators
 type Step<'a> = 
     internal
     | Nothing

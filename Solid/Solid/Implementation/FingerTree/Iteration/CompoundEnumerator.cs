@@ -2,7 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
-namespace Solid.FingerTree
+
+namespace Solid.FingerTree.Iteration
 {
 	internal class CompoundEnumerator<T> : IEnumerator<Measured>
 		where T : Measured

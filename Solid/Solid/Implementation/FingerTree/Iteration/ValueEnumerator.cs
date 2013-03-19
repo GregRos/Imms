@@ -1,8 +1,7 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Solid.FingerTree
+namespace Solid.FingerTree.Iteration
 {
 	internal sealed class ValueEnumerator<T> : IEnumerator<Measured>
 	{

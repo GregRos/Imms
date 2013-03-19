@@ -1,4 +1,4 @@
-﻿module private AssemblyInfo
+﻿module private SolidFS.AssemblyInfo
 open System.Diagnostics;
 open System.ComponentModel;
 open System.Runtime.InteropServices;

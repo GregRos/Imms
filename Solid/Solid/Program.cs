@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
-
 using Solid.FingerTree;
 using Solid.TrieMap;
 using Solid.TrieVector;
@@ -21,11 +20,16 @@ internal static class Program
 		
 	private static void Main(string[] args)
 	{
-		var range = Enumerable.Range(0, 100);
-	
+
+		var x = Enumerable.Range(0, 100).ToSequence();
+		x = x.Append(x);
+
+		x = x.Set(199, 5);
 
 
-		}
+
+
+	}
 
 	
 

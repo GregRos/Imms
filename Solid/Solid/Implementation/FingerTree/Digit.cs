@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using NUnit.Framework;
 using Solid.Common;
+using Solid.FingerTree.Iteration;
 using Errors = Solid.Common.Errors;
 namespace Solid.FingerTree
 {
@@ -47,7 +48,7 @@ namespace Solid.FingerTree
 			: base(measure)
 		{
 
-			CollectionAssert.AllItemsAreNotNull(new[] {one, two, three});
+			AssertEx.AreNotNull(one, two, three);
 			measure.Is(one.Measure + two.Measure + three.Measure);
 			
 			First = one;
@@ -139,6 +140,7 @@ namespace Solid.FingerTree
 		{
 			index.Is(i => i < Measure);
 			int measure_1 = First.Measure;
+			if (index == 0) return 0;
 			if (index < measure_1) return 1;
 			if (index == measure_1) return 2;
 			int measure_2 = measure_1 + Second.Measure;
@@ -251,8 +253,11 @@ namespace Solid.FingerTree
 			return new DigitEnumerator<T>(this);
 		}
 
+		
 		public override void Split<TObject>(int index, out TObject leftmost, out TObject rightmost)
 		{
+			
+			
 			index.Is(i => i < Measure);
 			int caseCode = SplitWhere(index);
 

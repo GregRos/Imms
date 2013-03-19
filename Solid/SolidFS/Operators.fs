@@ -1,20 +1,24 @@
 ﻿[<AutoOpen>]
-module Solid.Operators
+module SolidFS.Operators
 //++ Primitive Operators
 // We define generalized operators usable throughout the library.
 // This is preferable to separate static operators because when statically defined operators are used, 
 //Type inference doesn't seem to work very well.
 open System
 
+let inline delay1 f p1 = fun () -> f p1
+let inline delay2 f p1 p2 = fun () -> f  p1
+let inline delay3 f p1 p2 p3 = fun () -> f p1 p2 p3
+let inline delay4 f p1 p2 p3 p4 = fun () -> f p1 p2 p3 p4
 let inline iter (f : 'a -> unit) (x : 's) = (^s : (member ForEach : ('a -> unit) -> unit) x,f)
 let inline iterBack (f : 'a -> unit) (x : 's) = (^s : (member ForEachBack : ('a -> unit) -> unit) x,f)
 
 let inline empty ()               = (^s : (static member Empty : 's) ())
 let inline (+>) item col          = (^s : (member AddFirst : 'a -> 's) col,item)
 let inline (<+) col item          = (^s : (member AddLast : 'a -> 's) col,item)
-let inline (<+>) col1 col2        = (^s : (static member Concat : 's * 's -> 's) col1,col2)
-let inline (++>) items col        = (^s : (member AddFirstRange : #seq<_> -> 's) col,items)
-let inline (<++) col items        = (^s : (member AddLastRange : #seq<_> -> 's) col,items)
+let inline (<+>) col1 col2        = (^s : (member Append : 's -> 's) col1,col2)
+let inline (++>) items col        = (^s : (member AddRangeFirst : #seq<_> -> 's) col,items)
+let inline (<++) col items        = (^s : (member AddRangeLast : #seq<_> -> 's) col,items)
 
 //++ Advanced Operators
 //The following operators deal with adding or removing items from a data structure.
@@ -46,7 +50,8 @@ let inline reverse col            = (^s : (member Reverse : ^s) col)
 let inline length col             = (^s : (member Length : int) col)
 //++ Derived Operators
 // These operators use the above operators to apply functions on data structure, filter, etc.
-
+let inline isEmpty col = (^s : (member IsEmpty : bool) col)
+let inline isntEmpty col = col |> isEmpty |> not
 let inline splice index inner outer = 
     let part1,part2 = outer |> split index
     let part1 = part1 <+> inner

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Solid.FingerTree.Iteration;
 
 namespace Solid.FingerTree
 {

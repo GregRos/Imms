@@ -5,6 +5,7 @@ namespace Solid.Common
 {
 	internal static class Errors
 	{
+		private const string str__threading = "This instance can only be used from the thread that constructed it.";
 		private const string str__is_empty = "The operation is invalid because the data structure is empty.";
 		private const string str__index_out_of_range = "The index is out of range of this data structure";
 
@@ -18,7 +19,7 @@ namespace Solid.Common
 			str__invalid_leaf_invocation = "This operation cannot be performed on a leaf.",
 			str__invalid_exeuction_path = "A switch statement took an invalid execution path.";
 
-		public static InvalidOperationException Is_empty
+		internal static InvalidOperationException Is_empty
 		{
 			get
 			{
@@ -26,7 +27,15 @@ namespace Solid.Common
 			}
 		}
 
-		public static IndexOutOfRangeException Index_out_of_range
+		internal static InvalidOperationException Wrong_thread
+		{
+			get
+			{
+				return new InvalidOperationException(str__threading);
+			}
+		}
+
+		internal static IndexOutOfRangeException Index_out_of_range
 		{
 			get
 			{
@@ -34,7 +43,7 @@ namespace Solid.Common
 			}
 		}
 
-		public static InvalidOperationException Too_many_hash_collisions
+		internal static InvalidOperationException Too_many_hash_collisions
 		{
 			get
 			{
@@ -43,7 +52,7 @@ namespace Solid.Common
 			}
 		}
 
-		public static ArgumentException Key_exists
+		internal static ArgumentException Key_exists
 		{
 			get
 			{
@@ -51,7 +60,7 @@ namespace Solid.Common
 			}
 		}
 
-		public static KeyNotFoundException Key_not_found
+		internal static KeyNotFoundException Key_not_found
 		{
 			get
 			{
@@ -59,15 +68,15 @@ namespace Solid.Common
 			}
 		}
 
-		public static ArgumentNullException Argument_null(string name)
+		internal static ArgumentNullException Argument_null(string name)
 		{
 			return new ArgumentNullException(name, str__argument_null);
 		}
 
 
-			
 
-		public static InvalidOperationException Invalid_digit_size
+
+		internal static InvalidOperationException Invalid_digit_size
 		{
 			get
 			{
@@ -75,7 +84,7 @@ namespace Solid.Common
 			}
 		}
 
-		public static InvalidOperationException Invalid_leaf_invocation
+		internal static InvalidOperationException Invalid_leaf_invocation
 		{
 			get
 			{
@@ -83,7 +92,7 @@ namespace Solid.Common
 			}
 		}
 
-		public static InvalidOperationException Invalid_execution_path
+		internal static InvalidOperationException Invalid_execution_path
 		{
 			get
 			{

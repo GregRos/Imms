@@ -115,9 +115,10 @@ namespace Solid.TrieVector
 
 		public override VectorNode<T> Set(int index, T value)
 		{
-			index.Is(i => i < Count && i > 0);
+			
 			int myIndex = (index) & myBlock;
 			myIndex = myIndex >> offs;
+			myIndex.Is(i => i < Count && i >= 0);
 			VectorNode<T> myNewNode = Arr[myIndex].Set(index, value);
 			var myCopy = new VectorNode<T>[Arr.Length];
 			Arr.CopyTo(myCopy, 0);

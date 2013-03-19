@@ -80,8 +80,9 @@ namespace Solid.TrieVector
 
 		public override VectorNode<T> Set(int index, T value)
 		{
-			index.Is(i => i > 0 && i < Count);
+			
 			int bits = index & myBlock;
+			bits.Is(i => i >= 0 && i < Count);
 			var myCopy = new T[Arr.Length];
 			Arr.CopyTo(myCopy, 0);
 			myCopy[bits] = value;
