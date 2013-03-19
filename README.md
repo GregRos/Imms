@@ -11,7 +11,7 @@ Right now, it consists of three usable data structures.
   * Constant time access, addition, and removal from either end (`AddLast, AddFirst, DropFirst, DropLast, First, Last`).
   * Fast logarithmic time indexing (`this[index]`)
   * Slower logarithmic time concatenation, splitting, and similar (`Take, TakeLast, Split(out, out), Append, Concat(params Sequence<T>[]), Skip`
-  * Slower logarithmic time insertions of various kinds (`Insert int,T, InsertRange int,IEnumerable<T>, Insert int,Sequence<T>, Set T, ...`)
+  * Even slower logarithmic time insertions of various kinds (`Insert int,T, InsertRange int,IEnumerable<T>, Insert int,Sequence<T>, Set T, ...`)
   * Fast linear time reversal, filter, iteration.
   * Linear time `Select-`like transformation on the whole data structure.
 * Written as a highly optmized version (that is, optimized for C#) of [2-3 Finger Trees](http://www.soi.city.ac.uk/~ross/papers/FingerTree.pdf).
