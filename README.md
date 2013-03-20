@@ -24,9 +24,7 @@ This data structure was written exclusively to provide high-performance indexed 
 
 HashMap<TKey,TValue>
 --------------------
-A fast key-value map that uses equality semantics, rather than comparison semantics. This data structure needs more work.
-
-
+A fast key-value map that uses equality semantics, rather than comparison semantics. This data structure needs more work, although it is currently functional.
 Interface
 ===================
 The library provides a fairly uniform interface in the style of `C#`. Examples of methods are `AddLast, AddFirst, Take, Skip, Split,DropLast,DropFirst` and properties: `First, Last, Count, ...`. The data structures do not implement any particular interfaces at this time, besides `IEnumerable<int>`.
