@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 namespace Solid.FingerTree
 {
 	internal sealed class Single<T> : FTree<T>
-		where T : Measured
+		where T : Measured<T>
 	{
 		public readonly Digit<T> CenterDigit;
 
@@ -104,9 +104,9 @@ namespace Solid.FingerTree
 			return CenterDigit.GetEnumerator();
 		}
 
-		public override FTree<T> Set(int index, object value)
+		public override FTree<T> Set(int index, Measured value)
 		{
-			return new Single<T>(Measure, CenterDigit.Set<Digit<T>>(index, value));
+			return new Single<T>(Measure, CenterDigit.Set(index, value));
 		}
 
 		public override FTree<T> Insert(int index, object value)

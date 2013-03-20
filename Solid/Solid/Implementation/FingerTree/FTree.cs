@@ -12,7 +12,7 @@ namespace Solid.FingerTree
 	//  The Compound<T>, a tree with two digits and a Deep node. 
 	//  These have the same purpose as outlined in the referenced paper.
 	internal abstract class FTree<T>
-		where T : Measured
+		where T : Measured<T>
 	{
 		public static readonly FTree<T> Empty = Empty<T>.Instance;
 		
@@ -69,7 +69,7 @@ namespace Solid.FingerTree
 	
 		public abstract IEnumerator<Measured> GetEnumerator();
 
-		public abstract FTree<T> Set(int index, object value);
+		public abstract FTree<T> Set(int index, Measured value);
 
 		public abstract FTree<T> Insert(int index, object value);
 		public static FTree<T> Concat(FTree<T> first, FTree<T> last)

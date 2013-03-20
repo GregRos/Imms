@@ -6,7 +6,7 @@ using Solid.FingerTree.Iteration;
 namespace Solid.FingerTree
 {
 	internal sealed class Empty<T> : FTree<T>
-		where T : Measured
+		where T : Measured<T>
 	{
 		public static readonly Empty<T> Instance = new Empty<T>();
 
@@ -75,7 +75,7 @@ namespace Solid.FingerTree
 			return EmptyEnumerator<T>.Instance;
 		}
 
-		public override FTree<T> Set(int index, object value)
+		public override FTree<T> Set(int index, Measured value)
 		{
 			throw Errors.Is_empty;
 		}

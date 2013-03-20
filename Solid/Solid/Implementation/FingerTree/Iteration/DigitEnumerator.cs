@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace Solid.FingerTree.Iteration
 {
 	internal class DigitEnumerator<T>: IEnumerator<Measured>
-		where T: Measured
+		where T: Measured<T>
 	{
 		private readonly Digit<T> digit;
 		private IEnumerator<Measured> inner;

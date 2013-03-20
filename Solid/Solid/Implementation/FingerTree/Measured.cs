@@ -3,38 +3,50 @@ using System.Collections.Generic;
 
 namespace Solid.FingerTree
 {
+
 	internal abstract class Measured
 	{
 
 		public readonly int Measure;
-
 		protected Measured(int measure)
 		{
 			Measure = measure;
 		}
 
-		public abstract Measured this[int index] { get; }
-
-		public abstract TObject Reverse<TObject>()
-			where TObject : Measured;
-
 		public abstract void IterBack(Action<Measured> action);
-
 		public abstract IEnumerator<Measured> GetEnumerator();
-
-
-		public abstract void Split<TObject>(int index, out TObject leftmost, out TObject rightmost)
-			where TObject : Measured;
-
-
+		public abstract Measured this[int index] { get; }
 		public abstract void Iter(Action<Measured> action);
+	}
 
-		public abstract TObject Set<TObject>(int index, object value)
-			where TObject : Measured;
+	internal abstract class Measured<TObject> : Measured
+		where TObject : Measured
+	{
+
+		
+
+		protected Measured(int measure) : base(measure)
+		{
+			
+		}
+
+		
+
+		public abstract TObject Reverse();
 
 
-		public abstract void Insert<TObject>(int index, object value, out TObject leftmost, out TObject rightmost)
-			where TObject : Measured;
+		
+
+
+		public abstract void Split(int index, out TObject leftmost, out TObject rightmost);
+
+
+	
+
+		public abstract TObject Set(int index, Measured value);
+
+
+		public abstract void Insert(int index, object value, out TObject leftmost, out TObject rightmost);
 
 	}
 }

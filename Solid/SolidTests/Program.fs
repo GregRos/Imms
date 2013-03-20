@@ -82,7 +82,13 @@ let main argv =
     let iterations = 10**5
     System.Console.BufferHeight <- Console.BufferHeight * 3
     let all_tests = 
-        [Test_insert_ascending iterations; 
+        [Test_insert_ascending iterations;
+        Test_add_first iterations;
+        Test_add_last iterations;
+        Test_set_rnd iterations;
+        Test_set_each  ;
+        Test_iter_take_first iterations;
+        Test_concat_self iterations;
         ]
     let results = run_test_sequence all_tests (delay1 all_test_targets (10**5))
     results |> Seq.iter print

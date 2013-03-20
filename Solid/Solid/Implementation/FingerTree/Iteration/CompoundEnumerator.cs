@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace Solid.FingerTree.Iteration
 {
 	internal class CompoundEnumerator<T> : IEnumerator<Measured>
-		where T : Measured
+		where T : Measured<T>
 	{
 		private readonly Compound<T> tree;
 		private IEnumerator<Measured> inner;

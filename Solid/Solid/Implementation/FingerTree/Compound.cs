@@ -9,7 +9,7 @@ using Solid.FingerTree.Iteration;
 namespace Solid.FingerTree
 {
 	internal sealed class Compound<T> : FTree<T>
-		where T : Measured
+		where T : Measured<T>
 	{
 		
 		public readonly FTree<Digit<T>> DeepTree;
@@ -253,14 +253,14 @@ namespace Solid.FingerTree
 			return new CompoundEnumerator<T>(this);
 		}
 
-		public override FTree<T> Set(int index, object value)
+		public override FTree<T> Set(int index, Measured value)
 		{
 			int splitCode = WhereToSplit(index);
 			switch (splitCode)
 			{
 				case 0:
 				case 1:
-					var new_left = LeftDigit.Set<Digit<T>>(index, value);
+					var new_left = LeftDigit.Set(index, value);
 					return new Compound<T>(Measure, new_left, DeepTree, RightDigit);
 				case 2:
 				case 3:
@@ -269,7 +269,7 @@ namespace Solid.FingerTree
 					return new Compound<T>(Measure, LeftDigit, new_deep, RightDigit);
 				case 4:
 				case 5:
-					var new_right = RightDigit.Set<Digit<T>>(index - LeftDigit.Measure - DeepTree.Measure, value);
+					var new_right = RightDigit.Set(index - LeftDigit.Measure - DeepTree.Measure, value);
 					return new Compound<T>(Measure, LeftDigit, DeepTree, new_right);
 				default:
 					throw Errors.Index_out_of_range;

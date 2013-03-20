@@ -8,8 +8,8 @@ using Solid.FingerTree.Iteration;
 using Errors = Solid.Common.Errors;
 namespace Solid.FingerTree
 {
-	internal sealed class Digit<T> : Measured
-		where T : Measured
+	internal sealed class Digit<T> : Measured<Digit<T>>
+		where T : Measured<T>
 	{
 		public readonly T First;
 		public readonly T Fourth;
@@ -57,9 +57,9 @@ namespace Solid.FingerTree
 			Size = 3;
 		}
 		
-		public override U Reverse<U>()
+		public override Digit<T> Reverse()
 		{
-			return this.ReverseDigit() as U;
+			return this.ReverseDigit();
 		}
 
 		public Digit<T> ReverseDigit()
@@ -67,13 +67,13 @@ namespace Solid.FingerTree
 			switch (Size)
 			{
 				case 1:
-					return new Digit<T>(First.Reverse<T>(),Measure);
+					return new Digit<T>(First.Reverse(),Measure);
 				case 2:
-					return new Digit<T>(Second.Reverse<T>(), First.Reverse<T>(), Measure);
+					return new Digit<T>(Second.Reverse(), First.Reverse(), Measure);
 				case 3:
-					return new Digit<T>(Third.Reverse<T>(), Second.Reverse<T>(), First.Reverse<T>(), Measure);
+					return new Digit<T>(Third.Reverse(), Second.Reverse(), First.Reverse(), Measure);
 				case 4:
-					return new Digit<T>(Fourth.Reverse<T>(), Third.Reverse<T>(), Second.Reverse<T>(), First.Reverse<T>(), Measure);
+					return new Digit<T>(Fourth.Reverse(), Third.Reverse(), Second.Reverse(), First.Reverse(), Measure);
 				default:
 					throw Errors.Invalid_execution_path;
 			}
@@ -264,8 +264,8 @@ namespace Solid.FingerTree
 			return new DigitEnumerator<T>(this);
 		}
 
-		
-		public override void Split<TObject>(int index, out TObject leftmost, out TObject rightmost)
+
+		public override void Split(int index, out Digit<T> leftmost, out Digit<T> rightmost)
 		{
 			
 			
@@ -277,38 +277,38 @@ namespace Solid.FingerTree
 			{
 				case 1:
 					First.Split(index, out split1, out split2);
-					leftmost = new Digit<T>(split1, index) as TObject;
-					rightmost = CreateCheckNull(Measure - index, split2, Second, Third, Fourth) as TObject;
+					leftmost = new Digit<T>(split1, index);
+					rightmost = CreateCheckNull(Measure - index, split2, Second, Third, Fourth);
 					return;
 				case 2:
-					leftmost = new Digit<T>(First, index) as TObject;
-					rightmost = CreateCheckNull(Measure - index, Second, Third, Fourth) as TObject;
+					leftmost = new Digit<T>(First, index);
+					rightmost = CreateCheckNull(Measure - index, Second, Third, Fourth);
 					return;
 				case 3:
 					Second.Split(index - First.Measure, out split1, out split2);
-					leftmost = new Digit<T>(First, split1, index) as TObject;
-					rightmost = CreateCheckNull(Measure - index, split2, Third, Fourth) as TObject;
+					leftmost = new Digit<T>(First, split1, index);
+					rightmost = CreateCheckNull(Measure - index, split2, Third, Fourth);
 					return;
 				case 4:
-					leftmost = new Digit<T>(First, Second, index) as TObject;
-					rightmost = CreateCheckNull(Measure - index, Third, Fourth) as TObject;
+					leftmost = new Digit<T>(First, Second, index);
+					rightmost = CreateCheckNull(Measure - index, Third, Fourth);
 					return;
 				case 5:
 					Third.Split(index - First.Measure - Second.Measure, out split1, out split2);
-					leftmost = new Digit<T>(First, Second, split1, index) as TObject;
-					rightmost = CreateCheckNull(Measure - index, split2, Fourth) as TObject;
+					leftmost = new Digit<T>(First, Second, split1, index);
+					rightmost = CreateCheckNull(Measure - index, split2, Fourth);
 					return;
 				case 6:
-					leftmost = new Digit<T>(First, Second, Third, index) as TObject;
-					rightmost = CreateCheckNull(Measure - index, Fourth) as TObject;
+					leftmost = new Digit<T>(First, Second, Third, index);
+					rightmost = CreateCheckNull(Measure - index, Fourth);
 					return;
 				case 7:
 					Fourth.Split(index - Measure + Fourth.Measure, out split1, out split2);
-					leftmost = new Digit<T>(First, Second, Third, split1, index) as TObject;
-					rightmost = CreateCheckNull(Measure - index, split2) as TObject;
+					leftmost = new Digit<T>(First, Second, Third, split1, index);
+					rightmost = CreateCheckNull(Measure - index, split2);
 					return;
 				case 8:
-					leftmost = this as TObject;
+					leftmost = this;
 					rightmost = null;
 					return;
 			}
@@ -342,7 +342,7 @@ namespace Solid.FingerTree
 			}
 		}
 
-		public override void Insert<TObject>(int index, object value, out TObject leftmost, out TObject rightmost)
+		public override void Insert(int index, object value, out Digit<T> leftmost, out  Digit<T> rightmost)
 		{
 			value.IsNotNull();
 			
@@ -356,13 +356,13 @@ namespace Solid.FingerTree
 					First.Insert(index, value, out my_leftmost, out my_rightmost);
 					if (Size == 4 && my_rightmost != null)
 					{
-						leftmost = new Digit<T>(my_leftmost,my_rightmost,Second,First.Measure + Second.Measure+1) as TObject;
-						rightmost = new Digit<T>(Third, Fourth, Measure - leftmost.Measure) as TObject;
+						leftmost = new Digit<T>(my_leftmost,my_rightmost,Second,First.Measure + Second.Measure+1);
+						rightmost = new Digit<T>(Third, Fourth, Measure - leftmost.Measure);
 						return;
 					}
 					leftmost = my_rightmost != null ?
-							CreateCheckNull(Measure + 1, my_leftmost, my_rightmost, Second, Third) as TObject
-							: CreateCheckNull(Measure + 1, my_leftmost, Second, Third, Fourth) as TObject;
+							CreateCheckNull(Measure + 1, my_leftmost, my_rightmost, Second, Third) 
+							: CreateCheckNull(Measure + 1, my_leftmost, Second, Third, Fourth);
 					rightmost = null;
 					return;
 				case 2:
@@ -370,13 +370,13 @@ namespace Solid.FingerTree
 					Second.Insert(index - First.Measure, value, out my_leftmost, out my_rightmost);
 					if (Size == 4 && my_rightmost != null)
 					{
-						leftmost = new Digit<T>(First,my_leftmost,my_rightmost, First.Measure + Second.Measure + 1) as TObject;
-						rightmost = new Digit<T>(Third, Fourth, Third.Measure + Fourth.Measure) as TObject;
+						leftmost = new Digit<T>(First,my_leftmost,my_rightmost, First.Measure + Second.Measure + 1);
+						rightmost = new Digit<T>(Third, Fourth, Third.Measure + Fourth.Measure);
 						return;
 					}
 					leftmost = my_rightmost != null ?
-							CreateCheckNull(Measure + 1, First, my_leftmost, my_rightmost,Third) as TObject
-							: CreateCheckNull(Measure + 1, First, my_leftmost,Third, Fourth) as TObject;
+							CreateCheckNull(Measure + 1, First, my_leftmost, my_rightmost,Third)
+							: CreateCheckNull(Measure + 1, First, my_leftmost,Third, Fourth);
 					rightmost = null;
 					return;
 				case 4:
@@ -384,14 +384,14 @@ namespace Solid.FingerTree
 					Third.Insert(index - First.Measure - Second.Measure, value, out my_leftmost, out my_rightmost);
 					if (Size == 4 && my_rightmost != null)
 					{
-						leftmost = new Digit<T>(First, Second, my_leftmost, First.Measure + Second.Measure + my_leftmost.Measure) as TObject;
-						rightmost = new Digit<T>(my_rightmost, Fourth, my_rightmost.Measure + Fourth.Measure) as TObject;
+						leftmost = new Digit<T>(First, Second, my_leftmost, First.Measure + Second.Measure + my_leftmost.Measure);
+						rightmost = new Digit<T>(my_rightmost, Fourth, my_rightmost.Measure + Fourth.Measure);
 						return;
 					}
 					leftmost =
 						my_rightmost != null ?
-							CreateCheckNull(Measure + 1, First, Second, my_leftmost, my_rightmost) as TObject
-							: CreateCheckNull(Measure + 1, First, Second, my_leftmost, Fourth) as TObject;
+							CreateCheckNull(Measure + 1, First, Second, my_leftmost, my_rightmost)
+							: CreateCheckNull(Measure + 1, First, Second, my_leftmost, Fourth);
 					rightmost = null;
 					return;
 				case 6:
@@ -399,11 +399,11 @@ namespace Solid.FingerTree
 					Fourth.Insert(index - Measure + Fourth.Measure, value, out my_leftmost, out my_rightmost);
 					if (Size == 4 && my_rightmost != null)
 					{
-						leftmost = new Digit<T>(First, Second, Third, Measure - Fourth.Measure) as TObject;
-						rightmost = new Digit<T>(my_leftmost,my_rightmost, Measure - leftmost.Measure + 1) as TObject;
+						leftmost = new Digit<T>(First, Second, Third, Measure - Fourth.Measure);
+						rightmost = new Digit<T>(my_leftmost,my_rightmost, Measure - leftmost.Measure + 1);
 						return;
 					}
-					leftmost = new Digit<T>(First, Second, Third, my_leftmost, Measure + 1) as TObject;
+					leftmost = new Digit<T>(First, Second, Third, my_leftmost, Measure + 1);
 					rightmost = null;
 					return;
 				default:
@@ -412,7 +412,7 @@ namespace Solid.FingerTree
 		
 		}
 
-		public override TObject Set<TObject>(int index, object value)
+		public override Digit<T> Set(int index, Measured value)
 		{
 			var code = SplitWhere(index);
 			T res;
@@ -420,20 +420,20 @@ namespace Solid.FingerTree
 			{
 				case 0:
 				case 1:
-					res = First.Set<T>(index, value);
-					return CreateCheckNull(Measure, res, Second, Third, Fourth) as TObject;
+					res = First.Set(index, value);
+					return CreateCheckNull(Measure, res, Second, Third, Fourth);
 				case 2:
 				case 3:
-					res = Second.Set<T>(index - First.Measure, value);
-					return CreateCheckNull(Measure, First, res, Third, Fourth) as TObject;
+					res = Second.Set(index - First.Measure, value);
+					return CreateCheckNull(Measure, First, res, Third, Fourth);
 				case 4:
 				case 5:
-					res = Third.Set<T>(index - First.Measure - Second.Measure, value);
-					return CreateCheckNull(Measure, First, Second, res, Fourth) as TObject;
+					res = Third.Set(index - First.Measure - Second.Measure, value);
+					return CreateCheckNull(Measure, First, Second, res, Fourth);
 				case 6:
 				case 7:
-					res = Fourth.Set<T>(index - First.Measure - Second.Measure - Third.Measure, value);
-					return CreateCheckNull(Measure, First, Second, Third, res) as TObject;
+					res = Fourth.Set(index - First.Measure - Second.Measure - Third.Measure, value);
+					return CreateCheckNull(Measure, First, Second, Third, res);
 				default:
 					throw Errors.Invalid_execution_path;
 			}

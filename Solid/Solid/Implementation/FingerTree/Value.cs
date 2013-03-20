@@ -5,7 +5,7 @@ using Solid.FingerTree.Iteration;
 
 namespace Solid.FingerTree
 {
-	internal class Value<T> : Measured
+	internal class Value<T> : Measured<Value<T>>
 	{
 		public readonly T Content;
 
@@ -22,9 +22,9 @@ namespace Solid.FingerTree
 			}
 		}
 
-		public override U Reverse<U>()
+		public override Value<T> Reverse()
 		{
-			return this as U;
+			return this;
 		}
 
 		public override void IterBack(Action<Measured> action)
@@ -38,7 +38,7 @@ namespace Solid.FingerTree
 		}
 
 
-		public override void Split<TObject>(int index, out TObject leftmost, out TObject rightmost)
+		public override void Split(int index, out Value<T> leftmost, out Value<T> rightmost)
 		{
 			leftmost = null;
 			rightmost = null;
@@ -49,17 +49,17 @@ namespace Solid.FingerTree
 			action(this);
 		}
 
-		public override TObject Set<TObject>(int index, object value)
+		public override Value<T> Set(int index, Measured value)
 		{
 			value.IsInstanceOf<Value<T>>();
-			return value as TObject;
+			return value as Value<T>;
 		}
 
-		public override void Insert<TObject>(int index, object value, out TObject leftmost, out TObject rightmost)
+		public override void Insert(int index, object value, out Value<T> leftmost, out Value<T> rightmost)
 		{
 			value.IsInstanceOf<Value<T>>();
-			leftmost = value as TObject;
-			rightmost = this as TObject;
+			leftmost = value as Value<T>;
+			rightmost = this;
 		}
 	}
 }
