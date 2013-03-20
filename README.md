@@ -6,28 +6,65 @@ They are written in C# (I chose not to write them in F# mainly due to performanc
 
 These are data structures that cannot be modified in-place. Instead, operations such as `Add`, `Remove`, `Set`, and so forth return new versions of the data structure that share some of the structure with the old one.
 
-Right now, it consists of three usable data structures.
-* `Sequence<T>` (name change pending), a high performance _double-ended queue_ data structure that offers many fast operations. This is pretty much complete, aside from additional testing.
-  * Constant time access, addition, and removal from either end (`AddLast, AddFirst, DropFirst, DropLast, First, Last`).
-  * Fast logarithmic time indexing (`this[index]`)
-  * Slower logarithmic time concatenation, splitting, and similar (`Take, TakeLast, Split(out, out), Append, Concat(params Sequence<T>[]), Skip`
-  * Even slower logarithmic time insertions of various kinds (`Insert int,T, InsertRange int,IEnumerable<T>, Insert int,Sequence<T>, Set T, ...`)
-  * Fast linear time reversal, filter, iteration.
-  * Linear time `Select-`like transformation on the whole data structure.
-* Written as a highly optmized version (that is, optimized for C#) of [2-3 Finger Trees](http://www.soi.city.ac.uk/~ross/papers/FingerTree.pdf).
-* `Vector<T>`, a high performance dynamic array-like data structure that offers fast indexing operations. Implemented as a trie, similar to [Clojure's implementation](http://blog.higher-order.net/2009/02/01/understanding-clojures-persistentvector-implementation/)
-* `HashMap<TKey,TValue>`, a high performance Dictionary-like key-value map that uses equality semantics (instead of comparison semantics). Supports basic `Set(Tkey,TValue), Add(Tkey,TValue), Remove(Tkey,TValue), this[Tkey]` operations. Implemented as a HAMT similar to [Clojure's implementation](http://blog.higher-order.net/2009/09/08/understanding-clojures-persistenthashmap-deftwice/). Might also support set-like operations.
-
-Additional Features
+The Data Structures
 ===================
+This library consists of a small number of data structures with a wide array of capabilities. Right now it has three, but I might added a few more in the future. It is currently late alpha stage.
 
-Besides the standard interface for manipulating the data structures, there are (or will be) a few more language-specific features. For C#, there will be an interface for decleratively constructing `Sequence<T>` collections via LINQ queries. An example follows.
-```CSharp
- Sequence<T> result = from item in Enumerable.Range(0, 100).DelaySequence() where item % 2 == 0 orderby item select item
-```
-This is made possible by the `DelaySequence()` method which returns an object of type `DelayedSequence<T>`, for which the various query methods have been re-implemented. It will also have some caching logic (e.g. the `DelayedSequence<T>` will not needlessly construct the same data structure twice).
-For F# there will exist computation expressions that work as follows.
+Sequence<T>
+-----------
+This is a sequential data structure that provides a wide assortment of fast operations. It is chiefly designed as a double-ended queue, and provides very fast access, addition, and removal from either end. Although it is only constant amoritized time, worst-case performance for add/remove to the ends is `O(logn)`, is very rare, and in practice does not have a substantial impact on performance. It also provides a constant-time `Count` property.
+
+`Sequence<T>` also provides very fast indexed operations, such as get by index, set by index, and insert at index. It should support removing at an index soon as well, when I get around to it. In practice, although it is written as a sequential access data structure, its indexing performance is competitive with some data structures specifically written for indexing.
+
+It also supports all sorts of splits, subsequences, and concatenation. These are not much more expensive than insertion in the middle, which as I've mentioned, is very fast.
+
+Vector<T>
+---------
+This data structure was written exclusively to provide high-performance indexed operations. It is significantly faster than `Sequence<T>` at indexing and is also significantly faster at this than any immutable data structure written for .NET that I've seen. It also provides extremely fast `Take(int)`, which returns the first `n` items from the start of the data structure and an `O(1)` Count property.
+
+HashMap<TKey,TValue>
+--------------------
+A fast key-value map that uses equality semantics, rather than comparison semantics. This data structure needs more work.
+
+
+Interface
+===================
+The library provides a fairly uniform interface in the style of `C#`. Examples of methods are `AddLast, AddFirst, Take, Skip, Split,DropLast,DropFirst` and properties: `First, Last, Count, ...`. The data structures do not implement any particular interfaces at this time, besides `IEnumerable<int>`.
+
+F#
+--
+
+In addition to this, an included `F#` module provides operators and functions. At present, the following operators are defined. Consider `X` to be the collection and `n` to be the input.
+
+    X <+   n  Alias for X.AddLast(n)
+    n +>   X  Alias for X.AddFirst(n)
+    ns ++> X  Alias for X.AddRangeFirst(ns)
+    X <++  ns Alias for X.AddRangeLast(ns)
+    X <+>  Y  Alias for static Concat (X, Y)
+
+There are also functions such as `dropf, dropl, length, filter, map, ...` that work for all collections and can be considered operators.
+
+There are also two computation expression builders, one for `Sequence<T>` and one for `Vector<T>`. Here is an example of how to use them.
 ```FSharp
  let x = Sequence {for item in {0 .. 100} -> i.ToString()}
  let y = Vector {for item in {0 .. 100} -> i}
 ```
+
+C#
+--
+Besides manipulating data structures using the direct interface, there is also a feature resembling a list comprehension. Using LINQ, you can decleratively construct a data structure in the manner you want. Take this example:
+```CSharp
+ var result = from item in Enumerable.Range(0, 100).DelaySequence() where item % 2 == 0 orderby item select item
+```
+The result of the LINQ query (the `DelaySequence()` is what provides this additional functionality) is an object of type `DelayedSequence<T>`. It is an `IEnumerable<T>`. You can perform an implicit conversion, like this:
+```CSharp
+ Sequence<T> result2 = result;
+```
+This will automatically evaluate the above LINQ query and construct a `Sequence<T>` object. It is also possible to iterate over the `DelayedSequence<T>`, like this:
+```CSharp
+foreach (var item in result)
+{
+ //do things...
+}
+```
+Iterating over the object will also implicitly cache the `Sequence<T>` so that the implicit conversion will just return the cached `Sequence<T>`.
