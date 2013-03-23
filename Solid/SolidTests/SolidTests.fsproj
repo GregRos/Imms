@@ -37,12 +37,10 @@
     <OtherFlags>/mlcompatibility</OtherFlags>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FSharpx.Collections.Experimental">
-      <HintPath>..\packages\FSharpx.Collections.Experimental.1.7.11\lib\40\FSharpx.Collections.Experimental.dll</HintPath>
+    <Reference Include="FSharpx.Collections.Experimental, Version=1.7.11.0, Culture=neutral, PublicKeyToken=null">
       <Private>True</Private>
     </Reference>
-    <Reference Include="FSharpx.Core">
-      <HintPath>..\packages\FSharpx.Core.1.7.11\lib\40\FSharpx.Core.dll</HintPath>
+    <Reference Include="FSharpx.Core, Version=1.7.8.0, Culture=neutral, PublicKeyToken=null">
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />

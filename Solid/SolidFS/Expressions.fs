@@ -29,7 +29,7 @@ type FlexibleListBuilder internal() =
         | x, Nothing -> x
         | Just x, Just y -> XList.empty <+ x <+ y |> Many
         | Many X, Just y -> X <+ y |> Many
-        | Many X,Many Y -> X >+< Y |> Many
+        | Many X,Many Y -> X <+> Y |> Many
         | Just x, Many Y -> x +> Y |> Many
 
     member __.Zero = Nothing
@@ -56,7 +56,7 @@ type VectorBuilder internal() =
         | Just x, Just y -> XList.empty <+ x <+ y |> Many
         | Just x, Many ys -> x +> ys |> Many
         | Many xs, Just y -> xs <+ y |> Many
-        | Many xs, Many ys -> xs >+< ys |> Many
+        | Many xs, Many ys -> xs <+> ys |> Many
     
 let vector = VectorBuilder()
 let xlist = FlexibleListBuilder()

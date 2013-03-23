@@ -117,7 +117,7 @@ namespace Solid.FingerTree
 
 		public override FTree<T> Reverse()
 		{
-			return new Single<T>(Measure, CenterDigit.ReverseDigit());
+			return new Single<T>(Measure, CenterDigit.Reverse());
 		}
 
 		public override FTree<T> Set(int index, Measured value)

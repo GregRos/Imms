@@ -80,16 +80,18 @@ let perf_testing() =
     let lst = MutableList<int>()
     let lst2 = MutableList<int>()
     let sw = Stopwatch()
-    let iterations = 10**6
+    let iterations = 10**5
     System.Console.BufferHeight <- Console.BufferHeight * 3
     let all_tests = [Test_insert_ascending iterations;
         Test_add_first iterations;
         Test_add_last iterations;
         Test_set_rnd iterations;
         Test_set_each  ;
-        Test_iter_take_first iterations;
+        //Test_iter_take_first iterations;
+        Test_get_rnd <|10**5;
+        Test_get_each ;
         Test_concat_self iterations]
-    let results = run_test_sequence all_tests (delay1 all_test_targets 1000)
+    let results = run_test_sequence all_tests (delay1 all_test_targets iterations)
     results |> Seq.iter print
 
 let then_verify (x : TestTarget<_>) = 
@@ -132,7 +134,6 @@ let main argv =
     let mutable group = TestGroup([| solid_xlist 0; core_list 0 |]) :> TestTarget<_>
     perf_testing()
 
-    
 
     if group.Verify() |> not then
         failwith "Nope"

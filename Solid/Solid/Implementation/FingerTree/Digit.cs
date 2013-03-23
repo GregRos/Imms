@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using NUnit.Framework;
 using Solid.Common;
 using Solid.FingerTree.Iteration;
@@ -281,10 +282,6 @@ namespace Solid.FingerTree
 			}
 		}
 
-		public override Digit<T> Reverse()
-		{
-			return ReverseDigit();
-		}
 
 		public override Digit<T> Set(int index, Measured value)
 		{
@@ -381,7 +378,7 @@ namespace Solid.FingerTree
 		 * XXXX XXXX => XXX XXX XX
 		 * The function returns up to digits. Those that it doesn't return are null.
 		 */
-
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Digit<T> AddLeft(T item)
 		{
 			int new_measure = Measure + item.Measure;
@@ -397,13 +394,13 @@ namespace Solid.FingerTree
 					throw Errors.Invalid_digit_size;
 			}
 		}
-
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void AddLeftSplit(T item, out Digit<T> leftmost, out Digit<T> rightmost)
 		{
 			leftmost = new Digit<T>(item, First, First.Measure + item.Measure);
 			rightmost = new Digit<T>(Second, Third, Fourth, Measure - First.Measure);
 		}
-
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Digit<T> AddRight(T item)
 		{
 			int new_measure = Measure + item.Measure;
@@ -419,7 +416,7 @@ namespace Solid.FingerTree
 					throw Errors.Invalid_digit_size;
 			}
 		}
-
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void AddRightSplit(T item, out Digit<T> leftmost, out Digit<T> rightmost)
 		{
 			leftmost = new Digit<T>(First, Second, Third, Measure - Fourth.Measure);
@@ -479,7 +476,7 @@ namespace Solid.FingerTree
 			}
 		}
 
-		public Digit<T> ReverseDigit()
+		public override Digit<T> Reverse()
 		{
 			switch (Size)
 			{

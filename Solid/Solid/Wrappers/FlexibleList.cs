@@ -31,7 +31,10 @@ namespace Solid
 			return FlexibleList<T>.Empty;
 		}
 	}
-
+	/// <summary>
+	/// A sequential data structure that supports many fast operations.
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
 	[DebuggerTypeProxy(typeof (FlexibleList<>.FlexibleListDebugView))]
 	[DebuggerDisplay("{DebuggerDisplay,nq}")]
 	public sealed class FlexibleList<T>
@@ -125,7 +128,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Adds the specified item at the beginning of the list.
+		///   Adds the specified item at the beginning of the list. O(1) amortized.
 		/// </summary>
 		/// <param name="item"> The item to add. </param>
 		/// <returns> </returns>
@@ -135,7 +138,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Adds the specified items, in order, to the beginning of the list.
+		/// Adds the specified items, in order, to the beginning of the list. O(m)
 		/// </summary>
 		/// <param name="items"></param>
 		/// <returns></returns>
@@ -146,7 +149,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Joins the specified list to the beginning of this one.
+		/// Joins the specified list to the beginning of this one. O(logn)
 		/// </summary>
 		/// <param name="other"></param>
 		/// <returns></returns>
@@ -160,7 +163,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		///  Joins the specified sequence to the beginning of this list.
+		///  Joins the specified sequence to the beginning of this list. O(m)
 		/// </summary>
 		/// <param name="items"> </param>
 		/// <returns> </returns>
@@ -180,7 +183,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Adds the specified item to the end of the list.
+		///   Adds the specified item to the end of the list. O(1) amortized.
 		/// </summary>
 		/// <param name="item"> The item to add. </param>
 		/// <returns> </returns>
@@ -190,7 +193,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Adds several items to the end of the list.
+		/// Adds several items to the end of the list. O(m)
 		/// </summary>
 		/// <param name="items"></param>
 		/// <returns></returns>
@@ -201,7 +204,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Joins another list to the end of this one.
+		///   Joins another list to the end of this one. O(logn)
 		/// </summary>
 		/// <param name="other"> </param>
 		/// <returns> </returns>
@@ -215,7 +218,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Adds a sequence of items to the end of the list.
+		///   Adds a sequence of items to the end of the list. O(m)
 		/// </summary>
 		/// <param name="items"> </param>
 		/// <returns> </returns>
@@ -232,7 +235,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Applies the accumulator function on the list.  
+		/// Applies the accumulator function on the list, from first to last. O(n)  
 		/// </summary>
 		/// <typeparam name="TResult"></typeparam>
 		/// <param name="accumulator"></param>
@@ -244,15 +247,22 @@ namespace Solid
 			return initial;
 		}
 
-
+		/// <summary>
+		/// Applies an accumulator over the list, from last to first.  O(n)
+		/// </summary>
+		/// <typeparam name="TResult"></typeparam>
+		/// <param name="accumulator"></param>
+		/// <param name="initial"></param>
+		/// <returns></returns>
 		public TResult AggregateBack<TResult>(Func<TResult, T, TResult> accumulator, TResult initial = default(TResult))
 		{
+			
 			ForEachBack(v => initial = accumulator(initial, v));
 			return initial;
 		}
 
 		/// <summary>
-		///   Removes the first item from the list.
+		///   Removes the first item from the list. O(1) amortized.
 		/// </summary>
 		/// <returns> </returns>
 		/// <exception cref="InvalidOperationException">Thrown if the list is empty.</exception>
@@ -263,7 +273,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Removes the last item from the list.
+		///   Removes the last item from the list. O(1) amortized.
 		/// </summary>
 		/// <returns> </returns>
 		/// <exception cref="InvalidOperationException">Thrown if the list is empty.</exception>
@@ -274,7 +284,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Applies a function on every member of the list, starting from the first element.
+		///   Iterates over the list, from first to last. O(n)
 		/// </summary>
 		/// <param name="iterator"> </param>
 		/// <exception cref="ArgumentNullException">Thrown if the argument is null.</exception>
@@ -285,7 +295,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Applies a function on every member of the list, starting from the last element.
+		///   Iterates over the list, from last to first. O(n)
 		/// </summary>
 		/// <param name="iterator"></param>
 		public void ForEachBack(Action<T> iterator)
@@ -295,7 +305,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Iterates over the list, starting from the last element, while the specified function returns true.
+		/// Iterates over the list, from last to first, and stops if the conditional returns false. O(m)
 		/// </summary>
 		/// <param name="conditional"></param>
 		public void ForEachBackWhile(Func<T, bool> conditional)
@@ -306,8 +316,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Iterates over the list, starting from the first element, and applies the function on every element. 
-		/// Stops if the function returns false.
+		/// Iterates over the list, from first to last, and stops if the conditional returns false.
 		/// </summary>
 		/// <param name="conditional"></param>
 		public void ForEachWhile(Func<T, bool> conditional)
@@ -327,7 +336,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Returns the first index at which the specified predicate returns true.
+		/// Returns the index of the first item that fulfills the predicate. O(m)
 		/// </summary>
 		/// <param name="predicate"></param>
 		/// <returns></returns>
@@ -345,7 +354,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Inserts an item before the specified index.
+		///   Inserts an item before the specified index. O(logn)
 		/// </summary>
 		/// <param name="index"> The index at which to insert the item. If the index is negative, treats it as position from the end.</param>
 		/// <param name="item"> </param>
@@ -363,7 +372,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Inserts one or more items before the specified index.
+		/// Inserts one or more items before the specified index. O(logn + m)
 		/// </summary>
 		/// <param name="index"></param>
 		/// <param name="items"></param>
@@ -375,7 +384,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Inserts a list before the specified index.
+		///   Inserts a list before the specified index.  O(logn)
 		/// </summary>
 		/// <param name="index"> </param>
 		/// <param name="other"> </param>
@@ -401,7 +410,7 @@ namespace Solid
 			return this.AddLast(item);
 		}
 		/// <summary>
-		///   Inserts a sequence of items before the specified index.
+		///   Inserts a sequence of items before the specified index. O(logn + m)
 		/// </summary>
 		/// <param name="index"> </param>
 		/// <param name="items"> </param>
@@ -436,7 +445,7 @@ namespace Solid
 			
 		}
 		/// <summary>
-		///   Reverses the list.
+		///   Reverses the list. O(n).
 		/// </summary>
 		/// <returns> </returns>
 		public FlexibleList<T> Reverse()
@@ -445,7 +454,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Transforms the list by applying the specified selector on every item in the list.
+		/// Transforms the list by applying the specified selector on every item in the list. O(n).
 		/// </summary>
 		/// <typeparam name="TOut"> The output type of the transformation. </typeparam>
 		/// <param name="selector"> </param>
@@ -459,7 +468,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Applies the specified selector on every item in the list, concatenates the results, and constructs a new list.
+		/// Applies the specified selector on every item in the list, flattens, and constructs a new list. O(n·m)
 		/// </summary>
 		/// <typeparam name="TResult"></typeparam>
 		/// <param name="selector"></param>
@@ -473,7 +482,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Checks if the specified sequence is equal to the list.
+		/// Checks if the specified sequence is equal to the list. O(n)
 		/// </summary>
 		/// <param name="other"></param>
 		/// <param name="comparer"></param>
@@ -487,18 +496,27 @@ namespace Solid
 			return root.IterWhile(v => state.MoveNext() ? comparer.Equals((v as Value<T>).Content, state.Current) : false);
 		}
 
+		/// <summary>
+		/// Returns a sublist consisting of the first several elements. O(logn)
+		/// </summary>
+		/// <param name="count"></param>
+		/// <returns></returns>
 		public FlexibleList<T> Take(int count)
 		{
 			return this.Slice(0, count - 1);
 		}
-
+		/// <summary>
+		/// Returns subslist without the first several elements. O(logn)
+		/// </summary>
+		/// <param name="count"></param>
+		/// <returns></returns>
 		public FlexibleList<T> Skip(int count)
 		{
 			return this.Slice(count, -1);
 		}
 
 		/// <summary>
-		/// Sets the value of the item at the specified index.
+		/// Sets the value of the item at the specified index. O(logn)
 		/// </summary>
 		/// <param name="index"> </param>
 		/// <param name="item"> </param>
@@ -506,6 +524,7 @@ namespace Solid
 		/// <exception cref="IndexOutOfRangeException">Thrown if the index doesn't exist.</exception>
 		public FlexibleList<T> Set(int index, T item)
 		{
+
 			index = index < 0 ? index + root.Measure : index;
 			if (index >= root.Measure || index < 0) throw Errors.Index_out_of_range;
 			if (index == 0) return DropFirst().AddFirst(item);
@@ -514,7 +533,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Returns a list without the first elements for which the predicate returns true.
+		/// Returns a list without the first elements for which the predicate returns true. O(logn+m)
 		/// </summary>
 		/// <param name="predicate"></param>
 		/// <returns></returns>
@@ -527,7 +546,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Returns sublist by index.
+		/// Returns sublist beginning at the start index and ending at the end index.
 		/// </summary>
 		/// <param name="start">The first index of the subsequence, inclusive.</param>
 		/// <param name="end">The last index of the subsequence, inclusive. Defaults to the last index.</param>
@@ -551,7 +570,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Splits the list at the specified index. The boundary element becomes part of the first list.
+		///   Splits the list at the specified index. The boundary element becomes part of the first list. O(logn)
 		/// </summary>
 		/// <param name="index"> </param>
 		/// <param name="first"> An output parameter that returns the first part of the sequence. </param>
@@ -568,7 +587,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Returns a sublist consisting of the first items for which the predicate returns true.
+		/// Returns a sublist consisting of the first items for which the predicate returns true. O(logn+m)
 		/// </summary>
 		/// <param name="predicate"></param>
 		/// <returns></returns>
@@ -582,7 +601,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Returns true if all the items in the list fulfill the predicate
+		/// Returns true if all the items in the list fulfill the predicate. O(m)
 		/// </summary>
 		/// <param name="predicate"></param>
 		/// <returns></returns>
@@ -593,7 +612,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Returns a list consisting of all the elements for which the predicate returns true.
+		/// Returns a list consisting of all the elements for which the predicate returns true. O(n+m)
 		/// </summary>
 		/// <param name="predicate"></param>
 		/// <returns></returns>

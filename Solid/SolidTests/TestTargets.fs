@@ -139,7 +139,7 @@ module FSHARPX =
             x |> cns
         static member Empty = TestVector<'a>(FSharpx.Collections.Vector.empty) :> TestTarget<'a>
 
-    type TestDeque<'a>(inner : Deque<'a>) = 
+    type TestDeque<'a>(inner : FSharpx.Collections.Deque<'a>) = 
         inherit TestTarget<'a>("FSharpx...Deque")
         let cns x = TestDeque<'a>(x) :> TestTarget<_>
         override this.AddLast v = inner |> Deque.conj v |> cns
@@ -306,6 +306,7 @@ module SOLID =
         override __.Filter f = inner |> XList.filter f |> cns
         override __.Map f = inner |> XList.map f |> cns
         override __.IndexOf f = inner |> XList.indexOf f
+        override __.Reverse() = inner.Reverse() |> cns
         static member Empty = TestXList<'a>(XList.empty)
 
 

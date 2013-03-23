@@ -40,7 +40,7 @@ let inline test_addl_many  iter (o : ^s)  =
 let test_concat_self iter (o : TestTarget<_>) = 
     let mutable r = o
     for i = 0 to iter do
-        r <- o >+< o
+        r <- o <+> o
     o
 
 let test_addf_many  iter (o : TestTarget<_>) = 

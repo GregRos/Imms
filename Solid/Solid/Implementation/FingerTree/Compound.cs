@@ -192,9 +192,9 @@ namespace Solid.FingerTree
 
 		public override FTree<T> Reverse()
 		{
-			Digit<T> first = LeftDigit.ReverseDigit();
+			Digit<T> first = LeftDigit.Reverse();
 			FTree<Digit<T>> deep = DeepTree.Reverse();
-			Digit<T> last = RightDigit.ReverseDigit();
+			Digit<T> last = RightDigit.Reverse();
 			return new Compound<T>(Measure, last, deep, first);
 		}
 
