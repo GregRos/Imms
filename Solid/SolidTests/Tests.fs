@@ -40,7 +40,7 @@ let inline test_addl_many  iter (o : ^s)  =
 let test_concat_self iter (o : TestTarget<_>) = 
     let mutable r = o
     for i = 0 to iter do
-        r <- o <+> o
+        r <- o >+< o
     o
 
 let test_addf_many  iter (o : TestTarget<_>) = 
@@ -62,6 +62,24 @@ let test_dropl_all (o : TestTarget<_>) =
     let mutable o = o
     while not o.IsEmpty do
         o <- o |> dropl
+    o
+
+let test_dropl_num_then_verify n (o : TestTarget<_>) = 
+    let mutable o=o
+    while o.Length() > n do
+        for __ = 0 to n do
+            o <- o.DropLast()
+        if not <| o.Verify() then
+            failwith "Bad"
+    o
+
+let test_dropf_num_then_verify n (o : TestTarget<_>) = 
+    let mutable o=o
+    while o.Length() > n do
+        for __ = 0 to n do
+            o <- o.DropFirst()
+        if not <| o.Verify() then
+            failwith "Bad"
     o
 
 let test_dropf_all (o : TestTarget<_>) = 
@@ -98,7 +116,7 @@ let test_add_mixed_then_drop_all_mixed iter (o : TestTarget<_>) =
         else
             o <- i +> o
     
-    while o |> isntEmpty do
+    while o.IsEmpty |> not do
         if flip_coin(0.5) then
             o <- o |> dropl
         else
@@ -122,6 +140,7 @@ let test_iter_last iter (o : TestTarget<_>) =
     for i = 0 to iter do
         o.Last |> ignore
     o
+
 
 let test_get_each (o : TestTarget<_>) = 
     for i = 0 to o.Length()-1 do
@@ -174,6 +193,27 @@ let test_random_access iter ratio (o : TestTarget<_>)=
                 o <- o.Set rndIndex i
         o
 
+let test_iterate_slices iter (o : TestTarget<_>) = 
+    let mutable r=o
+    let len = o.Length()
+    for i = 0 to iter do
+        let rndI1 = rnd.Next(0, len)
+        let rndI2 = rnd.Next(rndI1,len)
+        r <- o.Slice rndI1 rndI2
+        if r.Verify() |> not then
+            failwith "Bad"
+
+let test_iterate_take_verify iter (o : TestTarget<_>) = 
+    let mutable r=o
+    
+    let len = o.Length()
+    for i = 0 to iter do
+        let rndI = rnd.Next(0,len)
+        r <- o.TakeFirst(rndI)
+        if r.Verify() |> not then
+            failwith "bad"
+    o
+
 let test_iterate_take iter (o : TestTarget<_>) = 
     let mutable r=o
     
@@ -186,7 +226,7 @@ let test_insert_ascending iter (o : TestTarget<_>)=
     let len = o.Length()
     let mutable o = o
     for i = 0 to (o.Length() - 2) do
-        o <- o.InsertAt i i
+        o <- o.Insert i i
     o
 let Test_add_last iter = 
     {

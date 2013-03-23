@@ -7,6 +7,7 @@ namespace Solid.TrieVector.Iteration
 	{
 		private readonly VectorLeaf<T> node;
 		private int index = -1;
+
 		public LeafEnumerator(VectorLeaf<T> node)
 		{
 			this.node = node;
@@ -14,7 +15,6 @@ namespace Solid.TrieVector.Iteration
 
 		public void Dispose()
 		{
-			
 		}
 
 		public bool MoveNext()
@@ -30,12 +30,18 @@ namespace Solid.TrieVector.Iteration
 
 		public T Current
 		{
-			get { return node[index]; }
+			get
+			{
+				return node[index];
+			}
 		}
 
 		object IEnumerator.Current
 		{
-			get { return Current; }
+			get
+			{
+				return Current;
+			}
 		}
 	}
 }

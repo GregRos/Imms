@@ -18,7 +18,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -43,14 +43,13 @@
     <Compile Include="ChainingAssertion.NUnit.cs" />
     <Compile Include="Implementation\Common\ArrayExt.cs" />
     <Compile Include="Implementation\Common\Errors.cs" />
-    <Compile Include="Wrappers\Convertion\DelayedSequence.cs" />
+    <Compile Include="Wrappers\Convertion\DelayedFlexibleList.cs" />
     <Compile Include="Wrappers\Convertion\Convertion.cs" />
     <Compile Include="Implementation\FingerTree\Iteration\CompoundEnumerator.cs" />
     <Compile Include="Implementation\FingerTree\Iteration\DigitEnumerator.cs" />
     <Compile Include="Implementation\FingerTree\Iteration\EmptyEnumerator.cs" />
     <Compile Include="Implementation\FingerTree\TreeExt.cs" />
     <Compile Include="Implementation\FingerTree\Iteration\EnumeratorWrapper.cs" />
-    <Compile Include="Implementation\FingerTree\Errors.cs" />
     <Compile Include="Implementation\FingerTree\Compound.cs" />
     <Compile Include="Implementation\FingerTree\Digit.cs" />
     <Compile Include="Implementation\FingerTree\Empty.cs" />
@@ -62,7 +61,7 @@
     <Compile Include="Implementation\FingerTree\Iteration\ValueEnumerator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Wrappers\Sequence.cs" />
+    <Compile Include="Wrappers\FlexibleList.cs" />
     <Compile Include="Implementation\TrieMap\HashedKey.cs" />
     <Compile Include="Wrappers\HashMap.cs" />
     <Compile Include="Implementation\TrieMap\Iteration\LeafIterator.cs" />

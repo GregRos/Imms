@@ -1,32 +1,27 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Solid.FingerTree;
 
 namespace Solid.TrieMap
 {
-	internal sealed class MapEmpty<TKey,TValue> : MapNode<TKey,TValue>
+	internal sealed class MapEmpty<TKey, TValue> : MapNode<TKey, TValue>
 	{
-		public MapEmpty() : base(0,0,NodeType.Empty)
+		public MapEmpty() : base(0, 0, NodeType.Empty)
 		{
 		}
 
-		public override TValue TryGet(HashedKey<TKey> tryKey, out Result result)
+		public override MapNode<TKey, TValue2> Apply<TValue2>(Func<TKey, TValue, TValue2> transform)
 		{
-			result = Result.KeyNotFound;
-			return default(TValue);
+			return MapEmpty<TKey, TValue2>.Empty;
 		}
 
-		public override MapNode<TKey, TValue> TrySet(HashedKey<TKey> tryKey, TValue value, WriteBehavior behave, out Result result)
+		public override IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
 		{
-			result = Result.Success;
-			return new MapLeaf<TKey, TValue>(0, tryKey, value);
+			return Enumerable.Empty<KeyValuePair<TKey, TValue>>().GetEnumerator();
 		}
 
-		public override MapNode<TKey, TValue> TryDrop(HashedKey<TKey> tryKey, out Result result)
+		public override void Iter(Action<TKey, TValue> action)
 		{
-			result = Result.KeyNotFound;
-			return null;
 		}
 
 		public override bool TryContains(HashedKey<TKey> tryKey, out Result result)
@@ -35,19 +30,23 @@ namespace Solid.TrieMap
 			return false;
 		}
 
-		public override void Iter(Action<TKey, TValue> action)
+		public override MapNode<TKey, TValue> TryDrop(HashedKey<TKey> tryKey, out Result result)
 		{
-			
+			result = Result.KeyNotFound;
+			return null;
 		}
 
-		public override IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
+		public override TValue TryGet(HashedKey<TKey> tryKey, out Result result)
 		{
-			return Enumerable.Empty<KeyValuePair<TKey, TValue>>().GetEnumerator();
+			result = Result.KeyNotFound;
+			return default(TValue);
 		}
 
-		public override MapNode<TKey, TValue2> Apply<TValue2>(Func<TKey, TValue, TValue2> transform)
+		public override MapNode<TKey, TValue> TrySet(HashedKey<TKey> tryKey, TValue value, WriteBehavior behave,
+		                                             out Result result)
 		{
-			return MapEmpty<TKey, TValue2>.Empty;
+			result = Result.Success;
+			return new MapLeaf<TKey, TValue>(0, tryKey, value);
 		}
 	}
 }

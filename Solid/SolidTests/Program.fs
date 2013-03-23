@@ -74,25 +74,69 @@ open SolidTests.Tests
 open SolidTests.Targets
 
 let print {Name = name; Results = results} = printfn "%s" name; results |> Seq.iter (fun t -> printfn "%A" t)
-[<EntryPoint>]
-let main argv = 
+
+
+let perf_testing() = 
     let lst = MutableList<int>()
     let lst2 = MutableList<int>()
     let sw = Stopwatch()
-    let iterations = 10**5
+    let iterations = 10**6
     System.Console.BufferHeight <- Console.BufferHeight * 3
-    let all_tests = 
-        [Test_insert_ascending iterations;
+    let all_tests = [Test_insert_ascending iterations;
         Test_add_first iterations;
         Test_add_last iterations;
         Test_set_rnd iterations;
         Test_set_each  ;
         Test_iter_take_first iterations;
-        Test_concat_self iterations;
-        ]
-    let results = run_test_sequence all_tests (delay1 all_test_targets (10**5))
+        Test_concat_self iterations]
+    let results = run_test_sequence all_tests (delay1 all_test_targets 1000)
     results |> Seq.iter print
+
+let then_verify (x : TestTarget<_>) = 
+    if x.Verify() |> not then
+        failwith "Error"
+    else
+        x
+
+let unit_consistency_testing() = 
+    let mutable group = TestGroup([| solid_xlist 0; core_list 0|]) :> TestTarget<_>
+    let mutable group2 = TestGroup([| core_list 0; solid_vector 0 |]) :> TestTarget<_>
+    let iters = 10 ** 4
+    group <- group |> test_addl_many iters |> then_verify
+    group <- group |> test_addf_many iters |> then_verify
+    group <- group |> test_add_mixed iters 0.5 |> then_verify
+    group <- group |> test_insert_ascending iters |> then_verify
+    group <- group |> test_set_rnd iters |> then_verify
+    group |> test_get_each |> ignore
+    group <- group |> test_set_each |> then_verify
+    group <- group |> test_drop_all_mixed |> then_verify
+    group <- group |> test_addl_many iters |> then_verify
+    group <- group |> test_addf_many iters |> then_verify
+    group |> test_dropl_num_then_verify 100 |> ignore
+    group2 <- group2 |> test_addl_many iters |> then_verify
+    group |> test_dropf_num_then_verify 100 |> ignore
+    group2 <- group2 |> test_iterate_take_verify 100
+    group2 <- group2 |> test_set_rnd iters |> then_verify
+    group2 <- group2 |> test_get_rnd iters
+    group2 <- group2 |> test_set_each |> then_verify
+    group2 <- group2 |> test_dropl_num_then_verify 100
+    group2 <- group2 |> test_addl_many 10000
+    group2 <- group2 |> test_dropl_all |> then_verify
     
+    test_iterate_slices 10 group 
+   
+
+
+[<EntryPoint>]
+let main argv = 
+    let mutable group = TestGroup([| solid_xlist 0; core_list 0 |]) :> TestTarget<_>
+    perf_testing()
+
+    
+
+    if group.Verify() |> not then
+        failwith "Nope"
+    printfn "Done"
     Console.Read()
     0
     

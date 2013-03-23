@@ -103,6 +103,7 @@ namespace Solid
 		/// <param name="transform"> </param>
 		public HashMap<TKey, TValue2> Apply<TValue2>(Func<TKey, TValue, TValue2> transform)
 		{
+			if (transform == null) throw Errors.Argument_null("transform");
 			return new HashMap<TKey, TValue2>(root.Apply(transform), Comparer);
 		}
 
@@ -114,6 +115,7 @@ namespace Solid
 		/// <exception cref="ArgumentNullException">Thrown if the key is null.</exception>
 		public bool Contains(TKey key)
 		{
+			if (key == null) throw Errors.Argument_null("key");
 			return TryContains(new HashedKey<TKey>(key, Comparer), 0);
 		}
 
@@ -123,6 +125,7 @@ namespace Solid
 		/// <param name="action"> </param>
 		public void ForEach(Action<TKey, TValue> action)
 		{
+			if (action == null) throw Errors.Argument_null("action");
 			root.Iter(action);
 		}
 
@@ -135,6 +138,7 @@ namespace Solid
 		/// <exception cref="ArgumentNullException">Thrown if the supplied key is null.</exception>
 		public HashMap<TKey, TValue> Remove(TKey key)
 		{
+			if (key == null) throw Errors.Argument_null("key");
 			return TryDrop(new HashedKey<TKey>(key, Comparer), 0, true);
 		}
 

@@ -8,24 +8,24 @@ namespace Solid
 	public static class Convertion
 	{
 		/// <summary>
-		/// Returns a wrapper for the IEnumerable that implicitly generates a collection of type Sequence.
+		/// Returns a wrapper for the IEnumerable that implicitly generates a collection of type FlexibleList.
 		/// Supports a subset of LINQ methods and query syntax.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="items"></param>
 		/// <returns></returns>
-		public static DelayedSequence<T> DelaySequence<T>(this IEnumerable<T> items)
+		public static DelayedFlexibleList<T> DelayList<T>(this IEnumerable<T> items)
 		{
-			return new DelayedSequence<T>(items);
+			return new DelayedFlexibleList<T>(items);
 		}
 
 		/// <summary>
-		/// Converts the DelaySequence to an array.
+		/// Converts a list to an array.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="seq"></param>
 		/// <returns></returns>
-		public static T[] ToArray<T>(this Sequence<T> seq)
+		public static T[] ToArray<T>(this FlexibleList<T> seq)
 		{
 			var list = new T[seq.Count];
 			int index = 0;
@@ -98,14 +98,14 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Creates a Sequence from a collection of items.
+		/// Creates a FlexibleList from a collection of items.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="items"></param>
 		/// <returns></returns>
-		public static Sequence<T> ToSequence<T>(this IEnumerable<T> items)
+		public static FlexibleList<T> ToFlexibleList<T>(this IEnumerable<T> items)
 		{
-			return Sequence.Empty<T>().AddRangeLast(items);
+			return FlexibleList.Empty<T>().AddLastRange(items);
 		}
 
 		/// <summary>
@@ -118,5 +118,11 @@ namespace Solid
 		{
 			return Vector<T>.Empty.AddLastRange(items);
 		}
+
+		public static Vector<T> ToVector<T>(this FlexibleList<T> list)
+		{
+			return Vector<T>.Empty.AddLastRange(list);
+		}
+
 	}
 }

@@ -6,6 +6,46 @@ using Solid.TrieVector.Iteration;
 
 namespace Solid.TrieVector
 {
+	public class CountingIterator<T>
+	{
+		private readonly IList<T> inner;
+		private int index;
+
+		public CountingIterator(IList<T> inner)
+		{
+			this.inner = inner;
+		}
+
+		public int Count
+		{
+			get
+			{
+				return inner.Count - index;
+			}
+		}
+
+		public bool MoveNext()
+		{
+			if (index < inner.Count)
+			{
+				index++;
+				return true;
+			}
+			return false;
+		}
+
+		public T Current
+		{
+			get
+			{
+				return inner[index];
+			}
+		}
+
+
+
+	}
+
 	internal sealed class VectorLeaf<T> : VectorNode<T>
 	{
 		private const int myBlock = (1 << 5) - 1;
@@ -45,50 +85,62 @@ namespace Solid.TrieVector
 			return new VectorParent<T>(1, 33, parentArr);
 		}
 
-		public override VectorNode<T> Drop()
-		{
-			return new VectorLeaf<T>(Arr);
-		}
-
 		public override VectorNode<TOut> Apply<TOut>(Func<T, TOut> transform)
 		{
-			throw new NotImplementedException();
-		}
-
-		public override VectorNode<T> Fill(IList<T> items, int start, out int count)
-		{
-			items.IsNotNull();
-			start.Is(i => i < Count && i > 0);
-			var newArr = new T[Math.Min(Arr.Length + items.Count, 32)];
+			var newArr = new TOut[Arr.Length];
 			Arr.CopyTo(newArr, 0);
-			int c = 0;
-			for (; c < newArr.Length; c++)
+			for (int i = 0; i < newArr.Length; i++)
 			{
-				newArr[Arr.Length + c] = items[c];
+				newArr[i] = transform(Arr[i]);
 			}
-			count = c;
+			return new VectorLeaf<TOut>(newArr);
+		}
+
+		public override VectorNode<T> Drop()
+		{
+			var newArr = new T[Arr.Length - 1];
+			Array.Copy(Arr, 0, newArr, 0, Arr.Length - 1);
 			return new VectorLeaf<T>(newArr);
 		}
 
-
-
-		public override VectorNode<T> TakeFirst(int index)
+		public override IEnumerator<T> GetEnumerator()
 		{
-			int bits = index & myBlock;
-			T[] newArr = Arr.TakeFirst(bits);
-			return new VectorLeaf<T>(newArr);
+			return new LeafEnumerator<T>(this);
 		}
 
-		public override VectorNode<T> Set(int index, T value)
+		public override void IterBack(Action<T> action)
 		{
-			
-			int bits = index & myBlock;
-			bits.Is(i => i >= 0 && i < Count);
-			var myCopy = new T[Arr.Length];
-			Arr.CopyTo(myCopy, 0);
-			myCopy[bits] = value;
-			T[] newArr = myCopy;
-			return new VectorLeaf<T>(newArr);
+			action.IsNotNull();
+			for (int i = Arr.Length - 1; i >= 0; i--)
+			{
+				action(Arr[i]);
+			}
+		}
+
+		public override bool IterWhile(Func<T, bool> conditional)
+		{
+			for (int i = 0; i < Arr.Length; i++)
+			{
+				if (!conditional(Arr[i]))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		public override bool IterBackWhile(Func<T, bool> conditional)
+		{
+			conditional.IsNotNull();
+			for (int i = Arr.Length - 1; i >= 0; i--)
+			{
+				if (!conditional(Arr[i]))
+				{
+					return false;
+				}
+				
+			}
+			return true;
 		}
 
 		public override void Iter(Action<T> action)
@@ -100,9 +152,22 @@ namespace Solid.TrieVector
 			}
 		}
 
-		public override IEnumerator<T> GetEnumerator()
+		public override VectorNode<T> Set(int index, T value)
 		{
-			return new LeafEnumerator<T>(this);
+			int bits = index & myBlock;
+			bits.Is(i => i >= 0 && i < Count);
+			var myCopy = new T[Arr.Length];
+			Arr.CopyTo(myCopy, 0);
+			myCopy[bits] = value;
+			T[] newArr = myCopy;
+			return new VectorLeaf<T>(newArr);
+		}
+
+		public override VectorNode<T> Take(int index)
+		{
+			int bits = index & myBlock;
+			T[] newArr = Arr.TakeFirst(bits);
+			return new VectorLeaf<T>(newArr);
 		}
 	}
 }

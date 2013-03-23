@@ -3,8 +3,7 @@ using System.Collections.Generic;
 
 namespace Solid.TrieMap.Iteration
 {
-	
-	internal sealed class LeafIterator<TKey,TValue> : IEnumerator<KeyValuePair<TKey,TValue>>
+	internal sealed class LeafIterator<TKey, TValue> : IEnumerator<KeyValuePair<TKey, TValue>>
 	{
 		private readonly MapLeaf<TKey, TValue> inner;
 		private bool started;
@@ -16,7 +15,6 @@ namespace Solid.TrieMap.Iteration
 
 		public void Dispose()
 		{
-			
 		}
 
 		public bool MoveNext()
@@ -33,12 +31,18 @@ namespace Solid.TrieMap.Iteration
 
 		public KeyValuePair<TKey, TValue> Current
 		{
-			get { return new KeyValuePair<TKey, TValue>(inner.MyKey.Key, inner.MyValue); }
+			get
+			{
+				return new KeyValuePair<TKey, TValue>(inner.MyKey.Key, inner.MyValue);
+			}
 		}
 
 		object IEnumerator.Current
 		{
-			get { return Current; }
+			get
+			{
+				return Current;
+			}
 		}
 	}
 }

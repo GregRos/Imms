@@ -11,7 +11,7 @@ namespace Solid.FingerTree
 
 		public Value(T content) : base(1)
 		{
-			this.Content = content;
+			Content = content;
 		}
 
 		public override Measured this[int index]
@@ -22,14 +22,14 @@ namespace Solid.FingerTree
 			}
 		}
 
-		public override Value<T> Reverse()
+		public override bool IterBackWhile(Func<Measured, bool> action)
 		{
-			return this;
+			return action(this);
 		}
 
-		public override void IterBack(Action<Measured> action)
+		public override bool IterWhile(Func<Measured, bool> action)
 		{
-			action(this);
+			return action(this);
 		}
 
 		public override IEnumerator<Measured> GetEnumerator()
@@ -37,16 +37,27 @@ namespace Solid.FingerTree
 			return new ValueEnumerator<T>(this);
 		}
 
-
-		public override void Split(int index, out Value<T> leftmost, out Value<T> rightmost)
+		public override void Insert(int index, Measured value, out Value<T> leftmost, out Value<T> rightmost)
 		{
-			leftmost = null;
-			rightmost = null;
+			value.IsInstanceOf<Value<T>>();
+			leftmost = value as Value<T>;
+			rightmost = this;
 		}
+
 
 		public override void Iter(Action<Measured> action)
 		{
 			action(this);
+		}
+
+		public override void IterBack(Action<Measured> action)
+		{
+			action(this);
+		}
+
+		public override Value<T> Reverse()
+		{
+			return this;
 		}
 
 		public override Value<T> Set(int index, Measured value)
@@ -55,11 +66,10 @@ namespace Solid.FingerTree
 			return value as Value<T>;
 		}
 
-		public override void Insert(int index, object value, out Value<T> leftmost, out Value<T> rightmost)
+		public override void Split(int index, out Value<T> leftmost, out Value<T> rightmost)
 		{
-			value.IsInstanceOf<Value<T>>();
-			leftmost = value as Value<T>;
-			rightmost = this;
+			leftmost = null;
+			rightmost = null;
 		}
 	}
 }

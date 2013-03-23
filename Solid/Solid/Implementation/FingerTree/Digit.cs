@@ -1,13 +1,17 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using NUnit.Framework;
 using Solid.Common;
 using Solid.FingerTree.Iteration;
-using Errors = Solid.Common.Errors;
+
 namespace Solid.FingerTree
 {
+	public enum IterateState
+	{
+		Next = 1,
+		Stop = 2
+	}
+
 	internal sealed class Digit<T> : Measured<Digit<T>>
 		where T : Measured<T>
 	{
@@ -16,10 +20,6 @@ namespace Solid.FingerTree
 		public readonly T Second;
 		public readonly int Size;
 		public readonly T Third;
-
-		private Digit() : base(0)
-		{
-		}
 
 		//In the following constructors, we take the measure as a parameter (instead of calculating it ourselves) for performance reasons.
 		//Almost always the external code can find the measure using fewer operations (that is, if it's not available from the beginning).
@@ -47,36 +47,13 @@ namespace Solid.FingerTree
 		public Digit(T one, T two, T three, int measure)
 			: base(measure)
 		{
-
 			AssertEx.AreNotNull(one, two, three);
 			measure.Is(one.Measure + two.Measure + three.Measure);
-			
+
 			First = one;
 			Second = two;
 			Third = three;
 			Size = 3;
-		}
-		
-		public override Digit<T> Reverse()
-		{
-			return this.ReverseDigit();
-		}
-
-		public Digit<T> ReverseDigit()
-		{
-			switch (Size)
-			{
-				case 1:
-					return new Digit<T>(First.Reverse(),Measure);
-				case 2:
-					return new Digit<T>(Second.Reverse(), First.Reverse(), Measure);
-				case 3:
-					return new Digit<T>(Third.Reverse(), Second.Reverse(), First.Reverse(), Measure);
-				case 4:
-					return new Digit<T>(Fourth.Reverse(), Third.Reverse(), Second.Reverse(), First.Reverse(), Measure);
-				default:
-					throw Errors.Invalid_execution_path;
-			}
 		}
 
 		public Digit(T one, T two, T three, T four, int measure)
@@ -91,9 +68,36 @@ namespace Solid.FingerTree
 			Size = 4;
 		}
 
+		private Digit() : base(0)
+		{
+		}
+
+		public override Measured this[int index]
+		{
+			get
+			{
+				index.Is(i => i < Measure);
+				int m_1 = First.Measure;
+				if (index < m_1)
+					return First[index];
+				int m_2 = Second.Measure + m_1;
+				if (index < m_2)
+					return Second[index - m_1];
+				int m_3 = m_2 + Third.Measure;
+				if (index < m_3)
+					return Third[index - m_2];
+				if (index < Measure)
+					return Fourth[index - m_3];
+				throw Errors.Invalid_digit_size;
+			}
+		}
+
 		public T Left
 		{
-			get { return First; }
+			get
+			{
+				return First;
+			}
 		}
 
 		public T Right
@@ -116,116 +120,134 @@ namespace Solid.FingerTree
 			}
 		}
 
-		public override Measured this[int index]
+		public override bool IterBackWhile(Func<Measured, bool> action)
 		{
-			get
+			action.IsNotNull();
+			action.IsNotNull();
+			if (Fourth != null)
 			{
-				index.Is(i => i < Measure);
-				var m_1 = First.Measure;
-				if (index < m_1)
-					return First[index];
-				var m_2 = Second.Measure + m_1;
-				if (index < m_2)
-					return Second[index - m_1];
-				var m_3 = m_2 + Third.Measure;
-				if (index < m_3)
-					return Third[index - m_2];
-				if (index < Measure)
-					return Fourth[index - m_3];
-				throw Errors.Invalid_digit_size;
+				if (!Fourth.IterBackWhile(action)) return false;
 			}
+			if (Third != null)
+			{
+				if (!Third.IterBackWhile(action)) return false;
+			}
+			if (Second != null)
+			{
+				if (!Second.IterBackWhile(action)) return false;
+			}
+			return First.IterBackWhile(action);
 		}
 
-		public int SplitWhere(int index)
+		public override bool IterWhile(Func<Measured, bool> action)
 		{
-			index.Is(i => i < Measure);
-			int measure_1 = First.Measure;
-			if (index == 0) return 0;
-			if (index < measure_1) return 1;
-			if (index == measure_1) return 2;
-			int measure_2 = measure_1 + Second.Measure;
-			if (index < measure_2) return 3;
-			if (index == measure_2) return 4;
-			int measure_3 = measure_2 + Third.Measure;
-			if (index < measure_3) return 5;
-			if (index == measure_3) return 6;
-			int measure_4 = measure_3 + Fourth.Measure;
-			if (index < measure_4) return 7;
-			if (index == measure_4) return 8;
-			throw Errors.Invalid_execution_path;
+			action.IsNotNull();
+			action.IsNotNull();
+			if (!First.IterWhile(action)) return false;
+			if (Second == null) return true;
+			if (!Second.IterWhile(action)) return false;
+			if (Third == null) return true;
+			if (!Third.IterWhile(action)) return false;
+			if (Fourth == null) return true;
+			return Fourth.IterWhile(action);
 		}
 
-		public T ChildbyIndex(int index)
+		public override IEnumerator<Measured> GetEnumerator()
 		{
-			if (index >= Size) throw Common.Errors.Index_out_of_range;
-			switch (index)
+			return new DigitEnumerator<T>(this);
+		}
+
+		public override void Insert(int index, Measured value, out Digit<T> leftmost, out Digit<T> rightmost)
+		{
+			value.IsNotNull();
+			int code = WhereIsThisIndex(index);
+			T my_leftmost;
+			T my_rightmost;
+			switch (code)
 			{
 				case 0:
-					return First;
 				case 1:
-					return Second;
+					First.Insert(index, value, out my_leftmost, out my_rightmost);
+					if (Size == 4 && my_rightmost != null)
+					{
+						leftmost = new Digit<T>(my_leftmost, my_rightmost, Second, First.Measure + Second.Measure + 1);
+						rightmost = new Digit<T>(Third, Fourth,Third.Measure +  Fourth.Measure);
+						return;
+					}
+					leftmost = my_rightmost != null
+						           ? CreateCheckNull(Measure + 1, my_leftmost, my_rightmost, Second, Third)
+						           : CreateCheckNull(Measure + 1, my_leftmost, Second, Third, Fourth);
+					rightmost = null;
+					return;
 				case 2:
-					return Third;
 				case 3:
-					return Fourth;
+					Second.Insert(index - First.Measure, value, out my_leftmost, out my_rightmost);
+					if (Size == 4 && my_rightmost != null)
+					{
+						leftmost = new Digit<T>(First, my_leftmost, my_rightmost, First.Measure + Second.Measure + 1);
+						rightmost = new Digit<T>(Third, Fourth, Third.Measure + Fourth.Measure);
+						return;
+					}
+					leftmost = my_rightmost != null
+						           ? CreateCheckNull(Measure + 1, First, my_leftmost, my_rightmost, Third)
+						           : CreateCheckNull(Measure + 1, First, my_leftmost, Third, Fourth);
+					rightmost = null;
+					return;
+				case 4:
+				case 5:
+					Third.Insert(index - First.Measure - Second.Measure, value, out my_leftmost, out my_rightmost);
+					if (Size == 4 && my_rightmost != null)
+					{
+						leftmost = new Digit<T>(First, Second, my_leftmost, First.Measure + Second.Measure + my_leftmost.Measure);
+						rightmost = new Digit<T>(my_rightmost, Fourth, my_rightmost.Measure + Fourth.Measure);
+						return;
+					}
+					leftmost =
+						my_rightmost != null
+							? CreateCheckNull(Measure + 1, First, Second, my_leftmost, my_rightmost)
+							: CreateCheckNull(Measure + 1, First, Second, my_leftmost, Fourth);
+					rightmost = null;
+					return;
+				case 6:
+				case 7:
+					Fourth.Insert(index - Measure + Fourth.Measure, value, out my_leftmost, out my_rightmost);
+					if (Size == 4 && my_rightmost != null)
+					{
+						leftmost = new Digit<T>(First, Second, Third, Measure - Fourth.Measure);
+						rightmost = new Digit<T>(my_leftmost, my_rightmost, Measure - leftmost.Measure + 1);
+						return;
+					}
+					leftmost = new Digit<T>(First, Second, Third, my_leftmost, Measure + 1);
+					rightmost = null;
+					return;
 				default:
 					throw Errors.Invalid_execution_path;
-
 			}
 		}
-	
-		public static Digit<T> CreateCheckNull(int measure, T item1 = null, T item2 = null, T item3 = null, T item4 = null)
-		{
-			//+ Implementation
-			//This method is essentially another constructor that decides the digit to create by performing checks.
-			//It assumes that some of the digits can be null, but that these nulls must be in sequence. E.g.
-			// NULL, NULL, DIGIT, DIGIT
-			// NULL, DIGIT, NULL, NULL
-			//But it does not expect the sequence
-			// NULL DIGIT NULL DIGIT
-			// For example. Note that this method could have been the only constructor, but I decided to only perform these checks
-			// Where absolutely necessary. 
-			int items_present = item1 != null ? 1 : 0;
-			items_present |= item2 != null ? 2 : 0;
-			items_present |= item3 != null ? 4 : 0;
-			items_present |= item4 != null ? 8 : 0;
 
-			switch (items_present)
+		public override void Iter(Action<Measured> action)
+		{
+			action.IsNotNull();
+			switch (Size)
 			{
-					
-				case 0:
-					return null;
-				case 1 << 0:
-					return new Digit<T>(item1, measure);
-				case 1 << 1:
-					return new Digit<T>(item2, measure);
-				case 1 << 2:
-					return new Digit<T>(item3, measure);
-				case 1 << 3:
-					return new Digit<T>(item4, measure);
-				case 1 << 0 | 1 << 1:
-					return new Digit<T>(item1, item2, measure);
-				case 1 << 0 | 1 << 1 | 1 << 2:
-					return new Digit<T>(item1, item2, item3, measure);
-				case 1 << 0 | 1 << 1 |1 << 2 | 1 << 3:
-					return new Digit<T>(item1, item2, item3, item4, measure);
-				case 1 << 1 | 1 << 2:
-					return new Digit<T>(item2, item3, measure);
-				case 1 << 1 | 1 << 2 | 1 << 3:
-					return new Digit<T>(item2, item3, item4, measure);
-				case 1 << 2 | 1 << 3:
-					return new Digit<T>(item3, item4, measure);
-				case 1 << 0 | 1 << 2:
-					return new Digit<T>(item1, item3, measure);
-				case 1 << 0 | 1 << 2 | 1 << 3:
-					return new Digit<T>(item1, item3, item4, measure);
-				case 1 << 1 | 1 << 3:
-					return new Digit<T>(item2, item4, measure);
-				case 1 << 0 | 1 << 3:
-					return new Digit<T>(item1, item4, measure);
-				case 1 << 0 | 1 << 1 | 1 << 3:
-					return new Digit<T>(item1, item2, item4, measure);
-			
+				case 1:
+					First.Iter(action);
+					return;
+				case 2:
+					First.Iter(action);
+					Second.Iter(action);
+					return;
+				case 3:
+					First.Iter(action);
+					Second.Iter(action);
+					Third.Iter(action);
+					return;
+				case 4:
+					First.Iter(action);
+					Second.Iter(action);
+					Third.Iter(action);
+					Fourth.Iter(action);
+					return;
 				default:
 					throw Errors.Invalid_execution_path;
 			}
@@ -258,19 +280,44 @@ namespace Solid.FingerTree
 					throw Errors.Invalid_execution_path;
 			}
 		}
-		
-		public override IEnumerator<Measured> GetEnumerator()
+
+		public override Digit<T> Reverse()
 		{
-			return new DigitEnumerator<T>(this);
+			return ReverseDigit();
 		}
 
+		public override Digit<T> Set(int index, Measured value)
+		{
+			value.IsNotNull();
+			int code = WhereIsThisIndex(index);
+			T res;
+			switch (code)
+			{
+				case 0:
+				case 1:
+					res = First.Set(index, value);
+					return CreateCheckNull(Measure, res, Second, Third, Fourth);
+				case 2:
+				case 3:
+					res = Second.Set(index - First.Measure, value);
+					return CreateCheckNull(Measure, First, res, Third, Fourth);
+				case 4:
+				case 5:
+					res = Third.Set(index - First.Measure - Second.Measure, value);
+					return CreateCheckNull(Measure, First, Second, res, Fourth);
+				case 6:
+				case 7:
+					res = Fourth.Set(index - First.Measure - Second.Measure - Third.Measure, value);
+					return CreateCheckNull(Measure, First, Second, Third, res);
+				default:
+					throw Errors.Invalid_execution_path;
+			}
+		}
 
 		public override void Split(int index, out Digit<T> leftmost, out Digit<T> rightmost)
 		{
-			
-			
 			index.Is(i => i < Measure);
-			int caseCode = SplitWhere(index);
+			int caseCode = WhereIsThisIndex(index);
 
 			T split1, split2;
 			switch (caseCode)
@@ -315,130 +362,6 @@ namespace Solid.FingerTree
 			throw Errors.Invalid_execution_path;
 		}
 
-		public override void Iter(Action<Measured> action)
-		{
-			switch (Size)
-			{
-				case 1:
-					First.Iter(action);
-					return;
-				case 2:
-					First.Iter(action);
-					Second.Iter(action);
-					return;
-				case 3:
-					First.Iter(action);
-					Second.Iter(action);
-					Third.Iter(action);
-					return;
-				case 4:
-					First.Iter(action);
-					Second.Iter(action);
-					Third.Iter(action);
-					Fourth.Iter(action);
-					return;
-				default:
-					throw Errors.Invalid_execution_path;
-			}
-		}
-
-		public override void Insert(int index, object value, out Digit<T> leftmost, out  Digit<T> rightmost)
-		{
-			value.IsNotNull();
-			
-			var code = SplitWhere(index);
-			T my_leftmost;
-			T my_rightmost;
-			switch (code)
-			{
-				case 0:
-				case 1:
-					First.Insert(index, value, out my_leftmost, out my_rightmost);
-					if (Size == 4 && my_rightmost != null)
-					{
-						leftmost = new Digit<T>(my_leftmost,my_rightmost,Second,First.Measure + Second.Measure+1);
-						rightmost = new Digit<T>(Third, Fourth, Measure - leftmost.Measure);
-						return;
-					}
-					leftmost = my_rightmost != null ?
-							CreateCheckNull(Measure + 1, my_leftmost, my_rightmost, Second, Third) 
-							: CreateCheckNull(Measure + 1, my_leftmost, Second, Third, Fourth);
-					rightmost = null;
-					return;
-				case 2:
-				case 3:
-					Second.Insert(index - First.Measure, value, out my_leftmost, out my_rightmost);
-					if (Size == 4 && my_rightmost != null)
-					{
-						leftmost = new Digit<T>(First,my_leftmost,my_rightmost, First.Measure + Second.Measure + 1);
-						rightmost = new Digit<T>(Third, Fourth, Third.Measure + Fourth.Measure);
-						return;
-					}
-					leftmost = my_rightmost != null ?
-							CreateCheckNull(Measure + 1, First, my_leftmost, my_rightmost,Third)
-							: CreateCheckNull(Measure + 1, First, my_leftmost,Third, Fourth);
-					rightmost = null;
-					return;
-				case 4:
-				case 5:
-					Third.Insert(index - First.Measure - Second.Measure, value, out my_leftmost, out my_rightmost);
-					if (Size == 4 && my_rightmost != null)
-					{
-						leftmost = new Digit<T>(First, Second, my_leftmost, First.Measure + Second.Measure + my_leftmost.Measure);
-						rightmost = new Digit<T>(my_rightmost, Fourth, my_rightmost.Measure + Fourth.Measure);
-						return;
-					}
-					leftmost =
-						my_rightmost != null ?
-							CreateCheckNull(Measure + 1, First, Second, my_leftmost, my_rightmost)
-							: CreateCheckNull(Measure + 1, First, Second, my_leftmost, Fourth);
-					rightmost = null;
-					return;
-				case 6:
-				case 7:
-					Fourth.Insert(index - Measure + Fourth.Measure, value, out my_leftmost, out my_rightmost);
-					if (Size == 4 && my_rightmost != null)
-					{
-						leftmost = new Digit<T>(First, Second, Third, Measure - Fourth.Measure);
-						rightmost = new Digit<T>(my_leftmost,my_rightmost, Measure - leftmost.Measure + 1);
-						return;
-					}
-					leftmost = new Digit<T>(First, Second, Third, my_leftmost, Measure + 1);
-					rightmost = null;
-					return;
-				default:
-					throw Errors.Invalid_execution_path;
-			}
-		
-		}
-
-		public override Digit<T> Set(int index, Measured value)
-		{
-			var code = SplitWhere(index);
-			T res;
-			switch (code)
-			{
-				case 0:
-				case 1:
-					res = First.Set(index, value);
-					return CreateCheckNull(Measure, res, Second, Third, Fourth);
-				case 2:
-				case 3:
-					res = Second.Set(index - First.Measure, value);
-					return CreateCheckNull(Measure, First, res, Third, Fourth);
-				case 4:
-				case 5:
-					res = Third.Set(index - First.Measure - Second.Measure, value);
-					return CreateCheckNull(Measure, First, Second, res, Fourth);
-				case 6:
-				case 7:
-					res = Fourth.Set(index - First.Measure - Second.Measure - Third.Measure, value);
-					return CreateCheckNull(Measure, First, Second, Third, res);
-				default:
-					throw Errors.Invalid_execution_path;
-			}
-		}
-
 		/* Here is an ASCII diagram for what the next function does.
 		 * X, X      => XX
 		 * X, XX     => XXX
@@ -458,13 +381,209 @@ namespace Solid.FingerTree
 		 * XXXX XXXX => XXX XXX XX
 		 * The function returns up to digits. Those that it doesn't return are null.
 		 */
-		public static void ReformDigitsForConcat(Digit<T> digit, Digit<T> other, out Digit<T> leftmost, out Digit<T> middle, out Digit<T> rightmost)
+
+		public Digit<T> AddLeft(T item)
+		{
+			int new_measure = Measure + item.Measure;
+			switch (Size)
+			{
+				case 1:
+					return new Digit<T>(item, First, new_measure);
+				case 2:
+					return new Digit<T>(item, First, Second, new_measure);
+				case 3:
+					return new Digit<T>(item, First, Second, Third, new_measure);
+				default:
+					throw Errors.Invalid_digit_size;
+			}
+		}
+
+		public void AddLeftSplit(T item, out Digit<T> leftmost, out Digit<T> rightmost)
+		{
+			leftmost = new Digit<T>(item, First, First.Measure + item.Measure);
+			rightmost = new Digit<T>(Second, Third, Fourth, Measure - First.Measure);
+		}
+
+		public Digit<T> AddRight(T item)
+		{
+			int new_measure = Measure + item.Measure;
+			switch (Size)
+			{
+				case 1:
+					return new Digit<T>(First, item, new_measure);
+				case 2:
+					return new Digit<T>(First, Second, item, new_measure);
+				case 3:
+					return new Digit<T>(First, Second, Third, item, new_measure);
+				default:
+					throw Errors.Invalid_digit_size;
+			}
+		}
+
+		public void AddRightSplit(T item, out Digit<T> leftmost, out Digit<T> rightmost)
+		{
+			leftmost = new Digit<T>(First, Second, Third, Measure - Fourth.Measure);
+			rightmost = new Digit<T>(Fourth, item, Fourth.Measure + item.Measure);
+		}
+
+		public T ChildbyIndex(int index)
+		{
+			if (index >= Size) throw Errors.Index_out_of_range;
+			switch (index)
+			{
+				case 0:
+					return First;
+				case 1:
+					return Second;
+				case 2:
+					return Third;
+				case 3:
+					return Fourth;
+				default:
+					throw Errors.Invalid_execution_path;
+			}
+		}
+
+		public Digit<T> PopLeft()
+		{
+			int new_measure = Measure - First.Measure;
+			switch (Size)
+			{
+				case 1:
+					throw Errors.Invalid_digit_size;
+				case 2:
+					return new Digit<T>(Second, new_measure);
+				case 3:
+					return new Digit<T>(Second, Third, new_measure);
+				case 4:
+					return new Digit<T>(Second, Third, Fourth, new_measure);
+				default:
+					throw Errors.Invalid_digit_size;
+			}
+		}
+
+		public Digit<T> PopRight()
+		{
+			switch (Size)
+			{
+				case 1:
+					throw Errors.Invalid_digit_size;
+				case 2:
+					return new Digit<T>(First, First.Measure);
+				case 3:
+					return new Digit<T>(First, Second, Measure - Third.Measure);
+				case 4:
+					return new Digit<T>(First, Second, Third, Measure - Fourth.Measure);
+				default:
+					throw Errors.Invalid_digit_size;
+			}
+		}
+
+		public Digit<T> ReverseDigit()
+		{
+			switch (Size)
+			{
+				case 1:
+					return new Digit<T>(First.Reverse(), Measure);
+				case 2:
+					return new Digit<T>(Second.Reverse(), First.Reverse(), Measure);
+				case 3:
+					return new Digit<T>(Third.Reverse(), Second.Reverse(), First.Reverse(), Measure);
+				case 4:
+					return new Digit<T>(Fourth.Reverse(), Third.Reverse(), Second.Reverse(), First.Reverse(), Measure);
+				default:
+					throw Errors.Invalid_execution_path;
+			}
+		}
+
+		/// <summary>
+		/// Returns a code telling where is the index located
+		/// </summary>
+		/// <param name="index"></param>
+		/// <returns></returns>
+		private int WhereIsThisIndex(int index)
+		{
+			index.Is(i => i < Measure);
+			int measure_1 = First.Measure;
+			if (index == 0) return 0;
+			if (index < measure_1) return 1;
+			if (index == measure_1) return 2;
+			int measure_2 = measure_1 + Second.Measure;
+			if (index < measure_2) return 3;
+			if (index == measure_2) return 4;
+			int measure_3 = measure_2 + Third.Measure;
+			if (index < measure_3) return 5;
+			if (index == measure_3) return 6;
+			int measure_4 = measure_3 + Fourth.Measure;
+			if (index < measure_4) return 7;
+			if (index == measure_4) return 8;
+			throw Errors.Invalid_execution_path;
+		}
+
+		public static Digit<T> CreateCheckNull(int measure, T item1 = null, T item2 = null, T item3 = null, T item4 = null)
+		{
+			//+ Implementation
+			//This method is essentially another constructor that decides the digit to create by performing checks.
+			//It assumes that some of the digits can be null, but that these nulls must be in sequence. E.g.
+			// NULL, NULL, DIGIT, DIGIT
+			// NULL, DIGIT, NULL, NULL
+			//But it does not expect the sequence
+			// NULL DIGIT NULL DIGIT
+			// For example. Note that this method could have been the only constructor, but I decided to only perform these checks
+			// Where absolutely necessary. 
+			int items_present = item1 != null ? 1 : 0;
+			items_present |= item2 != null ? 2 : 0;
+			items_present |= item3 != null ? 4 : 0;
+			items_present |= item4 != null ? 8 : 0;
+
+			switch (items_present)
+			{
+				case 0:
+					return null;
+				case 1 << 0:
+					return new Digit<T>(item1, measure);
+				case 1 << 1:
+					return new Digit<T>(item2, measure);
+				case 1 << 2:
+					return new Digit<T>(item3, measure);
+				case 1 << 3:
+					return new Digit<T>(item4, measure);
+				case 1 << 0 | 1 << 1:
+					return new Digit<T>(item1, item2, measure);
+				case 1 << 0 | 1 << 1 | 1 << 2:
+					return new Digit<T>(item1, item2, item3, measure);
+				case 1 << 0 | 1 << 1 | 1 << 2 | 1 << 3:
+					return new Digit<T>(item1, item2, item3, item4, measure);
+				case 1 << 1 | 1 << 2:
+					return new Digit<T>(item2, item3, measure);
+				case 1 << 1 | 1 << 2 | 1 << 3:
+					return new Digit<T>(item2, item3, item4, measure);
+				case 1 << 2 | 1 << 3:
+					return new Digit<T>(item3, item4, measure);
+				case 1 << 0 | 1 << 2:
+					return new Digit<T>(item1, item3, measure);
+				case 1 << 0 | 1 << 2 | 1 << 3:
+					return new Digit<T>(item1, item3, item4, measure);
+				case 1 << 1 | 1 << 3:
+					return new Digit<T>(item2, item4, measure);
+				case 1 << 0 | 1 << 3:
+					return new Digit<T>(item1, item4, measure);
+				case 1 << 0 | 1 << 1 | 1 << 3:
+					return new Digit<T>(item1, item2, item4, measure);
+
+				default:
+					throw Errors.Invalid_execution_path;
+			}
+		}
+
+		public static void ReformDigitsForConcat(Digit<T> digit, Digit<T> other, out Digit<T> leftmost, out Digit<T> middle,
+		                                         out Digit<T> rightmost)
 		{
 			digit.IsNotNull();
 			other.IsNotNull();
 			int sizeCode = digit.Size << 3 | other.Size;
 			int newMeasure = digit.Measure + other.Measure;
-			
+
 
 			switch (sizeCode)
 			{
@@ -518,7 +637,8 @@ namespace Solid.FingerTree
 					break;
 				case 4 << 3 | 1:
 					leftmost = new Digit<T>(digit.First, digit.Second, digit.First.Measure + digit.Second.Measure);
-					middle = new Digit<T>(digit.Third, digit.Fourth, other.First, other.Measure + digit.Third.Measure + digit.Fourth.Measure);
+					middle = new Digit<T>(digit.Third, digit.Fourth, other.First,
+					                      other.Measure + digit.Third.Measure + digit.Fourth.Measure);
 					rightmost = null;
 					break;
 				case 4 << 3 | 2:
@@ -529,91 +649,13 @@ namespace Solid.FingerTree
 					break;
 				case 4 << 3 | 4:
 					leftmost = new Digit<T>(digit.First, digit.Second, digit.Third, digit.Measure - digit.Fourth.Measure);
-					middle = new Digit<T>(digit.Fourth, other.First, other.Second, digit.Fourth.Measure + other.Second.Measure + other.First.Measure);
+					middle = new Digit<T>(digit.Fourth, other.First, other.Second,
+					                      digit.Fourth.Measure + other.Second.Measure + other.First.Measure);
 					rightmost = new Digit<T>(other.Third, other.Fourth, other.Third.Measure + other.Fourth.Measure);
 					break;
 				default:
 					throw Errors.Invalid_execution_path;
 			}
-		}
-	
-		public Digit<T> AddRight(T item)
-		{
-			int new_measure = Measure + item.Measure;
-			switch (Size)
-			{
-				case 1:
-					return new Digit<T>(First, item, new_measure);
-				case 2:
-					return new Digit<T>(First, Second, item, new_measure);
-				case 3:
-					return new Digit<T>(First, Second, Third, item, new_measure);
-				default:
-					throw Errors.Invalid_digit_size;
-			}
-		}
-
-		public Digit<T> AddLeft(T item)
-		{
-			int new_measure = Measure + item.Measure;
-			switch (Size)
-			{
-				case 1:
-					return new Digit<T>(item, First, new_measure);
-				case 2:
-					return new Digit<T>(item, First, Second, new_measure);
-				case 3:
-					return new Digit<T>(item, First, Second, Third, new_measure);
-				default:
-					throw Errors.Invalid_digit_size;
-			}
-		}
-	
-		public Digit<T> PopLeft()
-		{
-			int new_measure = Measure - First.Measure;
-			switch (Size)
-			{
-				case 1:
-					throw Errors.Invalid_digit_size;
-				case 2:
-					return new Digit<T>(Second, new_measure);
-				case 3:
-					return new Digit<T>(Second, Third, new_measure);
-				case 4:
-					return new Digit<T>(Second, Third, Fourth, new_measure);
-				default:
-					throw Errors.Invalid_digit_size;
-			}
-		}
-	
-		public Digit<T> PopRight()
-		{
-			switch (Size)
-			{
-				case 1:
-					throw Errors.Invalid_digit_size;
-				case 2:
-					return new Digit<T>(First, First.Measure);
-				case 3:
-					return new Digit<T>(First, Second, Measure - Third.Measure);
-				case 4:
-					return new Digit<T>(First, Second, Third, Measure - Fourth.Measure);
-				default:
-					throw Errors.Invalid_digit_size;
-			}
-		}
-
-		public void AddLeftSplit(T item, out Digit<T> leftmost, out Digit<T> rightmost)
-		{
-			leftmost = new Digit<T>(item, First, First.Measure + item.Measure);
-			rightmost = new Digit<T>(Second, Third, Fourth, Measure - First.Measure);
-		}
-	
-		public void AddRightSplit(T item, out Digit<T> leftmost, out Digit<T> rightmost)
-		{
-			leftmost = new Digit<T>(First, Second, Third, Measure - Fourth.Measure);
-			rightmost = new Digit<T>(Fourth, item, Fourth.Measure + item.Measure);
 		}
 	}
 }

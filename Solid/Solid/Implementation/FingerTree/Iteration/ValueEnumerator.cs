@@ -6,7 +6,7 @@ namespace Solid.FingerTree.Iteration
 	internal sealed class ValueEnumerator<T> : IEnumerator<Measured>
 	{
 		private readonly Value<T> value;
-		private bool started = false;
+		private bool started;
 
 		public ValueEnumerator(Value<T> value)
 		{
@@ -15,7 +15,6 @@ namespace Solid.FingerTree.Iteration
 
 		public void Dispose()
 		{
-			
 		}
 
 		public bool MoveNext()
@@ -43,7 +42,10 @@ namespace Solid.FingerTree.Iteration
 
 		object IEnumerator.Current
 		{
-			get { return Current; }
+			get
+			{
+				return Current;
+			}
 		}
 	}
 }

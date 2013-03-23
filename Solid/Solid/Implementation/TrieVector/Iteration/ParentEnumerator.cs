@@ -6,17 +6,27 @@ namespace Solid.TrieVector.Iteration
 	internal class ParentEnumerator<T> : IEnumerator<T>
 	{
 		private readonly VectorParent<T> node;
-		private int index = -1;
 		private IEnumerator<T> current;
+		private int index = -1;
 
 		public ParentEnumerator(VectorParent<T> node)
 		{
 			this.node = node;
 		}
 
+		public bool TryNext()
+		{
+			index++;
+			if (index < node.Arr.Length)
+			{
+				current = node.Arr[index].GetEnumerator();
+				return current.MoveNext();
+			}
+			return false;
+		}
+
 		public void Dispose()
 		{
-			
 		}
 
 		public bool MoveNext()
@@ -30,17 +40,6 @@ namespace Solid.TrieVector.Iteration
 				return true;
 			}
 			return TryNext();
-		}
-
-		public bool TryNext()
-		{
-			index++;
-			if (index < node.Count)
-			{
-				current = node.Arr[index].GetEnumerator();
-				return current.MoveNext();
-			}
-			return false;
 		}
 
 		public void Reset()
@@ -58,7 +57,10 @@ namespace Solid.TrieVector.Iteration
 
 		object IEnumerator.Current
 		{
-			get { return Current; }
+			get
+			{
+				return Current;
+			}
 		}
 	}
 }

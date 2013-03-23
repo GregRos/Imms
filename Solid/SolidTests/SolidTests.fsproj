@@ -58,6 +58,7 @@
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Runtime.DurableInstancing" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

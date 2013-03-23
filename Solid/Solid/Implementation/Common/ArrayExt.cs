@@ -8,14 +8,6 @@ namespace Solid.Common
 		//Most of the usages of these methods have been inlined in the hope of squeezing a little more performance.
 		//It didn't seem to help (most likely the JITter inlined them anyway).
 
-		public static T[] Set<T>(this T[] self, int index, T value)
-		{
-			var myCopy = new T[self.Length];
-			self.CopyTo(myCopy, 0);
-			myCopy[index] = value;
-			return myCopy;
-		}
-	
 		public static T[] Add<T>(this T[] self, T value)
 		{
 			var myCopy = new T[self.Length + 1];
@@ -27,12 +19,22 @@ namespace Solid.Common
 		public static T[] Insert<T>(this T[] self, int index, T value)
 		{
 			var myCopy = new T[self.Length + 1];
-			Array.Copy(self,0,myCopy,0,index);
+			Array.Copy(self, 0, myCopy, 0, index);
 			myCopy[index] = value;
-			Array.Copy(self,index,myCopy,index+1,self.Length - index);
+			Array.Copy(self, index, myCopy, index + 1, self.Length - index);
 			return myCopy;
 		}
 
+
+		public static T[] Remove<T>(this T[] self)
+		{
+			var myCopy = new T[self.Length - 1];
+			for (int i = 0; i < self.Length - 1; i++)
+			{
+				myCopy[i] = self[i];
+			}
+			return myCopy;
+		}
 
 		public static T[] RemoveAt<T>(this T[] self, int index)
 		{
@@ -51,15 +53,14 @@ namespace Solid.Common
 			return myCopy;
 		}
 
-		public static T[] Remove<T>(this T[] self)
+		public static T[] Set<T>(this T[] self, int index, T value)
 		{
-			var myCopy = new T[self.Length - 1];
-			for (int i = 0; i < self.Length - 1; i++)
-			{
-				myCopy[i] = self[i];
-			}
+			var myCopy = new T[self.Length];
+			self.CopyTo(myCopy, 0);
+			myCopy[index] = value;
 			return myCopy;
 		}
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static T[] TakeFirst<T>(this T[] self, int count)
 		{

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Solid.FingerTree.Iteration
 {
-	internal class EmptyEnumerator<T> : IEnumerator<Measured>,IEnumerable<Measured>
+	internal class EmptyEnumerator<T> : IEnumerator<Measured>, IEnumerable<Measured>
 	{
 		private static readonly EmptyEnumerator<T> empty = new EmptyEnumerator<T>();
 
@@ -12,17 +12,18 @@ namespace Solid.FingerTree.Iteration
 		{
 		}
 
-		public static IEnumerator<Measured> Instance
+		public IEnumerator<Measured> GetEnumerator()
 		{
-			get
-			{
-				return empty;
-			}
+			return empty;
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
 		}
 
 		public void Dispose()
 		{
-			
 		}
 
 		public bool MoveNext()
@@ -37,22 +38,26 @@ namespace Solid.FingerTree.Iteration
 
 		public Measured Current
 		{
-			get { throw new NotSupportedException(); }
+			get
+			{
+				throw new NotSupportedException();
+			}
 		}
 
 		object IEnumerator.Current
 		{
-			get { return Current; }
+			get
+			{
+				return Current;
+			}
 		}
 
-		public IEnumerator<Measured> GetEnumerator()
+		public static IEnumerator<Measured> Instance
 		{
-			return empty;
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return GetEnumerator();
+			get
+			{
+				return empty;
+			}
 		}
 	}
 }

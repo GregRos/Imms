@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using NUnit.Framework;
 
 namespace Solid.FingerTree
 {
@@ -15,7 +13,7 @@ namespace Solid.FingerTree
 		where T : Measured<T>
 	{
 		public static readonly FTree<T> Empty = Empty<T>.Instance;
-		
+
 		//+ Implementation
 		//  These two are readonly fields due to performance reasons.
 		//  While the CLR is normally supposed to inline property calls, in order to allow all types of FTrees to access
@@ -26,7 +24,7 @@ namespace Solid.FingerTree
 
 		public readonly int Kind;
 		public readonly int Measure;
-		
+
 		protected FTree(int measure, int kind)
 		{
 			Kind = kind;
@@ -39,39 +37,44 @@ namespace Solid.FingerTree
 		//  Into readonly fields, as outlined above.
 
 
-		public abstract T Left { get; }
+		public abstract T Left
+		{
+			get;
+		}
 
-		public abstract T Right { get; }
+		public abstract T Right
+		{
+			get;
+		}
 
-		public abstract Measured Get(int index);
-
-
-		//+ Implementation
-		//  The Iter and IterBack delegates are not typesafe. The delegates are declared with the parameter of type Measured
-		//  But infact only iterate over Value<T> objects. However, due to the limitations of generics in .NET
-		//  They must involve an internal cast.
-		//  An alternative would be to cast the values themselves, but this introduces boxing.
-		public abstract void Iter(Action<Measured> action);
-
-		public abstract void IterBack(Action<Measured> action);
-		
 		public abstract FTree<T> AddLeft(T item);
-	
+
 		public abstract FTree<T> AddRight(T item);
 
 		public abstract FTree<T> DropLeft();
-		
+
 		public abstract FTree<T> DropRight();
+
+		public abstract bool IterBackWhile(Func<Measured, bool> func);
+
+		public abstract bool IterWhile(Func<Measured, bool> func);
+
+		public abstract Measured Get(int index);
+
+		public abstract IEnumerator<Measured> GetEnumerator();
+
+		public abstract FTree<T> Insert(int index, Measured measured);
+
+		public abstract void Iter(Action<Measured> action);
+
+		public abstract void IterBack(Action<Measured> action);
 
 		public abstract FTree<T> Reverse();
 
-		public abstract void Split(int count, out FTree<T> leftmost, out FTree<T> rightmost);
-	
-		public abstract IEnumerator<Measured> GetEnumerator();
-
 		public abstract FTree<T> Set(int index, Measured value);
 
-		public abstract FTree<T> Insert(int index, object value);
+		public abstract void Split(int count, out FTree<T> leftmost, out FTree<T> rightmost);
+
 		public static FTree<T> Concat(FTree<T> first, FTree<T> last)
 		{
 			int status = first.Kind << 3 | last.Kind;
@@ -79,14 +82,13 @@ namespace Solid.FingerTree
 			FTree<Digit<T>> newDeep;
 			switch (status)
 			{
-				//+ Implementation
-				//This should be farily legible. It is a solution I like to call a 'case table'
-				//Note that TreeType is *not* an enum but a static class with constants.
-				//This is because enums do not support the bitwise << operator.
-				     
-					
-				
-				/* If either of the trees is empty*/
+					//+ Implementation
+					//This should be farily legible. It is a solution I like to call a 'case table'
+					//Note that TreeType is *not* an enum but a static class with constants.
+					//This is because enums do not support the bitwise << operator.
+
+
+					/* If either of the trees is empty*/
 				case TreeType.Empty << 3 | TreeType.Single:
 				case TreeType.Empty << 3 | TreeType.Compound:
 					return last;
@@ -95,27 +97,27 @@ namespace Solid.FingerTree
 					return first;
 				case TreeType.Empty << 3 | TreeType.Empty:
 					return first;
-				/* If both are single... we just create a new Compound with their digits.*/	
+					/* If both are single... we just create a new Compound with their digits.*/
 				case TreeType.Single << 3 | TreeType.Single:
 					var single1 = first as Single<T>;
 					var single2 = last as Single<T>;
 					return new Compound<T>(measure, single1.CenterDigit, Empty<Digit<T>>.Instance,
-										   single2.CenterDigit);
+					                       single2.CenterDigit);
 				case TreeType.Single << 3 | TreeType.Compound:
 					var asSingle = first as Single<T>;
 					var asCompound = last as Compound<T>;
 					newDeep = asCompound.DeepTree.AddLeft(asCompound.LeftDigit);
 					return new Compound<T>(measure,
 					                       asSingle.CenterDigit, newDeep, asCompound.RightDigit);
-				/* If one is single, we push the digit of the Compound into its Deep.*/
+					/* If one is single, we push the digit of the Compound into its Deep.*/
 				case TreeType.Compound << 3 | TreeType.Single:
 					var right_single = last as Single<T>;
 					var left_compound = first as Compound<T>;
-					
-					newDeep = left_compound.DeepTree.AddRight(left_compound.RightDigit);
-					return new Compound<T>(measure,left_compound.LeftDigit, newDeep, right_single.CenterDigit);
 
-				/* This is the most complex case.
+					newDeep = left_compound.DeepTree.AddRight(left_compound.RightDigit);
+					return new Compound<T>(measure, left_compound.LeftDigit, newDeep, right_single.CenterDigit);
+
+					/* This is the most complex case.
 				 * First note that when we have two Compounds, we essentially have two inner digits and two outer digits:
 				 *		A..B ++ C..D => A..D
 				 *	The digits B C must somehow be pushed into the FTree, but the digits A D are going to be its left and right digits.
@@ -134,7 +136,7 @@ namespace Solid.FingerTree
 					Digit<T> innerRight = compound2.LeftDigit;
 					Digit<T>.ReformDigitsForConcat(innerLeft, innerRight, out leftmost, out middle, out rightmost);
 					FTree<Digit<T>> deep;
-					if (compound1.Measure > compound2.Measure) 
+					if (compound1.Measure > compound2.Measure)
 						//We want to push the small tree into the large one. 
 					{
 						deep = compound1.DeepTree;

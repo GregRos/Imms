@@ -9,79 +9,31 @@ namespace Solid.TrieMap
 	/// </summary>
 	/// <typeparam name="TKey"></typeparam>
 	/// <typeparam name="TValue"></typeparam>
-	internal sealed class MapLeaf<TKey,TValue> : MapNode<TKey,TValue>
+	internal sealed class MapLeaf<TKey, TValue> : MapNode<TKey, TValue>
 	{
 		public readonly HashedKey<TKey> MyKey;
 		public readonly TValue MyValue;
-		
-		public MapLeaf(int height, HashedKey<TKey> hashKey,TValue value)
-			: base(height,1,NodeType.Leaf)
+
+		public MapLeaf(int height, HashedKey<TKey> hashKey, TValue value)
+			: base(height, 1, NodeType.Leaf)
 		{
-			this.MyKey = hashKey;
+			MyKey = hashKey;
 			MyValue = value;
 		}
 
-
-		public override TValue TryGet(HashedKey<TKey> tryKey, out Result result)
+		public override MapNode<TKey, TValue2> Apply<TValue2>(Func<TKey, TValue, TValue2> transform)
 		{
-			if (tryKey.Hash != MyKey.Hash)
-			{
-				result = Result.KeyNotFound;
-				return default(TValue);
-			}
-			if (MyKey.Comparer.Equals(MyKey.Key, tryKey.Key))
-			{
-				result = Result.Success;
-				return MyValue;
-			}
-			result = Result.HashCollision;
-			return default(TValue);
-
+			return new MapLeaf<TKey, TValue2>(Height, MyKey, transform(MyKey.Key, MyValue));
 		}
 
-		public override MapNode<TKey, TValue> TrySet(HashedKey<TKey> tryKey, TValue tryValue, WriteBehavior behave, out Result result)
+		public override IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
 		{
-			if (tryKey.Hash != MyKey.Hash && Height < MaxHeight)
-			{
-				if (behave == WriteBehavior.OnlyOverwrite)
-				{
-					result = Result.KeyNotFound;
-					return null;
-				}
-				result = Result.Success;
-
-				return new MapParent<TKey, TValue>(Height, MyKey, MyValue, tryKey, tryValue);
-			}
-			if (MyKey.Comparer.Equals(tryKey.Key, MyKey.Key))
-			{
-				if (behave == WriteBehavior.OnlyCreate)
-				{
-					result = Result.KeyExists;
-					return null;
-					
-				}
-				result = Result.Success;
-				return new MapLeaf<TKey, TValue>(Height, tryKey, tryValue);
-			}
-			result = Result.HashCollision;
-			return null;
-
+			return new LeafIterator<TKey, TValue>(this);
 		}
 
-		public override MapNode<TKey, TValue> TryDrop(HashedKey<TKey> tryKey, out Result result)
+		public override void Iter(Action<TKey, TValue> action)
 		{
-			if (tryKey.Hash != MyKey.Hash)
-			{
-				result = Result.KeyNotFound;
-				return null;
-			}
-			if (MyKey.Comparer.Equals(tryKey.Key, MyKey.Key))
-			{
-				result = Result.TurnedEmpty;
-				return null;
-			}
-			result = Result.HashCollision;
-			return null;
+			action(MyKey.Key, MyValue);
 		}
 
 		public override bool TryContains(HashedKey<TKey> tryKey, out Result result)
@@ -100,20 +52,65 @@ namespace Solid.TrieMap
 			return false;
 		}
 
-		public override void Iter(Action<TKey, TValue> action)
+		public override MapNode<TKey, TValue> TryDrop(HashedKey<TKey> tryKey, out Result result)
 		{
-			action(MyKey.Key, MyValue);
+			if (tryKey.Hash != MyKey.Hash)
+			{
+				result = Result.KeyNotFound;
+				return null;
+			}
+			if (MyKey.Comparer.Equals(tryKey.Key, MyKey.Key))
+			{
+				result = Result.TurnedEmpty;
+				return null;
+			}
+			result = Result.HashCollision;
+			return null;
 		}
 
-		public override IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
-		{
-			return new LeafIterator<TKey, TValue>(this);
 
+		public override TValue TryGet(HashedKey<TKey> tryKey, out Result result)
+		{
+			if (tryKey.Hash != MyKey.Hash)
+			{
+				result = Result.KeyNotFound;
+				return default(TValue);
+			}
+			if (MyKey.Comparer.Equals(MyKey.Key, tryKey.Key))
+			{
+				result = Result.Success;
+				return MyValue;
+			}
+			result = Result.HashCollision;
+			return default(TValue);
 		}
 
-		public override MapNode<TKey, TValue2> Apply<TValue2>(Func<TKey, TValue, TValue2> transform)
+		public override MapNode<TKey, TValue> TrySet(HashedKey<TKey> tryKey, TValue tryValue, WriteBehavior behave,
+		                                             out Result result)
 		{
-			return new MapLeaf<TKey, TValue2>(Height, MyKey, transform(MyKey.Key, MyValue));
+			if (tryKey.Hash != MyKey.Hash && Height < MaxHeight)
+			{
+				if (behave == WriteBehavior.OnlyOverwrite)
+				{
+					result = Result.KeyNotFound;
+					return null;
+				}
+				result = Result.Success;
+
+				return new MapParent<TKey, TValue>(Height, MyKey, MyValue, tryKey, tryValue);
+			}
+			if (MyKey.Comparer.Equals(tryKey.Key, MyKey.Key))
+			{
+				if (behave == WriteBehavior.OnlyCreate)
+				{
+					result = Result.KeyExists;
+					return null;
+				}
+				result = Result.Success;
+				return new MapLeaf<TKey, TValue>(Height, tryKey, tryValue);
+			}
+			result = Result.HashCollision;
+			return null;
 		}
 	}
 }

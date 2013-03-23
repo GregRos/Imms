@@ -21,15 +21,8 @@ internal static class Program
 	private static void Main(string[] args)
 	{
 
-		var x = Enumerable.Range(0, 100).ToSequence();
-		//x = x.Append(x);
-
-		for (int i = 0; i < 50; i++)
-		{
-			x = x.Insert(i * 2, 0);
-		}
-
-
+		var x = Enumerable.Range(0, 100).ToFlexibleList();
+		
 
 
 	}

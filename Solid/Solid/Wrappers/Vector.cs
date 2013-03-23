@@ -2,8 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Solid.Common;
 using Solid.TrieVector;
-
+using System.Linq;
 namespace Solid
 {
 	public static class Vector
@@ -55,6 +56,8 @@ namespace Solid
 		{
 			get
 			{
+				index = index < 0 ? index + Count : index;
+				if (index >= Count || index < 0) throw Errors.Index_out_of_range;
 				return root[index];
 			}
 		}
@@ -83,8 +86,15 @@ namespace Solid
 			return new Vector<T>(root.Add(item));
 		}
 
+		public Vector<T> AddLastItems(params T[] items)
+		{
+			if (items == null) throw Errors.Argument_null("items");
+			return this.AddLastRange(items.AsEnumerable());
+		}
+
 		public Vector<T> AddLastRange(IEnumerable<T> items)
 		{
+			if (items == null) throw Errors.Argument_null("items");
 			//TODO: Naive implementation. Implement with efficient bulk loading.
 			Vector<T> vec = this;
 			foreach (T item in items)
@@ -94,10 +104,30 @@ namespace Solid
 			return vec;
 		}
 
-		public Vector<TOut> Apply<TOut>(Func<T, TOut> transform)
+		public Vector<TOut> Select<TOut>(Func<T, TOut> transform)
 		{
+			if (transform == null) throw Errors.Argument_null("transform");
 			return new Vector<TOut>(root.Apply(transform));
 		}
+		
+		public T First
+		{
+			get
+			{
+				if (Count == 0) throw Errors.Is_empty;
+				return this[0];
+			}
+		}
+
+		public T Last
+		{
+			get
+			{
+				if (Count == 0) throw Errors.Is_empty;
+				return this[-1];
+			}
+		}
+
 
 		/// <summary>
 		/// Removes the last item from the list.
@@ -105,9 +135,58 @@ namespace Solid
 		/// <returns></returns>
 		public Vector<T> DropLast()
 		{
+			if (root.Count == 0) throw Errors.Is_empty;
 			return new Vector<T>(root.Drop());
 		}
 
+		public Vector<T> Where(Func<T, bool> predicate)
+		{
+			var newVector = empty;
+			this.ForEach(v =>
+			             {
+				             if (predicate(v))
+				             {
+					             newVector = newVector.AddLast(v);
+				             }
+
+
+			             });
+			return newVector;
+		}
+
+		public TResult Aggregate<TResult>(Func<TResult, T, TResult> accumulator, TResult initial)
+		{
+			this.ForEach(v => initial = accumulator(initial, v));
+			return initial;
+		}
+
+		public void ForEachWhile(Func<T, bool> conditional)
+		{
+			root.IterWhile(conditional);
+		}
+
+		public void ForEachBack(Action<T> action)
+		{
+			root.IterBack(action);
+		}
+
+		public void ForEachBackWhile(Func<T, bool> conditional)
+		{
+			root.IterBackWhile(conditional);
+		}
+
+
+		public int? IndexOf(Func<T, bool> predicate)
+		{
+			var index = 0;
+			var result = root.IterWhile(v =>
+			               {
+							   if (predicate(v)) return false;
+				               index++;
+							   return true;
+			               });
+			return !result ? (int?)index : null;
+		}
 		/// <summary>
 		/// Removes several items from the end of the list.
 		/// </summary>
@@ -115,11 +194,13 @@ namespace Solid
 		/// <returns></returns>
 		public Vector<T> DropLast(int count)
 		{
-			return new Vector<T>(root.TakeFirst(root.Count - count));
+			if (root.Count == 0) throw Errors.Is_empty;
+			return new Vector<T>(root.Take(root.Count - count));
 		}
 
 		public void ForEach(Action<T> action)
 		{
+			if (action == null) throw Errors.Argument_null("action");
 			root.Iter(action);
 		}
 
@@ -131,6 +212,8 @@ namespace Solid
 		/// <returns></returns>
 		public Vector<T> Set(int index, T item)
 		{
+			index = index < 0 ? index + Count : index;
+			if (index < 0 || index >= Count) throw Errors.Index_out_of_range;
 			return new Vector<T>(root.Set(index, item));
 		}
 
@@ -141,7 +224,9 @@ namespace Solid
 		/// <returns></returns>
 		public Vector<T> Take(int count)
 		{
-			return new Vector<T>(root.TakeFirst(count));
+			if (count < 0 || count > Count) throw Errors.Index_out_of_range;
+			if (count == 0) return empty;
+			return new Vector<T>(root.Take(count));
 		}
 
 		public IEnumerator<T> GetEnumerator()

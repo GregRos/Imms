@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Solid.FingerTree.Iteration
 {
-	internal class EnumeratorWrapper<T> : IEnumerator<T>,IEnumerable<T>
+	internal class EnumeratorWrapper<T> : IEnumerator<T>, IEnumerable<T>
 	{
 		private readonly IEnumerator<Measured> inner;
 		private T current;
@@ -14,15 +14,23 @@ namespace Solid.FingerTree.Iteration
 			this.inner = inner;
 		}
 
+		public IEnumerator<T> GetEnumerator()
+		{
+			return new EnumeratorWrapper<T>(inner);
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
+
 		public void Dispose()
 		{
-			
 		}
 
 		public bool MoveNext()
 		{
-
-			var ret = inner.MoveNext();
+			bool ret = inner.MoveNext();
 			if (ret)
 			{
 				var tmp = inner.Current as Value<T>;
@@ -47,17 +55,10 @@ namespace Solid.FingerTree.Iteration
 
 		object IEnumerator.Current
 		{
-			get { return Current; }
-		}
-
-		public IEnumerator<T> GetEnumerator()
-		{
-			return new EnumeratorWrapper<T>(inner);
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return GetEnumerator();
+			get
+			{
+				return Current;
+			}
 		}
 	}
 }

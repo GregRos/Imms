@@ -6,18 +6,19 @@ using Solid.TrieVector.Iteration;
 
 namespace Solid.TrieVector
 {
-
+	
 	internal sealed class VectorParent<T> : VectorNode<T>
 	{
 		public readonly VectorNode<T>[] Arr;
-	
+
 		private readonly int myBlock;
 		private readonly int offs;
+
 		public VectorParent(int height, int count, VectorNode<T>[] arr)
 			: base(height, count, arr.Length == 32 && arr[arr.Length - 1].IsFull)
 		{
 			arr.IsNotNull();
-			
+
 			Arr = arr;
 			offs = height*5;
 			myBlock = ((1 << 5) - 1) << offs;
@@ -31,21 +32,6 @@ namespace Solid.TrieVector
 				myIndex = myIndex >> offs;
 				return Arr[myIndex][index];
 			}
-		}
-
-		public override VectorNode<TOut> Apply<TOut>(Func<T, TOut> transform)
-		{
-			var newArr = new VectorNode<TOut>[Arr.Length];
-			for (int i = 0; i < newArr.Length; i++)
-			{
-				newArr[i] = Arr[i].Apply<TOut>(transform);
-			}
-			return new VectorParent<TOut>(Height, Count, newArr);
-		}
-
-		public override VectorNode<T> Fill(IList<T> items, int start,out int count)
-		{
-			throw new NotImplementedException();
 		}
 
 		public override VectorNode<T> Add(T item)
@@ -96,27 +82,70 @@ namespace Solid.TrieVector
 			var myCopy = new VectorNode<T>[Arr.Length];
 			Arr.CopyTo(myCopy, 0);
 			myCopy[Arr.Length - 1] = newLast;
-			newMyArr =  myCopy;
+			newMyArr = myCopy;
 			return new VectorParent<T>(Height, Count - 1, newMyArr);
 		}
 
 
-		public override VectorNode<T> TakeFirst(int index)
+		public override VectorNode<TOut> Apply<TOut>(Func<T, TOut> transform)
 		{
-			index.Is(i => i < Count && i > 0);
-			int myCount = index & myBlock;
-			myCount = myCount >> (offs);
-			VectorNode<T>[] myArrFirst = Arr.TakeFirst(myCount + 1);
-			VectorNode<T> myNewLast = Arr[myCount].TakeFirst(index);
-			myArrFirst[myCount] = myNewLast;
-			return new VectorParent<T>(Height, Arr[0].Count*(myCount - 1) + myNewLast.Count, myArrFirst);
+			var newArr = new VectorNode<TOut>[Arr.Length];
+			for (int i = 0; i < newArr.Length; i++)
+			{
+				newArr[i] = Arr[i].Apply(transform);
+			}
+			return new VectorParent<TOut>(Height, Count, newArr);
+		}
+
+		public override IEnumerator<T> GetEnumerator()
+		{
+			return new ParentEnumerator<T>(this);
+		}
+
+		public override void IterBack(Action<T> action)
+		{
+			for (int i = Arr.Length - 1; i >= 0; i--)
+			{
+				Arr[i].IterBack(action);
+			}
+		}
+
+		public override bool IterWhile(Func<T, bool> conditional)
+		{
+			for (int i = 0; i < Arr.Length; i++)
+			{
+				if (!Arr[i].IterWhile(conditional))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		public override bool IterBackWhile(Func<T, bool> conditional)
+		{
+			for (int i = Arr.Length - 1; i >= 0; i--)
+			{
+				if (!Arr[i].IterBackWhile(conditional))
+				{
+					return false;
+				}
+			}
+			return true;
 		}
 
 
+		public override void Iter(Action<T> action)
+		{
+			action.IsNotNull();
+			for (int i = 0; i < Arr.Length; i++)
+			{
+				Arr[i].Iter(action);
+			}
+		}
 
 		public override VectorNode<T> Set(int index, T value)
 		{
-			
 			int myIndex = (index) & myBlock;
 			myIndex = myIndex >> offs;
 			myIndex.Is(i => i < Count && i >= 0);
@@ -128,20 +157,15 @@ namespace Solid.TrieVector
 			return new VectorParent<T>(Height, Count, myNewArr);
 		}
 
-		public override void Iter(Action<T> action)
+		public override VectorNode<T> Take(int index)
 		{
-			action.IsNotNull();
-			for (int i = 0; i < Arr.Length; i++)
-			{
-				Arr[i].Iter(action);
-			}
-		}
-
-
-
-		public override IEnumerator<T> GetEnumerator()
-		{
-			return new ParentEnumerator<T>(this);
+			index.Is(i => i < Count && i > 0);
+			int myCount = index & myBlock;
+			myCount = myCount >> (offs);
+			VectorNode<T>[] myArrFirst = Arr.TakeFirst(myCount + 1);
+			VectorNode<T> myNewLast = Arr[myCount].Take(index);
+			myArrFirst[myCount] = myNewLast;
+			return new VectorParent<T>(Height, Arr[0].Count*(myCount - 1) + myNewLast.Count, myArrFirst);
 		}
 	}
 }

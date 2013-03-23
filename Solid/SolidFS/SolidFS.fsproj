@@ -47,7 +47,7 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Operators.fs" />
-    <Compile Include="SequenceExpression.fs" />
+    <Compile Include="Expressions.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
   </ItemGroup>

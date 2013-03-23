@@ -11,7 +11,7 @@ type MutableQueue<'t> = Generic.Queue<'t>
 open SolidFS.Operators
 open SolidFS.Expressions
 open Solid
-
+open SolidFS
 
 
 type TestNotAvailableException<'a>(target : TestTarget<'a>) = 
@@ -21,70 +21,118 @@ type TestNotAvailableException<'a>(target : TestTarget<'a>) =
 and [<AbstractClass>] 
     TestTarget<'a>(name) as this = 
     let not_available = TestNotAvailableException(this)
-    abstract member Name : string
-    abstract member AddLast : 'a -> TestTarget<'a>
-    abstract member AddFirst : 'a -> TestTarget<'a>
-    abstract member Length : unit ->  int
-    abstract member DropLast : unit -> TestTarget<'a>
-    abstract member DropFirst : unit -> TestTarget<'a>
-    abstract member Get : int -> 'a
-    abstract member Set : int -> 'a -> TestTarget<'a>
-    abstract member First : unit -> 'a
-    abstract member Last : unit -> 'a
-    abstract member AddRangeLast : seq<'a> -> TestTarget<'a>
-    abstract member AddRangeFirst : seq<'a> -> TestTarget<'a>
-    abstract member InsertAt : int -> 'a -> TestTarget<'a>
-    abstract member RemoveAt : int -> TestTarget<'a>
-    abstract member InsertManyAt : int -> seq<'a> -> TestTarget<'a>
-    abstract member TakeFirst : int -> TestTarget<'a>
-    abstract member TakeLast : int -> TestTarget<'a>
-    abstract member Concat : TestTarget<'a> -> TestTarget<'a>
-    abstract member AsSeq : unit -> seq<'a>
-    abstract member FromSeq : seq<'a> -> TestTarget<'a>
-    abstract member IsEmpty : bool
-    abstract member Append : TestTarget<'a> -> TestTarget<'a>
-    default __.Name = name
-    default __.AddLast _ = raise not_available
-    default __.AddFirst _ = raise not_available
-    default __.Length() = raise not_available
-    default __.DropFirst () = raise not_available
-    default __.DropLast () = raise not_available
-    default __.Get _ = raise not_available
-    default __.Set _ _ = raise not_available
-    default __.First() = raise not_available
-    default __.Last() = raise not_available
-    default __.AddRangeFirst _ = raise not_available
-    default __.AddRangeLast _ = raise not_available
-    default __.InsertAt _ _ = raise not_available
-    default __.RemoveAt _ = raise not_available
-    default __.InsertManyAt _ _ = raise not_available
-    default __.TakeFirst _ = raise not_available
-    default __.TakeLast _ = raise not_available
-    default __.Concat _ = raise not_available
-    default __.AsSeq () = raise not_available
-    default __.Append t = raise not_available
+    abstract member Name          : string
+    abstract member AddLast       : 'a             -> TestTarget<'a>
+    abstract member AddFirst      : 'a             -> TestTarget<'a>
+    abstract member Length        : unit           ->  int
+    abstract member DropLast      : unit           -> TestTarget<'a>
+    abstract member DropFirst     : unit           -> TestTarget<'a>
+    abstract member Get           : int            -> 'a
+    abstract member Set           : int            -> 'a -> TestTarget<'a>
+    abstract member First         : unit           -> 'a
+    abstract member Last          : unit           ->   'a
+    abstract member AddLastRange  : seq<'a>        -> TestTarget<'a>
+    abstract member AddFirstRange : seq<'a>        -> TestTarget<'a>
+    abstract member Insert        : int            -> 'a -> TestTarget<'a>
+    abstract member RemoveAt      : int            -> TestTarget<'a>
+    abstract member InsertRange   : int            -> seq<'a> -> TestTarget<'a>
+    abstract member TakeFirst     : int            -> TestTarget<'a>
+    abstract member TakeLast      : int            -> TestTarget<'a>
+    abstract member Slice         : int            -> int -> TestTarget<'a>
+    abstract member Concat        : TestTarget<'a> -> TestTarget<'a>
+    abstract member AsSeq         : unit           -> seq<'a>
+    abstract member FromSeq       : seq<'a>        -> TestTarget<'a>
+    abstract member IsEmpty       : bool
+    abstract member AddLastList   : TestTarget<'a> -> TestTarget<'a>
+    abstract member Filter        : ('a            -> bool) -> TestTarget<'a>
+    abstract member Map           : ('a            -> 'b) -> TestTarget<'b>  when 'b : equality
+    abstract member Reverse       : unit           -> TestTarget<'a>
+    abstract member IndexOf       : ('a            -> bool) -> int option
+    abstract member Verify : unit -> bool
+    default __.Name            = name
+    default __.AddLast _       = raise not_available
+    default __.AddFirst _      = raise not_available
+    default __.Length()        = raise not_available
+    default __.DropFirst ()    = raise not_available
+    default __.DropLast ()     = raise not_available
+    default __.Get _           = raise not_available
+    default __.Set _ _         = raise not_available
+    default __.First()         = raise not_available
+    default __.Last()          = raise not_available
+    default __.AddFirstRange _ = raise not_available
+    default __.AddLastRange _  = raise not_available
+    default __.Insert _ _      = raise not_available
+    default __.RemoveAt _      = raise not_available
+    default __.InsertRange _ _ = raise not_available
+    default __.TakeFirst _     = raise not_available
+    default __.TakeLast _      = raise not_available
+    default __.Concat _        = raise not_available
+    default __.AsSeq ()        = raise not_available
+    default __.AddLastList t   = raise not_available
+    default __.Reverse () = raise not_available
+    default __.Slice _ _       = raise not_available
+    default __.Filter _        = raise not_available
+    default __.Map _           = raise not_available
+    default __.IndexOf _ = raise not_available
+    default __.Verify () = raise not_available
+
+module Seq = 
+    let pivot (sqs : 'a seq array) : 'a array seq = 
+        let states = sqs |> Array.map (fun x -> x.GetEnumerator())
+        seq {
+            while (states |> Array.map (fun x -> x.MoveNext()) |> Seq.distinct |> Seq.exactlyOne) do
+                yield states |> Array.map (fun x -> x.Current)
+        }
+    let are_the_same (items : #seq<_>) : bool = 
+        items |> Seq.pairwise |> Seq.map (fun (a,b) -> a.Equals(b)) |> Seq.forall id
 
 
+    
 
+type TestGroup<'a when 'a : equality>(inner : 'a TestTarget array) = 
+    inherit TestTarget<'a>("Group")
+    static let cns x                      = TestGroup<'b>(x) :> TestTarget<'b>
+    override this.AddLast v        = inner |> Array.map (fun x -> x.AddLast v) |>        cns
+    override this.AddFirst v       = inner |> Array.map (fun x -> x.AddFirst v) |>       cns
+    override this.DropLast()       = inner |> Array.map (fun x -> x.DropLast()) |>       cns
+    override this.DropFirst()      = inner |> Array.map (fun x -> x.DropFirst()) |>      cns
+    override this.AddLastRange vs  = inner |> Array.map (fun x -> x.AddLastRange vs) |>  cns
+    override this.AddFirstRange vs = inner |> Array.map (fun x -> x.AddFirstRange vs) |> cns
+    override this.Insert i v       = inner |> Array.map (fun x -> x.Insert i v) |>       cns
+    override this.InsertRange i vs = inner |> Array.map (fun x -> x.InsertRange i vs) |> cns
+    override this.Length()         = inner |> Array.map (fun x -> x.Length()) |> Seq.distinct |> Seq.exactlyOne
+    override this.First()          = inner |> Array.map (fun x -> x.First()) |> Seq.distinct |> Seq.exactlyOne
+    override this.Last()           = inner |> Array.map (fun x -> x.Last()) |> Seq.distinct |> Seq.exactlyOne
+    override this.Get i            = inner |> Array.map (fun x -> x.Get i) |> Seq.distinct |> Seq.exactlyOne
+    override this.Set i v          = inner |> Array.map (fun x -> x.Set i v) |>          cns
+    override this.Filter f         = inner |> Array.map (fun x -> x.Filter f) |>         cns
+    override this.Map f            = inner |> Array.map (fun x -> x.Map f) |>            cns
+    override this.IndexOf f        = inner |> Array.map (fun x -> x.IndexOf f) |> Seq.distinct |> Seq.exactlyOne
+    override this.IsEmpty          = inner |> Array.map (fun x -> x.IsEmpty) |> Seq.distinct |> Seq.exactlyOne
+    override this.FromSeq vs       = inner |> Array.map (fun x -> x.FromSeq vs) |> cns
+    override this.Verify () = inner |> Array.map (fun x -> x.AsSeq()) |> Seq.pivot |> Seq.map (fun x -> x |> Seq.are_the_same) |> Seq.forall id
+    override this.AsSeq() = inner |> Array.map (fun x -> x.AsSeq()) |> Seq.pivot |> Seq.map (Seq.distinct >> Seq.exactlyOne)
+    override this.TakeFirst i = inner |> Array.map (fun x -> x.TakeFirst i) |> cns
+    override this.TakeLast i = inner |> Array.map (fun x -> x.TakeLast i) |> cns
+    override this.Slice i1 i2 = inner |> Array.map (fun x -> x.Slice i1 i2) |> cns
 module FSHARPX = 
     open FSharpx.Collections
 
-
     type TestVector<'a when 'a : equality>(inner : FSharpx.Collections.Vector<'a>) =
         inherit TestTarget<'a>("FSharpx...Vector")
-        let cns x = TestVector(x) :> TestTarget<_>
+        let cns x                = TestVector(x) :> TestTarget<_>
         
-        override this.AddLast v = inner |> Vector.conj v |> cns
-        override this.Length ()= inner.Length
+        override this.AddLast v  = inner |> Vector.conj v |> cns
+        override this.Length ()  = inner.Length
         override this.DropLast ()= inner |> Vector.unconj|> fst |> cns
-        override this.Get i = inner.[i]
-        override this.Set i v = inner.Update(i,v) |> cns
+        override this.Get i      = inner.[i]
+        override this.Set i v    = inner.Update(i,v) |> cns
         override this.First ()= inner.[0]
         override this.Last ()= inner.Last
-        override this.AsSeq () = inner :> _
-        override this.IsEmpty = inner.IsEmpty
+        override this.AsSeq ()   = inner :> _
+        override this.IsEmpty    = inner.IsEmpty
         override this.FromSeq vs = vs |> Vector.ofSeq |> cns
-        override this.AddRangeLast vs = 
+        override this.AddLastRange vs = 
             let mutable x = inner
             for i in vs do
                 x <- x |> FSharpx.Collections.Vector.conj i
@@ -143,23 +191,30 @@ module FSHARPX =
 module CORE = 
     type TestList<'a>(inner : System.Collections.Immutable.IImmutableList<'a>) = 
         inherit TestTarget<'a>("System...ImmutableList")
-        let cns x = TestList<'a>(x) :> TestTarget<'a>
-
+        static let cns x = TestList<'b>(x) :> TestTarget<'b>
+        static let cns_sq (x : 'b seq) = TestList<'b>(Immutable.ImmutableList.Create<'b>(x)) :> TestTarget<'b>
         override this.AddLast v= inner.Add v |> cns
-        override this.AddRangeLast vs = inner.AddRange vs |> cns
+        override this.AddLastRange vs = inner.AddRange vs |> cns
+        override this.AddFirst v = inner.Insert(0, v) |> cns
+        override this.AddFirstRange vs = inner.InsertRange(0, vs) |> cns
         override this.Last () = inner.[inner.Count - 1]
         override this.First() = inner.[0]
         override this.Get i = inner.[i]
         override this.Set i v = inner.SetItem(i,v) |> cns
         override this.IsEmpty = inner.Count = 0
+        override this.Slice i1 i2 = inner |> Seq.skip i1 |> Seq.take (i2 - i1 + 1) |> cns_sq
         override this.DropLast() = inner.RemoveAt(inner.Count - 1) |> cns
         override this.DropFirst() = inner.RemoveAt(0) |> cns
-        override this.InsertAt i v = inner.Insert(i,v) |> cns
+        override this.Insert i v = inner.Insert(i,v) |> cns
         override this.RemoveAt i = inner.RemoveAt i |> cns
         override this.Length ()= inner.Count
-        override this.InsertManyAt i vs = inner.InsertRange(i,vs) |> cns
+        override this.InsertRange i vs = inner.InsertRange(i,vs) |> cns
+        override this.TakeFirst i = inner |> Seq.take i |> cns_sq
+        override this.TakeLast i = inner |> Seq.skip (inner.Count - i) |> cns_sq
         override this.AsSeq () = inner :> _
-        override this.FromSeq vs = Immutable.ImmutableList.Create<'a>(vs) |> cns
+        override this.FromSeq vs = cns_sq vs
+        override this.Map f = inner |> Seq.map f |> cns_sq
+        override this.Filter f = inner |> Seq.filter f |> cns_sq
         static member Empty = TestList<'a>(Immutable.ImmutableList.Create())  :> TestTarget<'a>
     type TestStack<'a> (inner : System.Collections.Immutable.IImmutableStack<'a>) = 
         inherit TestTarget<'a>("System...ImmutableStack")
@@ -182,26 +237,7 @@ module CORE =
         override this.AsSeq () = inner :> _
         override this.FromSeq vs = Immutable.ImmutableQueue.Create<'a>(vs) |> cns
         static member Empty = TestQueue<'a>(Immutable.ImmutableQueue.Create())  :> TestTarget<'a>
-    type TestSeq<'a> (inner : seq<'a>) = 
-        inherit TestTarget<'a>("System...IEnumerable")
-        let cns x = TestSeq<'a> x :> TestTarget<_>
 
-        override this.AddLast v= Seq.singleton v |> Seq.append inner |> cns
-        override this.AddFirst v = inner |> Seq.append (Seq.singleton v) |> cns
-
-        override this.AddRangeLast vs = vs |> Seq.append inner |> cns
-        override this.AddRangeFirst vs = inner |> Seq.append vs |> cns
-        override this.IsEmpty = inner |> Seq.isEmpty
-        override this.First () = inner |> Seq.head
-
-        //override this.DropLast() = inner |> Seq.take ((inner |> Seq.length) - 1) |> cns
-        override this.Last() = inner |> Seq.last
-        override this.TakeFirst i = inner |> Seq.take i |> cns
-        override this.TakeLast i = inner |> Seq.skip ((inner |> Seq.length) - i) |> cns
-        override this.Get i = inner |> Seq.nth i
-        override this.AsSeq () = inner :> _
-        override this.FromSeq vs = vs |> cns
-        static member Empty = TestSeq<'a>(Seq.empty)  :> TestTarget<'a>
 module FSHARP = 
     type TestFSList<'a>( inner : list<'a>) =
         inherit TestTarget<'a>("FSharp...list")
@@ -242,31 +278,35 @@ module SOLID =
         override __.FromSeq vs = vs.ToVector() |> cns
         
         static member Empty = TestVector<'a>(Solid.Vector.Empty())
-    type TestXList<'a>(inner : Solid.Sequence<'a>) = 
+    type TestXList<'a>(inner : xlist<'a>) = 
         inherit TestTarget<'a>("Solid...Sequence")
-        let cns x = TestXList<'a>(x) :> TestTarget<'a>
+        static let cns (x : xlist<'b>) : TestTarget<'b> = TestXList<'b>(x) :> TestTarget<'b>
         member __.Inner = inner
         override __.AddFirst v = inner.AddFirst v |> cns
         override __.AddLast v = inner.AddLast v |> cns
         override __.Get i = inner.[i]
-        override __.TakeFirst i = inner.Take i |> cns
+        override __.TakeFirst i = inner.Slice(0,i-1) |> cns
+        override __.Slice i1 i2 = inner.Slice(i1,i2) |> cns
         override __.IsEmpty = inner.IsEmpty
         override __.DropFirst() = inner.DropFirst() |> cns
         override __.DropLast() = inner.DropLast() |> cns
-        override __.TakeLast i = inner.TakeLast i |> cns
+        override __.TakeLast i = inner.Slice(-i,-1) |> cns
         override __.AsSeq() = inner :>_
         override __.Length() = inner.Count
-        override __.FromSeq vs = vs.ToSequence() |> cns
+        override __.FromSeq vs = vs |> XList.ofSeq |> cns
         override __.First() = inner.First
         override __.Last() = inner.Last
-        override __.InsertAt i v = inner.Insert(i,v) |> cns
-        override __.AddRangeLast vs = inner.AddRangeLast vs |> cns
-        override __.AddRangeFirst vs = inner.AddRangeFirst vs |> cns
+        override __.Insert i v = inner.Insert(i,v) |> cns
+        override __.AddLastRange vs = inner.AddLastRange vs |> cns
+        override __.AddFirstRange vs = inner.AddFirstRange vs |> cns
         override __.Set i v = inner.Set(i,v) |> cns
-        override __.Append t = 
+        override __.AddLastList t = 
             let t = t :?> TestXList<'a>
-            inner.Append(t.Inner) |> cns
-        static member Empty = TestXList<'a>(Solid.Sequence.Empty())
+            inner.AddLastList(t.Inner) |> cns
+        override __.Filter f = inner |> XList.filter f |> cns
+        override __.Map f = inner |> XList.map f |> cns
+        override __.IndexOf f = inner |> XList.indexOf f
+        static member Empty = TestXList<'a>(XList.empty)
 
 
 
@@ -277,13 +317,13 @@ let fsharpx_vector count = FSHARPX.TestVector.Empty.FromSeq [0 .. count]
 let core_list count = CORE.TestList.Empty.FromSeq [0 .. count]
 let core_queue count= CORE.TestQueue.Empty.FromSeq [0 .. count]
 let core_stack count= CORE.TestStack.Empty.FromSeq [0 .. count]
-let core_seq count= CORE.TestSeq.Empty.FromSeq [0 .. count];
+
 let solid_vector count= SOLID.TestVector.Empty.FromSeq [0 .. count];
 let solid_xlist count= SOLID.TestXList.Empty.FromSeq [0 .. count]
 let core_flist count= FSHARP.TestFSList.Empty.FromSeq [0 .. count];
 let fsharpx_realdeque count = FSHARPX.TestRealDeque.Empty.FromSeq [0 .. count]
 let all_test_targets n= 
-    [solid_xlist; solid_vector; fsharpx_deque; fsharpx_skewlist; fsharpx_vector; core_list; core_queue;core_stack;core_seq;core_flist]
+    [solid_xlist; solid_vector; fsharpx_deque; fsharpx_skewlist; fsharpx_vector; core_list; core_queue;core_stack;core_flist]
     |> List.map (fun f -> f n)
 
 

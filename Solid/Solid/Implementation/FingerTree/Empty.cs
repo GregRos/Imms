@@ -16,27 +16,18 @@ namespace Solid.FingerTree
 
 		public override T Left
 		{
-			get { throw Common.Errors.Is_empty; }
+			get
+			{
+				throw Errors.Is_empty;
+			}
 		}
 
 		public override T Right
 		{
-			get { throw Common.Errors.Is_empty; }
-		}
-
-		public override Measured Get(int index)
-		{
-			throw Common.Errors.Is_empty;
-		}
-
-		public override void Iter(Action<Measured> action1)
-		{
-			return;
-		}
-
-		public override void IterBack(Action<Measured> action)
-		{
-			
+			get
+			{
+				throw Errors.Is_empty;
+			}
 		}
 
 		public override FTree<T> AddLeft(T item)
@@ -51,23 +42,27 @@ namespace Solid.FingerTree
 
 		public override FTree<T> DropLeft()
 		{
-			throw Common.Errors.Is_empty;
+			throw Errors.Is_empty;
 		}
 
 		public override FTree<T> DropRight()
 		{
-			throw Common.Errors.Is_empty;
+			throw Errors.Is_empty;
 		}
 
-		public override FTree<T> Reverse()
+		public override bool IterBackWhile(Func<Measured, bool> func)
 		{
-			return this;
+			return true;
 		}
 
-
-		public override void Split(int count, out FTree<T> leftmost, out FTree<T> rightmost)
+		public override bool IterWhile(Func<Measured, bool> func)
 		{
-			throw Common.Errors.Is_empty;
+			return true;
+		}
+
+		public override Measured Get(int index)
+		{
+			throw Errors.Is_empty;
 		}
 
 		public override IEnumerator<Measured> GetEnumerator()
@@ -75,14 +70,32 @@ namespace Solid.FingerTree
 			return EmptyEnumerator<T>.Instance;
 		}
 
+		public override FTree<T> Insert(int index, Measured value)
+		{
+			return AddRight(value as T);
+		}
+
+		public override void Iter(Action<Measured> action1)
+		{
+		}
+
+		public override void IterBack(Action<Measured> action)
+		{
+		}
+
+		public override FTree<T> Reverse()
+		{
+			return this;
+		}
+
 		public override FTree<T> Set(int index, Measured value)
 		{
 			throw Errors.Is_empty;
 		}
 
-		public override FTree<T> Insert(int index, object value)
+		public override void Split(int count, out FTree<T> leftmost, out FTree<T> rightmost)
 		{
-			return this.AddRight(value as T);
+			throw Errors.Is_empty;
 		}
 	}
 }

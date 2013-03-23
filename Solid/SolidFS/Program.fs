@@ -9,6 +9,8 @@ open SolidFS.Expressions
 
 [<EntryPoint>]
 let main argv = 
-    let ys = Vector {for i in {0 .. 100} -> i}
-    let zs = Sequence {for i in {0 .. 100} -> i}
+    let y = XList.ofSeq [0 .. 5]
+    let x = y.[0 .. 3]
+    let ys = vector {for i in {0 .. 100} -> i}
+    let zs = xlist  {for i in {0 .. 100} -> i}
     0 // return an integer exit code

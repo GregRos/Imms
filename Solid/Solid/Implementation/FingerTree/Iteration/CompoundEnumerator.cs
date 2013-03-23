@@ -9,14 +9,13 @@ namespace Solid.FingerTree.Iteration
 		where T : Measured<T>
 	{
 		private readonly Compound<T> tree;
+		private int index = -1;
 		private IEnumerator<Measured> inner;
-		private int index=-1;
 
 		public CompoundEnumerator(Compound<T> tree)
 		{
 			tree.IsNotNull();
 			this.tree = tree;
-			
 		}
 
 		private bool TryNext()
@@ -44,12 +43,10 @@ namespace Solid.FingerTree.Iteration
 
 		public void Dispose()
 		{
-			
 		}
 
 		public bool MoveNext()
 		{
-			
 			if (index == -1) return TryNext();
 			if (inner.MoveNext())
 				return true;
@@ -72,7 +69,10 @@ namespace Solid.FingerTree.Iteration
 
 		object IEnumerator.Current
 		{
-			get { return Current; }
+			get
+			{
+				return Current;
+			}
 		}
 	}
 }

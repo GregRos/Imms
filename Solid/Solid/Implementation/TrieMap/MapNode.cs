@@ -1,33 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Solid.FingerTree;
 
 namespace Solid.TrieMap
 {
-	internal abstract class MapNode<TKey,TValue>
+	internal abstract class MapNode<TKey, TValue>
 	{
-		private static InvalidOperationException Invalid_execution_path
-		{
-			get
-			{
-				return new InvalidOperationException("Invalid");
-			}
-		}
-		public readonly int Height;
-		public readonly int Count;
-		public readonly int Kind;
 		protected const int MaxHeight = 6;
-		private static readonly MapNode<TKey,TValue> empty = new MapEmpty<TKey,TValue>();
+		public readonly int Count;
+		public readonly int Height;
+		public readonly int Kind;
+		private static readonly MapNode<TKey, TValue> empty = new MapEmpty<TKey, TValue>();
+
 		protected MapNode(int height, int count, int kind)
 		{
-	
 			Height = height;
 			Count = count;
 			Kind = kind;
 		}
+
+		public abstract MapNode<TKey, TValue2> Apply<TValue2>(Func<TKey, TValue, TValue2> transform);
+
+		public abstract IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator();
+
+		public abstract void Iter(Action<TKey, TValue> action);
+
+		public abstract bool TryContains(HashedKey<TKey> tryKey, out Result result1);
+
+		public abstract MapNode<TKey, TValue> TryDrop(HashedKey<TKey> hashedKey, out Result result1);
+
 		/// <summary>
 		/// Tries to get a Content from the map using a hashed key.
 		/// </summary>
@@ -35,6 +35,7 @@ namespace Solid.TrieMap
 		/// <param name="result">An output parameter that returns the status code of the operation.</param>
 		/// <returns>The Content, or null if no key was found.</returns>
 		public abstract TValue TryGet(HashedKey<TKey> tryKey, out Result result);
+
 		/// <summary>
 		/// Tries to associate a key
 		/// </summary>
@@ -43,15 +44,13 @@ namespace Solid.TrieMap
 		/// <param name="writeBehavior"></param>
 		/// <param name="result1"></param>
 		/// <returns></returns>
-		public abstract MapNode<TKey, TValue> TrySet(HashedKey<TKey> tryKey, TValue tryValue, WriteBehavior writeBehavior,out Result result1);
-		public abstract MapNode<TKey, TValue> TryDrop(HashedKey<TKey> hashedKey, out Result result1);
-		public abstract bool TryContains(HashedKey<TKey> tryKey, out Result result1);
-		public abstract void Iter(Action<TKey, TValue> action);
-		public abstract IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator();
+		public abstract MapNode<TKey, TValue> TrySet(HashedKey<TKey> tryKey, TValue tryValue, WriteBehavior writeBehavior,
+		                                             out Result result1);
 
-		public MapNode<TKey, TValue> Union(MapNode<TKey, TValue> one, MapNode<TKey,TValue> other,List<KeyValuePair<TKey,TValue>> collisions)
+		public MapNode<TKey, TValue> Union(MapNode<TKey, TValue> one, MapNode<TKey, TValue> other,
+		                                   List<KeyValuePair<TKey, TValue>> collisions)
 		{
-			var code = one.Kind << 3 | other.Kind;
+			int code = one.Kind << 3 | other.Kind;
 
 			MapNode<TKey, TValue> output;
 			Result outcome;
@@ -97,23 +96,33 @@ namespace Solid.TrieMap
 				case NodeType.Parent << 3 | NodeType.Parent:
 					var parent1 = one as MapParent<TKey, TValue>;
 					var parent2 = other as MapParent<TKey, TValue>;
-					var result = parent1.UnionInPlace(parent2, collisions);
+					MapParent<TKey, TValue> result = parent1.UnionInPlace(parent2, collisions);
 					return result;
 				default:
 					throw Invalid_execution_path;
 			}
 		}
 
-		public static MapNode<TKey,TValue> Intersect(MapNode<TKey,TValue> one, MapNode<TKey,TValue> other, List<KeyValuePair<TKey,TValue>> collisions)
+		public static MapNode<TKey, TValue> Empty
+		{
+			get
+			{
+				return empty;
+			}
+		}
+
+		private static InvalidOperationException Invalid_execution_path
+		{
+			get
+			{
+				return new InvalidOperationException("Invalid");
+			}
+		}
+
+		public static MapNode<TKey, TValue> Intersect(MapNode<TKey, TValue> one, MapNode<TKey, TValue> other,
+		                                              List<KeyValuePair<TKey, TValue>> collisions)
 		{
 			throw new NotImplementedException();
-		}
-		
-		public abstract MapNode<TKey,TValue2> Apply<TValue2>(Func<TKey, TValue, TValue2> transform);
-
-		public static MapNode<TKey,TValue> Empty
-		{
-			get { return empty; }
 		}
 	}
 }

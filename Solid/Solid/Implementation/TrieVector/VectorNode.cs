@@ -5,10 +5,10 @@ namespace Solid.TrieVector
 {
 	internal abstract class VectorNode<T>
 	{
-		private readonly static VectorNode<T> empty = new VectorLeaf<T>(new T[0]);
+		public readonly int Count;
 		public readonly int Height;
 		public readonly bool IsFull;
-		public readonly int Count;
+		private static readonly VectorNode<T> empty = new VectorLeaf<T>(new T[0]);
 
 		protected VectorNode(int height, int count, bool isFull)
 		{
@@ -17,7 +17,33 @@ namespace Solid.TrieVector
 			IsFull = isFull;
 		}
 
-		public abstract T this[int index] { get; }
+		public abstract T this[int index]
+		{
+			get;
+		}
+
+		public abstract VectorNode<T> Add(T item);
+
+		public abstract VectorNode<TOut> Apply<TOut>(Func<T, TOut> transform);
+
+		public abstract VectorNode<T> Drop();
+
+		public abstract IEnumerator<T> GetEnumerator();
+
+
+		public abstract void IterBack(Action<T> action);
+
+		public abstract bool IterWhile(Func<T, bool> conditional);
+
+		public abstract bool IterBackWhile(Func<T, bool> conditional);
+
+
+		public abstract void Iter(Action<T> action);
+
+		public abstract VectorNode<T> Set(int index, T value);
+
+		public abstract VectorNode<T> Take(int index);
+
 		public static VectorNode<T> Empty
 		{
 			get
@@ -25,15 +51,5 @@ namespace Solid.TrieVector
 				return empty;
 			}
 		}
-		public abstract VectorNode<T> Add(T item);
-		public abstract VectorNode<T> Drop();
-		public abstract VectorNode<T> TakeFirst(int index);
-		public abstract VectorNode<T> Set(int index, T value);
-
-		public abstract void Iter(Action<T> action);
-
-		public abstract VectorNode<TOut> Apply<TOut>(Func<T, TOut> transform);
-		public abstract VectorNode<T> Fill(IList<T> items, int start, out int count);
-		public abstract IEnumerator<T> GetEnumerator();
 	}
 }

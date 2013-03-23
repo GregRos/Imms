@@ -4,12 +4,12 @@ using NUnit.Framework;
 
 namespace Solid.FingerTree.Iteration
 {
-	internal class DigitEnumerator<T>: IEnumerator<Measured>
-		where T: Measured<T>
+	internal class DigitEnumerator<T> : IEnumerator<Measured>
+		where T : Measured<T>
 	{
 		private readonly Digit<T> digit;
-		private IEnumerator<Measured> inner;
 		private int childNumber;
+		private IEnumerator<Measured> inner;
 
 		public DigitEnumerator(Digit<T> digit)
 		{
@@ -20,7 +20,6 @@ namespace Solid.FingerTree.Iteration
 
 		public void Dispose()
 		{
-
 		}
 
 		public bool MoveNext()
@@ -52,7 +51,10 @@ namespace Solid.FingerTree.Iteration
 
 		object IEnumerator.Current
 		{
-			get { return Current; }
+			get
+			{
+				return Current;
+			}
 		}
 	}
 }
