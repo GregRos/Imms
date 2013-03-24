@@ -88,7 +88,7 @@ module Seq =
 
 
     
-
+//The following class is for consistency tests, not performance tests. It shouldn't be used in benchmarks.
 type TestGroup<'a when 'a : equality>(inner : 'a TestTarget array) = 
     inherit TestTarget<'a>("Group")
     static let cns x                      = TestGroup<'b>(x) :> TestTarget<'b>
