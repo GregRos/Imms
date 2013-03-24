@@ -30,29 +30,28 @@ let (|Nil|Cons|) (l :_ xlist) =
 let (|Nil|Conj|) (l :_ xlist)=
     if l.IsEmpty then Nil else Conj(l.DropLast(), l.Last)
 
-
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module XList = 
-    ///Joins a sequence of elements to the beginning of the list.
+    ///O(m). Joins a sequence of elements to the beginning of the list.
     let consSeq hs (t :_ xlist) =
         t.AddFirstRange hs
-    ///Adds another list to the beginning of this one.
+    ///O(logn), fast. Adds another list to the beginning of this one.
     let consList (other :_ xlist) (target :_ xlist) = 
         target.AddFirstList(other)
 
-    ///Adds an item to the beginning of the list.
+    ///O(1) amortized. Adds an item to the beginning of the list.
     let cons h (t : _ xlist) =
         t.AddFirst(h)
 
-    ///Adds an item to the end of the list.
+    ///O(1) amortized. Adds an item to the end of the list.
     let conj h (t :_ xlist)=
         t.AddLast(h)
 
-    ///Joins a sequence of elements to the end of the list.
+    ///O(m). Joins a sequence of elements to the end of the list.
     let conjSeq hs (t :_ xlist)=
         t.AddLastRange hs
 
-    ///Joins another list to the end of this one.
+    ///O(logn), fast.Joins another list to the end of this one.
     let conjList (t1 :_ xlist) (target:_ xlist)=
         target.AddLastList(t1)
 
@@ -68,22 +67,22 @@ module XList =
     ///O(1) amortized. returns a list without the last element.
     let initial (target : xlist<'a>) = 
         target.DropLast()
-    ///O(logn), fast. Returns the element with the specified index.
+    ///O(logn), very fast. Returns the element with the specified index.
     let lookup  (index : int) (target : xlist<'a>) =
         target.[index]
-    ///O(logn). Updates the element with the specified index.
+    ///O(logn), fast. Updates the element with the specified index.
     let update (index : int) (item : 'a) (target : xlist<'a>) = 
         target.Set(index,item)
-    ///O(logn). Inserts an element immediately before the specified index.
+    ///O(logn), fast. Inserts an element immediately before the specified index.
     let insert  (index : int) (item : 'a) (target : xlist<'a>)=
         target.Insert(index,item)
     ///O(logn + m). Inserts a sequence of elements immediately before the specified index.
     let insertSeq (index : int) (items : 'a seq) (target : xlist<'a>) =
         target.InsertRange(index, items)
-    ///O(logn). Inserts a list immediately before the specified index.
+    ///O(logn), slow. Inserts a list immediately before the specified index.
     let insertList (index : int) (l : xlist<'a>) (target : xlist<'a>) = 
         target.InsertList(index,l)
-    ///O(logn). Returns a slice starting at one index and ending at the other index.
+    ///O(logn), slow. Returns a slice starting at one index and ending at the other index.
     let slice (startIndex : int) (endIndex : int) (target : xlist<'a>) = 
         target.Slice(startIndex,endIndex)
     ///O(1). Returns the length of the list.
@@ -98,14 +97,19 @@ module XList =
     ///O(n). Iterates over every element in the list.
     let iter (f : 'a -> unit) (target : xlist<'a>) = 
         target.ForEach(Action<'a>(f))
-    ///O(logn). Returns a sublist containing the first N elements.
+    ///O(logn), med. Returns a sublist containing the first N elements.
     let take count (target : xlist<'a>) = 
         target.Slice(0,count - 1)
-    ///O(logn). Returns a sublist without the first N elements.
+    ///O(logn), med. Returns a sublist without the first N elements.
     let skip count (target : xlist<'a>) = 
         target.Slice(count,-1)
     ///O(1). Gets the empty list.
     let empty<'a> = xlist<'a>.Empty
+
+    ///O(1). Gets if the list is empty.
+    let isEmpty (target :_ xlist)=
+        target.IsEmpty
+
     ///O(n).
     let choose (f : 'a -> 'b option) (target : xlist<'a>) = 
         let new_target = ref (empty : xlist<'b>)
@@ -131,7 +135,7 @@ module XList =
         l.IndexOf(Func<_,bool>(f)).HasValue
     ///O(1). Returns a list consisting of a single item.
     let ofItem x = empty <+ x
-    ///O(n),fast. Returns the index of the first element that fulfills a predicate, or None.
+    ///O(n), fast. Returns the index of the first element that fulfills a predicate, or None.
     let indexOf(f : _ -> bool) (l :_ xlist)=
         let res = l.IndexOf(Func<_,_>(f))
         if res.HasValue then Some res.Value else None
@@ -145,66 +149,80 @@ module XList =
     ///O(logn + m). Returns a list without the first elements that fulfill the predicate.
     let skipWhile (f : _ -> bool) (target :_ xlist) = 
         target.SkipWhile(Func<_,bool>(f))
-
+    ///O(n). Reverses the list.
+    let rev (target:_ xlist) = 
+        target.Reverse()
     
 [<CompilationRepresentationAttribute(CompilationRepresentationFlags.ModuleSuffix)>]
 module Vector = 
-    ///O(1). Gets the first element.
+    ///O(1). Gets if the vector is empty.
+    let isEmpty (target:_ Vector) = 
+        target.IsEmpty
+    ///O(logn); immediate. Gets the first element.
     let first (target : Vector<'a>)  = 
         target.First
-    ///O(1). Gets the last element.
+    ///O(logn); immediate. Gets the last element.
     let last (target :  Vector<'a>) = 
         target.Last
-
+    ///O(logn), fast.
+    let conj (h :_) (target:_ Vector)=
+        target.AddLast h
     ///O(logn), fast. Returns a vector without the last element.
     let initial (target :Vector<'a>) = 
         target.DropLast()
-    ///Fast. Returns the element with the specified index.
+    ///O(logn); immediate. Returns the element with the specified index.
     let lookup  (index : int) (target :Vector<'a>) =
         target.[index]
-    
+
+    ///O(logn), fast. Updates the element with the specified index.
     let update (index : int) (item : 'a) (target :Vector<'a>) = 
         target.Set(index,item)
-    ///O(1). Gets the length of the list.
+    ///O(1). Gets the length of the vector.
     let length (target:  Vector<'a>) = 
         target.Count
-    ///O(n). 
+    ///O(n). Returns a vector containing the elements that fulfill the predicate.
     let filter (f : 'a -> bool) (target : Vector<'a>) = 
         target.Where(Func<'a,bool>(f))
-
+    ///O(n). Applies the specified function on every element in the vector.
     let map (f : 'a -> 'b) (target : Vector<'a>) = 
         target.Select(Func<'a,'b>(f))
-
+    ///O(n). Iterates over the vector, from first to last.
     let iter (f : 'a -> unit) (target : Vector<'a>) = 
         target.ForEach(Action<'a>(f))
+    ///O(n). Iterates over the vector, from last to first.
+    let iterBack (f:_->unit) (target:_ Vector) =
+        target.ForEachBack(Action<_>(f))
 
+    
+
+    ///O(logn), fast. Returns a new vector consisting of the first several elements.
     let take count (target : Vector<'a>) = 
         target.Take(count)
-
+    ///Gets the empty vector.
     let empty<'a> = Vector<'a>.Empty
 
     let choose (f : 'a -> 'b option) (target :Vector<'a>) = 
         let new_target = ref (empty : Vector<'b>)
         target |> iter (fun v -> match f v with | None -> () | Some u -> new_target := (!new_target <+ u))
-
+    ///Applies an accumulator over the vector.
     let fold (initial : 'state) (f : 'state -> 'item -> 'state) (target : Vector<'item>) = 
         target.Aggregate(Func<'state,'item,'state>(f), initial)
 
     let zip (left : #seq<_>) (right:#seq<_>) = 
         empty<_> <++ Seq.zip left right
-        
+    ///O(n). Constructs a vector from a sequence.
     let ofSeq (xs : #seq<_>) = 
         empty<_> <++ xs
-
+    ///O(n). Checks if any item fulfilling the predicate exists in the vector.
     let exists (f : _ -> bool) (l : _ Vector) =
         l.IndexOf(Func<_,bool>(f)).HasValue
 
     let ofItem x = empty <+ x
-
+    ///O(n). Returns the index of the first item that fulfills the predicate, or None.
     let indexOf(f : _ -> bool) (l :_ Vector)=
         let res = l.IndexOf(Func<_,_>(f))
         if res.HasValue then Some res.Value else None
-
+    ///O(n). Returns the first item that fulfills the predicate, or None.
     let find(f : _ -> bool) (l :_ Vector)=
         let res = l.IndexOf(Func<_,_>(f))
         if res.HasValue then Some l.[res.Value] else None

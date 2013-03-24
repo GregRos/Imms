@@ -50,7 +50,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Gets the item at the specified index.
+		///   Gets the item at the specified index. O(logn), very fast.
 		/// </summary>
 		/// <param name="index"> The index of the item to get. </param>
 		/// <returns> </returns>
@@ -71,7 +71,7 @@ namespace Solid
 
 
 		/// <summary>
-		///   Gets the number of items in the list.
+		///   Gets the number of items in the list. O(1).
 		/// </summary>
 		public int Count
 		{
@@ -82,7 +82,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Gets the first item in the list.
+		///   Gets the first item in the list. O(1).
 		/// </summary>
 		/// <exception cref="InvalidOperationException">Thrown if the list is empty.</exception>
 		public T First
@@ -95,7 +95,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Returns true if the lsit is empty.
+		/// Returns true if the list is empty. O(1)
 		/// </summary>
 		public bool IsEmpty
 		{
@@ -106,7 +106,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Gets the last item in the list.
+		///   Gets the last item in the list. O(1)
 		/// </summary>
 		/// <exception cref="InvalidOperationException">Thrown if the list is empty.</exception>
 		public T Last
@@ -149,7 +149,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Joins the specified list to the beginning of this one. O(logn)
+		/// Joins the specified list to the beginning of this one. O(logn), fast
 		/// </summary>
 		/// <param name="other"></param>
 		/// <returns></returns>
@@ -204,7 +204,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Joins another list to the end of this one. O(logn)
+		///   Joins another list to the end of this one. O(logn), fast
 		/// </summary>
 		/// <param name="other"> </param>
 		/// <returns> </returns>
@@ -354,7 +354,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Inserts an item before the specified index. O(logn)
+		///   Inserts an item before the specified index. O(logn), fast.
 		/// </summary>
 		/// <param name="index"> The index at which to insert the item. If the index is negative, treats it as position from the end.</param>
 		/// <param name="item"> </param>
@@ -384,7 +384,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Inserts a list before the specified index.  O(logn)
+		///   Inserts a list immediately before the specified index. O(logn), slow.
 		/// </summary>
 		/// <param name="index"> </param>
 		/// <param name="other"> </param>
@@ -405,10 +405,7 @@ namespace Solid
 
 			return new FlexibleList<T>(result);
 		}
-		public FlexibleList<T> Add(T item)
-		{
-			return this.AddLast(item);
-		}
+
 		/// <summary>
 		///   Inserts a sequence of items before the specified index. O(logn + m)
 		/// </summary>
@@ -497,7 +494,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Returns a sublist consisting of the first several elements. O(logn)
+		/// Returns a sublist consisting of the first several elements. O(logn), slow
 		/// </summary>
 		/// <param name="count"></param>
 		/// <returns></returns>
@@ -506,7 +503,7 @@ namespace Solid
 			return this.Slice(0, count - 1);
 		}
 		/// <summary>
-		/// Returns subslist without the first several elements. O(logn)
+		/// Returns subslist without the first several elements. O(logn),slow
 		/// </summary>
 		/// <param name="count"></param>
 		/// <returns></returns>
@@ -516,7 +513,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Sets the value of the item at the specified index. O(logn)
+		/// Sets the value of the item at the specified index. O(logn), fast
 		/// </summary>
 		/// <param name="index"> </param>
 		/// <param name="item"> </param>
@@ -546,7 +543,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Returns sublist beginning at the start index and ending at the end index.
+		/// Returns sublist beginning at the start index and ending at the end index. O(logn), slow.
 		/// </summary>
 		/// <param name="start">The first index of the subsequence, inclusive.</param>
 		/// <param name="end">The last index of the subsequence, inclusive. Defaults to the last index.</param>
@@ -612,7 +609,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Returns a list consisting of all the elements for which the predicate returns true. O(n+m)
+		/// Returns a list consisting of all the elements for which the predicate returns true. 
 		/// </summary>
 		/// <param name="predicate"></param>
 		/// <returns></returns>

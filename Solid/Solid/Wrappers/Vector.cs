@@ -10,7 +10,7 @@ namespace Solid
 	public static class Vector
 	{
 		/// <summary>
-		/// Gets an empty Vector.
+		/// Gets the empty Vector.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
@@ -48,7 +48,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Gets the value of the item with the specified index.
+		/// Gets the value of the item with the specified index. O(logn); immediate.
 		/// </summary>
 		/// <param name="index"></param>
 		/// <returns></returns>
@@ -63,7 +63,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Returns the length of the list.
+		/// Gets the length of the vector.
 		/// </summary>
 		public int Count
 		{
@@ -80,18 +80,42 @@ namespace Solid
 				return string.Format("Vector, Count = {0}", Count);
 			}
 		}
-
+		/// <summary>
+		/// Adds the specified element to the end of the vector. O(logn), fast.
+		/// </summary>
+		/// <param name="item"></param>
+		/// <returns></returns>
 		public Vector<T> AddLast(T item)
 		{
 			return new Vector<T>(root.Add(item));
 		}
+		/// <summary>
+		/// O(1). Gets if the vector is empty.	
+		/// </summary>
+		public bool IsEmpty
+		{
+			get
+			{
+				return Count == 0;
+			}
+		}
 
+		/// <summary>
+		/// Adds the specified items to the end of the vector. O(m·logn), slow.
+		/// </summary>
+		/// <param name="items"></param>
+		/// <returns></returns>
 		public Vector<T> AddLastItems(params T[] items)
 		{
+			//TODO: Efficient bulk loading.
 			if (items == null) throw Errors.Argument_null("items");
 			return this.AddLastRange(items.AsEnumerable());
 		}
-
+		/// <summary>
+		/// Adds a sequence of items to the end of the vector. O(m·logn), slow.
+		/// </summary>
+		/// <param name="items"></param>
+		/// <returns></returns>
 		public Vector<T> AddLastRange(IEnumerable<T> items)
 		{
 			if (items == null) throw Errors.Argument_null("items");
@@ -103,13 +127,20 @@ namespace Solid
 			}
 			return vec;
 		}
-
+		/// <summary>
+		/// Applies a selector on every element. O(n)
+		/// </summary>
+		/// <typeparam name="TOut"></typeparam>
+		/// <param name="transform"></param>
+		/// <returns></returns>
 		public Vector<TOut> Select<TOut>(Func<T, TOut> transform)
 		{
 			if (transform == null) throw Errors.Argument_null("transform");
 			return new Vector<TOut>(root.Apply(transform));
 		}
-		
+		/// <summary>
+		/// Gets the first item in the vector. O(logn), immediate.
+		/// </summary>
 		public T First
 		{
 			get
@@ -118,7 +149,9 @@ namespace Solid
 				return this[0];
 			}
 		}
-
+		/// <summary>
+		/// Gets the last item in the vector. O(logn), immediate.
+		/// </summary>
 		public T Last
 		{
 			get
@@ -130,7 +163,7 @@ namespace Solid
 
 
 		/// <summary>
-		/// Removes the last item from the list.
+		/// Removes the last item from the list. O(logn), fast.
 		/// </summary>
 		/// <returns></returns>
 		public Vector<T> DropLast()
@@ -138,7 +171,11 @@ namespace Solid
 			if (root.Count == 0) throw Errors.Is_empty;
 			return new Vector<T>(root.Drop());
 		}
-
+		/// <summary>
+		/// Returns a vector consisting of the items that fulfill the specified predicate. O(n), slow.
+		/// </summary>
+		/// <param name="predicate"></param>
+		/// <returns></returns>
 		public Vector<T> Where(Func<T, bool> predicate)
 		{
 			var newVector = empty;
@@ -153,29 +190,50 @@ namespace Solid
 			             });
 			return newVector;
 		}
-
+		/// <summary>
+		/// Applies an accumulator over the vector.
+		/// </summary>
+		/// <typeparam name="TResult"></typeparam>
+		/// <param name="accumulator"></param>
+		/// <param name="initial"></param>
+		/// <returns></returns>
 		public TResult Aggregate<TResult>(Func<TResult, T, TResult> accumulator, TResult initial)
 		{
 			this.ForEach(v => initial = accumulator(initial, v));
 			return initial;
 		}
 
+		
+		/// <summary>
+		/// Iterates over every element in the vector, from first to last. Stops if the conditional returns false.
+		/// </summary>
+		/// <param name="conditional"></param>
 		public void ForEachWhile(Func<T, bool> conditional)
 		{
 			root.IterWhile(conditional);
 		}
-
+		/// <summary>
+		///Iterates over every element in the vector, from last to first.
+		/// </summary>
+		/// <param name="action"></param>
 		public void ForEachBack(Action<T> action)
 		{
 			root.IterBack(action);
 		}
-
+		/// <summary>
+		/// Iterates over every element in the vector, from last to first. Stops if the conditional returns false.
+		/// </summary>
+		/// <param name="conditional"></param>
 		public void ForEachBackWhile(Func<T, bool> conditional)
 		{
 			root.IterBackWhile(conditional);
 		}
 
-
+		/// <summary>
+		/// Returns the index of the first item that fulfills the predicate.
+		/// </summary>
+		/// <param name="predicate"></param>
+		/// <returns></returns>
 		public int? IndexOf(Func<T, bool> predicate)
 		{
 			var index = 0;
@@ -188,7 +246,7 @@ namespace Solid
 			return !result ? (int?)index : null;
 		}
 		/// <summary>
-		/// Removes several items from the end of the list.
+		/// Removes several items from the end of the list. O(logn), fast.
 		/// </summary>
 		/// <param name="count">The number of items to remove.</param>
 		/// <returns></returns>
@@ -197,7 +255,10 @@ namespace Solid
 			if (root.Count == 0) throw Errors.Is_empty;
 			return new Vector<T>(root.Take(root.Count - count));
 		}
-
+		/// <summary>
+		/// Iterates over every item in the vector, from first to last.
+		/// </summary>
+		/// <param name="action"></param>
 		public void ForEach(Action<T> action)
 		{
 			if (action == null) throw Errors.Argument_null("action");
@@ -205,7 +266,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Sets the value of the item with the specified index.
+		/// Sets the value of the item with the specified index. O(logn), fast.
 		/// </summary>
 		/// <param name="index"></param>
 		/// <param name="item"></param>
@@ -218,7 +279,7 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Retrieves a subsequence consisting of the first several items from the list.
+		/// Returns a vector consisting of the first several items. O(logn), fast.
 		/// </summary>
 		/// <param name="count"></param>
 		/// <returns></returns>
@@ -227,6 +288,20 @@ namespace Solid
 			if (count < 0 || count > Count) throw Errors.Index_out_of_range;
 			if (count == 0) return empty;
 			return new Vector<T>(root.Take(count));
+		}
+		/// <summary>
+		/// Returns a vector consisting of the first items that fulfill the predicate. O(m), fast.
+		/// </summary>
+		/// <param name="predicate"></param>
+		/// <returns></returns>
+		public Vector<T> TakeWhile(Func<T, bool> predicate)
+		{
+			var index = this.IndexOf(predicate);
+			if (!index.HasValue)
+			{
+				return this;
+			}
+			return Take((int) index + 1);
 		}
 
 		public IEnumerator<T> GetEnumerator()
@@ -238,7 +313,9 @@ namespace Solid
 		{
 			return GetEnumerator();
 		}
-
+		/// <summary>
+		/// Gets the empty vector.
+		/// </summary>
 		public static Vector<T> Empty
 		{
 			get
