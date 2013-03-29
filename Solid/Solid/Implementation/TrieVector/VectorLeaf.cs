@@ -6,7 +6,7 @@ using Solid.TrieVector.Iteration;
 
 namespace Solid.TrieVector
 {
-	public class CountingIterator<T>
+	internal class CountingIterator<T>
 	{
 		private readonly IList<T> inner;
 		private int index;
@@ -51,6 +51,7 @@ namespace Solid.TrieVector
 		private const int myBlock = (1 << 5) - 1;
 		public readonly T[] Arr;
 
+
 		public VectorLeaf(T[] arr) : base(0, arr.Length, arr.Length == 32)
 		{
 			Arr = arr;
@@ -64,6 +65,24 @@ namespace Solid.TrieVector
 				int bits = index & myBlock;
 				return Arr[bits];
 			}
+		}
+
+		public override VectorNode<T> BulkLoad(T[] data, int startIndex, int count)
+		{
+			var newArraySize = Math.Min(32, Arr.Length + count);
+			var newArray = new T[newArraySize];
+			var loadCount = Math.Min(32 - Arr.Length, count);
+			Arr.CopyTo(newArray, 0);
+			Array.Copy(data, startIndex, newArray, Arr.Length, loadCount);
+			var newLeaf = new VectorLeaf<T>(newArray);
+			if (loadCount < count)
+			{
+				var newParentArr = new VectorNode<T>[1];
+				newParentArr[0] = newLeaf;
+				var newParent = new VectorParent<T>(1, Arr.Length, newParentArr);
+				return newParent.BulkLoad(data, startIndex + loadCount, count - loadCount);
+			}
+			return newLeaf;
 		}
 
 		public override VectorNode<T> Add(T item)

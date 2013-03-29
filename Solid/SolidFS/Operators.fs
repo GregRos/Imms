@@ -32,9 +32,11 @@ let (|Nil|Conj|) (l :_ xlist)=
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module XList = 
+    
     ///O(m). Joins a sequence of elements to the beginning of the list.
     let consSeq hs (t :_ xlist) =
         t.AddFirstRange hs
+    
     ///O(logn), fast. Adds another list to the beginning of this one.
     let consList (other :_ xlist) (target :_ xlist) = 
         target.AddFirstList(other)
@@ -213,6 +215,10 @@ module Vector =
     ///O(n). Constructs a vector from a sequence.
     let ofSeq (xs : #seq<_>) = 
         empty<_> <++ xs
+
+    let ofArray (xs :array<'a>) = 
+        empty<'a>.AddLastRange(xs)
+
     ///O(n). Checks if any item fulfilling the predicate exists in the vector.
     let exists (f : _ -> bool) (l : _ Vector) =
         l.IndexOf(Func<_,bool>(f)).HasValue

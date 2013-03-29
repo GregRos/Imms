@@ -37,6 +37,7 @@ namespace Solid.TrieVector
 
 		public abstract bool IterBackWhile(Func<T, bool> conditional);
 
+		public abstract VectorNode<T> BulkLoad(T[] items, int startIndex, int count);
 
 		public abstract void Iter(Action<T> action);
 

@@ -7,12 +7,6 @@ using Solid.FingerTree.Iteration;
 
 namespace Solid.FingerTree
 {
-	public enum IterateState
-	{
-		Next = 1,
-		Stop = 2
-	}
-
 	internal sealed class Digit<T> : Measured<Digit<T>>
 		where T : Measured<T>
 	{
@@ -359,26 +353,8 @@ namespace Solid.FingerTree
 			throw Errors.Invalid_execution_path;
 		}
 
-		/* Here is an ASCII diagram for what the next function does.
-		 * X, X      => XX
-		 * X, XX     => XXX
-		 * X, XXX    => XX XX
-		 * X, XXXX   => XXX XX
-		 * XX X      => XXX
-		 * XX XX       stays
-		 * XX XXX      stays
-		 * XX XXXX   => XXX XXX
-		 * XXX X     => XX XX
-		 * XXX XX       stays
-		 * XXX XXX      stays
-		 * XXX XXXX  => XX XX XXX
-		 * XXXX X    => XX XXX
-		 * XXXX XX   => XXX XXX
-		 * XXXX XXX  => XXX XX XX
-		 * XXXX XXXX => XXX XXX XX
-		 * The function returns up to digits. Those that it doesn't return are null.
-		 */
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+
+	
 		public Digit<T> AddLeft(T item)
 		{
 			int new_measure = Measure + item.Measure;
@@ -394,7 +370,7 @@ namespace Solid.FingerTree
 					throw Errors.Invalid_digit_size;
 			}
 		}
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+
 		public void AddLeftSplit(T item, out Digit<T> leftmost, out Digit<T> rightmost)
 		{
 			leftmost = new Digit<T>(item, First, First.Measure + item.Measure);
@@ -416,7 +392,7 @@ namespace Solid.FingerTree
 					throw Errors.Invalid_digit_size;
 			}
 		}
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+
 		public void AddRightSplit(T item, out Digit<T> leftmost, out Digit<T> rightmost)
 		{
 			leftmost = new Digit<T>(First, Second, Third, Measure - Fourth.Measure);

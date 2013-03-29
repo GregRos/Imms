@@ -241,6 +241,7 @@ module CORE =
 module FSHARP = 
     type TestFSList<'a>( inner : list<'a>) =
         inherit TestTarget<'a>("FSharp...list")
+
         let cns x = TestFSList<'a>(x) :> TestTarget<'a>
 
         override this.AddFirst v = v::inner |> cns
@@ -277,7 +278,7 @@ module SOLID =
         override __.AsSeq () = inner :>_
         override __.FromSeq vs = vs.ToVector() |> cns
         
-        static member Empty = TestVector<'a>(Solid.Vector.Empty())
+        static member Empty = TestVector<'a>(Solid.Vector<'a>.Empty)
     type TestXList<'a>(inner : xlist<'a>) = 
         inherit TestTarget<'a>("Solid...Sequence")
         static let cns (x : xlist<'b>) : TestTarget<'b> = TestXList<'b>(x) :> TestTarget<'b>

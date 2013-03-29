@@ -5,39 +5,11 @@ using Solid.TrieMap;
 
 namespace Solid
 {
-	public static class HashMap
-	{
-		/// <summary>
-		///   Gets an empty HashMap.
-		/// </summary>
-		/// <param name="comparer"> The equality comparer used by the instance to determine equality. If not supplied or null the instance will use the key's default equality semantics. </param>
-		/// <typeparam name="TKey"> The type of the key./ </typeparam>
-		/// <typeparam name="TValue"> The type of value. </typeparam>
-		/// <returns> </returns>
-		/// <remarks>
-		///   Empty hashmaps may or may not be reference equal.
-		/// </remarks>
-		public static HashMap<TKey, TValue> Empty<TKey, TValue>(IEqualityComparer<TKey> comparer = null)
-		{
-			return comparer == null ? HashMap<TKey, TValue>.Empty : HashMap<TKey, TValue>.WithComparer(comparer);
-		}
-
-		/// <summary>
-		///   Creates a hash map from a single key-value pair.
-		/// </summary>
-		/// <typeparam name="TKey"> The type of the key. </typeparam>
-		/// <typeparam name="TValue"> The type of the value. </typeparam>
-		/// <param name="key"> The key object. </param>
-		/// <param name="value"> The value. May be null. </param>
-		/// <param name="comparer"> The equality comparer used to determine equality by the instance. If this parameter is not supplied or is null, the hash map will use the type's default equality semantics. </param>
-		/// <returns> </returns>
-		public static HashMap<TKey, TValue> FromItem<TKey, TValue>(TKey key, TValue value,
-		                                                           IEqualityComparer<TKey> comparer = null)
-		{
-			return HashMap<TKey, TValue>.Empty.Add(key, value);
-		}
-	}
-
+	/// <summary>
+	/// A key-value map that uses equality semantics
+	/// </summary>
+	/// <typeparam name="TKey">The type of the key.</typeparam>
+	/// <typeparam name="TValue">The type of the value.</typeparam>
 	public sealed class HashMap<TKey, TValue>
 	{
 		private const int maxIter = 20;
@@ -61,7 +33,7 @@ namespace Solid
 		/// <summary>
 		///   Gets the value with the specified key.
 		/// </summary>
-		/// <param name="key"> </param>
+		/// <param name="key">The key to get.</param>
 		/// <returns> </returns>
 		/// <exception cref="KeyNotFoundException">Thrown if the key is not found.</exception>
 		/// <exception cref="ArgumentNullException">Thrown if the supplied key is null.</exception>
@@ -91,6 +63,7 @@ namespace Solid
 		/// <param name="value"> </param>
 		/// <returns> </returns>
 		/// <exception cref="ArgumentException">Thrown when the key already exists.</exception>
+		/// <exception cref="ArgumentNullException">Thrown if the key is null.</exception>
 		public HashMap<TKey, TValue> Add(TKey key, TValue value)
 		{
 			return TrySet(new HashedKey<TKey>(key, Comparer), value, WriteBehavior.OnlyCreate, 0);
@@ -98,19 +71,21 @@ namespace Solid
 
 
 		/// <summary>
-		///   Applies a transformation on every value in the hash map.
+		/// Applies a transformation on every value in the hash map.
 		/// </summary>
-		/// <param name="transform"> </param>
-		public HashMap<TKey, TValue2> Apply<TValue2>(Func<TKey, TValue, TValue2> transform)
+		/// <typeparam name="TValue2">The type of values stored in the new hashmap.</typeparam>
+		/// <param name="transform">The transformation applied to every value.</param>
+		/// <returns></returns>
+		public HashMap<TKey, TValue2> Select<TValue2>(Func<TKey, TValue, TValue2> transform)
 		{
 			if (transform == null) throw Errors.Argument_null("transform");
 			return new HashMap<TKey, TValue2>(root.Apply(transform), Comparer);
 		}
 
 		/// <summary>
-		///   Gets if the item exists in the collection.
+		/// Returns true if the specified key exists in the collection.
 		/// </summary>
-		/// <param name="key"> </param>
+		/// <param name="key">The key.</param>
 		/// <returns> </returns>
 		/// <exception cref="ArgumentNullException">Thrown if the key is null.</exception>
 		public bool Contains(TKey key)
@@ -120,9 +95,10 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Applies a function on each key-value pair in the hash map.
+		/// Iterates over every key-value pair in the hash map.
 		/// </summary>
-		/// <param name="action"> </param>
+		/// <param name="action">The function used to iterate over the collection.</param>
+		/// <exception cref="ArgumentNullException">Thrown if the key is null.</exception>
 		public void ForEach(Action<TKey, TValue> action)
 		{
 			if (action == null) throw Errors.Argument_null("action");
@@ -132,7 +108,7 @@ namespace Solid
 		/// <summary>
 		///   Removes the specified key from the hash map. Throws an exception if the key is not found.
 		/// </summary>
-		/// <param name="key"> </param>
+		/// <param name="key">The key.</param>
 		/// <returns> </returns>
 		/// <exception cref="KeyNotFoundException">Thrown if the key is not found.</exception>
 		/// <exception cref="ArgumentNullException">Thrown if the supplied key is null.</exception>
@@ -145,8 +121,8 @@ namespace Solid
 		/// <summary>
 		///   Associates the specified key with a value. Can either overwrite or create a new key.
 		/// </summary>
-		/// <param name="key"> </param>
-		/// <param name="value"> </param>
+		/// <param name="key">The key to update.</param>
+		/// <param name="value">The new value.</param>
 		/// <returns> </returns>
 		/// <exception cref="ArgumentNullException">Thrown if the key is null.</exception>
 		public HashMap<TKey, TValue> Set(TKey key, TValue value)

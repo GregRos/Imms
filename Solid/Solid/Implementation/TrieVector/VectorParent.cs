@@ -134,6 +134,42 @@ namespace Solid.TrieVector
 			return true;
 		}
 
+		public override VectorNode<T> BulkLoad(T[] items, int startIndex, int count)
+		{
+			if (count == 0) return this;
+			var oldCount = count;
+			var maybeArraySize = Arr.Length + ((count + this.Count) >> offs);
+			var realArraySize = Math.Min(32, maybeArraySize);
+			var newArray = new VectorNode<T>[realArraySize];
+			Arr.CopyTo(newArray, 0);
+			var lastCount = Arr[Arr.Length - 1].Count;
+			var childMaxCapacity = (1 << offs);
+			var lastRemainingCapacity = childMaxCapacity - lastCount;
+			var newLast = Arr[Arr.Length - 1].BulkLoad(items, startIndex, lastRemainingCapacity);
+			newArray[Arr.Length - 1] = newLast;
+			startIndex = startIndex + lastRemainingCapacity;
+			count = count - lastRemainingCapacity;
+			var emptyLeaf = VectorLeaf<T>.Empty;
+			for (int i = Arr.Length; i < newArray.Length; i++)
+			{
+				var howManyToLoad = Math.Min(childMaxCapacity, count);
+				newArray[i] = emptyLeaf.BulkLoad(items, startIndex, howManyToLoad);
+				count -= howManyToLoad;
+				startIndex += howManyToLoad;
+			}
+
+			var newMyself = new VectorParent<T>(Height, Count + (oldCount - count),newArray);
+			if (count > 0)
+			{
+				var newParentArr = new VectorNode<T>[1];
+				newParentArr[0] = newMyself;
+				var newParent = (VectorNode<T>)new VectorParent<T>(Height + 1, newMyself.Count, newParentArr);
+				newParent = newParent.BulkLoad(items, startIndex, count);
+				return newParent;
+			}
+			return newMyself;
+		}
+
 
 		public override void Iter(Action<T> action)
 		{

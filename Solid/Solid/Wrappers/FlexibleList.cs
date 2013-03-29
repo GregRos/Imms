@@ -1,42 +1,18 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
+using System.Text;
 using Solid.Common;
 using Solid.FingerTree;
 using Solid.FingerTree.Iteration;
-
+using Microsoft.FSharp.Core;
 namespace Solid
 {
-	public static class FlexibleList
-	{
-		public static FlexibleList<T> Concat<T>(params FlexibleList<T>[] seqs)
-		{
-			FlexibleList<T> result = FlexibleList<T>.Empty;
-			foreach (var seq in seqs)
-			{
-				result = result.AddLastList(seq);
-			}
-			return result;
-		}
-
-		/// <summary>
-		///   Gets an empty FlexibleList.
-		/// </summary>
-		/// <typeparam name="T"> </typeparam>
-		/// <returns> </returns>
-		public static FlexibleList<T> Empty<T>()
-		{
-			return FlexibleList<T>.Empty;
-		}
-	}
-	/// <summary>
-	/// A sequential data structure that supports many fast operations.
-	/// </summary>
-	/// <typeparam name="T"></typeparam>
 	[DebuggerTypeProxy(typeof (FlexibleList<>.FlexibleListDebugView))]
 	[DebuggerDisplay("{DebuggerDisplay,nq}")]
+	
 	public sealed class FlexibleList<T>
 		: IEnumerable<T>
 	{
@@ -48,17 +24,31 @@ namespace Solid
 		{
 			this.root = root;
 		}
+	
+		private string FSharpFormatDisplay
+		{
+			get
+			{
+				var buildr = new StringBuilder(this.Count);
+				foreach (var item in this)
+				{
+					buildr.Append(item);
+				}
+				return "";
+			}
+		}
 
 		/// <summary>
-		///   Gets the item at the specified index. O(logn), very fast.
+		/// Gets the item at the specified index. O(logn), very fast.
 		/// </summary>
-		/// <param name="index"> The index of the item to get. </param>
-		/// <returns> </returns>
+		/// <param name="index">The index of the item to get. Can be negative.</param>
+		/// <returns></returns>
 		/// <exception cref="IndexOutOfRangeException">Thrown if the index doesn't exist.</exception>
 		public T this[int index]
 		{
 			get
 			{
+				
 				index = index < 0 ? index + root.Measure : index;
 				if (index == 0) return First;
 				if (index == root.Measure - 1) return Last;
@@ -71,12 +61,13 @@ namespace Solid
 
 
 		/// <summary>
-		///   Gets the number of items in the list. O(1).
+		///   Gets the number of items in the list.
 		/// </summary>
 		public int Count
 		{
 			get
 			{
+				
 				return root.Measure;
 			}
 		}
@@ -97,6 +88,7 @@ namespace Solid
 		/// <summary>
 		/// Returns true if the list is empty. O(1)
 		/// </summary>
+		
 		public bool IsEmpty
 		{
 			get
@@ -142,32 +134,34 @@ namespace Solid
 		/// </summary>
 		/// <param name="items"></param>
 		/// <returns></returns>
+
 		public FlexibleList<T> AddFirstItems(params T[] items)
 		{
 			if (items == null) throw Errors.Argument_null("items");
-			return AddFirstRange(items.AsEnumerable());
+			return AddFirstRange(items);
 		}
 
 		/// <summary>
 		/// Joins the specified list to the beginning of this one. O(logn), fast
 		/// </summary>
-		/// <param name="other"></param>
+		/// <param name="list">The list.</param>
 		/// <returns></returns>
 
-		public FlexibleList<T> AddFirstList(FlexibleList<T> other)
+		public FlexibleList<T> AddFirstList(FlexibleList<T> list)
 		{
-			if (other == null) throw Errors.Argument_null("other");
-			if (other.IsEmpty) return this;
-			FTree<Value<T>> result = FTree<Value<T>>.Concat(other.root, root);
+			if (list == null) throw Errors.Argument_null("list");
+			if (list.IsEmpty) return this;
+			FTree<Value<T>> result = FTree<Value<T>>.Concat(list.root, root);
 			return new FlexibleList<T>(result);
 		}
 
 		/// <summary>
-		///  Joins the specified sequence to the beginning of this list. O(m)
+		/// Joins the specified sequence to the beginning of this list. O(m)
 		/// </summary>
-		/// <param name="items"> </param>
-		/// <returns> </returns>
+		/// <param name="items">The items to add.</param>
+		/// <returns></returns>
 		/// <exception cref="ArgumentNullException">Thrown if the argument is null.</exception>
+
 		public FlexibleList<T> AddFirstRange(IEnumerable<T> items)
 		{
 			if (items == null) throw Errors.Argument_null("items");
@@ -183,10 +177,10 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Adds the specified item to the end of the list. O(1) amortized.
+		/// Adds the specified item to the end of the list. O(1) amortized.
 		/// </summary>
-		/// <param name="item"> The item to add. </param>
-		/// <returns> </returns>
+		/// <param name="item">The item to add.</param>
+		/// <returns></returns>
 		public FlexibleList<T> AddLast(T item)
 		{
 			return new FlexibleList<T>(root.AddRight(new Value<T>(item)));
@@ -195,33 +189,34 @@ namespace Solid
 		/// <summary>
 		/// Adds several items to the end of the list. O(m)
 		/// </summary>
-		/// <param name="items"></param>
+		/// <param name="items">The items to add.</param>
 		/// <returns></returns>
+		/// <exception cref="ArgumentNullException">If the argument is null.</exception>
 		public FlexibleList<T> AddLastItems(params T[] items)
 		{
 			if (items == null) throw Errors.Argument_null("items");
-			return AddLastRange(items.AsEnumerable());
+			return AddLastRange(items);
 		}
 
 		/// <summary>
-		///   Joins another list to the end of this one. O(logn), fast
+		/// Joins another list to the end of this one. O(logn), fast
 		/// </summary>
-		/// <param name="other"> </param>
-		/// <returns> </returns>
+		/// <param name="other">The other list.</param>
+		/// <returns></returns>
 		/// <exception cref="ArgumentNullException">Thrown if the argument is null.</exception>
 		public FlexibleList<T> AddLastList(FlexibleList<T> other)
 		{
-			if (other == null) throw Errors.Argument_null("other");
+			if (other == null) throw Errors.Argument_null("list");
 			if (other.IsEmpty) return this;
 			FTree<Value<T>> result = FTree<Value<T>>.Concat(root, other.root);
 			return new FlexibleList<T>(result);
 		}
 
 		/// <summary>
-		///   Adds a sequence of items to the end of the list. O(m)
+		/// Adds a sequence of items to the end of the list. O(m)
 		/// </summary>
-		/// <param name="items"> </param>
-		/// <returns> </returns>
+		/// <param name="items">The sequence.</param>
+		/// <returns></returns>
 		/// <exception cref="ArgumentNullException">Thrown if the argument is null.</exception>
 		public FlexibleList<T> AddLastRange(IEnumerable<T> items)
 		{
@@ -235,11 +230,11 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Applies the accumulator function on the list, from first to last. O(n)  
+		/// Applies the accumulator function on the list, from first to last. O(n)
 		/// </summary>
-		/// <typeparam name="TResult"></typeparam>
-		/// <param name="accumulator"></param>
-		/// <param name="initial"></param>
+		/// <typeparam name="TResult">The type of the result.</typeparam>
+		/// <param name="accumulator">The accumulator.</param>
+		/// <param name="initial">The initial value.</param>
 		/// <returns></returns>
 		public TResult Aggregate<TResult>(Func<TResult, T, TResult> accumulator, TResult initial = default(TResult))
 		{
@@ -250,9 +245,9 @@ namespace Solid
 		/// <summary>
 		/// Applies an accumulator over the list, from last to first.  O(n)
 		/// </summary>
-		/// <typeparam name="TResult"></typeparam>
-		/// <param name="accumulator"></param>
-		/// <param name="initial"></param>
+		/// <typeparam name="TResult">The type of the result.</typeparam>
+		/// <param name="accumulator">The accumulator.</param>
+		/// <param name="initial">The initial value.</param>
 		/// <returns></returns>
 		public TResult AggregateBack<TResult>(Func<TResult, T, TResult> accumulator, TResult initial = default(TResult))
 		{
@@ -262,9 +257,9 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Removes the first item from the list. O(1) amortized.
+		/// Removes the first item from the list. O(1) amortized.
 		/// </summary>
-		/// <returns> </returns>
+		/// <returns></returns>
 		/// <exception cref="InvalidOperationException">Thrown if the list is empty.</exception>
 		public FlexibleList<T> DropFirst()
 		{
@@ -273,9 +268,9 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Removes the last item from the list. O(1) amortized.
+		/// Removes the last item from the list. O(1) amortized.
 		/// </summary>
-		/// <returns> </returns>
+		/// <returns></returns>
 		/// <exception cref="InvalidOperationException">Thrown if the list is empty.</exception>
 		public FlexibleList<T> DropLast()
 		{
@@ -284,9 +279,9 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Iterates over the list, from first to last. O(n)
+		/// Iterates over the list, from first to last. O(n)
 		/// </summary>
-		/// <param name="iterator"> </param>
+		/// <param name="iterator">The iterator.</param>
 		/// <exception cref="ArgumentNullException">Thrown if the argument is null.</exception>
 		public void ForEach(Action<T> iterator)
 		{
@@ -295,9 +290,9 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Iterates over the list, from last to first. O(n)
+		/// Iterates over the list, from last to first. O(n)
 		/// </summary>
-		/// <param name="iterator"></param>
+		/// <param name="iterator">The iterator.</param>
 		public void ForEachBack(Action<T> iterator)
 		{
 			if (iterator == null) throw Errors.Argument_null("iterator");
@@ -307,7 +302,7 @@ namespace Solid
 		/// <summary>
 		/// Iterates over the list, from last to first, and stops if the conditional returns false. O(m)
 		/// </summary>
-		/// <param name="conditional"></param>
+		/// <param name="conditional">The conditional.</param>
 		public void ForEachBackWhile(Func<T, bool> conditional)
 		{
 			if (conditional == null) throw Errors.Argument_null("conditional");
@@ -318,7 +313,7 @@ namespace Solid
 		/// <summary>
 		/// Iterates over the list, from first to last, and stops if the conditional returns false.
 		/// </summary>
-		/// <param name="conditional"></param>
+		/// <param name="conditional">The conditional iterator that specifies whether to proceed with iteration.</param>
 		public void ForEachWhile(Func<T, bool> conditional)
 		{
 			if (conditional == null) throw Errors.Argument_null("conditional");
@@ -330,15 +325,17 @@ namespace Solid
 		/// Gets a new enumerator that iterates over the list.
 		/// </summary>
 		/// <returns></returns>
-		public IEnumerator<T> GetEnumerator()
+		
+		IEnumerator<T> IEnumerable<T>.GetEnumerator()
 		{
+			
 			return new EnumeratorWrapper<T>(root.GetEnumerator());
 		}
 
 		/// <summary>
-		/// Returns the index of the first item that fulfills the predicate. O(m)
+		/// Returns the index of the first item that fulfills the specified predicate, or null.
 		/// </summary>
-		/// <param name="predicate"></param>
+		/// <param name="predicate">The predicate.</param>
 		/// <returns></returns>
 		public int? IndexOf(Func<T, bool> predicate)
 		{
@@ -354,14 +351,15 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Inserts an item before the specified index. O(logn), fast.
+		/// Inserts an item immediately before the specified index. O(logn), fast.
 		/// </summary>
-		/// <param name="index"> The index at which to insert the item. If the index is negative, treats it as position from the end.</param>
-		/// <param name="item"> </param>
-		/// <returns> </returns>
+		/// <param name="index">The index before which to insert the item. Can be negative.</param>
+		/// <param name="item">The item to insert.</param>
+		/// <returns></returns>
 		/// <exception cref="IndexOutOfRangeException">Thrown if the index doesn't exist.</exception>
 		public FlexibleList<T> Insert(int index, T item)
 		{
+		
 			index = index < 0 ? root.Measure + index + 1: index;
 			if (index >= root.Measure || index < 0) throw Errors.Index_out_of_range;
 			if (index == root.Measure) return AddLast(item);
@@ -372,11 +370,12 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Inserts one or more items before the specified index. O(logn + m)
+		/// Inserts one or more items immediately before the specified index. 
 		/// </summary>
-		/// <param name="index"></param>
-		/// <param name="items"></param>
+		/// <param name="index">The position immediately before which the items are inserted.</param>
+		/// <param name="items">The items.</param>
 		/// <returns></returns>
+		/// <example></example>
 		public FlexibleList<T> InsertItems(int index, params T[] items)
 		{
 			if (items == null) throw Errors.Argument_null("items");
@@ -384,42 +383,42 @@ namespace Solid
 		}
 
 		/// <summary>
-		///   Inserts a list immediately before the specified index. O(logn), slow.
+		/// Inserts a list immediately before the specified index. O(logn), slow.
 		/// </summary>
-		/// <param name="index"> </param>
-		/// <param name="other"> </param>
-		/// <returns> </returns>
+		/// <param name="index">The position. Can be negative.</param>
+		/// <param name="list">The list to insert.</param>
+		/// <returns></returns>
 		/// <exception cref="ArgumentNullException">Thrown if the argument is null.</exception>
 		/// <exception cref="IndexOutOfRangeException">Thrown if the index does not exist in the list.</exception>
-		public FlexibleList<T> InsertList(int index, FlexibleList<T> other)
+		public FlexibleList<T> InsertList(int index, FlexibleList<T> list)
 		{
 			index = index < 0 ? root.Measure + index + 1 : index;
 			if (index > root.Measure || index < 0) throw Errors.Index_out_of_range;
-			if (other == null) throw Errors.Argument_null("other");
-			if (index == 0) return other.AddLastList(this);
-			if (index == root.Measure) return AddLastList(other);
+			if (list == null) throw Errors.Argument_null("list");
+			if (index == 0) return list.AddLastList(this);
+			if (index == root.Measure) return AddLastList(list);
 			FTree<Value<T>> part1, part2;
 			root.Split(index + 1, out part1, out part2);
-			part1 = FTree<Value<T>>.Concat(part1, other.root);
+			part1 = FTree<Value<T>>.Concat(part1, list.root);
 			FTree<Value<T>> result = FTree<Value<T>>.Concat(part1, part2);
 
 			return new FlexibleList<T>(result);
 		}
 
 		/// <summary>
-		///   Inserts a sequence of items before the specified index. O(logn + m)
+		/// Inserts a sequence of items immediately before the specified index. 
 		/// </summary>
-		/// <param name="index"> </param>
-		/// <param name="items"> </param>
-		/// <returns> </returns>
+		/// <param name="index">The index.</param>
+		/// <param name="items">The sequence of items to insert.</param>
+		/// <returns></returns>
 		/// <exception cref="IndexOutOfRangeException">Thrown if the index doesn't exist.</exception>
-		/// <exception cref="ArgumentNullException">Thrown if the IEnumerable is null."/></exception>
+		/// <exception cref="ArgumentNullException">Thrown if the IEnumerable is null."/&gt;</exception>
 		public FlexibleList<T> InsertRange(int index, IEnumerable<T> items)
 		{
 			if (items == null) throw Errors.Argument_null("items");
 			index = index < 0 ? index + root.Measure +1: index;
 			if (index >= root.Measure || index < 0) throw Errors.Index_out_of_range;
-			if (!items.Any()) return this;
+			if (!System.Linq.Enumerable.Any(items)) return this;
 			
 			
 			FTree<Value<T>> part1, part2;
@@ -432,19 +431,10 @@ namespace Solid
 			return new FlexibleList<T>(part1);
 		}
 
-
-		public DelayedFlexibleList<T> Delayed
-		{
-			get
-			{
-				return new DelayedFlexibleList<T>(this);
-			}
-			
-		}
 		/// <summary>
-		///   Reverses the list. O(n).
+		/// Reverses the list. O(n).
 		/// </summary>
-		/// <returns> </returns>
+		/// <returns></returns>
 		public FlexibleList<T> Reverse()
 		{
 			return new FlexibleList<T>(root.Reverse());
@@ -453,9 +443,9 @@ namespace Solid
 		/// <summary>
 		/// Transforms the list by applying the specified selector on every item in the list. O(n).
 		/// </summary>
-		/// <typeparam name="TOut"> The output type of the transformation. </typeparam>
-		/// <param name="selector"> </param>
-		/// <returns> </returns>
+		/// <typeparam name="TOut">The output type of the transformation.</typeparam>
+		/// <param name="selector">The selector.</param>
+		/// <returns></returns>
 		public FlexibleList<TOut> Select<TOut>(Func<T, TOut> selector)
 		{
 			if (selector == null) throw Errors.Argument_null("selector");
@@ -467,13 +457,13 @@ namespace Solid
 		/// <summary>
 		/// Applies the specified selector on every item in the list, flattens, and constructs a new list. O(n·m)
 		/// </summary>
-		/// <typeparam name="TResult"></typeparam>
-		/// <param name="selector"></param>
+		/// <typeparam name="TResult">The type of the result.</typeparam>
+		/// <param name="selector">The selector.</param>
 		/// <returns></returns>
 		public FlexibleList<TResult> SelectMany<TResult>(Func<T, IEnumerable<TResult>> selector)
 		{
 			if (selector == null) throw Errors.Argument_null("selector");
-			FlexibleList<TResult> result = FlexibleList.Empty<TResult>();
+			FlexibleList<TResult> result = FlexibleList<TResult>.Empty;
 			ForEach(v => result = result.AddLastRange(selector(v)));
 			return result;
 		}
@@ -481,12 +471,12 @@ namespace Solid
 		/// <summary>
 		/// Checks if the specified sequence is equal to the list. O(n)
 		/// </summary>
-		/// <param name="other"></param>
-		/// <param name="comparer"></param>
+		/// <param name="other">The list list.</param>
+		/// <param name="comparer">The comparer.</param>
 		/// <returns></returns>
 		public bool SequenceEqual(IEnumerable<T> other, IEqualityComparer<T> comparer = null)
 		{
-			if (other == null) throw Errors.Argument_null("other");
+			if (other == null) throw Errors.Argument_null("list");
 			comparer = comparer ?? EqualityComparer<T>.Default;
 
 			IEnumerator<T> state = other.GetEnumerator();
@@ -494,9 +484,9 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Returns a sublist consisting of the first several elements. O(logn), slow
+		/// Returns a sublist consisting of the first  items. O(logn), slow
 		/// </summary>
-		/// <param name="count"></param>
+		/// <param name="count">The length of the sublist.</param>
 		/// <returns></returns>
 		public FlexibleList<T> Take(int count)
 		{
@@ -505,7 +495,7 @@ namespace Solid
 		/// <summary>
 		/// Returns subslist without the first several elements. O(logn),slow
 		/// </summary>
-		/// <param name="count"></param>
+		/// <param name="count">The number of elements to skip. </param>
 		/// <returns></returns>
 		public FlexibleList<T> Skip(int count)
 		{
@@ -709,7 +699,7 @@ namespace Solid
 
 			public IEnumerator<T> GetEnumerator()
 			{
-				return inner.GetEnumerator();
+				return (inner as IEnumerable<T>).GetEnumerator();
 			}
 
 			IEnumerator IEnumerable.GetEnumerator()
@@ -720,7 +710,8 @@ namespace Solid
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return GetEnumerator();
+			
+			return (this as IEnumerable<T>).GetEnumerator();
 		}
 	}
 }

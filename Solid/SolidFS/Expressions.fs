@@ -1,4 +1,5 @@
-﻿module SolidFS.Expressions
+﻿[<AutoOpen>]
+module SolidFS.Expressions
 open Solid
 
 open SolidFS.Operators
@@ -15,13 +16,15 @@ type FlexibleListBuilder internal() =
     member __.YieldFrom (vs : 'a FlexibleList) = 
         Many vs
 
+
+
     member __.Run step = 
         match step with
-        | Nothing -> FlexibleList.Empty()
+        | Nothing -> FlexibleList.Empty
         | Just v -> XList.empty <+ v
         | Many S -> S
     member __.For (vs : 'b seq,f : 'b -> 'a) =
-        let mutable Sq = FlexibleList.Empty()
+        let mutable Sq = FlexibleList.Empty
         vs |> Seq.map f |> Sq.AddLastRange |> Many
     member __.Combine (step1 : Step<'a>, step2 : Step<'a>) = 
         match step1,step2 with
@@ -32,10 +35,11 @@ type FlexibleListBuilder internal() =
         | Many X,Many Y -> X <+> Y |> Many
         | Just x, Many Y -> x +> Y |> Many
 
-    member __.Zero = Nothing
+    member __.Zero() = Nothing
     member __.Delay f = f()
 
 type VectorBuilder internal() = 
+    member __.Zero() = Nothing
     member __.Yield v = Just v
     member __.YieldFrom (vs : 'a seq) = vs
     member __.For (vs : 'b seq, f : 'b -> 'a) = 
@@ -48,6 +52,9 @@ type VectorBuilder internal() =
         | Nothing -> XList.empty
         | Just v -> XList.ofItem v
         | Many V -> V
+
+    
+        
 
     member __.Combine (step1,step2) = 
         match step1,step2 with

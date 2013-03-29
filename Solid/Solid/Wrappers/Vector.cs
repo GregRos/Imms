@@ -7,33 +7,6 @@ using Solid.TrieVector;
 using System.Linq;
 namespace Solid
 {
-	public static class Vector
-	{
-		/// <summary>
-		/// Gets the empty Vector.
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		/// <remarks>
-		/// All empty vectors of the same generic type are reference equal.
-		/// Empty vectors of different generic types may or may not be reference equal.
-		/// </remarks>
-		public static Vector<T> Empty<T>()
-		{
-			return Vector<T>.Empty;
-		}
-
-		/// <summary>
-		/// Creates a vector from one or more items.
-		/// </summary>
-		/// <typeparam name="T">The type of value the vector holds.</typeparam>
-		/// <param name="items">One or more items to be part of the vector.</param>
-		/// <returns></returns>
-		public static Vector<T> FromItems<T>(params T[] items)
-		{
-			return items.ToVector();
-		}
-	}
 
 	[DebuggerDisplay("{DebuggerDisplay,nq}")]
 	[DebuggerTypeProxy(typeof (Vector<>.VectorDebugView))]
@@ -101,31 +74,27 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Adds the specified items to the end of the vector. O(m·logn), slow.
+		/// Adds the specified items to the end of the vector. O(m), fast.
 		/// </summary>
 		/// <param name="items"></param>
 		/// <returns></returns>
 		public Vector<T> AddLastItems(params T[] items)
 		{
-			//TODO: Efficient bulk loading.
+			
 			if (items == null) throw Errors.Argument_null("items");
 			return this.AddLastRange(items.AsEnumerable());
 		}
 		/// <summary>
-		/// Adds a sequence of items to the end of the vector. O(m·logn), slow.
+		/// Adds a sequence of items to the end of the vector. O(m), fast.
 		/// </summary>
 		/// <param name="items"></param>
 		/// <returns></returns>
 		public Vector<T> AddLastRange(IEnumerable<T> items)
 		{
 			if (items == null) throw Errors.Argument_null("items");
-			//TODO: Naive implementation. Implement with efficient bulk loading.
-			Vector<T> vec = this;
-			foreach (T item in items)
-			{
-				vec = vec.AddLast(item);
-			}
-			return vec;
+			var arr = items as T[] ?? items.ToArray();
+			var newRoot = root.BulkLoad(arr, 0, arr.Length);
+			return new Vector<T>(newRoot);
 		}
 		/// <summary>
 		/// Applies a selector on every element. O(n)

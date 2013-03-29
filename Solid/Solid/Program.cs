@@ -20,9 +20,8 @@ internal static class Program
 		
 	private static void Main(string[] args)
 	{
-
-		var x = Enumerable.Range(0, 100).ToFlexibleList();
-		
+		var v = Vector<int>.Empty;
+		var nums = Enumerable.Range(0, 1000000).ToArray();
 
 
 	}

@@ -42,12 +42,12 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Operators.fs" />
     <Compile Include="Expressions.fs" />
+    <Compile Include="Wrapper.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
   </ItemGroup>

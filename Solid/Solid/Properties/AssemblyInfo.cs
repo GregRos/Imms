@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Solid")]
-[assembly: AssemblyCopyright("Copyright Greg Rosenbaum ©  2013")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("SolidFS")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

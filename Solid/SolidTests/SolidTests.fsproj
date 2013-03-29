@@ -40,7 +40,7 @@
     <Reference Include="FSharpx.Collections.Experimental, Version=1.7.11.0, Culture=neutral, PublicKeyToken=null">
       <Private>True</Private>
     </Reference>
-    <Reference Include="FSharpx.Core, Version=1.7.8.0, Culture=neutral, PublicKeyToken=null">
+    <Reference Include="FSharpx.Core, Version=1.7.11.0, Culture=neutral, PublicKeyToken=null">
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />

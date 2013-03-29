@@ -14,9 +14,9 @@ namespace Solid
 		/// <typeparam name="T"></typeparam>
 		/// <param name="items"></param>
 		/// <returns></returns>
-		public static DelayedFlexibleList<T> DelayList<T>(this IEnumerable<T> items)
+		public static DelayedList<T> DelayList<T>(this IEnumerable<T> items)
 		{
-			return new DelayedFlexibleList<T>(items);
+			return new DelayedList<T>(items);
 		}
 
 		/// <summary>
@@ -105,7 +105,7 @@ namespace Solid
 		/// <returns></returns>
 		public static FlexibleList<T> ToFlexibleList<T>(this IEnumerable<T> items)
 		{
-			return FlexibleList.Empty<T>().AddLastRange(items);
+			return FlexibleList<T>.Empty.AddLastRange(items);
 		}
 
 		/// <summary>
