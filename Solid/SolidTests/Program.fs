@@ -69,7 +69,7 @@ let main argv =
     let mutable iter = 1
     let mutable time1 = 0L
     let mutable time2 = 0L
-    let n = 1
+    let n = 5
     let rnd = Random()
     for __ = 0 to n do
         GC.Collect()
