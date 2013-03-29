@@ -42,6 +42,7 @@
     </Reference>
     <Reference Include="FSharpx.Core, Version=1.7.11.0, Culture=neutral, PublicKeyToken=null">
       <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="mscorlib" />

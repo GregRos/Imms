@@ -22,7 +22,7 @@ internal static class Program
 	{
 		var v = Vector<int>.Empty;
 		var nums = Enumerable.Range(0, 1000000).ToArray();
-
+		v = v.AddLastRange(nums);
 
 	}
 

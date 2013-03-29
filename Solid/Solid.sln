@@ -12,8 +12,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		License.txt = License.txt
 	EndProjectSection
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Extras", "Extras\Extras.fsproj", "{4E2ABCC7-3FCA-477E-AB17-64E193BAF9FE}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,10 +30,6 @@ Global
 		{D8CD7E60-BDE8-44BF-8803-568AC1E30B90}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8CD7E60-BDE8-44BF-8803-568AC1E30B90}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8CD7E60-BDE8-44BF-8803-568AC1E30B90}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4E2ABCC7-3FCA-477E-AB17-64E193BAF9FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4E2ABCC7-3FCA-477E-AB17-64E193BAF9FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4E2ABCC7-3FCA-477E-AB17-64E193BAF9FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4E2ABCC7-3FCA-477E-AB17-64E193BAF9FE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

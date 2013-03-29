@@ -79,7 +79,7 @@ namespace Solid.TrieVector
 			{
 				var newParentArr = new VectorNode<T>[1];
 				newParentArr[0] = newLeaf;
-				var newParent = new VectorParent<T>(1, Arr.Length, newParentArr);
+				var newParent = new VectorParent<T>(1, newArray.Length, newParentArr);
 				return newParent.BulkLoad(data, startIndex + loadCount, count - loadCount);
 			}
 			return newLeaf;
