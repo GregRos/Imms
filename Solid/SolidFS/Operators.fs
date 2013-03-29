@@ -213,11 +213,13 @@ module Vector =
     let zip (left : #seq<_>) (right:#seq<_>) = 
         empty<_> <++ Seq.zip left right
     ///O(n). Constructs a vector from a sequence.
-    let ofSeq (xs : #seq<_>) = 
-        empty<_> <++ xs
+   
 
-    let ofArray (xs :array<'a>) = 
-        empty<'a>.AddLastRange(xs)
+    let ofSeq (xs : seq<_>) = 
+        match xs with
+        | :? list<'a> as lst -> empty<'a>.AddLastRange(lst |> List.toArray)
+        | _ -> empty<'a>.AddLastRange(xs)
+        
 
     ///O(n). Checks if any item fulfilling the predicate exists in the vector.
     let exists (f : _ -> bool) (l : _ Vector) =

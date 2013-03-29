@@ -74,28 +74,54 @@ namespace Solid
 		}
 
 		/// <summary>
-		/// Adds the specified items to the end of the vector. O(m), fast.
-		/// </summary>
-		/// <param name="items"></param>
-		/// <returns></returns>
-		public Vector<T> AddLastItems(params T[] items)
-		{
-			
-			if (items == null) throw Errors.Argument_null("items");
-			return this.AddLastRange(items.AsEnumerable());
-		}
-		/// <summary>
-		/// Adds a sequence of items to the end of the vector. O(m), fast.
+		/// Adds items to the end of the vector from a sequence.
 		/// </summary>
 		/// <param name="items"></param>
 		/// <returns></returns>
 		public Vector<T> AddLastRange(IEnumerable<T> items)
 		{
-			if (items == null) throw Errors.Argument_null("items");
-			var arr = items as T[] ?? items.ToArray();
-			var newRoot = root.BulkLoad(arr, 0, arr.Length);
-			return new Vector<T>(newRoot);
+			const int
+				IS_ARRAY = 1,
+				IS_FLEXIBLE_LIST = 2,
+				IS_LIST = 3,
+				IS_VECTOR = 4,
+				IS_OTHER = 5;
+			var code =
+				  items is T[] ? IS_ARRAY
+				: items is FlexibleList<T> ? IS_FLEXIBLE_LIST
+				: items is IList<T> ? IS_LIST
+				: items is Vector<T> ? IS_VECTOR
+				: IS_OTHER;
+			VectorNode<T> newRoot;
+			T[] arr;
+			switch (code)
+			{
+				case IS_ARRAY:
+					arr = items as T[];
+					newRoot = root.BulkLoad(arr, 0, arr.Length);
+					return new Vector<T>(newRoot);
+				case IS_FLEXIBLE_LIST:
+					var xlist = items as FlexibleList<T>;
+					newRoot = root.BulkLoad(xlist.ToArray(), 0, xlist.Count);
+					return new Vector<T>(newRoot);
+				case IS_LIST:
+					var list = items as List<T>;
+					newRoot = root.BulkLoad(list.ToArray(), 0, list.Count);
+					return new Vector<T>(newRoot);
+				case IS_VECTOR:
+					var vect = items as Vector<T>;
+					newRoot = root.BulkLoad(vect.ToArray(), 0, vect.Count);
+					return new Vector<T>(newRoot);
+				case IS_OTHER:
+					arr = items.ToArray();
+					newRoot = root.BulkLoad(arr, 0, arr.Length);
+					return new Vector<T>(newRoot);
+				default:
+					throw Errors.Invalid_execution_path;
+			}
+
 		}
+
 		/// <summary>
 		/// Applies a selector on every element. O(n)
 		/// </summary>
