@@ -60,12 +60,12 @@ open FSharpx.Collections
 [<EntryPoint>]
 let main argv = 
     let deq = FSharpx.Collections.Deque.empty
-    let len = Math.Pow(10., 4.) |> int
+    let len = Math.Pow(10., 5.) |> int
     let solid_vector = SolidFS.Operators.Vector.ofSeq [|0|]
     let fsharpx_vector = FSharpx.Collections.Vector.ofSeq  [0]
 
     let  xl = XList.ofSeq [0 .. len]
-    let mutable arr = [ 0 .. len ]
+    let mutable arr = {0 .. len}
     let mutable iter = 1
     let mutable time1 = 0L
     let mutable time2 = 0L
@@ -75,12 +75,12 @@ let main argv =
         GC.Collect()
         GC.WaitForPendingFinalizers()
         for i = 0 to iter do
-            let x = FSharpx.Collections.Vector.ofSeq xl
+            let x = FSharpx.Collections.Vector.ofSeq arr
             ()
         sw.Restart()
         
         for i = 0 to iter do
-            let x = FSharpx.Collections.Vector.ofSeq xl
+            let x = FSharpx.Collections.Vector.ofSeq arr
             ()
         sw.Stop()
         time1 <- time1 + sw.ElapsedTicks
@@ -91,11 +91,11 @@ let main argv =
         GC.Collect()
         GC.WaitForPendingFinalizers()
         for i = 0 to iter do
-            let x = SolidFS.Operators.Vector.ofSeq xl
+            let x = SolidFS.Operators.Vector.ofSeq arr
             ()  
         sw.Restart()
         for i = 0 to iter do
-            let x = SolidFS.Operators.Vector.ofSeq xl
+            let x = SolidFS.Operators.Vector.ofSeq arr
             ()  
         //test_deq.Tail
   

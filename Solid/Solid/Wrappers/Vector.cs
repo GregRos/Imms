@@ -2,9 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Dynamic;
+using System.Reflection;
 using Solid.Common;
 using Solid.TrieVector;
 using System.Linq;
+using Microsoft.FSharp.Collections;
 namespace Solid
 {
 
@@ -80,17 +83,23 @@ namespace Solid
 		/// <returns></returns>
 		public Vector<T> AddLastRange(IEnumerable<T> items)
 		{
+			if (items == null) throw Errors.Argument_null("items");
 			const int
 				IS_ARRAY = 1,
 				IS_FLEXIBLE_LIST = 2,
-				IS_LIST = 3,
+				IS_MUTABLE_LIST = 3,
 				IS_VECTOR = 4,
-				IS_OTHER = 5;
+				IS_FSHARP_LIST = 5,
+				IS_OTHER = 6,
+				IS_LINKED_LIST = 7;
 			var code =
 				  items is T[] ? IS_ARRAY
 				: items is FlexibleList<T> ? IS_FLEXIBLE_LIST
-				: items is IList<T> ? IS_LIST
+				: items is FSharpList<T> ? IS_FSHARP_LIST
+				: items is List<T> ? IS_MUTABLE_LIST
 				: items is Vector<T> ? IS_VECTOR
+				
+				: items is LinkedList<T> ? IS_LINKED_LIST
 				: IS_OTHER;
 			VectorNode<T> newRoot;
 			T[] arr;
@@ -104,7 +113,7 @@ namespace Solid
 					var xlist = items as FlexibleList<T>;
 					newRoot = root.BulkLoad(xlist.ToArray(), 0, xlist.Count);
 					return new Vector<T>(newRoot);
-				case IS_LIST:
+				case IS_MUTABLE_LIST:
 					var list = items as List<T>;
 					newRoot = root.BulkLoad(list.ToArray(), 0, list.Count);
 					return new Vector<T>(newRoot);
@@ -112,12 +121,15 @@ namespace Solid
 					var vect = items as Vector<T>;
 					newRoot = root.BulkLoad(vect.ToArray(), 0, vect.Count);
 					return new Vector<T>(newRoot);
-				case IS_OTHER:
+				case IS_FSHARP_LIST:
+					var flist = items as FSharpList<T>;
+					arr = ListModule.ToArray<T>(flist);
+					newRoot = root.BulkLoad(arr, 0, arr.Length);
+					return new Vector<T>(newRoot);		
+				default:
 					arr = items.ToArray();
 					newRoot = root.BulkLoad(arr, 0, arr.Length);
 					return new Vector<T>(newRoot);
-				default:
-					throw Errors.Invalid_execution_path;
 			}
 
 		}
