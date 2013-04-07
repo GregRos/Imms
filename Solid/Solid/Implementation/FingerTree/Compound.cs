@@ -137,6 +137,113 @@ namespace Solid.FingerTree
 			throw Errors.Index_out_of_range;
 		}
 
+		public override bool IsFragment
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+
+		private FTree<T> FixLeftDigit()
+		{
+			if (!LeftDigit.IsFragment)
+			{
+				return this;
+			}
+			if (DeepTree.Measure == 0)
+			{
+				Digit<T> first, last;
+				LeftDigit.Fuse(RightDigit, out first, out last);
+				return CreateCheckNull(Measure, first, DeepTree, last);
+			}
+			else
+			{
+				Digit<T> fromDeep = DeepTree.Left;
+				var newDeep = DeepTree.DropLeft();
+				Digit<T> first, last;
+				LeftDigit.Fuse(fromDeep, out first, out last);
+				if (last == null)
+				{
+
+					return new Compound<T>(Measure, first, newDeep, RightDigit);
+				}
+				return new Compound<T>(Measure, first, newDeep.AddLeft(last), RightDigit);
+			}
+		}
+
+		private FTree<T> FixRightDigit()
+		{
+			if (!RightDigit.IsFragment)
+			{
+				return this;
+			}
+			if (DeepTree.Measure == 0)
+			{
+				Digit<T> first, last;
+				LeftDigit.Fuse(RightDigit, out first, out last);
+				return CreateCheckNull(Measure, first, DeepTree, last);
+			}
+			else
+			{
+				Digit<T> fromDeep = DeepTree.Right;
+				var newDeep = DeepTree.DropRight();
+				Digit<T> first, last;
+				fromDeep.Fuse(RightDigit, out first, out last);
+				if (last == null)
+				{
+					return new Compound<T>(Measure, LeftDigit, newDeep, first);
+				}
+				return new Compound<T>(Measure, first, newDeep.AddLeft(first), last);
+			}
+		}
+
+
+		public override FTree<T> Remove(int index)
+		{
+			var code = WhereIsThisIndex(index);
+			Digit<T> res;
+			Digit<T> newLeft;
+			switch (code)
+			{
+				case 0:
+				case 1:
+					if (LeftDigit.IsFragment)
+					{
+						var fixedTree = this.FixLeftDigit();
+						return fixedTree.Remove(index);
+					}
+					newLeft = LeftDigit.Remove(index);
+					return CreateCheckNull(Measure - 1, newLeft, DeepTree, RightDigit);
+				case 2:
+				case 3:
+					FTree<Digit<T>> deep = DeepTree;
+					FTree<Digit<T>> newDeep;
+					if (deep.IsFragment)
+					{
+						newDeep = deep.AddLeft(LeftDigit);
+						newDeep = newDeep.Remove(index);
+						newLeft = newDeep.Left;
+						newDeep = newDeep.DropLeft();
+						return new Compound<T>(Measure - 1, newLeft, newDeep, RightDigit);
+					}
+					newDeep = DeepTree.Remove(index - LeftDigit.Measure);
+					return CreateCheckNull(Measure - 1, LeftDigit, newDeep, RightDigit);
+				case 4:
+				case 5:
+					if (RightDigit.IsFragment)
+					{
+						var fixedTree = this.FixRightDigit();
+						return fixedTree.Remove(index);
+					}
+					var newRight = RightDigit.Remove(index - LeftDigit.Measure - DeepTree.Measure);
+					return CreateCheckNull(Measure - 1, LeftDigit, DeepTree, newRight);
+				default:
+					throw Errors.Invalid_execution_path;
+			}
+		}
+
 		public override IEnumerator<Measured> GetEnumerator()
 		{
 			return new CompoundEnumerator<T>(this);

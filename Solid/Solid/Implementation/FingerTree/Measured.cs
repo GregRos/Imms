@@ -26,6 +26,8 @@ namespace Solid.FingerTree
 		public abstract void Iter(Action<Measured> action);
 
 		public abstract void IterBack(Action<Measured> action);
+
+		public abstract bool IsFragment { get; }
 	}
 
 	internal abstract class Measured<TObject> : Measured
@@ -40,9 +42,15 @@ namespace Solid.FingerTree
 
 		public abstract TObject Reverse();
 
+		
+
+		public abstract TObject Remove(int index);
 
 		public abstract TObject Set(int index, Measured value);
 
 		public abstract void Split(int index, out TObject leftmost, out TObject rightmost);
+
+		public abstract void Fuse(TObject after, out TObject firstRes, out TObject lastRes);
+		
 	}
 }

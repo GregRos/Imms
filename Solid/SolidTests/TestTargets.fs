@@ -301,6 +301,7 @@ module SOLID =
         override __.AddLastRange vs = inner.AddLastRange vs |> cns
         override __.AddFirstRange vs = inner.AddFirstRange vs |> cns
         override __.Set i v = inner.Set(i,v) |> cns
+        override __.RemoveAt i = inner.Remove(i) |> cns
         override __.AddLastList t = 
             let t = t :?> TestXList<'a>
             inner.AddLastList(t.Inner) |> cns

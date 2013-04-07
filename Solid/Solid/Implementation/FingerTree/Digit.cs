@@ -276,6 +276,68 @@ namespace Solid.FingerTree
 			}
 		}
 
+		public override bool IsFragment
+		{
+			get
+			{
+				return Size == 1;
+			}
+		}
+
+
+
+
+		public override Digit<T> Remove(int index)
+		{
+			int code = WhereIsThisIndex(index);
+			this.Size.IsNot(1);
+			T res;
+			switch (code)
+			{
+				case 0:
+				case 1:
+					res = First.Remove(index);
+					if (res != null && res.IsFragment)
+					{
+						T left, right;
+						res.Fuse(Second, out left, out right);
+						return CreateCheckNull(Measure - 1, left, right, Third, Fourth);
+					}
+					return CreateCheckNull(Measure - 1,res, Second, Third, Fourth);
+				case 2:
+				case 3:
+					res = Second.Remove(index - First.Measure);
+					if (res != null &&  res.IsFragment)
+					{
+						T left, right;
+						First.Fuse(res, out left, out right);
+						return CreateCheckNull(Measure - 1, left, right, Third, Fourth);
+					}
+					return CreateCheckNull(Measure - 1, First, res, Third, Fourth);
+				case 4:
+				case 5:
+					res = Third.Remove(index - First.Measure - Second.Measure);
+					if (res != null &&  res.IsFragment)
+					{
+						T left, right;
+						Second.Fuse(res, out left, out right);
+						return CreateCheckNull(Measure - 1, First, left, right, Fourth);
+					}
+					return CreateCheckNull(Measure - 1, First, Second, res, Fourth);
+				case 6:
+				case 7:
+					res = Fourth.Remove(index - First.Measure - Second.Measure - Third.Measure);
+					if (res != null && res.IsFragment)
+					{
+						T left, right;
+						Third.Fuse(res, out left, out right);
+						return CreateCheckNull(Measure - 1, First, Second, left, right);
+					}
+					return CreateCheckNull(Measure - 1, First, Second, Third, res);
+				default:
+					throw Errors.Invalid_execution_path;
+			}
+		}
 
 		public override Digit<T> Set(int index, Measured value)
 		{
@@ -353,8 +415,15 @@ namespace Solid.FingerTree
 			throw Errors.Invalid_execution_path;
 		}
 
+		public override void Fuse(Digit<T> other, out Digit<T> first, out Digit<T> last)
+		{
 
-	
+			Digit<T> skip;
+			ReformDigitsForConcat(this, other, out first, out last, out skip);
+
+		}
+
+
 		public Digit<T> AddLeft(T item)
 		{
 			int new_measure = Measure + item.Measure;
@@ -495,15 +564,7 @@ namespace Solid.FingerTree
 
 		public static Digit<T> CreateCheckNull(int measure, T item1 = null, T item2 = null, T item3 = null, T item4 = null)
 		{
-			//+ Implementation
-			//This method is essentially another constructor that decides the digit to create by performing checks.
-			//It assumes that some of the digits can be null, but that these nulls must be in sequence. E.g.
-			// NULL, NULL, DIGIT, DIGIT
-			// NULL, DIGIT, NULL, NULL
-			//But it does not expect the sequence
-			// NULL DIGIT NULL DIGIT
-			// For example. Note that this method could have been the only constructor, but I decided to only perform these checks
-			// Where absolutely necessary. 
+
 			int items_present = item1 != null ? 1 : 0;
 			items_present |= item2 != null ? 2 : 0;
 			items_present |= item3 != null ? 4 : 0;

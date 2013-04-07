@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using NUnit.Framework;
 
 namespace Solid.FingerTree
 {
@@ -87,6 +88,25 @@ namespace Solid.FingerTree
 		{
 			Measured r = CenterDigit[index];
 			return r;
+		}
+
+		public override bool IsFragment
+		{
+			get
+			{
+				return CenterDigit.IsFragment;
+			}
+		}
+
+		public override FTree<T> Remove(int index)
+		{
+			CenterDigit.IsFragment.Is(false);
+			var res = CenterDigit.Remove(index);
+			if (res == null)
+			{
+				return Empty<T>.Instance;
+			}
+			return new Single<T>(Measure - 1, res);
 		}
 
 		public override IEnumerator<Measured> GetEnumerator()

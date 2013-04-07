@@ -61,6 +61,10 @@ namespace Solid.FingerTree
 
 		public abstract Measured Get(int index);
 
+		public abstract bool IsFragment { get; }
+
+		public abstract FTree<T> Remove(int index);
+
 		public abstract IEnumerator<Measured> GetEnumerator();
 
 		public abstract FTree<T> Insert(int index, Measured measured);

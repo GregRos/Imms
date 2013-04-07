@@ -49,6 +49,13 @@ let test_addf_many  iter (o : TestTarget<_>) =
         o <- i +> o
     o
 
+let test_remove_rnd iter (o : TestTarget<_>) = 
+    let mutable o=o
+    let len = o.Length()
+    for i = 0 to iter do
+        o.RemoveAt(rnd.Next(0, len)) |> ignore
+    o
+
 let test_add_mixed  iter ratio (o : TestTarget<_>) = 
     let mutable o =o
     for i in 0 .. iter do
@@ -226,7 +233,7 @@ let test_insert_ascending iter (o : TestTarget<_>)=
     let len = o.Length()
     let mutable o = o
     for i = 0 to (o.Length() - 2) do
-        o <- o.Insert i i
+        o.Insert i i |> ignore
     o
 let Test_add_last iter = 
     {
@@ -275,6 +282,14 @@ let Test_get_rnd iter=
         Name = "Iterate Get Random"
         Parameter = iter
         Test = test_get_rnd iter
+    }
+
+
+let Test_remove_rnd  iter = 
+    {
+        Name = "Iterate Remove Random"
+        Parameter = 0
+        Test = test_remove_rnd iter
     }
 
 let Test_get_each = 

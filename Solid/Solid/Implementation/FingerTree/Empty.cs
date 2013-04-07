@@ -65,6 +65,19 @@ namespace Solid.FingerTree
 			throw Errors.Is_empty;
 		}
 
+		public override bool IsFragment
+		{
+			get
+			{
+				throw Errors.Invalid_execution_path;
+			}
+		}
+
+		public override FTree<T> Remove(int index)
+		{
+			throw Errors.Is_empty;
+		}
+
 		public override IEnumerator<Measured> GetEnumerator()
 		{
 			return EmptyEnumerator<T>.Instance;

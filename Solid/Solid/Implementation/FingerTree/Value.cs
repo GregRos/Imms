@@ -55,10 +55,25 @@ namespace Solid.FingerTree
 			action(this);
 		}
 
+		public override bool IsFragment
+		{
+			get
+			{
+				return false;
+			}
+		}
+
 		public override Value<T> Reverse()
 		{
 			return this;
 		}
+
+		public override Value<T> Remove(int index)
+		{
+			index.Is(0);
+			return null;
+		}
+
 
 		public override Value<T> Set(int index, Measured value)
 		{
@@ -70,6 +85,11 @@ namespace Solid.FingerTree
 		{
 			leftmost = null;
 			rightmost = null;
+		}
+
+		public override void Fuse(Value<T> after, out Value<T> firstRes, out Value<T> lastRes)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

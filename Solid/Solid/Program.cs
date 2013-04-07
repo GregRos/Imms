@@ -20,11 +20,12 @@ internal static class Program
 		
 	private static void Main(string[] args)
 	{
-		var v = Vector<int>.Empty;
-		var nums = Enumerable.Range(0, 1000000).ToArray();
-		v = v.AddLastRange(nums);
-		string[] strs = new string[5];
-		var isObjs = strs is object[];
+		var items = Enumerable.Range(0, 1000).ToFlexibleList();
+
+		for (int i = 0; i < 500; i++)
+		{
+			items = items.Remove(100);
+		}
 
 	}
 

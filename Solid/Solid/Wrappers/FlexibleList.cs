@@ -85,6 +85,11 @@ namespace Solid
 			}
 		}
 
+		public FlexibleList<T> Remove(int index)
+		{
+			return new FlexibleList<T>(root.Remove(index));
+		}
+
 		/// <summary>
 		/// Returns true if the list is empty. O(1)
 		/// </summary>
@@ -586,6 +591,7 @@ namespace Solid
 			if (lastIndex.HasValue) return Slice(0, lastIndex.Value);
 			return this;
 		}
+		
 
 		/// <summary>
 		/// Returns true if all the items in the list fulfill the predicate. O(m)
