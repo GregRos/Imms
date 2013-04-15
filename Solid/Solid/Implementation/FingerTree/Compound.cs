@@ -1,445 +1,535 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using NUnit.Framework;
 using Solid.Common;
-using Solid.FingerTree.Iteration;
 
-namespace Solid.FingerTree
+namespace Solid
 {
-	internal sealed class Compound<T> : FTree<T>
-		where T : Measured<T>
+	static partial class FingerTree<TValue>
 	{
-		public readonly FTree<Digit<T>> DeepTree;
-		public readonly Digit<T> LeftDigit;
-		public readonly Digit<T> RightDigit;
-
-
-		public Compound(int measure, Digit<T> leftDigit, FTree<Digit<T>> deepTree, Digit<T> rightDigit)
-			: base(measure, TreeType.Compound)
+		internal abstract partial class FTree<TChild>
+			where TChild : Measured<TChild>
 		{
-			leftDigit.IsNotNull();
-			deepTree.IsNotNull();
-			rightDigit.IsNotNull();
-			measure.IsStructuralEqual(leftDigit.Measure + rightDigit.Measure + deepTree.Measure);
-			DeepTree = deepTree;
-			RightDigit = rightDigit;
-			LeftDigit = leftDigit;
-		}
-
-		public override T Left
-		{
-			get
+			internal sealed class CompoundTree : FTree<TChild>
 			{
-				return LeftDigit.Left;
-			}
-		}
-
-		public override T Right
-		{
-			get
-			{
-				return RightDigit.Right;
-			}
-		}
-
-		public override FTree<T> AddLeft(T item)
-		{
-			if (LeftDigit.Size < 4)
-			{
-				return new Compound<T>(Measure + item.Measure, LeftDigit.AddLeft(item), DeepTree, RightDigit);
-			}
-			Digit<T> leftmost;
-			Digit<T> rightmost;
-			LeftDigit.AddLeftSplit(item, out leftmost, out rightmost);
-			FTree<Digit<T>> newDeep = DeepTree.AddLeft(rightmost);
-			return new Compound<T>(Measure + item.Measure, leftmost, newDeep, RightDigit);
-		}
-
-		public override FTree<T> AddRight(T item)
-		{
-			if (RightDigit.Size < 4)
-			{
-				return new Compound<T>(Measure + item.Measure, LeftDigit, DeepTree, RightDigit.AddRight(item));
-			}
-
-			Digit<T> leftmost;
-			Digit<T> rightmost;
-			RightDigit.AddRightSplit(item, out leftmost, out rightmost);
-			FTree<Digit<T>> newDeep = DeepTree.AddRight(leftmost);
-			return new Compound<T>(Measure + item.Measure, LeftDigit, newDeep, rightmost);
-		}
-
-		public override FTree<T> DropLeft()
-		{
-			if (LeftDigit.Size > 1)
-			{
-				Digit<T> new_left = LeftDigit.PopLeft();
-				int new_measure = Measure - LeftDigit.Left.Measure;
-				return new Compound<T>(new_measure, new_left, DeepTree, RightDigit);
-			}
-			if (DeepTree.Measure > 0)
-			{
-				Digit<T> new_left = DeepTree.Left;
-				FTree<Digit<T>> new_deep = DeepTree.DropLeft();
-				int new_measure = Measure - LeftDigit.Measure;
-				return new Compound<T>(new_measure, new_left, new_deep, RightDigit);
-			}
-			return new Single<T>(RightDigit.Measure, RightDigit);
-		}
-
-		public override FTree<T> DropRight()
-		{
-			if (RightDigit.Size > 1)
-			{
-				Digit<T> new_right = RightDigit.PopRight();
-				int new_measure = Measure - RightDigit.Right.Measure;
-				return new Compound<T>(new_measure, LeftDigit, DeepTree, new_right);
-			}
-			if (DeepTree.Measure > 0)
-			{
-				Digit<T> new_right = DeepTree.Right;
-				FTree<Digit<T>> new_deep = DeepTree.DropRight();
-				int new_measure = Measure - RightDigit.Measure;
-				return new Compound<T>(new_measure, LeftDigit, new_deep, new_right);
-			}
-			return new Single<T>(LeftDigit.Measure, LeftDigit);
-		}
-
-		public override bool IterBackWhile(Func<Measured, bool> action)
-		{
-			if (!RightDigit.IterBackWhile(action)) return false;
-			if (!DeepTree.IterBackWhile(action)) return false;
-			if (!LeftDigit.IterBackWhile(action)) return false;
-			return true;
-		}
-
-		public override bool IterWhile(Func<Measured, bool> action)
-		{
-			if (!LeftDigit.IterWhile(action)) return false;
-			if (!DeepTree.IterWhile(action)) return false;
-			if (!RightDigit.IterWhile(action)) return false;
-			return true;
-		}
-
-		public override Measured Get(int index)
-		{
-			index.Is(i => i < Measure);
-			int m1 = LeftDigit.Measure;
-			int m2 = DeepTree.Measure + m1;
-
-			if (index < m1)
-				return LeftDigit[index];
-			if (index < m2)
-				return DeepTree.Get(index - m1);
-			if (index < Measure)
-				return RightDigit[index - m2];
-
-			throw Errors.Index_out_of_range;
-		}
-
-		public override bool IsFragment
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-
-		private FTree<T> FixLeftDigit()
-		{
-			if (!LeftDigit.IsFragment)
-			{
-				return this;
-			}
-			if (DeepTree.Measure == 0)
-			{
-				Digit<T> first, last;
-				LeftDigit.Fuse(RightDigit, out first, out last);
-				return CreateCheckNull(Measure, first, DeepTree, last);
-			}
-			else
-			{
-				Digit<T> fromDeep = DeepTree.Left;
-				var newDeep = DeepTree.DropLeft();
-				Digit<T> first, last;
-				LeftDigit.Fuse(fromDeep, out first, out last);
-				if (last == null)
+				internal class CompoundEnumerator : IEnumerator<Leaf<TValue>>
 				{
+					private readonly bool _forward;
+					private int index = -1;
+					private IEnumerator<Leaf<TValue>> inner;
+					private readonly CompoundTree tree;
 
-					return new Compound<T>(Measure, first, newDeep, RightDigit);
+					public CompoundEnumerator(CompoundTree tree, bool forward)
+					{
+						this.tree = tree;
+						_forward = forward;
+					}
+
+					public Leaf<TValue> Current
+					{
+						get
+						{
+							return inner.Current;
+						}
+					}
+
+					object IEnumerator.Current
+					{
+						get
+						{
+							return Current;
+						}
+					}
+
+					public void Dispose()
+					{
+					}
+
+					public bool MoveNext()
+					{
+						if (index != -1 && inner.MoveNext())
+							return true;
+						index++;
+						var fixedNum = _forward ? index : 2 - index;
+						switch (fixedNum)
+						{
+							case 0:
+								inner = tree.LeftDigit.GetEnumerator(_forward);
+								return MoveNext();
+							case 1:
+								inner = tree.DeepTree.GetEnumerator(_forward);
+								return MoveNext();
+							case 2:
+								inner = tree.RightDigit.GetEnumerator(_forward);
+								return MoveNext();
+							default:
+								return false;
+						}
+					}
+
+					public void Reset()
+					{
+						throw new NotSupportedException();
+					}
 				}
-				return new Compound<T>(Measure, first, newDeep.AddLeft(last), RightDigit);
-			}
-		}
 
-		private FTree<T> FixRightDigit()
-		{
-			if (!RightDigit.IsFragment)
-			{
-				return this;
-			}
-			if (DeepTree.Measure == 0)
-			{
-				Digit<T> first, last;
-				LeftDigit.Fuse(RightDigit, out first, out last);
-				return CreateCheckNull(Measure, first, DeepTree, last);
-			}
-			else
-			{
-				Digit<T> fromDeep = DeepTree.Right;
-				var newDeep = DeepTree.DropRight();
-				Digit<T> first, last;
-				fromDeep.Fuse(RightDigit, out first, out last);
-				if (last == null)
+				private const int
+					IN_END = 6;
+
+				private const int
+					IN_MIDDLE_OF_DEEP = 3;
+
+				private const int
+					IN_MIDDLE_OF_LEFT = 1;
+
+				private const int
+					IN_MIDDLE_OF_RIGHT = 5;
+
+				private const int
+					IN_START = 0;
+
+				private const int
+					IN_START_OF_DEEP = 2;
+
+				private const int
+					IN_START_OF_RIGHT = 4;
+
+				private const int
+					OUTSIDE = 7;
+
+				public readonly FTree<Digit> DeepTree;
+				public readonly Digit LeftDigit;
+				public readonly Digit RightDigit;
+
+				public CompoundTree(Digit leftDigit, FTree<Digit> deepTree, Digit rightDigit)
+					: base(leftDigit.Measure + deepTree.Measure + rightDigit.Measure, TreeType.Compound)
 				{
-					return new Compound<T>(Measure, LeftDigit, newDeep, first);
+#if DEBUG
+					leftDigit.IsNotNull();
+					deepTree.IsNotNull();
+					rightDigit.IsNotNull();
+#endif
+					DeepTree = deepTree;
+					RightDigit = rightDigit;
+					LeftDigit = leftDigit;
 				}
-				return new Compound<T>(Measure, first, newDeep.AddLeft(first), last);
-			}
-		}
 
+				private static FTree<TChild> CreateCheckNull(Digit left = null, FTree<Digit> deep = null,
+				                                             Digit right = null)
+				{
+					var memberPermutation = left != null ? 1 << 0 : 0;
+					memberPermutation |= (deep != null && deep.Measure != 0) ? 1 << 1 : 0;
+					memberPermutation |= right != null ? 1 << 2 : 0;
 
-		public override FTree<T> Remove(int index)
-		{
-			var code = WhereIsThisIndex(index);
-			Digit<T> res;
-			Digit<T> newLeft;
-			switch (code)
-			{
-				case 0:
-				case 1:
-					if (LeftDigit.IsFragment)
+					switch (memberPermutation)
 					{
-						var fixedTree = this.FixLeftDigit();
-						return fixedTree.Remove(index);
+						case 0:
+							return Empty;
+						case 1 << 0:
+							return new Single(left);
+						case 1 << 0 | 1 << 1:
+							var deep_1 = deep.DropRight();
+							var r_2 = deep.Right;
+							return new CompoundTree(left, deep.DropRight(), deep.Right);
+						case 1 << 0 | 1 << 1 | 1 << 2:
+							return new CompoundTree(left, deep, right);
+						case 1 << 1 | 1 << 2:
+							return new CompoundTree(deep.Left, deep.DropLeft(), right);
+						case 1 << 0 | 1 << 2:
+							return new CompoundTree(left, deep, right);
+						case 1 << 1:
+							left = deep.Left;
+							deep = deep.DropLeft();
+							if (deep.Measure != 0)
+							{
+								right = deep.Right;
+								deep = deep.DropRight();
+								return new CompoundTree(left, deep, right);
+							}
+							return new Single(left);
+						case 1 << 2:
+							return new Single(right);
+						default:
+							throw Errors.Invalid_execution_path;
 					}
-					newLeft = LeftDigit.Remove(index);
-					return CreateCheckNull(Measure - 1, newLeft, DeepTree, RightDigit);
-				case 2:
-				case 3:
-					FTree<Digit<T>> deep = DeepTree;
-					FTree<Digit<T>> newDeep;
-					if (deep.IsFragment)
+				}
+
+				public override bool IsFragment
+				{
+					get
 					{
-						newDeep = deep.AddLeft(LeftDigit);
-						newDeep = newDeep.Remove(index);
-						newLeft = newDeep.Left;
-						newDeep = newDeep.DropLeft();
-						return new Compound<T>(Measure - 1, newLeft, newDeep, RightDigit);
+						return false;
 					}
-					newDeep = DeepTree.Remove(index - LeftDigit.Measure);
-					return CreateCheckNull(Measure - 1, LeftDigit, newDeep, RightDigit);
-				case 4:
-				case 5:
-					if (RightDigit.IsFragment)
+				}
+				public override TChild Left
+				{
+					get
 					{
-						var fixedTree = this.FixRightDigit();
-						return fixedTree.Remove(index);
+						return LeftDigit.Left;
 					}
-					var newRight = RightDigit.Remove(index - LeftDigit.Measure - DeepTree.Measure);
-					return CreateCheckNull(Measure - 1, LeftDigit, DeepTree, newRight);
-				default:
+				}
+
+				public override TChild Right
+				{
+					get
+					{
+						return RightDigit.Right;
+					}
+				}
+
+				public override FTree<TChild> AddLeft(TChild item)
+				{
+					if (LeftDigit.Size < 4)
+					{
+						return new CompoundTree(LeftDigit.AddLeft(item), DeepTree, RightDigit);
+					}
+					Digit leftmost;
+					Digit rightmost;
+					LeftDigit.AddLeftSplit(item, out leftmost, out rightmost);
+					var newDeep = DeepTree.AddLeft(rightmost);
+					return new CompoundTree(leftmost, newDeep, RightDigit);
+				}
+
+				public override FTree<TChild> AddRight(TChild item)
+				{
+					if (RightDigit.Size < 4)
+					{
+						return new CompoundTree(LeftDigit, DeepTree, RightDigit.AddRight(item));
+					}
+
+					Digit leftmost;
+					Digit rightmost;
+					RightDigit.AddRightSplit(item, out leftmost, out rightmost);
+					var newDeep = DeepTree.AddRight(leftmost);
+					return new CompoundTree(LeftDigit, newDeep, rightmost);
+				}
+
+				public override FTree<TChild> DropLeft()
+				{
+					if (LeftDigit.Size > 1)
+					{
+						var new_left = LeftDigit.PopLeft();
+						var new_measure = Measure - LeftDigit.Left.Measure;
+						return new CompoundTree(new_left, DeepTree, RightDigit);
+					}
+					if (DeepTree.Measure > 0)
+					{
+						var new_left = DeepTree.Left;
+						var new_deep = DeepTree.DropLeft();
+						var new_measure = Measure - LeftDigit.Measure;
+						return new CompoundTree(new_left, new_deep, RightDigit);
+					}
+					return new Single(RightDigit);
+				}
+
+				public override FTree<TChild> DropRight()
+				{
+					if (RightDigit.Size > 1)
+					{
+						var new_right = RightDigit.PopRight();
+						var new_measure = Measure - RightDigit.Right.Measure;
+						return new CompoundTree(LeftDigit, DeepTree, new_right);
+					}
+					if (DeepTree.Measure > 0)
+					{
+						var new_right = DeepTree.Right;
+						var new_deep = DeepTree.DropRight();
+						var new_measure = Measure - RightDigit.Measure;
+						return new CompoundTree(LeftDigit, new_deep, new_right);
+					}
+					return new Single(LeftDigit);
+				}
+
+				private FTree<TChild> FixLeftDigit()
+				{
+					if (!LeftDigit.IsFragment)
+					{
+						return this;
+					}
+					if (DeepTree.Measure == 0)
+					{
+						Digit first, last;
+						LeftDigit.Fuse(RightDigit, out first, out last);
+						return CreateCheckNull(first, DeepTree, last);
+					}
+					else
+					{
+						var fromDeep = DeepTree.Left;
+						var newDeep = DeepTree.DropLeft();
+						Digit first, last;
+						LeftDigit.Fuse(fromDeep, out first, out last);
+						if (last == null)
+						{
+							return new CompoundTree(first, newDeep, RightDigit);
+						}
+						return new CompoundTree(first, newDeep.AddLeft(last), RightDigit);
+					}
+				}
+
+				private FTree<TChild> FixRightDigit()
+				{
+					if (!RightDigit.IsFragment)
+					{
+						return this;
+					}
+					if (DeepTree.Measure == 0)
+					{
+						Digit first, last;
+						LeftDigit.Fuse(RightDigit, out first, out last);
+						return CreateCheckNull(first, DeepTree, last);
+					}
+					else
+					{
+						var fromDeep = DeepTree.Right;
+						var newDeep = DeepTree.DropRight();
+						Digit first, last;
+						fromDeep.Fuse(RightDigit, out first, out last);
+						if (last == null)
+						{
+							return new CompoundTree(LeftDigit, newDeep, first);
+						}
+						return new CompoundTree(first, newDeep.AddLeft(first), last);
+					}
+				}
+
+				public override Leaf<TValue> this[int index]
+				{
+					get
+					{
+#if DEBUG
+						index.Is(i => i < Measure);
+#endif
+						var m1 = LeftDigit.Measure;
+						var m2 = DeepTree.Measure + m1;
+
+						if (index < m1)
+							return LeftDigit[index];
+						if (index < m2)
+							return DeepTree[index - m1];
+						if (index < Measure)
+							return RightDigit[index - m2];
+
+						throw Errors.Arg_out_of_range("index");
+					}
+				}
+
+				public override IEnumerator<Leaf<TValue>> GetEnumerator(bool forward)
+				{
+					return new CompoundEnumerator(this, forward);
+				}
+
+				public override FTree<TChild> Insert(int index, Leaf<TValue> leaf)
+				{
+					var whereIsThisIndex = WhereIsThisIndex(index);
+					int new_measure = Measure + 1;
+					FTree<Digit> new_deep;
+					switch (whereIsThisIndex)
+					{
+						case IN_START:
+						case IN_MIDDLE_OF_LEFT:
+							Digit left_l, left_r;
+							LeftDigit.Insert(index, leaf, out left_l, out left_r);
+							new_deep = left_r != null ? DeepTree.AddLeft(left_r) : DeepTree;
+							return new CompoundTree(left_l, new_deep, RightDigit);
+						case IN_START_OF_DEEP:
+						case IN_MIDDLE_OF_DEEP:
+							new_deep = DeepTree.Insert(index - LeftDigit.Measure, leaf);
+							return new CompoundTree(LeftDigit, new_deep, RightDigit);
+						case IN_START_OF_RIGHT:
+						case IN_MIDDLE_OF_RIGHT:
+							Digit right_l, right_r;
+							RightDigit.Insert(index - LeftDigit.Measure - DeepTree.Measure, leaf, out right_l, out right_r);
+							new_deep = right_r != null ? DeepTree.AddRight(right_l) : DeepTree;
+							right_r = right_r ?? right_l;
+							return new CompoundTree(RightDigit, new_deep, right_r);
+					}
 					throw Errors.Invalid_execution_path;
-			}
-		}
+				}
 
-		public override IEnumerator<Measured> GetEnumerator()
-		{
-			return new CompoundEnumerator<T>(this);
-		}
+				public override void Iter(Action<Leaf<TValue>> action)
+				{
+#if DEBUG
+					action.IsNotNull();
+#endif
+					LeftDigit.Iter(action);
+					DeepTree.Iter(action);
+					RightDigit.Iter(action);
+				}
 
-		public override FTree<T> Insert(int index, Measured value)
-		{
-			int splitCode = WhereIsThisIndex(index);
+				public override void IterBack(Action<Leaf<TValue>> action)
+				{
+#if DEBUG
+					action.IsNotNull();
+#endif
+					RightDigit.IterBack(action);
+					DeepTree.IterBack(action);
+					LeftDigit.IterBack(action);
+				}
 
-			switch (splitCode)
-			{
-				case 0:
-				case 1:
-					Digit<T> left_l, left_r;
-					LeftDigit.Insert(index, value, out left_l, out left_r);
-					if (left_r != null)
+				public override bool IterBackWhile(Func<Leaf<TValue>, bool> action)
+				{
+					if (!RightDigit.IterBackWhile(action)) return false;
+					if (!DeepTree.IterBackWhile(action)) return false;
+					if (!LeftDigit.IterBackWhile(action)) return false;
+					return true;
+				}
+
+				public override bool IterWhile(Func<Leaf<TValue>, bool> action)
+				{
+					if (!LeftDigit.IterWhile(action)) return false;
+					if (!DeepTree.IterWhile(action)) return false;
+					if (!RightDigit.IterWhile(action)) return false;
+					return true;
+				}
+
+				public override FTree<TChild> Remove(int index)
+				{
+					var whereIsThisIndex = WhereIsThisIndex(index);
+					Digit newLeft;
+					switch (whereIsThisIndex)
 					{
-						return new Compound<T>(Measure + 1, left_l, DeepTree.AddLeft(left_r), RightDigit);
+						case IN_START:
+						case IN_MIDDLE_OF_LEFT:
+							if (LeftDigit.IsFragment)
+							{
+								var fixedTree = FixLeftDigit();
+								return fixedTree.Remove(index);
+							}
+							newLeft = LeftDigit.Remove(index);
+							return CreateCheckNull(newLeft, DeepTree, RightDigit);
+						case IN_START_OF_DEEP:
+						case IN_MIDDLE_OF_DEEP:
+							var deep = DeepTree;
+							FTree<Digit> newDeep;
+							if (deep.IsFragment)
+							{
+								newDeep = deep.AddLeft(LeftDigit);
+								newDeep = newDeep.Remove(index);
+								newLeft = newDeep.Left;
+								newDeep = newDeep.DropLeft();
+								return new CompoundTree(newLeft, newDeep, RightDigit);
+							}
+							newDeep = DeepTree.Remove(index - LeftDigit.Measure);
+							return CreateCheckNull(LeftDigit, newDeep, RightDigit);
+						case IN_START_OF_RIGHT:
+						case IN_MIDDLE_OF_RIGHT:
+							if (RightDigit.IsFragment)
+							{
+								var fixedTree = FixRightDigit();
+								return fixedTree.Remove(index);
+							}
+							var newRight = RightDigit.Remove(index - LeftDigit.Measure - DeepTree.Measure);
+							return CreateCheckNull(LeftDigit, DeepTree, newRight);
+						default:
+							throw Errors.Invalid_execution_path;
 					}
-					return new Compound<T>(Measure + 1, left_l, DeepTree, RightDigit);
-				case 2:
-				case 3:
-					return new Compound<T>(Measure + 1, LeftDigit, DeepTree.Insert(index - LeftDigit.Measure, value), RightDigit);
-				case 4:
-				case 5:
-					Digit<T> right_l, right_r;
-					RightDigit.Insert(index - LeftDigit.Measure - DeepTree.Measure, value, out right_l, out right_r);
-					if (right_r != null)
+					
+				}
+
+				public override FTree<TChild> Reverse()
+				{
+					var first = LeftDigit.Reverse();
+					var deep = DeepTree.Reverse();
+					var last = RightDigit.Reverse();
+					return new CompoundTree(last, deep, first);
+				}
+
+				public override FTree<TChild> Set(int index, Leaf<TValue> leaf)
+				{
+					var whereIsThisIndex = WhereIsThisIndex(index);
+					switch (whereIsThisIndex)
 					{
-						return new Compound<T>(Measure + 1, LeftDigit, DeepTree.AddRight(right_l), right_r);
+						case IN_START:
+						case IN_MIDDLE_OF_LEFT:
+							var new_left = LeftDigit.Set(index, leaf);
+							return new CompoundTree(new_left, DeepTree, RightDigit);
+						case IN_START_OF_DEEP:
+						case IN_MIDDLE_OF_DEEP:
+							if (DeepTree.Measure == 0) goto case IN_START_OF_RIGHT;
+							var new_deep = DeepTree.Set(index - LeftDigit.Measure, leaf);
+							return new CompoundTree(LeftDigit, new_deep, RightDigit);
+						case IN_START_OF_RIGHT:
+						case IN_MIDDLE_OF_RIGHT:
+							var new_right = RightDigit.Set(index - LeftDigit.Measure - DeepTree.Measure, leaf);
+							return new CompoundTree(LeftDigit, DeepTree, new_right);
 					}
-					return new Compound<T>(Measure + 1, LeftDigit, DeepTree, right_l);
-				default:
-					throw Errors.Invalid_execution_path;
-			}
-		}
+					throw Errors.Arg_out_of_range("index");
+				}
 
-		public override void Iter(Action<Measured> action)
-		{
-			action.IsNotNull();
-			LeftDigit.Iter(action);
-			DeepTree.Iter(action);
-			RightDigit.Iter(action);
-		}
+				public override void Split(int count, out FTree<TChild> leftmost, out FTree<TChild> rightmost)
+				{
+					var whereIsThisIndex = WhereIsThisIndex(count);
+#if DEBUG
+					count.Is(i => i < Measure && i >= 0);
+#endif
 
-		public override void IterBack(Action<Measured> action)
-		{
-			action.IsNotNull();
-			RightDigit.IterBack(action);
-			DeepTree.IterBack(action);
-			LeftDigit.IterBack(action);
-		}
-
-		public override FTree<T> Reverse()
-		{
-			Digit<T> first = LeftDigit.Reverse();
-			FTree<Digit<T>> deep = DeepTree.Reverse();
-			Digit<T> last = RightDigit.Reverse();
-			return new Compound<T>(Measure, last, deep, first);
-		}
-
-		public override FTree<T> Set(int index, Measured value)
-		{
-			int splitCode = WhereIsThisIndex(index);
-			switch (splitCode)
-			{
-				case 0:
-				case 1:
-					Digit<T> new_left = LeftDigit.Set(index, value);
-					return new Compound<T>(Measure, new_left, DeepTree, RightDigit);
-				case 2:
-				case 3:
-					if (DeepTree.Measure == 0) goto case 4;
-					FTree<Digit<T>> new_deep = DeepTree.Set(index - LeftDigit.Measure, value);
-					return new Compound<T>(Measure, LeftDigit, new_deep, RightDigit);
-				case 4:
-				case 5:
-					Digit<T> new_right = RightDigit.Set(index - LeftDigit.Measure - DeepTree.Measure, value);
-					return new Compound<T>(Measure, LeftDigit, DeepTree, new_right);
-				default:
-					throw Errors.Index_out_of_range;
-			}
-		}
-
-		public override void Split(int count, out FTree<T> leftmost, out FTree<T> rightmost)
-		{
-			int splitCode = WhereIsThisIndex(count);
-			count.Is(i => i < Measure && i >= 0);
-
-			switch (splitCode)
-			{
-				case 0:
-					leftmost = Empty<T>.Instance;
-					rightmost = this;
-					return;
-				case 1:
-					Digit<T> left_1, left_2;
-					LeftDigit.Split(count, out left_1, out left_2);
-					leftmost = left_1 != null ? (FTree<T>) new Single<T>(left_1.Measure, left_1) : Empty<T>.Instance;
-					rightmost = CreateCheckNull(Measure - count, left_2, DeepTree, RightDigit);
-					return;
-				case 2:
-					leftmost = new Single<T>(LeftDigit.Measure, LeftDigit);
-					rightmost = CreateCheckNull(Measure - leftmost.Measure, null, DeepTree, RightDigit);
-					return;
-				case 3:
-					FTree<Digit<T>> tree_1, tree_2;
-					DeepTree.Split(count - LeftDigit.Measure, out tree_1, out tree_2);
-					leftmost = CreateCheckNull(count, LeftDigit, tree_1);
-					rightmost = CreateCheckNull(Measure - count, null, tree_2, RightDigit);
-					return;
-				case 4:
-					leftmost = CreateCheckNull(count, LeftDigit, DeepTree);
-					rightmost = new Single<T>(Measure - count, RightDigit);
-					return;
-				case 5:
-					Digit<T> right_1, right_2;
-					RightDigit.Split(count - LeftDigit.Measure - DeepTree.Measure, out right_1, out right_2);
-					leftmost = CreateCheckNull(count, LeftDigit, DeepTree, right_1);
-					rightmost = CreateCheckNull(Measure - count, right_2);
-					return;
-				case 6:
-					leftmost = this;
-					rightmost = Empty<T>.Instance;
-					return;
-				default:
-					throw Errors.Invalid_execution_path;
-			}
-		}
-
-		/// <summary>
-		/// Returns 0 if count is 0 (meaning, empty).
-		/// Returns 1 if count is in left digit
-		/// Returns 2 if count encompasses the left digit.
-		/// Returns 3 if he count is in the deep tree.
-		/// Returns 4 if the count encompasses the left digit + deep tree
-		/// Returns 5 if the count is in the right digit.
-		/// Returns 6 if the count encompasses the entire tree.
-		/// Returns 7 if the count is outside the tree.
-		/// </summary>
-		/// <param name="count"></param>
-		/// <returns></returns>
-		private int WhereIsThisIndex(int count)
-		{
-			count.Is(i => i < Measure);
-			if (count == 0) return 0;
-			if (count < LeftDigit.Measure) return 1;
-			if (count == LeftDigit.Measure) return 2;
-			if (count < LeftDigit.Measure + DeepTree.Measure) return 3;
-			if (count == LeftDigit.Measure + DeepTree.Measure) return 4;
-			if (count < Measure) return 5;
-			if (count == Measure) return 6;
-			throw new Exception();
-		}
-
-		//+ Implementation
-		//  This function creates an FTree of the right type, depending on which digits are null.
-		//  The tree cannot be null, but can be empty.
-
-		private static FTree<T> CreateCheckNull(int measure, Digit<T> left = null, FTree<Digit<T>> deep = null,
-		                                        Digit<T> right = null)
-		{
-			int caseCode = left != null ? 1 << 0 : 0;
-			caseCode |= (deep != null && deep.Measure != 0) ? 1 << 1 : 0;
-			caseCode |= right != null ? 1 << 2 : 0;
-
-			switch (caseCode)
-			{
-				case 0:
-					return Empty<T>.Instance;
-				case 1 << 0:
-					return new Single<T>(measure, left);
-				case 1 << 0 | 1 << 1:
-					FTree<Digit<T>> deep_1 = deep.DropRight();
-					Digit<T> r_2 = deep.Right;
-					return new Compound<T>(measure, left, deep.DropRight(), deep.Right);
-				case 1 << 0 | 1 << 1 | 1 << 2:
-					return new Compound<T>(measure, left, deep, right);
-				case 1 << 1 | 1 << 2:
-					return new Compound<T>(measure, deep.Left, deep.DropLeft(), right);
-				case 1 << 0 | 1 << 2:
-					return new Compound<T>(measure, left, deep, right);
-				case 1 << 1:
-					left = deep.Left;
-					deep = deep.DropLeft();
-					if (deep.Measure != 0)
+					switch (whereIsThisIndex)
 					{
-						right = deep.Right;
-						deep = deep.DropRight();
-						return new Compound<T>(measure, left, deep, right);
+						case IN_START:
+							leftmost = Empty;
+							rightmost = this;
+							return;
+						case IN_MIDDLE_OF_LEFT:
+							Digit left_1, left_2;
+							LeftDigit.Split(count, out left_1, out left_2);
+							leftmost = left_1 != null ? new Single(left_1) : Empty;
+							rightmost = CreateCheckNull(left_2, DeepTree, RightDigit);
+							return;
+						case IN_START_OF_DEEP:
+							leftmost = new Single(LeftDigit);
+							rightmost = CreateCheckNull(null, DeepTree, RightDigit);
+							return;
+						case IN_MIDDLE_OF_DEEP:
+							FTree<Digit> tree_1, tree_2;
+							DeepTree.Split(count - LeftDigit.Measure, out tree_1, out tree_2);
+							leftmost = CreateCheckNull(LeftDigit, tree_1);
+							rightmost = CreateCheckNull(null, tree_2, RightDigit);
+							return;
+						case IN_START_OF_RIGHT:
+							leftmost = CreateCheckNull(LeftDigit, DeepTree);
+							rightmost = new Single(RightDigit);
+							return;
+						case IN_MIDDLE_OF_RIGHT:
+							Digit right_1, right_2;
+							RightDigit.Split(count - LeftDigit.Measure - DeepTree.Measure, out right_1, out right_2);
+							leftmost = CreateCheckNull(LeftDigit, DeepTree, right_1);
+							rightmost = CreateCheckNull(right_2);
+							return;
+						case IN_END:
+							leftmost = this;
+							rightmost = Empty;
+							return;
 					}
-					return new Single<T>(measure, left);
-				case 1 << 2:
-					return new Single<T>(measure, right);
-				default:
 					throw Errors.Invalid_execution_path;
+				}
+
+				/// <summary>
+				///   Returns 0 if index is 0 (meaning, empty).
+				///   Returns 1 if index is in left digit
+				///   Returns 2 if index encompasses the left digit.
+				///   Returns 3 if he index is in the deep tree.
+				///   Returns 4 if the index encompasses the left digit + deep tree
+				///   Returns 5 if the index is in the right digit.
+				///   Returns 6 if the index encompasses the entire tree.
+				///   Returns 7 if the index is outside the tree.
+				/// </summary>
+				/// <param name="index"> </param>
+				/// <returns> </returns>
+				private int WhereIsThisIndex(int index)
+				{
+					if (index == 0) return IN_START;
+					if (index < LeftDigit.Measure) return IN_MIDDLE_OF_LEFT;
+					if (index == LeftDigit.Measure) return IN_START_OF_DEEP;
+					if (index < LeftDigit.Measure + DeepTree.Measure) return IN_MIDDLE_OF_DEEP;
+					if (index == LeftDigit.Measure + DeepTree.Measure) return IN_START_OF_RIGHT;
+					if (index < Measure) return IN_MIDDLE_OF_RIGHT;
+					if (index == Measure) return IN_END;
+					return OUTSIDE;
+				}
+
+				//+ Implementation
+				//  This function creates an FTree<TChild> of the right type, depending on which digits are null.
+				//  The tree cannot be null, but can be empty.
 			}
 		}
 	}

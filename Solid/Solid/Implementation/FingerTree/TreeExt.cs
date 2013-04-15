@@ -6,7 +6,7 @@ namespace Solid.FingerTree
 	{
 		internal static T Item<T>(this FTree<Value<T>> ftree, int index)
 		{
-			Measured leaf = ftree.Get(index);
+			var leaf = ftree.Get(index);
 			var leaf2 = leaf as Value<T>;
 			return leaf2.Content;
 		}

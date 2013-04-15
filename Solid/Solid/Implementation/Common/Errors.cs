@@ -5,37 +5,38 @@ namespace Solid.Common
 {
 	internal static class Errors
 	{
-		private const string str__argument_null = "The argument cannot be null.";
-		private const string str__index_out_of_range = "The index is out of range of this data structure";
-
-		private const string str__invalid_digit_size = "This operation cannot be performed on a digit with this size.";
-
-		private const string str__invalid_exeuction_path = "A switch statement took an invalid execution path.";
-
-		private const string str__invalid_leaf_invocation = "This operation cannot be performed on a leaf.";
-		private const string str__is_empty = "The operation is invalid because the data structure is empty.";
-		private const string str__key_exists = "The specified key already exists.";
-		private const string str__key_not_found = "The specified key does not exist in this data structure.";
-		private const string str__threading = "This instance can only be used from the thread that constructed it.";
-
-		private const string str__too_many_hash_collisions =
-			"An abnormally large number of hash collisions has occurred. This may be a sign that equality members must be reimplemented.";
-
-
-
-		internal static IndexOutOfRangeException Index_out_of_range
+		internal static InvalidOperationException Collection_readonly
 		{
 			get
 			{
-				return new IndexOutOfRangeException(str__index_out_of_range);
+				return new InvalidOperationException("This instance is readonly.");
 			}
+		}
+
+		internal static InvalidOperationException Capacity_exceeded
+		{
+			get
+			{
+				return new InvalidOperationException("The collection has exceeded its maximum capacity.");
+			}
+		}
+
+		internal static ArgumentOutOfRangeException Not_found(string name)
+		{
+			return new ArgumentOutOfRangeException(name, "The specified item was not found in the collection.");
+		}
+
+		internal static ArgumentOutOfRangeException Arg_out_of_range(string name)
+		{
+			return new ArgumentOutOfRangeException(name, "The index is out of range of this data structure");
+			
 		}
 
 		internal static InvalidOperationException Invalid_digit_size
 		{
 			get
 			{
-				return new InvalidOperationException(str__invalid_digit_size);
+				return new InvalidOperationException("This operation cannot be performed on a digit with this size.");
 			}
 		}
 
@@ -43,7 +44,7 @@ namespace Solid.Common
 		{
 			get
 			{
-				return new InvalidOperationException(str__invalid_exeuction_path);
+				return new InvalidOperationException("A switch statement took an invalid execution path.");
 			}
 		}
 
@@ -51,7 +52,7 @@ namespace Solid.Common
 		{
 			get
 			{
-				return new InvalidOperationException(str__invalid_leaf_invocation);
+				return new InvalidOperationException("This operation cannot be performed on a leaf.");
 			}
 		}
 
@@ -59,7 +60,7 @@ namespace Solid.Common
 		{
 			get
 			{
-				return new InvalidOperationException(str__is_empty);
+				return new InvalidOperationException("The operation is invalid because the data structure is empty.");
 			}
 		}
 
@@ -67,7 +68,7 @@ namespace Solid.Common
 		{
 			get
 			{
-				return new ArgumentException(str__key_exists);
+				return new ArgumentException("The specified key already exists.");
 			}
 		}
 
@@ -75,7 +76,7 @@ namespace Solid.Common
 		{
 			get
 			{
-				return new KeyNotFoundException(str__key_not_found);
+				return new KeyNotFoundException("The specified key does not exist in this data structure.");
 			}
 		}
 
@@ -84,7 +85,7 @@ namespace Solid.Common
 			get
 			{
 				return new InvalidOperationException(
-					str__too_many_hash_collisions);
+					"An abnormally large number of hash collisions has occurred. This may be a sign that equality members must be reimplemented.");
 			}
 		}
 
@@ -92,13 +93,13 @@ namespace Solid.Common
 		{
 			get
 			{
-				return new InvalidOperationException(str__threading);
+				return new InvalidOperationException("This instance can only be used from the thread that constructed it.");
 			}
 		}
 
 		internal static ArgumentNullException Argument_null(string name)
 		{
-			return new ArgumentNullException(name, str__argument_null);
+			return new ArgumentNullException(name, "The argument cannot be null.");
 		}
 	}
 }

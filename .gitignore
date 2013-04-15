@@ -12,8 +12,9 @@ TestResults
 *.suo
 *.user
 *.sln.docstates
-
+[Hh]istory/
 # Build results
+
 [Dd]ebug/
 [Rr]elease/
 x64/

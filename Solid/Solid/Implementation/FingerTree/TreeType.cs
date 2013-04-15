@@ -1,9 +1,15 @@
-namespace Solid.FingerTree
+namespace Solid
 {
-	internal static class TreeType
+	static partial class FingerTree<TValue>
 	{
-		public const int Compound = 3;
-		public const int Empty = 1;
-		public const int Single = 2;
+		abstract partial class FTree<TChild>
+		{
+			internal static class TreeType
+			{
+				public const int Compound = 3;
+				public const int Empty = 1;
+				public const int Single = 2;
+			}
+		}
 	}
 }

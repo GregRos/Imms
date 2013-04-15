@@ -5,10 +5,10 @@ using Solid.TrieMap.Iteration;
 namespace Solid.TrieMap
 {
 	/// <summary>
-	/// A node associated with a key-Content pair.
+	///   A node associated with a key-Leaf pair.
 	/// </summary>
-	/// <typeparam name="TKey"></typeparam>
-	/// <typeparam name="TValue"></typeparam>
+	/// <typeparam name="TKey"> </typeparam>
+	/// <typeparam name="TValue"> </typeparam>
 	internal sealed class MapLeaf<TKey, TValue> : MapNode<TKey, TValue>
 	{
 		public readonly HashedKey<TKey> MyKey;
@@ -36,7 +36,7 @@ namespace Solid.TrieMap
 			action(MyKey.Key, MyValue);
 		}
 
-		public override bool TryContains(HashedKey<TKey> tryKey, out Result result)
+		public override bool TryContains(HashedKey<TKey> tryKey, ref Result result)
 		{
 			if (tryKey.Hash != MyKey.Hash)
 			{
@@ -52,7 +52,7 @@ namespace Solid.TrieMap
 			return false;
 		}
 
-		public override MapNode<TKey, TValue> TryDrop(HashedKey<TKey> tryKey, out Result result)
+		public override MapNode<TKey, TValue> TryDrop(HashedKey<TKey> tryKey, ref Result result)
 		{
 			if (tryKey.Hash != MyKey.Hash)
 			{
@@ -68,8 +68,7 @@ namespace Solid.TrieMap
 			return null;
 		}
 
-
-		public override TValue TryGet(HashedKey<TKey> tryKey, out Result result)
+		public override TValue TryGet(HashedKey<TKey> tryKey, ref Result result)
 		{
 			if (tryKey.Hash != MyKey.Hash)
 			{
@@ -86,7 +85,7 @@ namespace Solid.TrieMap
 		}
 
 		public override MapNode<TKey, TValue> TrySet(HashedKey<TKey> tryKey, TValue tryValue, WriteBehavior behave,
-		                                             out Result result)
+		                                             ref Result result)
 		{
 			if (tryKey.Hash != MyKey.Hash && Height < MaxHeight)
 			{

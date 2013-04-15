@@ -13,22 +13,6 @@ namespace Solid.TrieMap.Iteration
 			this.inner = inner;
 		}
 
-		public void Dispose()
-		{
-		}
-
-		public bool MoveNext()
-		{
-			if (started) return false;
-			started = true;
-			return true;
-		}
-
-		public void Reset()
-		{
-			started = false;
-		}
-
 		public KeyValuePair<TKey, TValue> Current
 		{
 			get
@@ -43,6 +27,22 @@ namespace Solid.TrieMap.Iteration
 			{
 				return Current;
 			}
+		}
+
+		public void Dispose()
+		{
+		}
+
+		public bool MoveNext()
+		{
+			if (started) return false;
+			started = true;
+			return true;
+		}
+
+		public void Reset()
+		{
+			started = false;
 		}
 	}
 }

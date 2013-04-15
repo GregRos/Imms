@@ -12,28 +12,12 @@ namespace Solid.FingerTree.Iteration
 		{
 		}
 
-		public IEnumerator<Measured> GetEnumerator()
+		public static IEnumerator<Measured> Instance
 		{
-			return empty;
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return GetEnumerator();
-		}
-
-		public void Dispose()
-		{
-		}
-
-		public bool MoveNext()
-		{
-			return false;
-		}
-
-		public void Reset()
-		{
-			throw new NotSupportedException();
+			get
+			{
+				return empty;
+			}
 		}
 
 		public Measured Current
@@ -52,12 +36,28 @@ namespace Solid.FingerTree.Iteration
 			}
 		}
 
-		public static IEnumerator<Measured> Instance
+		public void Dispose()
 		{
-			get
-			{
-				return empty;
-			}
+		}
+
+		public IEnumerator<Measured> GetEnumerator()
+		{
+			return empty;
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
+
+		public bool MoveNext()
+		{
+			return false;
+		}
+
+		public void Reset()
+		{
+			throw new NotSupportedException();
 		}
 	}
 }

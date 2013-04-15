@@ -1,56 +1,54 @@
 using System;
 using System.Collections.Generic;
 
-namespace Solid.FingerTree
+namespace Solid
 {
-	internal abstract class Measured
+	static partial class FingerTree<TValue>
 	{
-		public readonly int Measure;
-
-		protected Measured(int measure)
+		internal interface IMeasuredEnumerator<in TOver> : IEnumerator<Leaf<TValue>>
+			where TOver : Measured<TOver>
 		{
-			Measure = measure;
+			void Retarget(TOver next);
 		}
 
-		public abstract Measured this[int index]
+
+
+		internal abstract class Measured<TObject>
+			where TObject : Measured<TObject>
 		{
-			get;
+			public readonly int Measure;
+
+			protected Measured(int measure)
+			{
+				Measure = measure;
+			}
+
+
+			public abstract void Fuse(TObject after, out TObject firstRes, out TObject lastRes);
+
+			public abstract IMeasuredEnumerator<TObject> GetEnumerator(bool forward);
+
+			public abstract void Insert(int index, Leaf<TValue> leaf, out TObject value, out TObject rightmost1);
+
+			public abstract TObject Remove(int index);
+
+			public abstract TObject Reverse();
+
+			public abstract TObject Set(int index, Leaf<TValue> leaf);
+
+			public abstract void Split(int index, out TObject leftmost, out TObject rightmost);
+
+			public abstract Leaf<TValue> this[int index] { get; }
+
+			public abstract bool IsFragment { get; }
+
+			public abstract void Iter(Action<Leaf<TValue>> action);
+
+			public abstract void IterBack(Action<Leaf<TValue>> action);
+
+			public abstract bool IterBackWhile(Func<Leaf<TValue>, bool> action);
+
+			public abstract bool IterWhile(Func<Leaf<TValue>, bool> action);
 		}
-
-		public abstract bool IterBackWhile(Func<Measured, bool> action);
-
-		public abstract bool IterWhile(Func<Measured, bool> action);
-
-		public abstract IEnumerator<Measured> GetEnumerator();
-
-		public abstract void Iter(Action<Measured> action);
-
-		public abstract void IterBack(Action<Measured> action);
-
-		public abstract bool IsFragment { get; }
-	}
-
-	internal abstract class Measured<TObject> : Measured
-		where TObject : Measured
-	{
-		protected Measured(int measure) : base(measure)
-		{
-		}
-
-		public abstract void Insert(int index, Measured measured, out TObject value, out TObject rightmost1);
-
-
-		public abstract TObject Reverse();
-
-		
-
-		public abstract TObject Remove(int index);
-
-		public abstract TObject Set(int index, Measured value);
-
-		public abstract void Split(int index, out TObject leftmost, out TObject rightmost);
-
-		public abstract void Fuse(TObject after, out TObject firstRes, out TObject lastRes);
-		
 	}
 }

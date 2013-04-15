@@ -5,27 +5,30 @@ namespace Solid.TrieMap.Iteration
 {
 	internal sealed class ParentIterator<TKey, TValue> : IEnumerator<KeyValuePair<TKey, TValue>>
 	{
-		private readonly MapParent<TKey, TValue> root;
 		private KeyValuePair<TKey, TValue> curValue;
 		private IEnumerator<KeyValuePair<TKey, TValue>> currentIter;
 		private int index;
+		private readonly MapParent<TKey, TValue> root;
 
 		public ParentIterator(MapParent<TKey, TValue> root)
 		{
 			this.root = root;
 		}
 
-		private bool TryNext()
+		public KeyValuePair<TKey, TValue> Current
 		{
-			index++;
-			if (index < root.Arr.Length)
+			get
 			{
-				currentIter = root.Arr[index].GetEnumerator();
-				currentIter.MoveNext();
-				curValue = currentIter.Current;
-				return true;
+				return curValue;
 			}
-			return false;
+		}
+
+		object IEnumerator.Current
+		{
+			get
+			{
+				return Current;
+			}
 		}
 
 		public void Dispose()
@@ -48,20 +51,17 @@ namespace Solid.TrieMap.Iteration
 			curValue = default(KeyValuePair<TKey, TValue>);
 		}
 
-		public KeyValuePair<TKey, TValue> Current
+		private bool TryNext()
 		{
-			get
+			index++;
+			if (index < root.Arr.Length)
 			{
-				return curValue;
+				currentIter = root.Arr[index].GetEnumerator();
+				currentIter.MoveNext();
+				curValue = currentIter.Current;
+				return true;
 			}
-		}
-
-		object IEnumerator.Current
-		{
-			get
-			{
-				return Current;
-			}
+			return false;
 		}
 	}
 }

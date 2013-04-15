@@ -9,6 +9,8 @@ using Solid.FingerTree;
 using Solid.TrieMap;
 using Solid.TrieVector;
 
+#pragma warning disable 1587
+///<summary>test</summary>
 namespace Solid
 {
 
@@ -20,12 +22,7 @@ internal static class Program
 		
 	private static void Main(string[] args)
 	{
-		var items = Enumerable.Range(0, 1000).ToFlexibleList();
 
-		for (int i = 0; i < 500; i++)
-		{
-			items = items.Remove(100);
-		}
 
 	}
 

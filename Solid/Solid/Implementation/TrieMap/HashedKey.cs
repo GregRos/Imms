@@ -3,7 +3,7 @@ using Solid.Common;
 
 namespace Solid.TrieMap
 {
-	internal struct HashedKey<TKey>
+	internal class HashedKey<TKey>
 	{
 		public readonly IEqualityComparer<TKey> Comparer;
 		public readonly int Hash;
@@ -14,7 +14,16 @@ namespace Solid.TrieMap
 			if (comparer == null) throw Errors.Argument_null("comparer");
 			if (key == null) throw Errors.Argument_null("key");
 			Comparer = comparer;
-			Hash = comparer.GetHashCode(key);
+			var hash = (uint) comparer.GetHashCode(key);
+			unchecked
+			{
+				hash *= 0x5bd1e995;
+				hash ^= hash >> 24;
+				hash *= 0x5bd1e995;
+				hash ^= 4 ^ 0xc58f1a7b;
+				Hash = (int) hash;
+			}
+
 			Key = key;
 		}
 

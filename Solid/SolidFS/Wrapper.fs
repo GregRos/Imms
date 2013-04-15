@@ -1,105 +1,211 @@
 ﻿module Wrapper
-open Solid.FingerTree
+open Solid
+open Solid.Common;
 open System.Collections.Generic
 open System.Collections
 open System
 
-module internal Errors = 
-    let Argument_null name = 
-        ArgumentException(name)
-    let Index_out_of_range() = 
-        IndexOutOfRangeException()
 
 
-
-
-
-
-
-[<Compil
-module internal Verify = 
-    let inline notNull name arg = 
-        if obj.ReferenceEquals(arg, null) then
-            raise(Errors.Argument_null(name))
-    let inline index len index = 
-        let index = if index < 0 then index + len else index
-        if index < 0 || index >= len then
-            raise(Errors.Index_out_of_range())
-        else
-            index
-type FlexibleList<'value>(root : FTree<Value<'value>>)= 
+type XList<'value>(root : FlexibleList<'value>)= 
     
-    static let empty = FlexibleList<_>(FTree<Value<'value>>.Empty)
-    static let cns r = FlexibleList<'b>(r)
+    static let empty = XList<_>(FlexibleList<'value>.Empty)
+    static let cns r = XList<'b>(r)
       
-    
-
-
     interface seq<'value> with
         member this.GetEnumerator() : IEnumerator<'value> =
-            new Solid.FingerTree.Iteration.EnumeratorWrapper<'value>(root.GetEnumerator()):>_
-        member this.GetEnumerator() : IEnumerator = (this :> seq<'value>).GetEnumerator():>_
+            root.GetEnumerator()
+        member this.GetEnumerator() : IEnumerator = root.GetEnumerator():>_
 
+    interface IList<'value> with
+        member this.Count = this.Length
+        member this.Add _ = raise Errors.Collection_readonly
+        member this.RemoveAt _ = raise Errors.Collection_readonly
+        member this.IsReadOnly = true
+        member this.CopyTo (arr, index) = 
+            root.CopyTo(arr, index)
+        member this.IndexOf i = (root :> IList<'value>).IndexOf(i)
+        member this.Contains i = (root :> IList<'value>).Contains(i)
+        member this.Clear () = raise Errors.Collection_readonly
+        member this.Insert(_,_) = raise Errors.Collection_readonly
+        member this.Remove _ = raise Errors.Collection_readonly
+        member this.get_Item i = this.[i]
+        member this.set_Item(a,b) = raise Errors.Collection_readonly
     static member OfSeq vs = 
-        let mutable ftree = FTree<Value<'value>>.Empty
-        for v in vs do
-            ftree <- ftree.AddRight(Value(v))
-        FlexibleList<_>(ftree)
+        FlexibleList.Empty.AddLastRange(vs) |> cns
 
     member internal this.Root = root  
        
     member this.Cons v = 
-        this.Root.AddLeft(Value(v)) |> cns
+        root.AddFirst v
 
     member this.Conj v = 
-        this.Root.AddRight(Value(v)) |> cns
+        root.AddLast v |> cns
 
-    member this.ConsList (other : FlexibleList<'value>) = 
-        Verify.notNull "other" other
-        FTree<_>.Concat(other.Root, root) |> cns
+    member this.ConsList (other : XList<'value>) = 
+        other.Root |> root.AddFirstList |> cns
 
-    member this.ConjList (other : FlexibleList<'value>) = 
-        Verify.notNull "other" other
-        FTree<_>.Concat(root, other.Root) |> cns
+    member this.ConjList (other : XList<'value>) = 
+        other.Root |> root.AddLastList |> cns
 
-    member this.ConsSeq (sequence : seq<'value>) = 
-        Verify.notNull "sequence" sequence
-        let asList = FlexibleList.OfSeq(sequence)
-        this.ConsList asList
+    member this.ConsSeq (s : seq<'value>) = 
+        s |> root.AddFirstRange |> cns
 
-    member this.ConjSeq (sequence : seq<'value>) = 
-        Verify.notNull "sequence" sequence
-        let mutable ftree = FTree<_>.Empty
-        for v in sequence do
-            ftree <- ftree.AddRight(Value(v))
-        ftree |> cns
-    
-    member this.Length = root.Measure
+    member this.ConjSeq (s : seq<'value>) = 
+        s |> root.AddLastRange |> cns
+    member this.Length = root.Count
     member this.Item index = 
-        let index = index |> Verify.index root.Measure
-        ((root.Get index) :?> Value<'value>).Content
+        root.[index]
     member this.Update index value = 
-        let index = index |> Verify.index root.Measure
-        root.Set(index, Value(value)) |> cns
+        root.Set(index,value)
     member this.Insert index value = 
-        let index = index |> Verify.index root.Measure
-        root.Insert(index,Value(value)) |> cns
-    member this.Slice startIndex endIndex = 
-        let startIndex = startIndex |> Verify.index root.Measure
-        let endIndex = endIndex |> Verify.index root.Measure
-        if startIndex > endIndex then
-            raise(Errors.Index_out_of_range())
-        if startIndex = endIndex then
-            let res = (root.Get(startIndex) :?> Value<'value>).Content
-            empty.Conj(res)
-        else
-            let mutable split1 : FTree<_> = null
-            let mutable split2 : FTree<_> = null
-            root.Split(startIndex, &split1, &split2)
-            split2.Split(endIndex - startIndex, &split1, &split2)
-            split1 |> cns
+        root.Insert(index,value)
+    member this.GetSlice(fIndex, lIndex)= 
+        match fIndex,lIndex with
+        | None,None -> this
+        | Some s, None -> root.Slice(s, -1) |> cns
+        | Some s, Some e -> root.Slice(s,e) |> cns
+        | None, Some e -> root.Slice(0, e) |> cns
 
-    member this.InsertSeq 
+    member this.InsertSeq index s = 
+        root.InsertRange(index, s) |> cns
+
+    member this.InsertList index (l : XList<_>) = 
+        root.InsertList(index, l.Root) |> cns
+
+    member this.Remove index = 
+        root.Remove(index) |> cns
+
+    member this.Take n = 
+        root.Take(n) |> cns
+
+    member this.Skip n = 
+        root.Skip(n) |> cns
+
+    member this.TakeWhile f = 
+        root.TakeWhile(Func<_,_>(f))
+
+    member this.SkipWhile f = 
+        root.SkipWhile(Func<_,_>(f))
+
+    member this.Iter f = 
+        root.ForEach(Action<_>(f))
+
+    member this.IterBack f = 
+        root.ForEach(Action<_>(f))
+
+    member this.IterWhile f = 
+        root.ForEachWhile(Func<_,_>(f))
+
+    member this.IterBackWhile f = 
+        root.ForEachBackWhile(Func<_,_>(f))
+
+    member this.Fold f = 
+        root.Aggregate(Func<_,_,_>(f))
+
+    member this.FoldBack f = 
+        root.AggregateBack(Func<_,_,_>(f))
+
+    member this.Filter f = 
+        root.Where(Func<_,_>(f)) |> cns
+
+    member this.Map f = 
+        root.Select(Func<_,_>(f)) |> cns
+
+    member this.Uncons = 
+        root.DropFirst() |> cns
+
+    member this.Unconj = 
+        root.DropLast() |> cns
+
+    member this.Head = 
+        root.First 
+
+    member this.Last = 
+        root.Last
+
+    member this.IndexOf p = 
+        match root.IndexOf(p) with
+        | n when n.HasValue -> Some <| n.Value
+        | _ -> None
+
+    member this.Rev() = root.Reverse() |> cns
+
+    member this.Split i =
+        let mutable part1 : FlexibleList<_> = null
+        let mutable part2 : FlexibleList<_> = null
+        root.Split(i, &part1, &part2)
+        part1,part2
+
+type Vector<'value>(root : FastList<'value>) = 
+    static let cns x = Vector<'value>(x)
+    interface seq<'value> with
+        member this.GetEnumerator() : IEnumerator<'value> = root.GetEnumerator()
+        member this.GetEnumerator() : IEnumerator = root.GetEnumerator():>_
+
+    interface IList<'value> with
+        member this.Count = this.Length
+        member this.Add _ = raise Errors.Collection_readonly
+        member this.RemoveAt _ = raise Errors.Collection_readonly
+        member this.IsReadOnly = true
+        member this.CopyTo (arr, index) = 
+            root.CopyTo(arr, index)
+        member this.IndexOf i = (root :> IList<'value>).IndexOf(i)
+        member this.Contains i = (root :> IList<'value>).Contains(i)
+        member this.Clear () = raise Errors.Collection_readonly
+        member this.Insert(_,_) = raise Errors.Collection_readonly
+        member this.Remove _ = raise Errors.Collection_readonly
+        member this.get_Item i = this.[i]
+        member this.set_Item(a,b) = raise Errors.Collection_readonly
+
+    member val internal Root = root
+    
+    member __.Conj v = root.AddLast v |> cns
+
+    member __.ConjSeq vs = root.AddLastRange vs |> cns
+
+    member __.Unconj = root.DropLast() |> cns
+
+    member __.Item i = root.[i]
+
+    member __.Last = root.Last
+
+    member __.Head = root.First
+
+    member __.Filter f = root.Where(Func<_,_>(f)) |> cns
+
+    member __.Map f = root.Select(Func<_,_>(f)) |> cns
+
+    member __.Fold f = root.Aggregate(Func<_,_,_>(f)) |> cns
+
+    member __.Iter f = root.ForEach(Action<_>(f))
+
+    member __.IterBack f = root.ForEachBack(Action<_>(f))
+
+    member __.IterWhile f = root.ForEachWhile(Func<_,_>(f))
+
+    member __.IterBackWhile f = root.ForEachBackWhile(Func<_,_>(f))
+
+    member __.Take n = root.Take n |> cns
+
+    member __.UnconjN n = root.DropLast(n) |> cns
+
+    member __.FoldBack f = root.AggregateBack(Func<_,_,_>(f))
+
+    member __.TakeWhile f = root.TakeWhile(Func<_,_>(f)) |> cns
+    
+    member __.Length = root.Count
+
+    member __.IndexOf f = 
+        match root.IndexOf(Func<_,_>(f)) with
+        | n when n.HasValue -> Some(n.Value)
+        | _ -> None
+
+
+
+
+
+        
         
         
     

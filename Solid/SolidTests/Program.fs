@@ -1,145 +1,6 @@
-﻿5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-61
-62
-63
-64
-65
-66
-67
-68
-69
-70
-71
-72
-73
-74
-75
-76
-77
-78
-79
-80
-81
-82
-83
-84
-85
-86
-87
-88
-89
-90
-91
-92
-93
-94
-95
-96
-97
-98
-99
-100
-101
-102
-103
-104
-105
-106
-107
-108
-109
-110
-111
-112
-113
-114
-115
-116
-117
-118
-119
-120
-121
-122
-123
-124
-125
-126
-127
-128
-129
-130
-131
-132
-133
-134
-135
-136
-137
-138
-139
-140
-141
-142
-143
+﻿
 
-
-
+module Main
 // Learn more about F# at http://fsharp.net
 // See the 'F# Tutorial' project for more help.
 
@@ -153,12 +14,14 @@ open SolidTests.Tests
 open System.Collections.Generic
 open System.Threading
 open SolidFS
+open MapTestTargets
+open SolidTests.Generators
 let inline ( ** ) a b = pown a b
 
 
 
 type MutableList<'a> = System.Collections.Generic.List<'a>
-let warmup = 2
+let warmup = 3
 let sw = Stopwatch()
 let mutable time = TimeSpan()
 let mutable maybe_failed = false
@@ -176,7 +39,8 @@ let invoke_test action o =
                 action o
             GC.Collect()
             sw.Restart()
-            action o |> ignore
+            for __ = 0 to warmup do
+                action o
             sw.Stop()
             time <- sw.Elapsed
             with //empirically this try-with block does not affect performance.
@@ -187,7 +51,7 @@ let invoke_test action o =
     thread.Start()
     thread.Join()
 
-    if maybe_failed then Failed else Succeeded(time.TotalMilliseconds)
+    if maybe_failed then Failed else Succeeded(time.TotalMilliseconds/4.)
 
 
 
@@ -204,6 +68,12 @@ let run_test_on (action : Test) (objs : list<TestTarget<int>>) =
 
     {Name = action.Name; Results = results}
 
+let run_test_on_map (action : MapTest<_>) (objs : list<MapTestTarget<_>>)= 
+    let results = MutableList()
+    for target in objs do
+        let ret = target |> invoke_test (action.Test >> ignore)
+        results.Add({Name = target.Name; Result = ret})
+    {Name = action.Name; Results = results}
 let run_test_sequence (the_sequence : Test list) get_targets =
     seq {
         for test in the_sequence do
@@ -211,6 +81,13 @@ let run_test_sequence (the_sequence : Test list) get_targets =
             yield current_result
         }
 
+
+let run_test_sequence_map (the_sequence : MapTest<_> list) get_targets = 
+    seq {
+        for test in the_sequence do
+            let current_result = run_test_on_map test (get_targets())
+            yield current_result
+    }
 open SolidTests.Tests
 
 open SolidTests.Targets
@@ -233,10 +110,28 @@ let perf_testing() =
         //Test_iter_take_first iterations;
         Test_get_rnd <|10**5;
         Test_get_each ;
-        Test_concat_self iterations]
+        Test_rem_all;
+        Test_concat_self iterations;
+        Test_iter_take_first iterations]
     let results = run_test_sequence all_tests (delay1 all_test_targets iterations)
     results |> Seq.iter print
 
+let perf_testing_maps() = 
+    let iterations = (10 ** 5)
+    let sGenerator = {Bounds = 30, 50; Chars=  [| 'a' .. 'z'|]; Count = iterations} :> IGenerator<_>
+    let sGenerator2 = {Bounds = 30, 50; Chars = [| 'A' .. 'Z'|]; Count = iterations} :> IGenerator<_>
+    let input = sGenerator.Generate() |> Seq.toArray
+    let input2 =sGenerator2.Generate() |> Seq.toArray
+    System.Console.BufferHeight <- Console.BufferHeight * 3
+    let test_list = 
+        [
+            Test_add_many input2;
+            //Test_rem_many input;
+            Test_get_many input;
+            Test_contains_many input
+        ]
+    let results = run_test_sequence_map test_list (fun () -> [FSMapTestTarget<_>.FromSeq input; SolidMapTestTarget<_>.FromSeq input])
+    results |> Seq.iter print
 let then_verify (x : TestTarget<_>) =
     if x.Verify() |> not then
         failwith "Error"
@@ -275,11 +170,8 @@ let unit_consistency_testing() =
 [<EntryPoint>]
 let main argv =
     let mutable group = TestGroup([| solid_xlist 0; core_list 0 |]) :> TestTarget<_>
-    perf_testing()
+    
 
-
-    if group.Verify() |> not then
-        failwith "Nope"
     printfn "Done"
-    Console.Read()
+    Console.Read() |> ignore
     0

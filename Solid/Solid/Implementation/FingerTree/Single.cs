@@ -1,157 +1,168 @@
 using System;
 using System.Collections.Generic;
-using NUnit.Framework;
 
-namespace Solid.FingerTree
+namespace Solid
 {
-	internal sealed class Single<T> : FTree<T>
-		where T : Measured<T>
+	static partial class FingerTree<TValue>
 	{
-		public readonly Digit<T> CenterDigit;
-
-		public Single(int measure, Digit<T> centerDigit) : base(measure, TreeType.Single)
+		internal abstract partial class FTree<TChild>
 		{
-			CenterDigit = centerDigit;
-		}
-
-		public override T Left
-		{
-			get
+			internal sealed class Single : FTree<TChild>
 			{
-				return CenterDigit.Left;
+				public readonly Digit CenterDigit;
+
+				public Single(Digit centerDigit)
+					: base(centerDigit.Measure, TreeType.Single)
+				{
+					CenterDigit = centerDigit;
+				}
+
+				public override bool IsFragment
+				{
+					get
+					{
+						return CenterDigit.IsFragment;
+					}
+				}
+
+				public override TChild Left
+				{
+					get
+					{
+						return CenterDigit.Left;
+					}
+				}
+
+				public override TChild Right
+				{
+					get
+					{
+						return CenterDigit.Right;
+					}
+				}
+
+				public override FTree<TChild> AddLeft(TChild item)
+				{
+					if (CenterDigit.Size < 4)
+					{
+						return new Single(CenterDigit.AddLeft(item));
+					}
+					Digit leftmost;
+					Digit rightmost;
+					CenterDigit.AddLeftSplit(item, out leftmost, out rightmost);
+					return new CompoundTree(leftmost, FTree<Digit>.Empty, rightmost);
+				}
+
+				public override FTree<TChild> AddRight(TChild item)
+				{
+					if (CenterDigit.Size < 4)
+					{
+						return new Single(CenterDigit.AddRight(item));
+					}
+					Digit leftmost;
+					Digit rightmost;
+					CenterDigit.AddRightSplit(item, out leftmost, out rightmost);
+					return new CompoundTree(leftmost, FTree<Digit>.Empty, rightmost);
+				}
+
+				public override FTree<TChild> DropLeft()
+				{
+					if (CenterDigit.Size > 1)
+					{
+						var newDigit = CenterDigit.PopLeft();
+						return new Single(newDigit);
+					}
+					return Empty;
+				}
+
+				public override FTree<TChild> DropRight()
+				{
+					if (CenterDigit.Size > 1)
+					{
+						var newDigit = CenterDigit.PopRight();
+						return new Single(newDigit);
+					}
+					return Empty;
+				}
+
+				public override Leaf<TValue> this[int index]
+				{
+					get
+					{
+						var r = CenterDigit[index];
+						return r;
+					}
+				}
+
+				public override IEnumerator<Leaf<TValue>> GetEnumerator(bool forward)
+				{
+					return CenterDigit.GetEnumerator(forward);
+				}
+
+				public override FTree<TChild> Insert(int index, Leaf<TValue> leaf)
+				{
+					Digit leftmost, rightmost;
+					CenterDigit.Insert(index, leaf, out leftmost, out rightmost);
+					if (rightmost == null)
+					{
+						return new Single(leftmost);
+					}
+					return new CompoundTree(leftmost, FTree<Digit>.Empty, rightmost);
+				}
+
+				public override void Iter(Action<Leaf<TValue>> action)
+				{
+					CenterDigit.Iter(action);
+				}
+
+				public override void IterBack(Action<Leaf<TValue>> action)
+				{
+					CenterDigit.IterBack(action);
+				}
+
+				public override bool IterBackWhile(Func<Leaf<TValue>, bool> func)
+				{
+					return CenterDigit.IterBackWhile(func);
+				}
+
+				public override bool IterWhile(Func<Leaf<TValue>, bool> func)
+				{
+					return CenterDigit.IterWhile(func);
+				}
+
+				public override FTree<TChild> Remove(int index)
+				{
+#if DEBUG
+					CenterDigit.IsFragment.Is(false);
+#endif
+
+					var res = CenterDigit.Remove(index);
+					if (res == null)
+					{
+						return Empty;
+					}
+					return new Single(res);
+				}
+
+				public override FTree<TChild> Reverse()
+				{
+					return new Single(CenterDigit.Reverse());
+				}
+
+				public override FTree<TChild> Set(int index, Leaf<TValue> leaf)
+				{
+					return new Single(CenterDigit.Set(index, leaf));
+				}
+
+				public override void Split(int count, out FTree<TChild> leftmost, out FTree<TChild> rightmost)
+				{
+					Digit left_digit;
+					Digit right_digit;
+					CenterDigit.Split(count, out left_digit, out right_digit);
+					leftmost = left_digit != null ? new Single(left_digit) : Empty;
+					rightmost = right_digit != null ? new Single(right_digit) : Empty;
+				}
 			}
-		}
-
-		public override T Right
-		{
-			get
-			{
-				return CenterDigit.Right;
-			}
-		}
-
-		public override FTree<T> AddLeft(T item)
-		{
-			if (CenterDigit.Size < 4)
-			{
-				return new Single<T>(Measure + item.Measure, CenterDigit.AddLeft(item));
-			}
-			Digit<T> leftmost;
-			Digit<T> rightmost;
-			CenterDigit.AddLeftSplit(item, out leftmost, out rightmost);
-			return new Compound<T>(Measure + item.Measure, leftmost, Empty<Digit<T>>.Instance, rightmost);
-		}
-
-		public override FTree<T> AddRight(T item)
-		{
-			if (CenterDigit.Size < 4)
-			{
-				return new Single<T>(Measure + item.Measure, CenterDigit.AddRight(item));
-			}
-			Digit<T> leftmost;
-			Digit<T> rightmost;
-			CenterDigit.AddRightSplit(item, out leftmost, out rightmost);
-			return new Compound<T>(Measure + item.Measure, leftmost, Empty<Digit<T>>.Instance, rightmost);
-		}
-
-		public override FTree<T> DropLeft()
-		{
-			if (CenterDigit.Size > 1)
-			{
-				Digit<T> newDigit = CenterDigit.PopLeft();
-				return new Single<T>(newDigit.Measure, newDigit);
-			}
-			return Empty<T>.Instance;
-		}
-
-		public override FTree<T> DropRight()
-		{
-			if (CenterDigit.Size > 1)
-			{
-				Digit<T> newDigit = CenterDigit.PopRight();
-				return new Single<T>(newDigit.Measure, newDigit);
-			}
-			return Empty<T>.Instance;
-		}
-
-		public override bool IterBackWhile(Func<Measured, bool> func)
-		{
-			return CenterDigit.IterBackWhile(func);
-		}
-
-		public override bool IterWhile(Func<Measured, bool> func)
-		{
-			return CenterDigit.IterWhile(func);
-		}
-
-		public override Measured Get(int index)
-		{
-			Measured r = CenterDigit[index];
-			return r;
-		}
-
-		public override bool IsFragment
-		{
-			get
-			{
-				return CenterDigit.IsFragment;
-			}
-		}
-
-		public override FTree<T> Remove(int index)
-		{
-			CenterDigit.IsFragment.Is(false);
-			var res = CenterDigit.Remove(index);
-			if (res == null)
-			{
-				return Empty<T>.Instance;
-			}
-			return new Single<T>(Measure - 1, res);
-		}
-
-		public override IEnumerator<Measured> GetEnumerator()
-		{
-			return CenterDigit.GetEnumerator();
-		}
-
-		public override FTree<T> Insert(int index, Measured value)
-		{
-			Digit<T> leftmost, rightmost;
-			CenterDigit.Insert(index, value, out leftmost, out rightmost);
-			if (rightmost == null)
-			{
-				return new Single<T>(Measure + 1, leftmost);
-			}
-			return new Compound<T>(Measure + 1, leftmost, Empty<Digit<T>>.Instance, rightmost);
-		}
-
-		public override void Iter(Action<Measured> action)
-		{
-			CenterDigit.Iter(action);
-		}
-
-		public override void IterBack(Action<Measured> action)
-		{
-			CenterDigit.IterBack(action);
-		}
-
-		public override FTree<T> Reverse()
-		{
-			return new Single<T>(Measure, CenterDigit.Reverse());
-		}
-
-		public override FTree<T> Set(int index, Measured value)
-		{
-			return new Single<T>(Measure, CenterDigit.Set(index, value));
-		}
-
-		public override void Split(int count, out FTree<T> leftmost, out FTree<T> rightmost)
-		{
-			Digit<T> left_digit;
-			Digit<T> right_digit;
-			CenterDigit.Split(count, out left_digit, out right_digit);
-			leftmost = left_digit != null ? (FTree<T>) new Single<T>(count, left_digit) : Empty<T>.Instance;
-			rightmost = right_digit != null ? (FTree<T>) new Single<T>(Measure - count, right_digit) : Empty<T>.Instance;
 		}
 	}
 }

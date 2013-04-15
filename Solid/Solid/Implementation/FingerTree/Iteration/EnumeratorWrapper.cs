@@ -4,61 +4,61 @@ using System.Collections.Generic;
 
 namespace Solid.FingerTree.Iteration
 {
-	internal class EnumeratorWrapper<T> : IEnumerator<T>, IEnumerable<T>
-	{
-		private readonly IEnumerator<Measured> inner;
-		private T current;
+	//internal class EnumeratorWrapper<T> : IEnumerator<T>, IEnumerable<T>
+	//{
+	//	private T current;
+	//	private readonly IEnumerator<Measured> inner;
 
-		public EnumeratorWrapper(IEnumerator<Measured> inner)
-		{
-			this.inner = inner;
-		}
+	//	public EnumeratorWrapper(IEnumerator<Measured> inner)
+	//	{
+	//		this.inner = inner;
+	//	}
 
-		public IEnumerator<T> GetEnumerator()
-		{
-			return new EnumeratorWrapper<T>(inner);
-		}
+	//	public T Current
+	//	{
+	//		get
+	//		{
+	//			return current;
+	//		}
+	//	}
 
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return GetEnumerator();
-		}
+	//	object IEnumerator.Current
+	//	{
+	//		get
+	//		{
+	//			return Current;
+	//		}
+	//	}
 
-		public void Dispose()
-		{
-		}
+	//	public void Dispose()
+	//	{
+	//	}
 
-		public bool MoveNext()
-		{
-			bool ret = inner.MoveNext();
-			if (ret)
-			{
-				var tmp = inner.Current as Value<T>;
-				current = tmp.Content;
-				return true;
-			}
-			return false;
-		}
+	//	public IEnumerator<T> GetEnumerator()
+	//	{
+	//		return new EnumeratorWrapper<T>(inner);
+	//	}
 
-		public void Reset()
-		{
-			throw new NotSupportedException();
-		}
+	//	IEnumerator IEnumerable.GetEnumerator()
+	//	{
+	//		return GetEnumerator();
+	//	}
 
-		public T Current
-		{
-			get
-			{
-				return current;
-			}
-		}
+	//	public bool MoveNext()
+	//	{
+	//		var ret = inner.MoveNext();
+	//		if (ret)
+	//		{
+	//			var tmp = inner.Current as Value<T>;
+	//			current = tmp.Content;
+	//			return true;
+	//		}
+	//		return false;
+	//	}
 
-		object IEnumerator.Current
-		{
-			get
-			{
-				return Current;
-			}
-		}
-	}
+	//	public void Reset()
+	//	{
+	//		throw new NotSupportedException();
+	//	}
+	//}
 }

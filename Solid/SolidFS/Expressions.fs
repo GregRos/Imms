@@ -38,7 +38,7 @@ type FlexibleListBuilder internal() =
     member __.Zero() = Nothing
     member __.Delay f = f()
 
-type VectorBuilder internal() = 
+type FastListBuilder internal() = 
     member __.Zero() = Nothing
     member __.Yield v = Just v
     member __.YieldFrom (vs : 'a seq) = vs
@@ -65,7 +65,7 @@ type VectorBuilder internal() =
         | Many xs, Just y -> xs <+ y |> Many
         | Many xs, Many ys -> xs <+> ys |> Many
     
-let vector = VectorBuilder()
+let fastlist = FastListBuilder()
 let xlist = FlexibleListBuilder()
         
 

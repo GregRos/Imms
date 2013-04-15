@@ -24,26 +24,26 @@ namespace Solid.TrieMap
 		{
 		}
 
-		public override bool TryContains(HashedKey<TKey> tryKey, out Result result)
+		public override bool TryContains(HashedKey<TKey> tryKey, ref Result result)
 		{
 			result = Result.Success;
 			return false;
 		}
 
-		public override MapNode<TKey, TValue> TryDrop(HashedKey<TKey> tryKey, out Result result)
+		public override MapNode<TKey, TValue> TryDrop(HashedKey<TKey> tryKey, ref Result result)
 		{
 			result = Result.KeyNotFound;
 			return null;
 		}
 
-		public override TValue TryGet(HashedKey<TKey> tryKey, out Result result)
+		public override TValue TryGet(HashedKey<TKey> tryKey, ref Result result)
 		{
 			result = Result.KeyNotFound;
 			return default(TValue);
 		}
 
 		public override MapNode<TKey, TValue> TrySet(HashedKey<TKey> tryKey, TValue value, WriteBehavior behave,
-		                                             out Result result)
+		                                             ref Result result)
 		{
 			result = Result.Success;
 			return new MapLeaf<TKey, TValue>(0, tryKey, value);

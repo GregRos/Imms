@@ -1,56 +1,56 @@
 using System;
 using System.Collections.Generic;
 
-namespace Solid.TrieVector
+namespace Solid
 {
-	internal abstract class VectorNode<T>
+	internal static partial class TrieVector<TValue>
 	{
-		public readonly int Count;
-		public readonly int Height;
-		public readonly bool IsFull;
-		private static readonly VectorNode<T> empty = new VectorLeaf<T>(new T[0]);
-
-		protected VectorNode(int height, int count, bool isFull)
+		internal abstract class VectorNode
 		{
-			Height = height;
-			Count = count;
-			IsFull = isFull;
-		}
+			private static readonly VectorNode empty = new VectorLeaf(new TValue[0]);
+			public readonly int Count;
+			public readonly int Height;
+			public readonly bool IsFull;
 
-		public abstract T this[int index]
-		{
-			get;
-		}
-
-		public abstract VectorNode<T> Add(T item);
-
-		public abstract VectorNode<TOut> Apply<TOut>(Func<T, TOut> transform);
-
-		public abstract VectorNode<T> Drop();
-
-		public abstract IEnumerator<T> GetEnumerator();
-
-
-		public abstract void IterBack(Action<T> action);
-
-		public abstract bool IterWhile(Func<T, bool> conditional);
-
-		public abstract bool IterBackWhile(Func<T, bool> conditional);
-
-		public abstract VectorNode<T> BulkLoad(T[] items, int startIndex, int count);
-
-		public abstract void Iter(Action<T> action);
-
-		public abstract VectorNode<T> Set(int index, T value);
-
-		public abstract VectorNode<T> Take(int index);
-
-		public static VectorNode<T> Empty
-		{
-			get
+			protected VectorNode(int height, int count, bool isFull)
 			{
-				return empty;
+				Height = height;
+				Count = count;
+				IsFull = isFull;
 			}
+
+			public static VectorNode Empty
+			{
+				get
+				{
+					return empty;
+				}
+			}
+
+			public abstract TValue this[int index] { get; }
+
+			public abstract VectorNode Add(TValue item);
+
+			public abstract TrieVector<TOut>.VectorNode Apply<TOut>(Func<TValue, TOut> transform);
+
+			public abstract VectorNode BulkLoad(TValue[] items, int startIndex, int count);
+
+			public abstract VectorNode Drop();
+
+			public abstract IEnumerator<TValue> GetEnumerator();
+
+			public abstract void Iter(Action<TValue> action);
+
+			public abstract void IterBack(Action<TValue> action);
+
+			public abstract bool IterBackWhile(Func<TValue, bool> conditional);
+
+			public abstract bool IterWhile(Func<TValue, bool> conditional);
+
+			public abstract VectorNode Set(int index, TValue value);
+
+			public abstract VectorNode Take(int index);
 		}
 	}
+	
 }

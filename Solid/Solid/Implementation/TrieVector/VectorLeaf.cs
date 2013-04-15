@@ -1,192 +1,204 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using NUnit.Framework;
 using Solid.Common;
 using Solid.TrieVector.Iteration;
 
-namespace Solid.TrieVector
+namespace Solid
 {
-	internal class CountingIterator<T>
+	internal static partial class TrieVector<TValue>
 	{
-		private readonly IList<T> inner;
-		private int index;
-
-		public CountingIterator(IList<T> inner)
+		internal sealed class VectorLeaf : VectorNode
 		{
-			this.inner = inner;
-		}
-
-		public int Count
-		{
-			get
+			internal class LeafEnumerator : IEnumerator<TValue>
 			{
-				return inner.Count - index;
+				private int index = -1;
+				private readonly VectorLeaf node;
+
+				public LeafEnumerator(VectorLeaf node)
+				{
+					this.node = node;
+				}
+
+				public TValue Current
+				{
+					get
+					{
+						return node[index];
+					}
+				}
+
+				object IEnumerator.Current
+				{
+					get
+					{
+						return Current;
+					}
+				}
+
+				public void Dispose()
+				{
+				}
+
+				public bool MoveNext()
+				{
+					index++;
+					return index < node.Count;
+				}
+
+				public void Reset()
+				{
+					index = -1;
+				}
 			}
-		}
+			private const int myBlock = (1 << 5) - 1;
+			public readonly TValue[] Arr;
 
-		public bool MoveNext()
-		{
-			if (index < inner.Count)
+			public VectorLeaf(TValue[] arr)
+				: base(0, arr.Length, arr.Length == 32)
 			{
-				index++;
+				Arr = arr;
+			}
+
+			public override TValue this[int index]
+			{
+				get
+				{
+					var bits = index & myBlock;
+					return Arr[bits];
+				}
+			}
+
+			public override VectorNode Add(TValue item)
+			{
+				if (Count < 32)
+				{
+					var myCopy = new TValue[Arr.Length + 1];
+					Arr.CopyTo(myCopy, 0);
+					myCopy[myCopy.Length - 1] = item;
+					var newArr = myCopy;
+					return new VectorLeaf(newArr);
+				}
+				var parentArr = new VectorNode[2];
+				var childArr = new TValue[1];
+				childArr[0] = item;
+				var newNode = new VectorLeaf(childArr);
+				parentArr[0] = this;
+				parentArr[1] = newNode;
+				return new VectorParent(1, 33, parentArr);
+			}
+
+			public override TrieVector<TOut>.VectorNode Apply<TOut>(Func<TValue, TOut> transform)
+			{
+				var newArr = new TOut[Arr.Length];
+				Arr.CopyTo(newArr, 0);
+				for (var i = 0; i < newArr.Length; i++)
+				{
+					newArr[i] = transform(Arr[i]);
+				}
+				return new TrieVector<TOut>.VectorLeaf(newArr);
+			}
+
+			public override VectorNode BulkLoad(TValue[] data, int startIndex, int count)
+			{
+				var newArraySize = Math.Min(32, Arr.Length + count);
+				var newArray = new TValue[newArraySize];
+				var loadCount = Math.Min(32 - Arr.Length, count);
+				Arr.CopyTo(newArray, 0);
+				Array.Copy(data, startIndex, newArray, Arr.Length, loadCount);
+				var newLeaf = new VectorLeaf(newArray);
+				if (loadCount < count)
+				{
+					var newParentArr = new VectorNode[1];
+					newParentArr[0] = newLeaf;
+					var newParent = new VectorParent(1, newArray.Length, newParentArr);
+					return newParent.BulkLoad(data, startIndex + loadCount, count - loadCount);
+				}
+				return newLeaf;
+			}
+
+			public override VectorNode Drop()
+			{
+				var newArr = new TValue[Arr.Length - 1];
+				Array.Copy(Arr, 0, newArr, 0, Arr.Length - 1);
+				return new VectorLeaf(newArr);
+			}
+
+			public override IEnumerator<TValue> GetEnumerator()
+			{
+				return new LeafEnumerator(this);
+			}
+
+			public override void Iter(Action<TValue> action)
+			{
+#if DEBUG
+			action.IsNotNull();
+#endif
+				for (var i = 0; i < Arr.Length; i++)
+				{
+					action(Arr[i]);
+				}
+			}
+
+			public override void IterBack(Action<TValue> action)
+			{
+#if DEBUG
+			action.IsNotNull();
+#endif
+				for (var i = Arr.Length - 1; i >= 0; i--)
+				{
+					action(Arr[i]);
+				}
+			}
+
+			public override bool IterBackWhile(Func<TValue, bool> conditional)
+			{
+#if DEBUG
+			conditional.IsNotNull();
+#endif
+				for (var i = Arr.Length - 1; i >= 0; i--)
+				{
+					if (!conditional(Arr[i]))
+					{
+						return false;
+					}
+				}
 				return true;
 			}
-			return false;
-		}
 
-		public T Current
-		{
-			get
+			public override bool IterWhile(Func<TValue, bool> conditional)
 			{
-				return inner[index];
-			}
-		}
-
-
-
-	}
-
-	internal sealed class VectorLeaf<T> : VectorNode<T>
-	{
-		private const int myBlock = (1 << 5) - 1;
-		public readonly T[] Arr;
-
-
-		public VectorLeaf(T[] arr) : base(0, arr.Length, arr.Length == 32)
-		{
-			Arr = arr;
-		}
-
-
-		public override T this[int index]
-		{
-			get
-			{
-				int bits = index & myBlock;
-				return Arr[bits];
-			}
-		}
-
-		public override VectorNode<T> BulkLoad(T[] data, int startIndex, int count)
-		{
-			var newArraySize = Math.Min(32, Arr.Length + count);
-			var newArray = new T[newArraySize];
-			var loadCount = Math.Min(32 - Arr.Length, count);
-			Arr.CopyTo(newArray, 0);
-			Array.Copy(data, startIndex, newArray, Arr.Length, loadCount);
-			var newLeaf = new VectorLeaf<T>(newArray);
-			if (loadCount < count)
-			{
-				var newParentArr = new VectorNode<T>[1];
-				newParentArr[0] = newLeaf;
-				var newParent = new VectorParent<T>(1, newArray.Length, newParentArr);
-				return newParent.BulkLoad(data, startIndex + loadCount, count - loadCount);
-			}
-			return newLeaf;
-		}
-
-		public override VectorNode<T> Add(T item)
-		{
-			if (Count < 32)
-			{
-				var myCopy = new T[Arr.Length + 1];
-				Arr.CopyTo(myCopy, 0);
-				myCopy[myCopy.Length - 1] = item;
-				T[] newArr = myCopy;
-				return new VectorLeaf<T>(newArr);
-			}
-			var parentArr = new VectorNode<T>[2];
-			var childArr = new T[1];
-			childArr[0] = item;
-			var newNode = new VectorLeaf<T>(childArr);
-			parentArr[0] = this;
-			parentArr[1] = newNode;
-			return new VectorParent<T>(1, 33, parentArr);
-		}
-
-		public override VectorNode<TOut> Apply<TOut>(Func<T, TOut> transform)
-		{
-			var newArr = new TOut[Arr.Length];
-			Arr.CopyTo(newArr, 0);
-			for (int i = 0; i < newArr.Length; i++)
-			{
-				newArr[i] = transform(Arr[i]);
-			}
-			return new VectorLeaf<TOut>(newArr);
-		}
-
-		public override VectorNode<T> Drop()
-		{
-			var newArr = new T[Arr.Length - 1];
-			Array.Copy(Arr, 0, newArr, 0, Arr.Length - 1);
-			return new VectorLeaf<T>(newArr);
-		}
-
-		public override IEnumerator<T> GetEnumerator()
-		{
-			return new LeafEnumerator<T>(this);
-		}
-
-		public override void IterBack(Action<T> action)
-		{
-			action.IsNotNull();
-			for (int i = Arr.Length - 1; i >= 0; i--)
-			{
-				action(Arr[i]);
-			}
-		}
-
-		public override bool IterWhile(Func<T, bool> conditional)
-		{
-			for (int i = 0; i < Arr.Length; i++)
-			{
-				if (!conditional(Arr[i]))
+				for (var i = 0; i < Arr.Length; i++)
 				{
-					return false;
+					if (!conditional(Arr[i]))
+					{
+						return false;
+					}
 				}
+				return true;
 			}
-			return true;
-		}
 
-		public override bool IterBackWhile(Func<T, bool> conditional)
-		{
-			conditional.IsNotNull();
-			for (int i = Arr.Length - 1; i >= 0; i--)
+			public override VectorNode Set(int index, TValue value)
 			{
-				if (!conditional(Arr[i]))
-				{
-					return false;
-				}
-				
-			}
-			return true;
-		}
-
-		public override void Iter(Action<T> action)
-		{
-			action.IsNotNull();
-			for (int i = 0; i < Arr.Length; i++)
-			{
-				action(Arr[i]);
-			}
-		}
-
-		public override VectorNode<T> Set(int index, T value)
-		{
-			int bits = index & myBlock;
+				var bits = index & myBlock;
+#if DEBUG
 			bits.Is(i => i >= 0 && i < Count);
-			var myCopy = new T[Arr.Length];
-			Arr.CopyTo(myCopy, 0);
-			myCopy[bits] = value;
-			T[] newArr = myCopy;
-			return new VectorLeaf<T>(newArr);
-		}
+#endif
+				var myCopy = new TValue[Arr.Length];
+				Arr.CopyTo(myCopy, 0);
+				myCopy[bits] = value;
+				var newArr = myCopy;
+				return new VectorLeaf(newArr);
+			}
 
-		public override VectorNode<T> Take(int index)
-		{
-			int bits = index & myBlock;
-			T[] newArr = Arr.TakeFirst(bits);
-			return new VectorLeaf<T>(newArr);
+			public override VectorNode Take(int index)
+			{
+				var bits = index & myBlock;
+				var newArr = Arr.TakeFirst(bits);
+				return new VectorLeaf(newArr);
+			}
 		}
 	}
+
+	
 }

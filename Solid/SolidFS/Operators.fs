@@ -24,15 +24,16 @@ type 'a FlexibleList with
         let endIndex = if endIndex.IsSome then endIndex.Value else -1
         this.Slice(startIndex,endIndex)
 
+        
 let (|Nil|Cons|) (l :_ xlist) = 
     if l.IsEmpty then Nil else Cons(l.First,l.DropFirst())
 
 let (|Nil|Conj|) (l :_ xlist)=
-    if l.IsEmpty then Nil else Conj(l.DropLast(), l.Last)
-
+    if l.IsEmpty then Nil else Conj(l.DropLast(), l.Last)   
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module XList = 
     
+
     ///O(m). Joins a sequence of elements to the beginning of the list.
     let consSeq hs (t :_ xlist) =
         t.AddFirstRange hs
@@ -154,10 +155,11 @@ module XList =
     ///O(n). Reverses the list.
     let rev (target:_ xlist) = 
         target.Reverse()
-    
+    let remove i (target:_ xlist) = 
+        target.Remove(i) 
 [<CompilationRepresentationAttribute(CompilationRepresentationFlags.ModuleSuffix)>]
 module Vector = 
-    ///O(1). Gets if the vector is empty.
+    ///O(1). Gets if the Vector is empty.
     let isEmpty (target:_ Vector) = 
         target.IsEmpty
     ///O(logn); immediate. Gets the first element.
@@ -169,7 +171,7 @@ module Vector =
     ///O(logn), fast.
     let conj (h :_) (target:_ Vector)=
         target.AddLast h
-    ///O(logn), fast. Returns a vector without the last element.
+    ///O(logn), fast. Returns a Vector without the last element.
     let initial (target :Vector<'a>) = 
         target.DropLast()
     ///O(logn); immediate. Returns the element with the specified index.
@@ -179,46 +181,46 @@ module Vector =
     ///O(logn), fast. Updates the element with the specified index.
     let update (index : int) (item : 'a) (target :Vector<'a>) = 
         target.Set(index,item)
-    ///O(1). Gets the length of the vector.
+    ///O(1). Gets the length of the Vector.
     let length (target:  Vector<'a>) = 
         target.Count
-    ///O(n). Returns a vector containing the elements that fulfill the predicate.
+    ///O(n). Returns a Vector containing the elements that fulfill the predicate.
     let filter (f : 'a -> bool) (target : Vector<'a>) = 
         target.Where(Func<'a,bool>(f))
-    ///O(n). Applies the specified function on every element in the vector.
+    ///O(n). Applies the specified function on every element in the Vector.
     let map (f : 'a -> 'b) (target : Vector<'a>) = 
         target.Select(Func<'a,'b>(f))
-    ///O(n). Iterates over the vector, from first to last.
+    ///O(n). Iterates over the Vector, from first to last.
     let iter (f : 'a -> unit) (target : Vector<'a>) = 
         target.ForEach(Action<'a>(f))
-    ///O(n). Iterates over the vector, from last to first.
+    ///O(n). Iterates over the Vector, from last to first.
     let iterBack (f:_->unit) (target:_ Vector) =
         target.ForEachBack(Action<_>(f))
 
     
 
-    ///O(logn), fast. Returns a new vector consisting of the first several elements.
+    ///O(logn), fast. Returns a new Vector consisting of the first several elements.
     let take count (target : Vector<'a>) = 
         target.Take(count)
-    ///Gets the empty vector.
+    ///Gets the empty Vector.
     let empty<'a> = Vector<'a>.Empty
 
     let choose (f : 'a -> 'b option) (target :Vector<'a>) = 
         let new_target = ref (empty : Vector<'b>)
         target |> iter (fun v -> match f v with | None -> () | Some u -> new_target := (!new_target <+ u))
-    ///Applies an accumulator over the vector.
+    ///Applies an accumulator over the Vector.
     let fold (initial : 'state) (f : 'state -> 'item -> 'state) (target : Vector<'item>) = 
         target.Aggregate(Func<'state,'item,'state>(f), initial)
 
     let zip (left : #seq<_>) (right:#seq<_>) = 
         empty<_> <++ Seq.zip left right
-    ///O(n). Constructs a vector from a sequence.
+    ///O(n). Constructs a Vector from a sequence.
    
 
     let ofSeq (xs : seq<_>) = empty<_>.AddLastRange(xs)
         
-
-    ///O(n). Checks if any item fulfilling the predicate exists in the vector.
+    
+    ///O(n). Checks if any item fulfilling the predicate exists in the Vector.
     let exists (f : _ -> bool) (l : _ Vector) =
         l.IndexOf(Func<_,bool>(f)).HasValue
 

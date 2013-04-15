@@ -9,7 +9,7 @@ let inline dropl x = (^s : (member DropLast : unit -> 's) x)
 let inline dropf x = (^s : (member DropFirst : unit -> 's) x)
 let rnd = Random()
 
-
+#nowarn "25"
 
 let flip_coin (chance_heads) = 
     if rnd.NextDouble() > chance_heads then
@@ -54,6 +54,13 @@ let test_remove_rnd iter (o : TestTarget<_>) =
     let len = o.Length()
     for i = 0 to iter do
         o.RemoveAt(rnd.Next(0, len)) |> ignore
+    o
+
+let test_remove_all  (o : TestTarget<_>) =
+    let mutable o=o
+    let len = o.Length()
+    for i = 0 to (len - 1) do
+        o.RemoveAt(i) |> ignore
     o
 
 let test_add_mixed  iter ratio (o : TestTarget<_>) = 
@@ -167,7 +174,7 @@ let test_get_rnd iter (o : TestTarget<_>) =
 let test_set_each (o : TestTarget<_>)  = 
     let mutable o=o
     for i = 0 to o.Length()-1 do
-        o <- o.Set i i
+        o.Set i i |> ignore
     o
 
 let test_iter_take_last iter (o : TestTarget<_>) = 
@@ -183,7 +190,7 @@ let test_set_rnd iter (o : TestTarget<_>) =
     let len = o.Length()
     for i = 0 to iter do
         let rndIndex = rnd.Next(0,len-3)
-        o<-o.Set rndIndex i
+        o.Set rndIndex i |> ignore
     o
 
 let test_random_access iter ratio (o : TestTarget<_>)= 
@@ -375,4 +382,11 @@ let Test_iter_take_last iter =
         Parameter = iter
         Test = test_iter_take_last iter
 
+    }
+
+let Test_rem_all = 
+    {
+        Name = "Remove All"
+        Parameter = Unchecked.defaultof<_>
+        Test = test_remove_all
     }

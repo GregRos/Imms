@@ -1,114 +1,125 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Solid.Common;
-using Solid.FingerTree.Iteration;
 
-namespace Solid.FingerTree
+namespace Solid
 {
-	internal sealed class Empty<T> : FTree<T>
-		where T : Measured<T>
+	static partial class FingerTree<TValue>
 	{
-		public static readonly Empty<T> Instance = new Empty<T>();
-
-		private Empty() : base(0, TreeType.Empty)
+		internal abstract partial class FTree<TChild>
 		{
-		}
+			internal sealed class EmptyTree : FTree<TChild>
 
-		public override T Left
-		{
-			get
 			{
-				throw Errors.Is_empty;
+				public static readonly EmptyTree Instance = new EmptyTree();
+
+				private EmptyTree()
+					: base(0, TreeType.Empty)
+				{
+				}
+
+				public override bool IsFragment
+				{
+					get
+					{
+						throw Errors.Invalid_execution_path;
+					}
+				}
+
+				public override TChild Left
+				{
+					get
+					{
+						throw Errors.Is_empty;
+					}
+				}
+
+				public override TChild Right
+				{
+					get
+					{
+						throw Errors.Is_empty;
+					}
+				}
+
+				public override FTree<TChild> AddLeft(TChild item)
+				{
+					return new Single(new Digit(item));
+				}
+
+				public override FTree<TChild> AddRight(TChild item)
+				{
+					return new Single(new Digit(item));
+				}
+
+				public override FTree<TChild> DropLeft()
+				{
+					throw Errors.Is_empty;
+				}
+
+				public override FTree<TChild> DropRight()
+				{
+					throw Errors.Is_empty;
+				}
+
+				public override Leaf<TValue> this[int index]
+				{
+					get
+					{
+						throw Errors.Is_empty;
+					}
+				}
+
+				public override IEnumerator<Leaf<TValue>> GetEnumerator(bool forward)
+				{
+					return Enumerable.Empty<Leaf<TValue>>().GetEnumerator();
+				}
+
+				public override FTree<TChild> Insert(int index, Leaf<TValue> leaf)
+				{
+					return AddRight(leaf as TChild);
+				}
+
+				public override void Iter(Action<Leaf<TValue>> action1)
+				{
+				}
+
+				public override void IterBack(Action<Leaf<TValue>> action)
+				{
+				}
+
+				public override bool IterBackWhile(Func<Leaf<TValue>, bool> func)
+				{
+					return true;
+				}
+
+				public override bool IterWhile(Func<Leaf<TValue>, bool> func)
+				{
+					return true;
+				}
+
+				public override FTree<TChild> Remove(int index)
+				{
+					throw Errors.Is_empty;
+				}
+
+				public override FTree<TChild> Reverse()
+				{
+					return this;
+				}
+
+				public override FTree<TChild> Set(int index, Leaf<TValue> leaf)
+				{
+					throw Errors.Is_empty;
+				}
+
+				public override void Split(int count, out FTree<TChild> leftmost, out FTree<TChild> rightmost)
+				{
+					throw Errors.Is_empty;
+				}
 			}
-		}
-
-		public override T Right
-		{
-			get
-			{
-				throw Errors.Is_empty;
-			}
-		}
-
-		public override FTree<T> AddLeft(T item)
-		{
-			return new Single<T>(item.Measure, new Digit<T>(item, item.Measure));
-		}
-
-		public override FTree<T> AddRight(T item)
-		{
-			return new Single<T>(item.Measure, new Digit<T>(item, item.Measure));
-		}
-
-		public override FTree<T> DropLeft()
-		{
-			throw Errors.Is_empty;
-		}
-
-		public override FTree<T> DropRight()
-		{
-			throw Errors.Is_empty;
-		}
-
-		public override bool IterBackWhile(Func<Measured, bool> func)
-		{
-			return true;
-		}
-
-		public override bool IterWhile(Func<Measured, bool> func)
-		{
-			return true;
-		}
-
-		public override Measured Get(int index)
-		{
-			throw Errors.Is_empty;
-		}
-
-		public override bool IsFragment
-		{
-			get
-			{
-				throw Errors.Invalid_execution_path;
-			}
-		}
-
-		public override FTree<T> Remove(int index)
-		{
-			throw Errors.Is_empty;
-		}
-
-		public override IEnumerator<Measured> GetEnumerator()
-		{
-			return EmptyEnumerator<T>.Instance;
-		}
-
-		public override FTree<T> Insert(int index, Measured value)
-		{
-			return AddRight(value as T);
-		}
-
-		public override void Iter(Action<Measured> action1)
-		{
-		}
-
-		public override void IterBack(Action<Measured> action)
-		{
-		}
-
-		public override FTree<T> Reverse()
-		{
-			return this;
-		}
-
-		public override FTree<T> Set(int index, Measured value)
-		{
-			throw Errors.Is_empty;
-		}
-
-		public override void Split(int count, out FTree<T> leftmost, out FTree<T> rightmost)
-		{
-			throw Errors.Is_empty;
 		}
 	}
 }
