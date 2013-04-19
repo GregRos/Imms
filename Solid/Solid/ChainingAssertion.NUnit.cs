@@ -59,7 +59,7 @@
  * var lower = new[] { "a", "b", "c" };
  * var upper = new[] { "A", "B", "C" };
  *
- * // Comparer CollectionAssert, use IEqualityComparer<T> or Func<T,T,bool> delegate
+ * // EqualityComparer CollectionAssert, use IEqualityComparer<T> or Func<T,T,bool> delegate
  * #if DEBUG 
  lower.Is(upper, StringComparer.InvariantCultureIgnoreCase); 
  #endif

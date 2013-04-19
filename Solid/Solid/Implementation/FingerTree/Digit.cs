@@ -12,12 +12,12 @@ namespace Solid
 		{
 			internal sealed class Digit : Measured<Digit>
 			{
-				internal class DigitEnumerator : IMeasuredEnumerator<Digit>
+				internal class DigitEnumerator : IReusableEnumerator<Digit>
 				{
 					private int _childNumber = -1;
 					private Digit _digit;
 					private readonly bool _forward;
-					private readonly IMeasuredEnumerator<TChild> _inner;
+					private readonly IReusableEnumerator<TChild> _inner;
 
 					public DigitEnumerator(bool forward, Digit target)
 					{
@@ -31,7 +31,7 @@ namespace Solid
 						get
 						{
 #if DEBUG
-					_inner.IsNotNull();
+							_inner.IsNotNull();
 #endif
 							return _inner.Current;
 						}
@@ -71,7 +71,6 @@ namespace Solid
 							case 3:
 								_inner.Retarget(_digit.Fourth);
 								return MoveNext();
-								
 						}
 						throw Errors.Invalid_execution_path;
 					}
@@ -128,7 +127,7 @@ namespace Solid
 					: base(one.Measure)
 				{
 #if DEBUG
-				
+
 					one.IsNotNull();
 #endif
 					First = one;
@@ -139,7 +138,7 @@ namespace Solid
 					: base(one.Measure + two.Measure)
 				{
 #if DEBUG
-					
+
 					one.IsNotNull();
 					two.IsNotNull();
 #endif
@@ -149,11 +148,11 @@ namespace Solid
 				}
 
 				public Digit(TChild one, TChild two, TChild three)
-					: base(one.Measure  + two.Measure + three.Measure)
+					: base(one.Measure + two.Measure + three.Measure)
 				{
 #if DEBUG
 					AssertEx.AreNotNull(one, two, three);
-					
+
 #endif
 
 					First = one;
@@ -167,14 +166,13 @@ namespace Solid
 				{
 #if DEBUG
 					AssertEx.AreNotNull(one, two, three, four);
-					
+
 #endif
 					First = one;
 					Second = two;
 					Third = three;
 					Fourth = four;
 					Size = 4;
-					
 				}
 
 				private Digit()
@@ -224,7 +222,6 @@ namespace Solid
 							return new Digit(item1, item4);
 						case 1 << 0 | 1 << 1 | 1 << 3:
 							return new Digit(item1, item2, item4);
-							
 					}
 					throw Errors.Invalid_execution_path;
 				}
@@ -239,7 +236,6 @@ namespace Solid
 					other.IsNotNull();
 #endif
 					var sizePermutation = digit.Size << 3 | other.Size;
-
 
 					switch (sizePermutation)
 					{
@@ -362,16 +358,14 @@ namespace Solid
 							case 3:
 								return Third;
 							case 4:
-								return Fourth;								
+								return Fourth;
 						}
 						throw Errors.Invalid_digit_size;
 					}
-
 				}
 
 				public Digit AddLeft(TChild item)
 				{
-		
 					switch (Size)
 					{
 						case 1:
@@ -380,7 +374,6 @@ namespace Solid
 							return new Digit(item, First, Second);
 						case 3:
 							return new Digit(item, First, Second, Third);
-							
 					}
 					throw Errors.Invalid_digit_size;
 				}
@@ -393,7 +386,6 @@ namespace Solid
 
 				public Digit AddRight(TChild item)
 				{
-			
 					switch (Size)
 					{
 						case 1:
@@ -402,7 +394,6 @@ namespace Solid
 							return new Digit(First, Second, item);
 						case 3:
 							return new Digit(First, Second, Third, item);
-							
 					}
 					throw Errors.Invalid_digit_size;
 				}
@@ -413,15 +404,13 @@ namespace Solid
 					rightmost = new Digit(Fourth, item);
 				}
 
-
-
 				public override void Fuse(Digit other, out Digit first, out Digit last)
 				{
 					Digit skip;
 					ReformDigitsForConcat(this, other, out first, out last, out skip);
 				}
 
-				public override IMeasuredEnumerator<Digit> GetEnumerator(bool x)
+				public override IReusableEnumerator<Digit> GetEnumerator(bool x)
 				{
 					return new DigitEnumerator(x, this);
 				}
@@ -550,7 +539,6 @@ namespace Solid
 							Second.IterBack(action);
 							First.IterBack(action);
 							return;
-							
 					}
 					throw Errors.Invalid_execution_path;
 				}
@@ -603,7 +591,6 @@ namespace Solid
 							return new Digit(Second, Third);
 						case 4:
 							return new Digit(Second, Third, Fourth);
-							
 					}
 					throw Errors.Invalid_digit_size;
 				}
@@ -620,7 +607,6 @@ namespace Solid
 							return new Digit(First, Second);
 						case 4:
 							return new Digit(First, Second, Third);
-							
 					}
 					throw Errors.Invalid_digit_size;
 				}
@@ -673,7 +659,7 @@ namespace Solid
 								Third.Fuse(res, out left, out right);
 								return CreateCheckNull(First, Second, left, right);
 							}
-							return CreateCheckNull(First, Second, Third, res);					
+							return CreateCheckNull(First, Second, Third, res);
 					}
 					throw Errors.Invalid_execution_path;
 				}
@@ -690,7 +676,6 @@ namespace Solid
 							return new Digit(Third.Reverse(), Second.Reverse(), First.Reverse());
 						case 4:
 							return new Digit(Fourth.Reverse(), Third.Reverse(), Second.Reverse(), First.Reverse());
-							
 					}
 					throw Errors.Invalid_execution_path;
 				}

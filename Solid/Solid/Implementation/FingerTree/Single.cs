@@ -17,6 +17,15 @@ namespace Solid
 					CenterDigit = centerDigit;
 				}
 
+				public override Leaf<TValue> this[int index]
+				{
+					get
+					{
+						var r = CenterDigit[index];
+						return r;
+					}
+				}
+
 				public override bool IsFragment
 				{
 					get
@@ -83,15 +92,6 @@ namespace Solid
 						return new Single(newDigit);
 					}
 					return Empty;
-				}
-
-				public override Leaf<TValue> this[int index]
-				{
-					get
-					{
-						var r = CenterDigit[index];
-						return r;
-					}
 				}
 
 				public override IEnumerator<Leaf<TValue>> GetEnumerator(bool forward)

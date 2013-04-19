@@ -8,23 +8,28 @@ namespace Solid
 {
 	internal static partial class TrieVector<TValue>
 	{
+
+
 		internal sealed class VectorLeaf : VectorNode
 		{
 			internal class LeafEnumerator : IEnumerator<TValue>
 			{
 				private int index = -1;
-				private readonly VectorLeaf node;
+				private readonly VectorLeaf _node;
+				private readonly bool _forward;
 
-				public LeafEnumerator(VectorLeaf node)
+				public LeafEnumerator(VectorLeaf node, bool forward)
 				{
-					this.node = node;
+					this._node = node;
+					_forward = forward;
 				}
 
 				public TValue Current
 				{
 					get
 					{
-						return node[index];
+						var ix = _forward ? index : _node.Arr.Length - 1 - index;
+						return _node.Arr[ix];
 					}
 				}
 
@@ -43,7 +48,7 @@ namespace Solid
 				public bool MoveNext()
 				{
 					index++;
-					return index < node.Count;
+					return index < _node.Count;
 				}
 
 				public void Reset()
@@ -51,6 +56,7 @@ namespace Solid
 					index = -1;
 				}
 			}
+
 			private const int myBlock = (1 << 5) - 1;
 			public readonly TValue[] Arr;
 
@@ -124,15 +130,15 @@ namespace Solid
 				return new VectorLeaf(newArr);
 			}
 
-			public override IEnumerator<TValue> GetEnumerator()
+			public override IEnumerator<TValue> GetEnumerator(bool heading)
 			{
-				return new LeafEnumerator(this);
+				return new LeafEnumerator(this, heading);
 			}
 
 			public override void Iter(Action<TValue> action)
 			{
 #if DEBUG
-			action.IsNotNull();
+				action.IsNotNull();
 #endif
 				for (var i = 0; i < Arr.Length; i++)
 				{
@@ -143,7 +149,7 @@ namespace Solid
 			public override void IterBack(Action<TValue> action)
 			{
 #if DEBUG
-			action.IsNotNull();
+				action.IsNotNull();
 #endif
 				for (var i = Arr.Length - 1; i >= 0; i--)
 				{
@@ -154,7 +160,7 @@ namespace Solid
 			public override bool IterBackWhile(Func<TValue, bool> conditional)
 			{
 #if DEBUG
-			conditional.IsNotNull();
+				conditional.IsNotNull();
 #endif
 				for (var i = Arr.Length - 1; i >= 0; i--)
 				{
@@ -182,7 +188,7 @@ namespace Solid
 			{
 				var bits = index & myBlock;
 #if DEBUG
-			bits.Is(i => i >= 0 && i < Count);
+				bits.Is(i => i >= 0 && i < Count);
 #endif
 				var myCopy = new TValue[Arr.Length];
 				Arr.CopyTo(myCopy, 0);
@@ -199,6 +205,4 @@ namespace Solid
 			}
 		}
 	}
-
-	
 }

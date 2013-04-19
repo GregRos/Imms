@@ -8,24 +8,25 @@ namespace Solid
 {
 	internal static partial class TrieVector<TValue>
 	{
-		internal sealed class VectorParent: VectorNode
+		internal sealed class VectorParent : VectorNode
 		{
 			internal class ParentEnumerator : IEnumerator<TValue>
 			{
-				private IEnumerator<TValue> current;
+				private IEnumerator<TValue> _current;
 				private int index = -1;
-				private readonly VectorParent node;
-
-				public ParentEnumerator(VectorParent node)
+				private readonly VectorParent _node;
+				private readonly bool _forward;
+				public ParentEnumerator(VectorParent node, bool forward)
 				{
-					this.node = node;
+					this._node = node;
+					_forward = forward;
 				}
 
 				public TValue Current
 				{
 					get
 					{
-						return current.Current;
+						return _current.Current;
 					}
 				}
 
@@ -47,7 +48,7 @@ namespace Solid
 					{
 						return TryNext();
 					}
-					if (current.MoveNext())
+					if (_current.MoveNext())
 					{
 						return true;
 					}
@@ -62,10 +63,11 @@ namespace Solid
 				public bool TryNext()
 				{
 					index++;
-					if (index < node.Arr.Length)
+					if (index < _node.Arr.Length)
 					{
-						current = node.Arr[index].GetEnumerator();
-						return current.MoveNext();
+						var ix = _forward ? index : _node.Arr.Length - 1 - index;
+						_current = _node.Arr[ix].GetEnumerator(_forward);
+						return _current.MoveNext();
 					}
 					return false;
 				}
@@ -79,7 +81,7 @@ namespace Solid
 				: base(height, count, arr.Length == 32 && arr[arr.Length - 1].IsFull)
 			{
 #if DEBUG
-			arr.IsNotNull();
+				arr.IsNotNull();
 #endif
 
 				Arr = arr;
@@ -168,7 +170,7 @@ namespace Solid
 				{
 					var newParentArr = new VectorNode[1];
 					newParentArr[0] = newMyself;
-					var newParent = (VectorNode)new VectorParent(Height + 1, newMyself.Count, newParentArr);
+					var newParent = (VectorNode) new VectorParent(Height + 1, newMyself.Count, newParentArr);
 					newParent = newParent.BulkLoad(items, startIndex, count);
 					return newParent;
 				}
@@ -195,15 +197,15 @@ namespace Solid
 				return new VectorParent(Height, Count - 1, newMyArr);
 			}
 
-			public override IEnumerator<TValue> GetEnumerator()
+			public override IEnumerator<TValue> GetEnumerator(bool forward)
 			{
-				return new ParentEnumerator(this);
+				return new ParentEnumerator(this,forward);
 			}
 
 			public override void Iter(Action<TValue> action)
 			{
 #if DEBUG
-			action.IsNotNull();
+				action.IsNotNull();
 #endif
 				for (var i = 0; i < Arr.Length; i++)
 				{
@@ -248,7 +250,7 @@ namespace Solid
 				var myIndex = (index) & myBlock;
 				myIndex = myIndex >> offs;
 #if DEBUG
-			myIndex.Is(i => i < Count && i >= 0);
+				myIndex.Is(i => i < Count && i >= 0);
 #endif
 				var myNewNode = Arr[myIndex].Set(index, value);
 				var myCopy = new VectorNode[Arr.Length];
@@ -261,7 +263,7 @@ namespace Solid
 			public override VectorNode Take(int index)
 			{
 #if DEBUG
-			index.Is(i => i < Count && i > 0);
+				index.Is(i => i < Count && i > 0);
 #endif
 				var myCount = index & myBlock;
 				myCount = myCount >> (offs);
@@ -272,5 +274,4 @@ namespace Solid
 			}
 		}
 	}
-	
 }

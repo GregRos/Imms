@@ -154,6 +154,27 @@ namespace Solid
 					}
 				}
 
+				public override Leaf<TValue> this[int index]
+				{
+					get
+					{
+#if DEBUG
+						index.Is(i => i < Measure);
+#endif
+						var m1 = LeftDigit.Measure;
+						var m2 = DeepTree.Measure + m1;
+
+						if (index < m1)
+							return LeftDigit[index];
+						if (index < m2)
+							return DeepTree[index - m1];
+						if (index < Measure)
+							return RightDigit[index - m2];
+
+						throw Errors.Arg_out_of_range("index");
+					}
+				}
+
 				public override bool IsFragment
 				{
 					get
@@ -161,6 +182,7 @@ namespace Solid
 						return false;
 					}
 				}
+
 				public override TChild Left
 				{
 					get
@@ -292,27 +314,6 @@ namespace Solid
 					}
 				}
 
-				public override Leaf<TValue> this[int index]
-				{
-					get
-					{
-#if DEBUG
-						index.Is(i => i < Measure);
-#endif
-						var m1 = LeftDigit.Measure;
-						var m2 = DeepTree.Measure + m1;
-
-						if (index < m1)
-							return LeftDigit[index];
-						if (index < m2)
-							return DeepTree[index - m1];
-						if (index < Measure)
-							return RightDigit[index - m2];
-
-						throw Errors.Arg_out_of_range("index");
-					}
-				}
-
 				public override IEnumerator<Leaf<TValue>> GetEnumerator(bool forward)
 				{
 					return new CompoundEnumerator(this, forward);
@@ -321,7 +322,7 @@ namespace Solid
 				public override FTree<TChild> Insert(int index, Leaf<TValue> leaf)
 				{
 					var whereIsThisIndex = WhereIsThisIndex(index);
-					int new_measure = Measure + 1;
+					var new_measure = Measure + 1;
 					FTree<Digit> new_deep;
 					switch (whereIsThisIndex)
 					{
@@ -423,7 +424,6 @@ namespace Solid
 						default:
 							throw Errors.Invalid_execution_path;
 					}
-					
 				}
 
 				public override FTree<TChild> Reverse()

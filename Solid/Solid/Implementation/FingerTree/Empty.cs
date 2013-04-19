@@ -20,6 +20,14 @@ namespace Solid
 				{
 				}
 
+				public override Leaf<TValue> this[int index]
+				{
+					get
+					{
+						throw Errors.Is_empty;
+					}
+				}
+
 				public override bool IsFragment
 				{
 					get
@@ -62,14 +70,6 @@ namespace Solid
 				public override FTree<TChild> DropRight()
 				{
 					throw Errors.Is_empty;
-				}
-
-				public override Leaf<TValue> this[int index]
-				{
-					get
-					{
-						throw Errors.Is_empty;
-					}
 				}
 
 				public override IEnumerator<Leaf<TValue>> GetEnumerator(bool forward)

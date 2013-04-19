@@ -5,6 +5,8 @@ namespace Solid
 {
 	internal static partial class TrieVector<TValue>
 	{
+
+
 		internal abstract class VectorNode
 		{
 			private static readonly VectorNode empty = new VectorLeaf(new TValue[0]);
@@ -37,7 +39,7 @@ namespace Solid
 
 			public abstract VectorNode Drop();
 
-			public abstract IEnumerator<TValue> GetEnumerator();
+			public abstract IEnumerator<TValue> GetEnumerator(bool forward);
 
 			public abstract void Iter(Action<TValue> action);
 
@@ -52,5 +54,4 @@ namespace Solid
 			public abstract VectorNode Take(int index);
 		}
 	}
-	
 }

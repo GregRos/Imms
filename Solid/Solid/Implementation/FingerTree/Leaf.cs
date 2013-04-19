@@ -7,7 +7,7 @@ namespace Solid
 {
 	internal class Leaf<TValue> : FingerTree<TValue>.Measured<Leaf<TValue>>
 	{
-		private class LeafEnumerator : FingerTree<TValue>.IMeasuredEnumerator<Leaf<TValue>>
+		private class LeafEnumerator : FingerTree<TValue>.IReusableEnumerator<Leaf<TValue>>
 		{
 			private Leaf<TValue> _inner;
 			private bool done = false;
@@ -88,7 +88,7 @@ namespace Solid
 			throw new NotImplementedException();
 		}
 
-		public override FingerTree<TValue>.IMeasuredEnumerator<Leaf<TValue>> GetEnumerator(bool x)
+		public override FingerTree<TValue>.IReusableEnumerator<Leaf<TValue>> GetEnumerator(bool x)
 		{
 			return new LeafEnumerator(this);
 		}

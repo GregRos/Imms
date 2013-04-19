@@ -5,13 +5,7 @@ namespace Solid.Common
 {
 	internal static class Errors
 	{
-		internal static InvalidOperationException Collection_readonly
-		{
-			get
-			{
-				return new InvalidOperationException("This instance is readonly.");
-			}
-		}
+		
 
 		internal static InvalidOperationException Capacity_exceeded
 		{
@@ -21,15 +15,12 @@ namespace Solid.Common
 			}
 		}
 
-		internal static ArgumentOutOfRangeException Not_found(string name)
+		internal static InvalidOperationException Collection_readonly
 		{
-			return new ArgumentOutOfRangeException(name, "The specified item was not found in the collection.");
-		}
-
-		internal static ArgumentOutOfRangeException Arg_out_of_range(string name)
-		{
-			return new ArgumentOutOfRangeException(name, "The index is out of range of this data structure");
-			
+			get
+			{
+				return new InvalidOperationException("This instance is readonly.");
+			}
 		}
 
 		internal static InvalidOperationException Invalid_digit_size
@@ -97,9 +88,19 @@ namespace Solid.Common
 			}
 		}
 
+		internal static ArgumentOutOfRangeException Arg_out_of_range(string name)
+		{
+			return new ArgumentOutOfRangeException(name, "The index is out of range of this data structure");
+		}
+
 		internal static ArgumentNullException Argument_null(string name)
 		{
 			return new ArgumentNullException(name, "The argument cannot be null.");
+		}
+
+		internal static ArgumentOutOfRangeException Not_found(string name)
+		{
+			return new ArgumentOutOfRangeException(name, "The specified item was not found in the collection.");
 		}
 	}
 }

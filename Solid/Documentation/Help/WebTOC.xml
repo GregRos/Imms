@@ -1,133 +1,83 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <HelpTOC>
 
-  <HelpTOCNode Id="00b2b0ee-a45d-4911-9fdb-23364e164c2a" Title="Solid Namespace" Url="html/N_Solid.htm">
-    <HelpTOCNode Id="5674f8a5-24d5-4839-939d-0825d2973b62" Title="Convertion Class" Url="html/T_Solid_Convertion.htm">
+  <HelpTOCNode Id="a8524f55-9768-4a8d-ae2a-7ca5fcdb466d" Title="Solid Namespace" Url="html/N_Solid.htm">
+    <HelpTOCNode Id="97771610-6b71-4991-a461-f3c1754f120c" Title="Convertion Class" Url="html/T_Solid_Convertion.htm">
       <HelpTOCNode Title="Convertion Members" Url="html/AllMembers_T_Solid_Convertion.htm" />
-      <HelpTOCNode Id="c8196f9e-5e96-475e-9b31-28b8c574e3c6" Title="Convertion Methods" Url="html/Methods_T_Solid_Convertion.htm">
-        <HelpTOCNode Title="DelayList(T) Method " Url="html/M_Solid_Convertion_DelayList__1.htm" />
-        <HelpTOCNode Title="ToFlexibleList(T) Method " Url="html/M_Solid_Convertion_ToFlexibleList__1.htm" />
-        <HelpTOCNode Id="0d6ca456-6455-4c83-a0e9-b174f124098b" Title="ToVector Method " Url="html/Overload_Solid_Convertion_ToVector.htm">
+      <HelpTOCNode Id="e435f766-b17b-4899-a0f4-2078c89f01e4" Title="Convertion Methods" Url="html/Methods_T_Solid_Convertion.htm">
+        <HelpTOCNode Title="ToFlexList(T) Method " Url="html/M_Solid_Convertion_ToFlexList__1.htm" />
+        <HelpTOCNode Id="be771550-2e11-470a-82ce-f0d501dd2450" Title="ToVector Method " Url="html/Overload_Solid_Convertion_ToVector.htm">
           <HelpTOCNode Title="ToVector(T) Method (IEnumerable(T))" Url="html/M_Solid_Convertion_ToVector__1_1.htm" />
           <HelpTOCNode Title="ToVector(T) Method (FlexibleList(T))" Url="html/M_Solid_Convertion_ToVector__1.htm" />
         </HelpTOCNode>
       </HelpTOCNode>
     </HelpTOCNode>
-    <HelpTOCNode Id="c43c8c9c-165e-4545-87de-ac59baa2f401" Title="DelayedList(T) Class" Url="html/T_Solid_DelayedList_1.htm">
-      <HelpTOCNode Title="DelayedList(T) Members" Url="html/AllMembers_T_Solid_DelayedList_1.htm" />
-      <HelpTOCNode Id="3c74cb1a-1678-404a-85a3-393188184b8c" Title="DelayedList(T) Methods" Url="html/Methods_T_Solid_DelayedList_1.htm">
-        <HelpTOCNode Id="261602b8-72e5-465b-8c3f-8d12eb6b4d4f" Title="DefaultIfEmpty Method " Url="html/Overload_Solid_DelayedList_1_DefaultIfEmpty.htm">
-          <HelpTOCNode Title="DefaultIfEmpty Method " Url="html/M_Solid_DelayedList_1_DefaultIfEmpty.htm" />
-          <HelpTOCNode Title="DefaultIfEmpty Method (T)" Url="html/M_Solid_DelayedList_1_DefaultIfEmpty_1.htm" />
-        </HelpTOCNode>
-        <HelpTOCNode Id="d76a962f-7714-4fe3-b845-25a92136dee1" Title="Distinct Method " Url="html/Overload_Solid_DelayedList_1_Distinct.htm">
-          <HelpTOCNode Title="Distinct Method " Url="html/M_Solid_DelayedList_1_Distinct.htm" />
-          <HelpTOCNode Title="Distinct Method (IEqualityComparer(T))" Url="html/M_Solid_DelayedList_1_Distinct_1.htm" />
-        </HelpTOCNode>
-        <HelpTOCNode Title="GetEnumerator Method " Url="html/M_Solid_DelayedList_1_GetEnumerator.htm" />
-        <HelpTOCNode Id="ff1d8fba-189f-43a6-9ead-fa5c420a87e7" Title="GroupBy Method " Url="html/Overload_Solid_DelayedList_1_GroupBy.htm">
-          <HelpTOCNode Title="GroupBy(TKey) Method (Func(T, TKey))" Url="html/M_Solid_DelayedList_1_GroupBy__1.htm" />
-          <HelpTOCNode Title="GroupBy(TKey, TElement) Method (Func(T, TKey), Func(T, TElement))" Url="html/M_Solid_DelayedList_1_GroupBy__2.htm" />
-          <HelpTOCNode Title="GroupBy(TKey, TResult) Method (Func(T, TKey), Func(TKey, IEnumerable(T), TResult))" Url="html/M_Solid_DelayedList_1_GroupBy__2_1.htm" />
-          <HelpTOCNode Title="GroupBy(TKey, TElement, TResult) Method (Func(T, TKey), Func(T, TElement), Func(TKey, IEnumerable(TElement), TResult))" Url="html/M_Solid_DelayedList_1_GroupBy__3.htm" />
-        </HelpTOCNode>
-        <HelpTOCNode Title="Join(TInner, TKey, TResult) Method " Url="html/M_Solid_DelayedList_1_Join__3.htm" />
-        <HelpTOCNode Title="OrderBy(TKey) Method " Url="html/M_Solid_DelayedList_1_OrderBy__1.htm" />
-        <HelpTOCNode Title="OrderByDescending(TKey) Method " Url="html/M_Solid_DelayedList_1_OrderByDescending__1.htm" />
-        <HelpTOCNode Title="OuterJoin(TInner, TKey, TResult) Method " Url="html/M_Solid_DelayedList_1_OuterJoin__3.htm" />
-        <HelpTOCNode Title="Select(TResult) Method " Url="html/M_Solid_DelayedList_1_Select__1.htm" />
-        <HelpTOCNode Id="1b766702-f2ce-4d29-a8cb-a1744a48d76d" Title="SelectMany Method " Url="html/Overload_Solid_DelayedList_1_SelectMany.htm">
-          <HelpTOCNode Title="SelectMany(TResult) Method (Func(T, IEnumerable(TResult)))" Url="html/M_Solid_DelayedList_1_SelectMany__1.htm" />
-          <HelpTOCNode Title="SelectMany(TCollect, TResult) Method (Func(T, IEnumerable(TCollect)), Func(T, TCollect, TResult))" Url="html/M_Solid_DelayedList_1_SelectMany__2.htm" />
-        </HelpTOCNode>
-        <HelpTOCNode Title="Skip Method " Url="html/M_Solid_DelayedList_1_Skip.htm" />
-        <HelpTOCNode Title="SkipWhile Method " Url="html/M_Solid_DelayedList_1_SkipWhile.htm" />
-        <HelpTOCNode Title="Take Method " Url="html/M_Solid_DelayedList_1_Take.htm" />
-        <HelpTOCNode Title="TakeWhile Method " Url="html/M_Solid_DelayedList_1_TakeWhile.htm" />
-        <HelpTOCNode Id="2cae0a98-9c47-4253-97ee-8817a9756e2a" Title="Where Method " Url="html/Overload_Solid_DelayedList_1_Where.htm">
-          <HelpTOCNode Title="Where Method (Func(T, Boolean))" Url="html/M_Solid_DelayedList_1_Where.htm" />
-          <HelpTOCNode Title="Where Method (Func(T, Int32, Boolean))" Url="html/M_Solid_DelayedList_1_Where_1.htm" />
-        </HelpTOCNode>
-      </HelpTOCNode>
-      <HelpTOCNode Id="8b218406-a7b1-4c5b-9da9-600d016d36a5" Title="DelayedList(T) Type Conversions" Url="html/Operators_T_Solid_DelayedList_1.htm">
-        <HelpTOCNode Title="Implicit Conversion (DelayedList(T) to FlexibleList(T))" Url="html/M_Solid_DelayedList_1_op_Implicit.htm" />
-      </HelpTOCNode>
-      <HelpTOCNode Id="abfddd00-08ff-48cf-8446-f2fab9783b39" Title="DelayedList(T) Properties" Url="html/Properties_T_Solid_DelayedList_1.htm">
-        <HelpTOCNode Title="Force Property " Url="html/P_Solid_DelayedList_1_Force.htm" />
-      </HelpTOCNode>
-    </HelpTOCNode>
-    <HelpTOCNode Id="ac6d1a48-7181-411b-83fc-66d35f504f7d" Title="FlexibleList(T) Class" Url="html/T_Solid_FlexibleList_1.htm">
+    <HelpTOCNode Id="986e4148-0a4a-4b06-96e3-dceae1026062" Title="FlexibleList(T) Class" Url="html/T_Solid_FlexibleList_1.htm">
       <HelpTOCNode Title="FlexibleList(T) Members" Url="html/AllMembers_T_Solid_FlexibleList_1.htm" />
-      <HelpTOCNode Id="3062fe66-7557-47ee-b8cc-588646af8bdc" Title="FlexibleList(T) Methods" Url="html/Methods_T_Solid_FlexibleList_1.htm">
+      <HelpTOCNode Id="10b97525-e695-49ed-a2bb-3f25b37a4874" Title="FlexibleList(T) Methods" Url="html/Methods_T_Solid_FlexibleList_1.htm">
         <HelpTOCNode Title="AddFirst Method " Url="html/M_Solid_FlexibleList_1_AddFirst.htm" />
-        <HelpTOCNode Title="AddFirstItems Method " Url="html/M_Solid_FlexibleList_1_AddFirstItems.htm" />
         <HelpTOCNode Title="AddFirstList Method " Url="html/M_Solid_FlexibleList_1_AddFirstList.htm" />
         <HelpTOCNode Title="AddFirstRange Method " Url="html/M_Solid_FlexibleList_1_AddFirstRange.htm" />
         <HelpTOCNode Title="AddLast Method " Url="html/M_Solid_FlexibleList_1_AddLast.htm" />
-        <HelpTOCNode Title="AddLastItems Method " Url="html/M_Solid_FlexibleList_1_AddLastItems.htm" />
         <HelpTOCNode Title="AddLastList Method " Url="html/M_Solid_FlexibleList_1_AddLastList.htm" />
         <HelpTOCNode Title="AddLastRange Method " Url="html/M_Solid_FlexibleList_1_AddLastRange.htm" />
-        <HelpTOCNode Title="Aggregate(TResult) Method " Url="html/M_Solid_FlexibleList_1_Aggregate__1.htm" />
-        <HelpTOCNode Title="AggregateBack(TResult) Method " Url="html/M_Solid_FlexibleList_1_AggregateBack__1.htm" />
-        <HelpTOCNode Title="All Method " Url="html/M_Solid_FlexibleList_1_All.htm" />
-        <HelpTOCNode Title="Concat Method " Url="html/M_Solid_FlexibleList_1_Concat.htm" />
         <HelpTOCNode Title="CopyTo Method " Url="html/M_Solid_FlexibleList_1_CopyTo.htm" />
         <HelpTOCNode Title="DropFirst Method " Url="html/M_Solid_FlexibleList_1_DropFirst.htm" />
         <HelpTOCNode Title="DropLast Method " Url="html/M_Solid_FlexibleList_1_DropLast.htm" />
+        <HelpTOCNode Title="Fold(TResult) Method " Url="html/M_Solid_FlexibleList_1_Fold__1.htm" />
+        <HelpTOCNode Title="FoldBack(TResult) Method " Url="html/M_Solid_FlexibleList_1_FoldBack__1.htm" />
         <HelpTOCNode Title="ForEach Method " Url="html/M_Solid_FlexibleList_1_ForEach.htm" />
         <HelpTOCNode Title="ForEachBack Method " Url="html/M_Solid_FlexibleList_1_ForEachBack.htm" />
         <HelpTOCNode Title="ForEachBackWhile Method " Url="html/M_Solid_FlexibleList_1_ForEachBackWhile.htm" />
         <HelpTOCNode Title="ForEachWhile Method " Url="html/M_Solid_FlexibleList_1_ForEachWhile.htm" />
         <HelpTOCNode Title="GetEnumerator Method " Url="html/M_Solid_FlexibleList_1_GetEnumerator.htm" />
-        <HelpTOCNode Title="IndexOf Method " Url="html/M_Solid_FlexibleList_1_IndexOf.htm" />
         <HelpTOCNode Title="Insert Method " Url="html/M_Solid_FlexibleList_1_Insert.htm" />
-        <HelpTOCNode Title="InsertItems Method " Url="html/M_Solid_FlexibleList_1_InsertItems.htm" />
         <HelpTOCNode Title="InsertList Method " Url="html/M_Solid_FlexibleList_1_InsertList.htm" />
         <HelpTOCNode Title="InsertRange Method " Url="html/M_Solid_FlexibleList_1_InsertRange.htm" />
         <HelpTOCNode Title="Remove Method " Url="html/M_Solid_FlexibleList_1_Remove.htm" />
         <HelpTOCNode Title="Reverse Method " Url="html/M_Solid_FlexibleList_1_Reverse.htm" />
         <HelpTOCNode Title="Select(TOut) Method " Url="html/M_Solid_FlexibleList_1_Select__1.htm" />
         <HelpTOCNode Title="SelectMany(TResult) Method " Url="html/M_Solid_FlexibleList_1_SelectMany__1.htm" />
-        <HelpTOCNode Title="SequenceEqual Method " Url="html/M_Solid_FlexibleList_1_SequenceEqual.htm" />
         <HelpTOCNode Title="Set Method " Url="html/M_Solid_FlexibleList_1_Set.htm" />
-        <HelpTOCNode Title="Skip Method " Url="html/M_Solid_FlexibleList_1_Skip.htm" />
         <HelpTOCNode Title="SkipWhile Method " Url="html/M_Solid_FlexibleList_1_SkipWhile.htm" />
         <HelpTOCNode Title="Slice Method " Url="html/M_Solid_FlexibleList_1_Slice.htm" />
-        <HelpTOCNode Title="Split Method " Url="html/M_Solid_FlexibleList_1_Split.htm" />
-        <HelpTOCNode Title="Take Method " Url="html/M_Solid_FlexibleList_1_Take.htm" />
         <HelpTOCNode Title="TakeWhile Method " Url="html/M_Solid_FlexibleList_1_TakeWhile.htm" />
         <HelpTOCNode Title="ToArray Method " Url="html/M_Solid_FlexibleList_1_ToArray.htm" />
         <HelpTOCNode Title="Where Method " Url="html/M_Solid_FlexibleList_1_Where.htm" />
       </HelpTOCNode>
-      <HelpTOCNode Id="61bac3d4-1b4a-4943-ad09-3f2abd96c9d0" Title="FlexibleList(T) Type Conversions" Url="html/Operators_T_Solid_FlexibleList_1.htm">
+      <HelpTOCNode Id="6006ef5d-03b5-4cd5-ac81-aae3d8b5272d" Title="FlexibleList(T) Type Conversions" Url="html/Operators_T_Solid_FlexibleList_1.htm">
         <HelpTOCNode Title="Implicit Conversion (T[] to FlexibleList(T))" Url="html/M_Solid_FlexibleList_1_op_Implicit.htm" />
       </HelpTOCNode>
-      <HelpTOCNode Id="1ab98ce6-b447-4bba-82d9-74faed689de1" Title="FlexibleList(T) Properties" Url="html/Properties_T_Solid_FlexibleList_1.htm">
+      <HelpTOCNode Id="d81475c4-310c-4ba0-bbbc-11154039ae2e" Title="FlexibleList(T) Properties" Url="html/Properties_T_Solid_FlexibleList_1.htm">
         <HelpTOCNode Title="Backward Property " Url="html/P_Solid_FlexibleList_1_Backward.htm" />
         <HelpTOCNode Title="Count Property " Url="html/P_Solid_FlexibleList_1_Count.htm" />
         <HelpTOCNode Title="Empty Property " Url="html/P_Solid_FlexibleList_1_Empty.htm" />
         <HelpTOCNode Title="First Property " Url="html/P_Solid_FlexibleList_1_First.htm" />
         <HelpTOCNode Title="Forward Property " Url="html/P_Solid_FlexibleList_1_Forward.htm" />
         <HelpTOCNode Title="IsEmpty Property " Url="html/P_Solid_FlexibleList_1_IsEmpty.htm" />
-        <HelpTOCNode Title="Item Property " Url="html/P_Solid_FlexibleList_1_Item.htm" />
+        <HelpTOCNode Id="72da6ca0-42a3-4d18-916d-2a09daf1667b" Title="Item Property " Url="html/Overload_Solid_FlexibleList_1_Item.htm">
+          <HelpTOCNode Title="Item Property (Int32)" Url="html/P_Solid_FlexibleList_1_Item.htm" />
+          <HelpTOCNode Title="Item Property (Int32, Int32)" Url="html/P_Solid_FlexibleList_1_Item_1.htm" />
+        </HelpTOCNode>
         <HelpTOCNode Title="Last Property " Url="html/P_Solid_FlexibleList_1_Last.htm" />
       </HelpTOCNode>
     </HelpTOCNode>
-    <HelpTOCNode Id="297e3536-c85b-449e-9f64-c1f6f80a09a7" Title="Vector(T) Class" Url="html/T_Solid_Vector_1.htm">
+    <HelpTOCNode Id="600f5f94-ccb3-47bc-b324-7320cce11368" Title="Vector(T) Class" Url="html/T_Solid_Vector_1.htm">
       <HelpTOCNode Title="Vector(T) Members" Url="html/AllMembers_T_Solid_Vector_1.htm" />
-      <HelpTOCNode Id="05702435-4d63-400a-954a-2cb32ac77d74" Title="Vector(T) Fields" Url="html/Fields_T_Solid_Vector_1.htm">
+      <HelpTOCNode Id="c1ff15fe-e18d-4c14-a0ba-539d933a5582" Title="Vector(T) Fields" Url="html/Fields_T_Solid_Vector_1.htm">
         <HelpTOCNode Title="MaxCapacity Field" Url="html/F_Solid_Vector_1_MaxCapacity.htm" />
       </HelpTOCNode>
-      <HelpTOCNode Id="70c13ff3-c90e-438f-81f0-fe1694320725" Title="Vector(T) Methods" Url="html/Methods_T_Solid_Vector_1.htm">
+      <HelpTOCNode Id="8794a39b-c762-4d30-9ebb-dc742dc26147" Title="Vector(T) Methods" Url="html/Methods_T_Solid_Vector_1.htm">
         <HelpTOCNode Title="AddLast Method " Url="html/M_Solid_Vector_1_AddLast.htm" />
         <HelpTOCNode Title="AddLastRange Method " Url="html/M_Solid_Vector_1_AddLastRange.htm" />
-        <HelpTOCNode Title="Aggregate(TResult) Method " Url="html/M_Solid_Vector_1_Aggregate__1.htm" />
-        <HelpTOCNode Title="AggregateBack(TResult) Method " Url="html/M_Solid_Vector_1_AggregateBack__1.htm" />
+        <HelpTOCNode Title="CopyFrom Method " Url="html/M_Solid_Vector_1_CopyFrom.htm" />
         <HelpTOCNode Title="CopyTo Method " Url="html/M_Solid_Vector_1_CopyTo.htm" />
-        <HelpTOCNode Id="dded57f0-7884-4d04-b4d3-e07d1180e0db" Title="DropLast Method " Url="html/Overload_Solid_Vector_1_DropLast.htm">
+        <HelpTOCNode Id="23dd68b3-704d-42d8-ad75-2de2811462e1" Title="DropLast Method " Url="html/Overload_Solid_Vector_1_DropLast.htm">
           <HelpTOCNode Title="DropLast Method " Url="html/M_Solid_Vector_1_DropLast.htm" />
           <HelpTOCNode Title="DropLast Method (Int32)" Url="html/M_Solid_Vector_1_DropLast_1.htm" />
         </HelpTOCNode>
+        <HelpTOCNode Title="Fold(TResult) Method " Url="html/M_Solid_Vector_1_Fold__1.htm" />
+        <HelpTOCNode Title="FoldBack(TResult) Method " Url="html/M_Solid_Vector_1_FoldBack__1.htm" />
         <HelpTOCNode Title="ForEach Method " Url="html/M_Solid_Vector_1_ForEach.htm" />
         <HelpTOCNode Title="ForEachBack Method " Url="html/M_Solid_Vector_1_ForEachBack.htm" />
         <HelpTOCNode Title="ForEachBackWhile Method " Url="html/M_Solid_Vector_1_ForEachBackWhile.htm" />
@@ -135,19 +85,105 @@
         <HelpTOCNode Title="GetEnumerator Method " Url="html/M_Solid_Vector_1_GetEnumerator.htm" />
         <HelpTOCNode Title="IndexOf Method " Url="html/M_Solid_Vector_1_IndexOf.htm" />
         <HelpTOCNode Title="Select(TOut) Method " Url="html/M_Solid_Vector_1_Select__1.htm" />
+        <HelpTOCNode Title="SelectMany(TOut) Method " Url="html/M_Solid_Vector_1_SelectMany__1.htm" />
         <HelpTOCNode Title="Set Method " Url="html/M_Solid_Vector_1_Set.htm" />
         <HelpTOCNode Title="Take Method " Url="html/M_Solid_Vector_1_Take.htm" />
         <HelpTOCNode Title="TakeWhile Method " Url="html/M_Solid_Vector_1_TakeWhile.htm" />
         <HelpTOCNode Title="ToArray Method " Url="html/M_Solid_Vector_1_ToArray.htm" />
         <HelpTOCNode Title="Where Method " Url="html/M_Solid_Vector_1_Where.htm" />
       </HelpTOCNode>
-      <HelpTOCNode Id="1383c7f7-b665-44b6-b7c7-ef073329ccc0" Title="Vector(T) Properties" Url="html/Properties_T_Solid_Vector_1.htm">
+      <HelpTOCNode Id="5199760a-9a67-43ef-9833-ea37dd8b772c" Title="Vector(T) Properties" Url="html/Properties_T_Solid_Vector_1.htm">
+        <HelpTOCNode Title="Backward Property " Url="html/P_Solid_Vector_1_Backward.htm" />
         <HelpTOCNode Title="Count Property " Url="html/P_Solid_Vector_1_Count.htm" />
         <HelpTOCNode Title="Empty Property " Url="html/P_Solid_Vector_1_Empty.htm" />
         <HelpTOCNode Title="First Property " Url="html/P_Solid_Vector_1_First.htm" />
         <HelpTOCNode Title="IsEmpty Property " Url="html/P_Solid_Vector_1_IsEmpty.htm" />
         <HelpTOCNode Title="Item Property " Url="html/P_Solid_Vector_1_Item.htm" />
         <HelpTOCNode Title="Last Property " Url="html/P_Solid_Vector_1_Last.htm" />
+      </HelpTOCNode>
+    </HelpTOCNode>
+  </HelpTOCNode>
+  <HelpTOCNode Id="b9687e04-02da-4512-a824-51632f6485f4" Title="Solid.Builders Namespace" Url="html/N_Solid_Builders.htm">
+    <HelpTOCNode Id="915a2495-6129-47d3-84f4-635ac08c89a0" Title="FlexListBuilder(T) Class" Url="html/T_Solid_Builders_FlexListBuilder_1.htm">
+      <HelpTOCNode Title="FlexListBuilder(T) Members" Url="html/AllMembers_T_Solid_Builders_FlexListBuilder_1.htm" />
+      <HelpTOCNode Id="2a9d4999-30b4-4b9a-a25a-2b9717a9c2ad" Title="FlexListBuilder(T) Methods" Url="html/Methods_T_Solid_Builders_FlexListBuilder_1.htm">
+        <HelpTOCNode Id="f64ddefb-aba1-4576-8237-089ba0aa12db" Title="DefaultIfEmpty Method " Url="html/Overload_Solid_Builders_FlexListBuilder_1_DefaultIfEmpty.htm">
+          <HelpTOCNode Title="DefaultIfEmpty Method " Url="html/M_Solid_Builders_FlexListBuilder_1_DefaultIfEmpty.htm" />
+          <HelpTOCNode Title="DefaultIfEmpty Method (T)" Url="html/M_Solid_Builders_FlexListBuilder_1_DefaultIfEmpty_1.htm" />
+        </HelpTOCNode>
+        <HelpTOCNode Id="3ba17c3d-be82-4ad5-811d-952a36726e62" Title="Distinct Method " Url="html/Overload_Solid_Builders_FlexListBuilder_1_Distinct.htm">
+          <HelpTOCNode Title="Distinct Method " Url="html/M_Solid_Builders_FlexListBuilder_1_Distinct.htm" />
+          <HelpTOCNode Title="Distinct Method (IEqualityComparer(T))" Url="html/M_Solid_Builders_FlexListBuilder_1_Distinct_1.htm" />
+        </HelpTOCNode>
+        <HelpTOCNode Title="Force Method " Url="html/M_Solid_Builders_FlexListBuilder_1_Force.htm" />
+        <HelpTOCNode Title="GetEnumerator Method " Url="html/M_Solid_Builders_FlexListBuilder_1_GetEnumerator.htm" />
+        <HelpTOCNode Id="f8924027-7bcf-4906-a418-86423a572cad" Title="GroupBy Method " Url="html/Overload_Solid_Builders_FlexListBuilder_1_GroupBy.htm">
+          <HelpTOCNode Title="GroupBy(TKey) Method (Func(T, TKey))" Url="html/M_Solid_Builders_FlexListBuilder_1_GroupBy__1.htm" />
+          <HelpTOCNode Title="GroupBy(TKey, TElement) Method (Func(T, TKey), Func(T, TElement))" Url="html/M_Solid_Builders_FlexListBuilder_1_GroupBy__2.htm" />
+          <HelpTOCNode Title="GroupBy(TKey, TResult) Method (Func(T, TKey), Func(TKey, IEnumerable(T), TResult))" Url="html/M_Solid_Builders_FlexListBuilder_1_GroupBy__2_1.htm" />
+          <HelpTOCNode Title="GroupBy(TKey, TElement, TResult) Method (Func(T, TKey), Func(T, TElement), Func(TKey, IEnumerable(TElement), TResult))" Url="html/M_Solid_Builders_FlexListBuilder_1_GroupBy__3.htm" />
+        </HelpTOCNode>
+        <HelpTOCNode Title="Join(TInner, TKey, TResult) Method " Url="html/M_Solid_Builders_FlexListBuilder_1_Join__3.htm" />
+        <HelpTOCNode Title="OrderBy(TKey) Method " Url="html/M_Solid_Builders_FlexListBuilder_1_OrderBy__1.htm" />
+        <HelpTOCNode Title="OrderByDescending(TKey) Method " Url="html/M_Solid_Builders_FlexListBuilder_1_OrderByDescending__1.htm" />
+        <HelpTOCNode Title="OuterJoin(TInner, TKey, TResult) Method " Url="html/M_Solid_Builders_FlexListBuilder_1_OuterJoin__3.htm" />
+        <HelpTOCNode Title="Select(TResult) Method " Url="html/M_Solid_Builders_FlexListBuilder_1_Select__1.htm" />
+        <HelpTOCNode Id="38310564-be0f-48f1-81a8-90f5a957b1ef" Title="SelectMany Method " Url="html/Overload_Solid_Builders_FlexListBuilder_1_SelectMany.htm">
+          <HelpTOCNode Title="SelectMany(TResult) Method (Func(T, IEnumerable(TResult)))" Url="html/M_Solid_Builders_FlexListBuilder_1_SelectMany__1.htm" />
+          <HelpTOCNode Title="SelectMany(TCollect, TResult) Method (Func(T, IEnumerable(TCollect)), Func(T, TCollect, TResult))" Url="html/M_Solid_Builders_FlexListBuilder_1_SelectMany__2.htm" />
+        </HelpTOCNode>
+        <HelpTOCNode Title="Skip Method " Url="html/M_Solid_Builders_FlexListBuilder_1_Skip.htm" />
+        <HelpTOCNode Title="SkipWhile Method " Url="html/M_Solid_Builders_FlexListBuilder_1_SkipWhile.htm" />
+        <HelpTOCNode Title="Take Method " Url="html/M_Solid_Builders_FlexListBuilder_1_Take.htm" />
+        <HelpTOCNode Title="TakeWhile Method " Url="html/M_Solid_Builders_FlexListBuilder_1_TakeWhile.htm" />
+        <HelpTOCNode Id="8266c544-223e-4f55-9657-9f385987303c" Title="Where Method " Url="html/Overload_Solid_Builders_FlexListBuilder_1_Where.htm">
+          <HelpTOCNode Title="Where Method (Func(T, Boolean))" Url="html/M_Solid_Builders_FlexListBuilder_1_Where.htm" />
+          <HelpTOCNode Title="Where Method (Func(T, Int32, Boolean))" Url="html/M_Solid_Builders_FlexListBuilder_1_Where_1.htm" />
+        </HelpTOCNode>
+      </HelpTOCNode>
+      <HelpTOCNode Id="ad16ad5d-2edb-433b-a9d2-27289e279d37" Title="FlexListBuilder(T) Type Conversions" Url="html/Operators_T_Solid_Builders_FlexListBuilder_1.htm">
+        <HelpTOCNode Title="Implicit Conversion (FlexListBuilder(T) to FlexibleList(T))" Url="html/M_Solid_Builders_FlexListBuilder_1_op_Implicit.htm" />
+      </HelpTOCNode>
+    </HelpTOCNode>
+    <HelpTOCNode Id="c31dc1f2-da61-43e2-bb28-3dda47535849" Title="VectorBuilder(T) Class" Url="html/T_Solid_Builders_VectorBuilder_1.htm">
+      <HelpTOCNode Title="VectorBuilder(T) Members" Url="html/AllMembers_T_Solid_Builders_VectorBuilder_1.htm" />
+      <HelpTOCNode Id="58021857-f405-41cf-b6b1-e2b7a1350fa8" Title="VectorBuilder(T) Methods" Url="html/Methods_T_Solid_Builders_VectorBuilder_1.htm">
+        <HelpTOCNode Id="9a57cb3c-f7c6-4415-a5c5-a47eaaa91d08" Title="DefaultIfEmpty Method " Url="html/Overload_Solid_Builders_VectorBuilder_1_DefaultIfEmpty.htm">
+          <HelpTOCNode Title="DefaultIfEmpty Method " Url="html/M_Solid_Builders_VectorBuilder_1_DefaultIfEmpty.htm" />
+          <HelpTOCNode Title="DefaultIfEmpty Method (T)" Url="html/M_Solid_Builders_VectorBuilder_1_DefaultIfEmpty_1.htm" />
+        </HelpTOCNode>
+        <HelpTOCNode Id="0e2193c3-481b-4fab-bee2-07e6c9f9497e" Title="Distinct Method " Url="html/Overload_Solid_Builders_VectorBuilder_1_Distinct.htm">
+          <HelpTOCNode Title="Distinct Method " Url="html/M_Solid_Builders_VectorBuilder_1_Distinct.htm" />
+          <HelpTOCNode Title="Distinct Method (IEqualityComparer(T))" Url="html/M_Solid_Builders_VectorBuilder_1_Distinct_1.htm" />
+        </HelpTOCNode>
+        <HelpTOCNode Title="Force Method " Url="html/M_Solid_Builders_VectorBuilder_1_Force.htm" />
+        <HelpTOCNode Title="GetEnumerator Method " Url="html/M_Solid_Builders_VectorBuilder_1_GetEnumerator.htm" />
+        <HelpTOCNode Id="cbcf7b21-c539-4fd6-b1c9-7e780a45e5d1" Title="GroupBy Method " Url="html/Overload_Solid_Builders_VectorBuilder_1_GroupBy.htm">
+          <HelpTOCNode Title="GroupBy(TKey) Method (Func(T, TKey))" Url="html/M_Solid_Builders_VectorBuilder_1_GroupBy__1.htm" />
+          <HelpTOCNode Title="GroupBy(TKey, TElement) Method (Func(T, TKey), Func(T, TElement))" Url="html/M_Solid_Builders_VectorBuilder_1_GroupBy__2.htm" />
+          <HelpTOCNode Title="GroupBy(TKey, TResult) Method (Func(T, TKey), Func(TKey, IEnumerable(T), TResult))" Url="html/M_Solid_Builders_VectorBuilder_1_GroupBy__2_1.htm" />
+          <HelpTOCNode Title="GroupBy(TKey, TElement, TResult) Method (Func(T, TKey), Func(T, TElement), Func(TKey, IEnumerable(TElement), TResult))" Url="html/M_Solid_Builders_VectorBuilder_1_GroupBy__3.htm" />
+        </HelpTOCNode>
+        <HelpTOCNode Title="Join(TInner, TKey, TResult) Method " Url="html/M_Solid_Builders_VectorBuilder_1_Join__3.htm" />
+        <HelpTOCNode Title="OrderBy(TKey) Method " Url="html/M_Solid_Builders_VectorBuilder_1_OrderBy__1.htm" />
+        <HelpTOCNode Title="OrderByDescending(TKey) Method " Url="html/M_Solid_Builders_VectorBuilder_1_OrderByDescending__1.htm" />
+        <HelpTOCNode Title="OuterJoin(TInner, TKey, TResult) Method " Url="html/M_Solid_Builders_VectorBuilder_1_OuterJoin__3.htm" />
+        <HelpTOCNode Title="Select(TResult) Method " Url="html/M_Solid_Builders_VectorBuilder_1_Select__1.htm" />
+        <HelpTOCNode Id="bc9423dc-8c63-4cae-9fcf-5fe2be38101e" Title="SelectMany Method " Url="html/Overload_Solid_Builders_VectorBuilder_1_SelectMany.htm">
+          <HelpTOCNode Title="SelectMany(TResult) Method (Func(T, IEnumerable(TResult)))" Url="html/M_Solid_Builders_VectorBuilder_1_SelectMany__1.htm" />
+          <HelpTOCNode Title="SelectMany(TCollect, TResult) Method (Func(T, IEnumerable(TCollect)), Func(T, TCollect, TResult))" Url="html/M_Solid_Builders_VectorBuilder_1_SelectMany__2.htm" />
+        </HelpTOCNode>
+        <HelpTOCNode Title="Skip Method " Url="html/M_Solid_Builders_VectorBuilder_1_Skip.htm" />
+        <HelpTOCNode Title="SkipWhile Method " Url="html/M_Solid_Builders_VectorBuilder_1_SkipWhile.htm" />
+        <HelpTOCNode Title="Take Method " Url="html/M_Solid_Builders_VectorBuilder_1_Take.htm" />
+        <HelpTOCNode Title="TakeWhile Method " Url="html/M_Solid_Builders_VectorBuilder_1_TakeWhile.htm" />
+        <HelpTOCNode Id="f986f858-983b-4071-8663-30ff883daeb1" Title="Where Method " Url="html/Overload_Solid_Builders_VectorBuilder_1_Where.htm">
+          <HelpTOCNode Title="Where Method (Func(T, Boolean))" Url="html/M_Solid_Builders_VectorBuilder_1_Where.htm" />
+          <HelpTOCNode Title="Where Method (Func(T, Int32, Boolean))" Url="html/M_Solid_Builders_VectorBuilder_1_Where_1.htm" />
+        </HelpTOCNode>
+      </HelpTOCNode>
+      <HelpTOCNode Id="5b31547e-9410-4ec3-b6c1-a5b02937d39d" Title="VectorBuilder(T) Type Conversions" Url="html/Operators_T_Solid_Builders_VectorBuilder_1.htm">
+        <HelpTOCNode Title="Implicit Conversion (VectorBuilder(T) to Vector(T))" Url="html/M_Solid_Builders_VectorBuilder_1_op_Implicit.htm" />
       </HelpTOCNode>
     </HelpTOCNode>
   </HelpTOCNode>

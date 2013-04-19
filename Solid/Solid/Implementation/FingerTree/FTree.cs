@@ -32,8 +32,6 @@ namespace Solid
 			{
 				Kind = kind;
 				Measure = measure;
-	
-
 			}
 
 			public static FTree<TChild> Concat(FTree<TChild> first, FTree<TChild> last)
@@ -135,6 +133,8 @@ namespace Solid
 				throw Errors.Invalid_execution_path;
 			}
 
+			public abstract Leaf<TValue> this[int index] { get; }
+
 			public abstract bool IsFragment { get; }
 
 			//+ Implementation
@@ -162,8 +162,6 @@ namespace Solid
 			public abstract FTree<TChild> DropLeft();
 
 			public abstract FTree<TChild> DropRight();
-
-			public abstract Leaf<TValue> this[int index] { get; }
 
 			public abstract IEnumerator<Leaf<TValue>> GetEnumerator(bool forward);
 

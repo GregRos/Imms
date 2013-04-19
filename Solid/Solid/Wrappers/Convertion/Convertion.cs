@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.FSharp.Core;
 
 namespace Solid
 {
@@ -8,34 +9,22 @@ namespace Solid
 	/// </summary>
 	public static class Convertion
 	{
-		/// <summary>
-		///   Returns a wrapper for the IEnumerable that implicitly generates a collection of type FlexibleList.
-		/// </summary>
-		/// <typeparam name="T"> The type of value the flexible list will contain. </typeparam>
-		/// <param name="items"> The sequence to process. </param>
-		/// <returns> </returns>
-		public static DelayedList<T> DelayList<T>(this IEnumerable<T> items)
-		{
-			return new DelayedList<T>(items);
-		}
-
-
-
-
 
 		/// <summary>
 		///   Converts the HashMap to a Dictionary object from the standard collection library.
 		///   The dictionary is created using the HashMap's equality comparer if none is specified..
 		/// </summary>
-		/// <typeparam name="TKey">The type of the key.</typeparam>
-		/// <typeparam name="TValue">The type of the value.</typeparam>
-		/// <param name="map">The HashMap object.</param>
-		/// <param name="comparer">The comparer to use for the dictionary.</param>
+		/// <typeparam name="TKey"> The type of the key. </typeparam>
+		/// <typeparam name="TValue"> The type of the value. </typeparam>
+		/// <param name="map"> The HashMap object. </param>
+		/// <param name="comparer"> The comparer to use for the dictionary. </param>
 		/// <returns> </returns>
 		internal static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(this HashMap<TKey, TValue> map,
-		                                                                    IEqualityComparer<TKey> comparer)
+																			IEqualityComparer<TKey> comparer)
 			where TKey : IEquatable<TKey>
 		{
+
+			FlexibleList<long> x = new[] {5L};
 			var dict = new Dictionary<TKey, TValue>(comparer ?? map.Comparer);
 			map.ForEach(dict.Add);
 			return dict;
@@ -44,10 +33,10 @@ namespace Solid
 		/// <summary>
 		///   Creates a FlexibleList from a sequence of items.
 		/// </summary>
-		/// <typeparam name="T">The type of the value.</typeparam>
-		/// <param name="items">The sequence.</param>
+		/// <typeparam name="T"> The type of the value. </typeparam>
+		/// <param name="items"> The sequence. </param>
 		/// <returns> </returns>
-		public static FlexibleList<T> ToFlexibleList<T>(this IEnumerable<T> items)
+		public static FlexibleList<T> ToFlexList<T>(this IEnumerable<T> items)
 		{
 			return FlexibleList<T>.Empty.AddLastRange(items);
 		}
@@ -55,13 +44,13 @@ namespace Solid
 		/// <summary>
 		///   Creates a HashMap from a collection of KeyValuePair objects. The keys must all be unique.
 		/// </summary>
-		/// <typeparam name="TKey">The type of the key.</typeparam>
-		/// <typeparam name="TValue">The type of the value.</typeparam>
+		/// <typeparam name="TKey"> The type of the key. </typeparam>
+		/// <typeparam name="TValue"> The type of the value. </typeparam>
 		/// <param name="items"> The collection of items. </param>
 		/// <param name="comparer"> The equality comparer used by the instance to determine equality. If this parameter is not specified, the default equality comparer is used instead, which makes use of instance methods. </param>
 		/// <returns> </returns>
 		internal static HashMap<TKey, TValue> ToHashMap<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> items,
-		                                                              IEqualityComparer<TKey> comparer = null)
+																	  IEqualityComparer<TKey> comparer = null)
 		{
 			var hm = comparer == null
 				? HashMap<TKey, TValue>.empty
@@ -77,8 +66,8 @@ namespace Solid
 		/// <summary>
 		///   Creates a Vector from a collection of items.
 		/// </summary>
-		/// <typeparam name="T">The type of value.</typeparam>
-		/// <param name="items">The sequence.</param>
+		/// <typeparam name="T"> The type of value. </typeparam>
+		/// <param name="items"> The sequence. </param>
 		/// <returns> </returns>
 		public static Vector<T> ToVector<T>(this IEnumerable<T> items)
 		{

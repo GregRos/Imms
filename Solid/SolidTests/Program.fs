@@ -14,6 +14,7 @@ open SolidTests.Tests
 open System.Collections.Generic
 open System.Threading
 open SolidFS
+
 open MapTestTargets
 open SolidTests.Generators
 let inline ( ** ) a b = pown a b
@@ -165,13 +166,11 @@ let unit_consistency_testing() =
     
     test_iterate_slices 10 group
    
+open SolidFS.Operators
+open Solid
 
 
 [<EntryPoint>]
 let main argv =
-    let mutable group = TestGroup([| solid_xlist 0; core_list 0 |]) :> TestTarget<_>
-    
-
-    printfn "Done"
-    Console.Read() |> ignore
+   
     0

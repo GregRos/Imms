@@ -1,6 +1,6 @@
 ﻿module Wrapper
 open Solid
-open Solid.Common;
+open Solid.Common
 open System.Collections.Generic
 open System.Collections
 open System
@@ -60,12 +60,8 @@ type XList<'value>(root : FlexibleList<'value>)=
         root.Set(index,value)
     member this.Insert index value = 
         root.Insert(index,value)
-    member this.GetSlice(fIndex, lIndex)= 
-        match fIndex,lIndex with
-        | None,None -> this
-        | Some s, None -> root.Slice(s, -1) |> cns
-        | Some s, Some e -> root.Slice(s,e) |> cns
-        | None, Some e -> root.Slice(0, e) |> cns
+
+    member this.Item(a,b) = root.Slice(a,b)
 
     member this.InsertSeq index s = 
         root.InsertRange(index, s) |> cns
@@ -75,12 +71,6 @@ type XList<'value>(root : FlexibleList<'value>)=
 
     member this.Remove index = 
         root.Remove(index) |> cns
-
-    member this.Take n = 
-        root.Take(n) |> cns
-
-    member this.Skip n = 
-        root.Skip(n) |> cns
 
     member this.TakeWhile f = 
         root.TakeWhile(Func<_,_>(f))
@@ -101,10 +91,10 @@ type XList<'value>(root : FlexibleList<'value>)=
         root.ForEachBackWhile(Func<_,_>(f))
 
     member this.Fold f = 
-        root.Aggregate(Func<_,_,_>(f))
+        root.Fold(Func<_,_,_>(f))
 
     member this.FoldBack f = 
-        root.AggregateBack(Func<_,_,_>(f))
+        root.FoldBack(Func<_,_,_>(f))
 
     member this.Filter f = 
         root.Where(Func<_,_>(f)) |> cns
@@ -137,7 +127,7 @@ type XList<'value>(root : FlexibleList<'value>)=
         root.Split(i, &part1, &part2)
         part1,part2
 
-type Vector<'value>(root : FastList<'value>) = 
+type Vector<'value>(root : Solid.Vector<'value>) = 
     static let cns x = Vector<'value>(x)
     interface seq<'value> with
         member this.GetEnumerator() : IEnumerator<'value> = root.GetEnumerator()

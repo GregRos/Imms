@@ -11,8 +11,7 @@
     <AssemblyName>SolidFS</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <Name>SolidFS</Name>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -47,9 +46,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="Operators.fs" />
-    <Compile Include="Expressions.fs" />
-    <None Include="Wrapper.fs" />
+    <Compile Include="Compatibility.fs" />
+    <Compile Include="GeneralizedOps.fs" />
+    <Compile Include="PublicOperators.fs" />
+    <Compile Include="FlexibleListOverloads.fs" />
+    <Compile Include="VectorOverloads.fs" />
+    <Compile Include="VectorModule.fs" />
+    <Compile Include="FlexListModule.fs" />
+    <Compile Include="Builders.fs" />
+    <Compile Include="Patterns.fs" />
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>

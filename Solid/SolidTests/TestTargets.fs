@@ -9,11 +9,13 @@ type FSMap<'t when 't : comparison> = Map<'t,'t>
 type FSList<'t> = list<'t>
 type MutableQueue<'t> = Generic.Queue<'t>
 open SolidFS.Operators
-open SolidFS.Expressions
 open Solid
 open SolidFS
 
-
+let inline delay1 f p1 = fun () -> f p1
+let inline delay2 f p1 p2 = fun () -> f  p1
+let inline delay3 f p1 p2 p3 = fun () -> f p1 p2 p3
+let inline delay4 f p1 p2 p3 p4 = fun () -> f p1 p2 p3 p4
 type TestNotAvailableException<'a>(target : TestTarget<'a>) = 
     inherit Exception( "The test is not available for the object.")
 
@@ -21,6 +23,9 @@ type TestNotAvailableException<'a>(target : TestTarget<'a>) =
 and [<AbstractClass>] 
     TestTarget<'a>(name) as this = 
     let not_available = TestNotAvailableException(this)
+    interface seq<'a> with
+        member this.GetEnumerator() = this.AsSeq().GetEnumerator()
+        member this.GetEnumerator() : IEnumerator = this.AsSeq().GetEnumerator() :>_
     abstract member Name          : string
     abstract member AddLast       : 'a             -> TestTarget<'a>
     abstract member AddFirst      : 'a             -> TestTarget<'a>
@@ -277,9 +282,9 @@ module SOLID =
         override __.FromSeq vs = vs.ToVector() |> cns
         
         static member Empty = TestVector<'a>(Solid.Vector<'a>.Empty)
-    type TestXList<'a>(inner : xlist<'a>) = 
+    type TestXList<'a>(inner : FlexibleList<'a>) = 
         inherit TestTarget<'a>("Solid...Sequence")
-        static let cns (x : xlist<'b>) : TestTarget<'b> = TestXList<'b>(x) :> TestTarget<'b>
+        static let cns (x : FlexibleList<'b>) : TestTarget<'b> = TestXList<'b>(x) :> TestTarget<'b>
         member __.Inner = inner
         override __.AddFirst v = inner.AddFirst v |> cns
         override __.AddLast v = inner.AddLast v |> cns
@@ -302,10 +307,10 @@ module SOLID =
         override __.RemoveAt i = inner.Remove(i) |> cns
         override __.AddLastList t = 
             let t = t :?> TestXList<'a>
-            inner.AddLastList(t.Inner) |> cns
+            inner.AddLastRange(t.Inner) |> cns
         override __.Filter f = inner |> XList.filter f |> cns
-        override __.Map f = inner |> XList.map f |> cns
-        override __.IndexOf f = inner |> XList.indexOf f
+        override __.Map f = inner |> XList.select f |> cns
+
         override __.Reverse() = inner.Reverse() |> cns
         static member Empty = TestXList<'a>(XList.empty)
 

@@ -26,8 +26,7 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -58,6 +57,7 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FSharp.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="nunit.framework" Condition="$(DefineConstants.Contains('DEBUG'))">
@@ -67,8 +67,10 @@
   <ItemGroup>
     <Compile Include="ChainingAssertion.NUnit.cs" Condition="$(DefineConstants.Contains('DEBUG'))" />
     <Compile Include="Implementation\Common\ArrayExt.cs" />
+    <Compile Include="Implementation\Common\Comparison.cs" />
     <Compile Include="Implementation\Common\Errors.cs" />
-    <Compile Include="Wrappers\Convertion\DelayedList.cs" />
+    <Compile Include="Wrappers\Builders\Builders.cs" />
+    <Compile Include="Wrappers\Builders\FlexListBuilder.cs" />
     <Compile Include="Wrappers\Convertion\Convertion.cs" />
     <Compile Include="Implementation\FingerTree\Compound.cs" />
     <Compile Include="Implementation\FingerTree\Digit.cs" />
@@ -79,8 +81,12 @@
     <Compile Include="Implementation\FingerTree\TreeType.cs" />
     <Compile Include="Implementation\FingerTree\Leaf.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Wrappers\FlexibleList.cs" />
+    <Compile Include="Wrappers\Builders\VectorBuilder.cs" />
+    <Compile Include="Wrappers\FlexibleList\Core.cs" />
     <Compile Include="Implementation\TrieMap\HashedKey.cs" />
+    <Compile Include="Wrappers\FlexibleList\Debugging.cs" />
+    <Compile Include="Wrappers\FlexibleList\Interfaces.cs" />
+    <Compile Include="Wrappers\FlexibleList\Iteration.cs" />
     <Compile Include="Wrappers\HashMap.cs" />
     <Compile Include="Implementation\TrieMap\Iteration\LeafIterator.cs" />
     <Compile Include="Implementation\TrieMap\NodeType.cs" />
@@ -94,7 +100,10 @@
     <Compile Include="Implementation\TrieVector\VectorLeaf.cs" />
     <Compile Include="Implementation\TrieVector\VectorNode.cs" />
     <Compile Include="Implementation\TrieVector\VectorParent.cs" />
-    <Compile Include="Wrappers\Vector.cs" />
+    <Compile Include="Wrappers\Vector\Debugging.cs" />
+    <Compile Include="Wrappers\Vector\Interfaces.cs" />
+    <Compile Include="Wrappers\Vector\Iteration.cs" />
+    <Compile Include="Wrappers\Vector\Vector.cs" />
     <Compile Include="Implementation\TrieVector\Iteration\ParentEnumerator.cs" />
     <Compile Include="Implementation\TrieVector\Iteration\LeafEnumerator.cs" />
   </ItemGroup>
