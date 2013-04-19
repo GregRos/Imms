@@ -61,7 +61,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="nunit.framework" Condition="$(DefineConstants.Contains('DEBUG'))">
-      <HintPath>..\packages\NUnit.2.6.2\lib\nunit.framework.dll</HintPath>
+      <HintPath>..\NUnit-2.6.2\bin\nunit.framework.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
