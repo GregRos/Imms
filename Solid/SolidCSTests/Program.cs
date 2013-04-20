@@ -6,7 +6,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Solid;
-
+using System.IO.IsolatedStorage;
+using System.IO.MemoryMappedFiles;
 
 namespace SolidCSTests
 {
@@ -14,18 +15,8 @@ namespace SolidCSTests
 	{
 		static void Main(string[] args)
 		{
-			
-			var list1 = Enumerable.Range(0, 100000).ToFlexList();
-			var list2 = list1.ToList();
-			Action act = () =>
-			             {
-				             for (int i = 0; i < 1000000; i++)
-				             {
-					            list2.Insert(50000, 0);
-				             }
-			             };
+			var x = System.IO.MemoryMappedFiles.MemoryMappedFile.CreateNew("Test123", 1000000);
 
-			Console.WriteLine(Bench(act));
 		}
 
 		private static Stopwatch watch = new Stopwatch();

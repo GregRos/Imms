@@ -49,7 +49,8 @@
     </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\Solid.XML</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
@@ -100,6 +101,7 @@
     <Compile Include="Implementation\TrieVector\VectorLeaf.cs" />
     <Compile Include="Implementation\TrieVector\VectorNode.cs" />
     <Compile Include="Implementation\TrieVector\VectorParent.cs" />
+    <Compile Include="Wrappers\List2.cs" />
     <Compile Include="Wrappers\Vector\Debugging.cs" />
     <Compile Include="Wrappers\Vector\Interfaces.cs" />
     <Compile Include="Wrappers\Vector\Iteration.cs" />
