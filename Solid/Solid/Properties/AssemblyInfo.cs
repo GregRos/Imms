@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Solid")]
 [assembly: InternalsVisibleTo("SolidFS")]
-[assembly: InternalsVisibleTo("SolidTests")]
+[assembly: InternalsVisibleTo("Benchmarks")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -31,6 +31,7 @@ namespace Solid
 			this._root = root;
 		}
 
+
 		/// <summary>
 		///   Gets the empty vector.
 		/// </summary>
@@ -53,7 +54,7 @@ namespace Solid
 			get
 			{
 				index = index < 0 ? index + Count : index;
-				if (index >= Count || index < 0) throw Errors.Arg_out_of_range("index");
+				if (index >= Count || index < 0) throw Errors.Arg_out_of_range("index", index);
 				return _root[index];
 			}
 		}
@@ -215,7 +216,7 @@ namespace Solid
 			var x = new[] {0};
 
 			index = index < 0 ? index + Count : index;
-			if (index < 0 || index >= Count) throw Errors.Arg_out_of_range("index");
+			if (index < 0 || index >= Count) throw Errors.Arg_out_of_range("index", index);
 			return new Vector<T>(_root.Set(index, item));
 		}
 
@@ -227,7 +228,7 @@ namespace Solid
 		/// <exception cref="ArgumentOutOfRangeException">Thrown if the count is invalid.</exception>
 		public Vector<T> Take(int count)
 		{
-			if (count < 0 || count > Count) throw Errors.Arg_out_of_range("count");
+			if (count < 0 || count > Count) throw Errors.Arg_out_of_range("count", count);
 			if (count == 0) return empty;
 			return new Vector<T>(_root.Take(count));
 		}

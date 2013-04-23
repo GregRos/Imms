@@ -89,8 +89,8 @@ csx
 AppPackages/
 
 # Others
-[Bb]in
 [Oo]bj
+Documentation/
 sql
 TestResults
 [Tt]est[Rr]esult*

@@ -88,9 +88,9 @@ namespace Solid.Common
 			}
 		}
 
-		internal static ArgumentOutOfRangeException Arg_out_of_range(string name)
+		internal static ArgumentOutOfRangeException Arg_out_of_range(string name, int index)
 		{
-			return new ArgumentOutOfRangeException(name, "The index is out of range of this data structure");
+			return new ArgumentOutOfRangeException(name, "The index is out of range of this data structure. It was: " + index);
 		}
 
 		internal static ArgumentNullException Argument_null(string name)

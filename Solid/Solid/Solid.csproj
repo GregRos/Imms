@@ -48,9 +48,8 @@
     <DefineConstants>
     </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <DocumentationFile>
-    </DocumentationFile>
+    <WarningLevel>1</WarningLevel>
+    <DocumentationFile>bin\Release\Solid.XML</DocumentationFile>
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
@@ -58,11 +57,10 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FSharp.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="nunit.framework" Condition="$(DefineConstants.Contains('DEBUG'))">
-      <HintPath>..\NUnit-2.6.2\bin\nunit.framework.dll</HintPath>
+      <HintPath>..\NUnit-2.6.2\bin\framework\nunit.framework.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -101,7 +99,6 @@
     <Compile Include="Implementation\TrieVector\VectorLeaf.cs" />
     <Compile Include="Implementation\TrieVector\VectorNode.cs" />
     <Compile Include="Implementation\TrieVector\VectorParent.cs" />
-    <Compile Include="Wrappers\List2.cs" />
     <Compile Include="Wrappers\Vector\Debugging.cs" />
     <Compile Include="Wrappers\Vector\Interfaces.cs" />
     <Compile Include="Wrappers\Vector\Iteration.cs" />

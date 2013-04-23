@@ -171,7 +171,7 @@ namespace Solid
 						if (index < Measure)
 							return RightDigit[index - m2];
 
-						throw Errors.Arg_out_of_range("index");
+						throw Errors.Arg_out_of_range("index",index);
 					}
 				}
 
@@ -207,7 +207,8 @@ namespace Solid
 					}
 					Digit leftmost;
 					Digit rightmost;
-					LeftDigit.AddLeftSplit(item, out leftmost, out rightmost);
+					leftmost = new Digit(item, LeftDigit.First);
+					rightmost = new Digit(LeftDigit.Second, LeftDigit.Third, LeftDigit.Fourth);
 					var newDeep = DeepTree.AddLeft(rightmost);
 					return new CompoundTree(leftmost, newDeep, RightDigit);
 				}
@@ -221,7 +222,8 @@ namespace Solid
 
 					Digit leftmost;
 					Digit rightmost;
-					RightDigit.AddRightSplit(item, out leftmost, out rightmost);
+					leftmost = new Digit(RightDigit.First, RightDigit.Second, RightDigit.Third);
+					rightmost = new Digit(RightDigit.Fourth, item);
 					var newDeep = DeepTree.AddRight(leftmost);
 					return new CompoundTree(LeftDigit, newDeep, rightmost);
 				}
@@ -324,6 +326,8 @@ namespace Solid
 					var whereIsThisIndex = WhereIsThisIndex(index);
 					var new_measure = Measure + 1;
 					FTree<Digit> new_deep;
+					CompoundTree res = null;
+					Digit right_l, right_r;
 					switch (whereIsThisIndex)
 					{
 						case IN_START:
@@ -331,19 +335,24 @@ namespace Solid
 							Digit left_l, left_r;
 							LeftDigit.Insert(index, leaf, out left_l, out left_r);
 							new_deep = left_r != null ? DeepTree.AddLeft(left_r) : DeepTree;
-							return new CompoundTree(left_l, new_deep, RightDigit);
+							res= new CompoundTree(left_l, new_deep, RightDigit);
+							return res;
 						case IN_START_OF_DEEP:
 						case IN_MIDDLE_OF_DEEP:
+							if (this.DeepTree.Measure == 0) goto case IN_START_OF_RIGHT;
 							new_deep = DeepTree.Insert(index - LeftDigit.Measure, leaf);
-							return new CompoundTree(LeftDigit, new_deep, RightDigit);
+							res = new CompoundTree(LeftDigit, new_deep, RightDigit);
+							return res;
 						case IN_START_OF_RIGHT:
 						case IN_MIDDLE_OF_RIGHT:
-							Digit right_l, right_r;
+							
 							RightDigit.Insert(index - LeftDigit.Measure - DeepTree.Measure, leaf, out right_l, out right_r);
 							new_deep = right_r != null ? DeepTree.AddRight(right_l) : DeepTree;
 							right_r = right_r ?? right_l;
-							return new CompoundTree(RightDigit, new_deep, right_r);
+							res = new CompoundTree(LeftDigit, new_deep, right_r);
+							return res;
 					}
+					
 					throw Errors.Invalid_execution_path;
 				}
 
@@ -400,6 +409,7 @@ namespace Solid
 							return CreateCheckNull(newLeft, DeepTree, RightDigit);
 						case IN_START_OF_DEEP:
 						case IN_MIDDLE_OF_DEEP:
+							if (DeepTree.Measure == 0) goto case IN_START_OF_RIGHT;
 							var deep = DeepTree;
 							FTree<Digit> newDeep;
 							if (deep.IsFragment)
@@ -453,7 +463,7 @@ namespace Solid
 							var new_right = RightDigit.Set(index - LeftDigit.Measure - DeepTree.Measure, leaf);
 							return new CompoundTree(LeftDigit, DeepTree, new_right);
 					}
-					throw Errors.Arg_out_of_range("index");
+					throw Errors.Arg_out_of_range("index",index);
 				}
 
 				public override void Split(int count, out FTree<TChild> leftmost, out FTree<TChild> rightmost)

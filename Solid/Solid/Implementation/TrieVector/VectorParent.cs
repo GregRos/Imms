@@ -145,17 +145,18 @@ namespace Solid
 			{
 				if (count == 0) return this;
 				var oldCount = count;
-				var maybeArraySize = Arr.Length + ((count + Count) >> offs);
+				var maybeArraySize = 1 + ((count + Count - 1) >> offs);
 				var realArraySize = Math.Min(32, maybeArraySize);
 				var newArray = new VectorNode[realArraySize];
 				Arr.CopyTo(newArray, 0);
 				var lastCount = Arr[Arr.Length - 1].Count;
 				var childMaxCapacity = (1 << offs);
 				var lastRemainingCapacity = childMaxCapacity - lastCount;
-				var newLast = Arr[Arr.Length - 1].BulkLoad(items, startIndex, lastRemainingCapacity);
+				var newLast = Arr[Arr.Length - 1].BulkLoad(items, startIndex, Math.Min(count, lastRemainingCapacity));
 				newArray[Arr.Length - 1] = newLast;
 				startIndex = startIndex + lastRemainingCapacity;
-				count = count - lastRemainingCapacity;
+				count = Math.Max(0,count - lastRemainingCapacity);
+
 				var emptyLeaf = Empty;
 				for (var i = Arr.Length; i < newArray.Length; i++)
 				{

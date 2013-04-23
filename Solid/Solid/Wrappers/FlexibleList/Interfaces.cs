@@ -56,7 +56,7 @@ namespace Solid
 		{
 			var res = IndexOf(v => item.Equals(v));
 			if (res.HasValue) return res.Value;
-			throw Errors.Arg_out_of_range("item");
+			throw Errors.Arg_out_of_range("item", -1);
 		}
 
 		void IList<T>.Insert(int index, T item)

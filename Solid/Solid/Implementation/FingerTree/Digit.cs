@@ -187,42 +187,44 @@ namespace Solid
 					items_present |= item2 != null ? 2 : 0;
 					items_present |= item3 != null ? 4 : 0;
 					items_present |= item4 != null ? 8 : 0;
-
+					Digit res = null;
 					switch (items_present)
 					{
 						case 0:
-							return null;
+							res = null; break;
 						case 1 << 0:
-							return new Digit(item1);
+							res = new Digit(item1); break;
 						case 1 << 1:
-							return new Digit(item2);
+							res = new Digit(item2); break;
 						case 1 << 2:
-							return new Digit(item3);
+							res = new Digit(item3); break;
 						case 1 << 3:
-							return new Digit(item4);
+							res = new Digit(item4); break;
 						case 1 << 0 | 1 << 1:
-							return new Digit(item1, item2);
+							res = new Digit(item1, item2); break;
 						case 1 << 0 | 1 << 1 | 1 << 2:
-							return new Digit(item1, item2, item3);
+							res = new Digit(item1, item2, item3); break;
 						case 1 << 0 | 1 << 1 | 1 << 2 | 1 << 3:
-							return new Digit(item1, item2, item3, item4);
+							res = new Digit(item1, item2, item3, item4); break;
 						case 1 << 1 | 1 << 2:
-							return new Digit(item2, item3);
+							res = new Digit(item2, item3); break;
 						case 1 << 1 | 1 << 2 | 1 << 3:
-							return new Digit(item2, item3, item4);
+							res = new Digit(item2, item3, item4); break;
 						case 1 << 2 | 1 << 3:
-							return new Digit(item3, item4);
+							res = new Digit(item3, item4); break;
 						case 1 << 0 | 1 << 2:
-							return new Digit(item1, item3);
+							res = new Digit(item1, item3); break;
 						case 1 << 0 | 1 << 2 | 1 << 3:
-							return new Digit(item1, item3, item4);
+							res = new Digit(item1, item3, item4); break;
 						case 1 << 1 | 1 << 3:
-							return new Digit(item2, item4);
+							res = new Digit(item2, item4); break;
 						case 1 << 0 | 1 << 3:
-							return new Digit(item1, item4);
+							res = new Digit(item1, item4); break;
 						case 1 << 0 | 1 << 1 | 1 << 3:
-							return new Digit(item1, item2, item4);
+							res = new Digit(item1, item2, item4); break;
 					}
+				
+					return res;
 					throw Errors.Invalid_execution_path;
 				}
 
@@ -383,7 +385,7 @@ namespace Solid
 					leftmost = new Digit(item, First);
 					rightmost = new Digit(Second, Third, Fourth);
 				}
-
+	
 				public Digit AddRight(TChild item)
 				{
 					switch (Size)
@@ -424,6 +426,8 @@ namespace Solid
 					var whereIsThisIndex = WhereIsThisIndex(index);
 					TChild my_leftmost;
 					TChild my_rightmost;
+					leftmost = null;
+					rightmost = null;
 					switch (whereIsThisIndex)
 					{
 						case IN_START:
@@ -482,6 +486,7 @@ namespace Solid
 							rightmost = null;
 							return;
 					}
+					
 					throw Errors.Invalid_execution_path;
 				}
 

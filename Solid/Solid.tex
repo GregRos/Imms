@@ -190,6 +190,8 @@ This data structure is implemented as a 2-3 finger tree.
 
 This is in addition all the operations offered by all \solid data structures, of course. 
 
+In terms of performance, 
+
 \subsection{Ve\relax ctor}\label{sec:vector}
 Vector<T> is a more specialized collection that boasts fewer features but much better performance. 
 
@@ -203,9 +205,14 @@ It is implemented as an array mapped trie, utilizing arrays and efficient memory
 	\item[Subsequence] Offers a \method{Take(n)} operation. Doesn't support slices though. $O(\log n)$.
 \end{description}
 
+\class{Vector<T>} performs
+
 
 \section{Library Features}\label{sec:library}
 These are the general features shared by all collections in the library, and are unlikely to change in future revisions. By the way, this section is written in \csh. You might need to glance at \cref{sec:csh-easy} because it has some information on the interface.
+
+\subsection{High performance and functionality}
+\solid collections perform better and have more features than other persistent collections of their type. 
 
 \subsection{Implicit optimization}\label{sec:optimization}
 All \solid collections use implicit optimization. This means that the collection will always try to optimize things behind the scenes.

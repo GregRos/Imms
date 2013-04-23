@@ -79,7 +79,9 @@ namespace Solid
 
 				public override FTree<TChild> Insert(int index, Leaf<TValue> leaf)
 				{
-					return AddRight(leaf as TChild);
+						throw Errors.Invalid_execution_path;
+					
+
 				}
 
 				public override void Iter(Action<Leaf<TValue>> action1)

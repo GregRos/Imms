@@ -15,7 +15,7 @@ namespace SolidCSTests
 	{
 		static void Main(string[] args)
 		{
-			var x = System.IO.MemoryMappedFiles.MemoryMappedFile.CreateNew("Test123", 1000000);
+			
 
 		}
 

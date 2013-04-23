@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>4ae0206d-527d-43d7-9dcb-e88a8e1d47b6</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <RootNamespace>SolidFS</RootNamespace>
     <AssemblyName>SolidFS</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
@@ -55,7 +55,6 @@
     <Compile Include="FlexListModule.fs" />
     <Compile Include="Builders.fs" />
     <Compile Include="Patterns.fs" />
-    <Compile Include="Tests.fs" />
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>

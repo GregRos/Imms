@@ -13,7 +13,7 @@ namespace Solid
 	///   A sequential data structure supporting many efficient operations.
 	/// </summary>
 	/// <typeparam name="T"> The type of value stored in the data structure. </typeparam>
-	public sealed partial class FlexibleList<T>
+	public  partial class FlexibleList<T>
 	{
 		private static readonly FingerTree<T>.FTree<Leaf<T>> emptyFTree = FingerTree<T>.FTree<Leaf<T>>.Empty;
 		internal static readonly FlexibleList<T> empty = new FlexibleList<T>(emptyFTree);
@@ -47,6 +47,11 @@ namespace Solid
 			}
 		}
 
+		public FlexibleList<T> Take(int count)
+		{
+			return Slice(0, count - 1);
+		}
+
 		/// <summary>
 		///   Gets the item at the specified index. O(logn), very fast.
 		/// </summary>
@@ -60,7 +65,7 @@ namespace Solid
 				index = index < 0 ? index + _root.Measure : index;
 				if (index == 0) return First;
 				if (index == _root.Measure - 1) return Last;
-				if (index >= _root.Measure || index < 0) throw Errors.Arg_out_of_range("index");
+				if (index >= _root.Measure || index < 0) throw Errors.Arg_out_of_range("index", index);
 				var v = _root[index];
 				return v.Value;
 			}
@@ -254,11 +259,16 @@ namespace Solid
 		public FlexibleList<T> Insert(int index, T item)
 		{
 			index = index < 0 ? _root.Measure + index + 1 : index;
-			if (index >= _root.Measure || index < 0) throw Errors.Arg_out_of_range("index");
+			if (index > _root.Measure || index < 0) throw Errors.Arg_out_of_range("index", index);
 			if (index == _root.Measure) return AddLast(item);
 			if (index == 0) return AddFirst(item);
 
-			return new FlexibleList<T>(_root.Insert(index, new Leaf<T>(item)));
+			var new_root = _root.Insert(index, new Leaf<T>(item));
+			if (new_root.Measure != _root.Measure + 1)
+			{
+				throw new Exception("here!");
+			}
+			return new FlexibleList<T>(new_root);
 		}
 
 		/// <summary>
@@ -287,7 +297,7 @@ namespace Solid
 		public FlexibleList<T> InsertList(int index, FlexibleList<T> list)
 		{
 			index = index < 0 ? _root.Measure + index + 1 : index;
-			if (index > _root.Measure || index < 0) throw Errors.Arg_out_of_range("index");
+			if (index > _root.Measure || index < 0) throw Errors.Arg_out_of_range("index", index);
 			if (list == null) throw Errors.Argument_null("list");
 			if (index == 0) return list.AddLastRange(this);
 			if (index == _root.Measure) return AddLastRange(list);
@@ -311,7 +321,7 @@ namespace Solid
 		{
 			if (items == null) throw Errors.Argument_null("items");
 			index = index < 0 ? index + _root.Measure + 1 : index;
-			if (index >= _root.Measure || index < 0) throw Errors.Arg_out_of_range("index");
+			if (index >= _root.Measure || index < 0) throw Errors.Arg_out_of_range("index", index);
 			if (items is FlexibleList<T>)
 			{
 				return this.InsertList(index, items as FlexibleList<T>);
@@ -335,7 +345,7 @@ namespace Solid
 		public FlexibleList<T> Remove(int index)
 		{
 			index = index < 0 ? index + _root.Measure : index;
-			if (index < 0 || index >= _root.Measure) throw Errors.Arg_out_of_range("index");
+			if (index < 0 || index >= _root.Measure) throw Errors.Arg_out_of_range("index", index);
 			return new FlexibleList<T>(_root.Remove(index));
 		}
 
@@ -358,7 +368,7 @@ namespace Solid
 		public FlexibleList<T> Set(int index, T item)
 		{
 			index = index < 0 ? index + _root.Measure : index;
-			if (index >= _root.Measure || index < 0) throw Errors.Arg_out_of_range("index");
+			if (index >= _root.Measure || index < 0) throw Errors.Arg_out_of_range("index", index);
 			if (index == 0) return DropFirst().AddFirst(item);
 			if (index == _root.Measure - 1) return DropLast().AddLast(item);
 			return new FlexibleList<T>(_root.Set(index, new Leaf<T>(item)));
@@ -375,9 +385,9 @@ namespace Solid
 		{
 			start = start < 0 ? start + _root.Measure : start;
 			end = end < 0 ? end + _root.Measure : end;
-			if (start < 0 || start > _root.Measure) throw Errors.Arg_out_of_range("start");
-			if (end < 0 || end > _root.Measure) throw Errors.Arg_out_of_range("end");
-			if (end < start) throw Errors.Arg_out_of_range("start");
+			if (start < 0 || start >= _root.Measure) throw Errors.Arg_out_of_range("start", start);
+			if (end < 0 || end >= _root.Measure) throw Errors.Arg_out_of_range("end", end);
+			if (end < start) throw Errors.Arg_out_of_range("start", start);
 			if (start == end)
 			{
 				var res = _root[start];
@@ -400,7 +410,7 @@ namespace Solid
 		internal void Split(int index, out FlexibleList<T> first, out FlexibleList<T> last)
 		{
 			index = index < 0 ? index + _root.Measure : index;
-			if (index >= _root.Measure || index < 0) throw Errors.Arg_out_of_range("index");
+			if (index >= _root.Measure || index < 0) throw Errors.Arg_out_of_range("index", index);
 			FingerTree<T>.FTree<Leaf<T>> left, right;
 			_root.Split(index + 1, out left, out right);
 			first = new FlexibleList<T>(left);

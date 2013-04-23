@@ -5,13 +5,14 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>d8cd7e60-bde8-44bf-8803-568ac1e30b90</ProjectGuid>
+    <ProjectGuid>7ec95555-ca5b-4e87-a8da-525fa4e01fac</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>SolidTests</RootNamespace>
-    <AssemblyName>SolidTests</AssemblyName>
+    <RootNamespace>PerfTesting</RootNamespace>
+    <AssemblyName>Benchmarks</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>SolidTests</Name>
-    <TargetFrameworkProfile />
+    <Name>Benchmarks</Name>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -22,7 +23,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\SolidTests.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\PerfTesting.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -31,23 +32,46 @@
     <Tailcalls>true</Tailcalls>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
+    <WarningLevel>4</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Release\SolidTests.XML</DocumentationFile>
-    <Prefer32Bit>true</Prefer32Bit>
+    <DocumentationFile>bin\Release\PerfTesting.XML</DocumentationFile>
+    <Prefer32Bit>false</Prefer32Bit>
     <OtherFlags>
     </OtherFlags>
   </PropertyGroup>
+  <PropertyGroup>
+    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
   <ItemGroup>
+    <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="Tagging.fs" />
+    <Compile Include="Definitions.fs" />
+    <Compile Include="Helpers.fs" />
+    <Compile Include="Ops.fs" />
+    <Compile Include="Tests.fs" />
+    <Compile Include="Wrappers.fs" />
+    <Compile Include="Targets.fs" />
+    <Compile Include="Bench.fs" />
+    <Compile Include="TestSuite.fs" />
+    <Compile Include="Program.fs" />
+    <None Include="App.config" />
+    <None Include="packages.config" />
+    <None Include="Timer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="CsvHelper, Version=1.17.0.14431, Culture=neutral, PublicKeyToken=8c4959082be5c823">
+      <Private>True</Private>
+    </Reference>
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
-    <Reference Include="FSharpx.Collections.Experimental">
-      <HintPath>..\packages\FSharpx.Collections.Experimental.1.8.3.0\lib\40\FSharpx.Collections.Experimental.dll</HintPath>
+    <Reference Include="FSharpx.Core">
+      <HintPath>..\packages\FSharpx.Core.1.8.22\lib\40\FSharpx.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FSharpx.Core">
-      <HintPath>..\packages\FSharpx.Core.1.8.3.0\lib\40\FSharpx.Core.dll</HintPath>
+    <Reference Include="FSharpx.TypeProviders.Math">
+      <HintPath>..\packages\FSharpx.TypeProviders.Math.1.8.22\lib\40\FSharpx.TypeProviders.Math.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
@@ -59,32 +83,18 @@
     </Reference>
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Runtime.DurableInstancing" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-    <Compile Include="Generators.fs" />
-    <Compile Include="TestTargets.fs" />
-    <Compile Include="Tests.fs" />
-    <Compile Include="MapTests.fs" />
-    <Compile Include="Program.fs" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\SolidFS\SolidFS.fsproj">
-      <Name>SolidFS</Name>
-      <Project>{4ae0206d-527d-43d7-9dcb-e88a8e1d47b6}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <ProjectReference Include="..\Solid\Solid.csproj">
       <Name>Solid</Name>
       <Project>{7af97cc1-4b4c-4112-82af-bf9fc4b16407}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
-  <PropertyGroup>
-    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
-  </PropertyGroup>
-  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

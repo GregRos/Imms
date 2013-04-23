@@ -58,7 +58,8 @@ namespace Solid
 					}
 					Digit leftmost;
 					Digit rightmost;
-					CenterDigit.AddLeftSplit(item, out leftmost, out rightmost);
+					leftmost = new Digit(item, CenterDigit.First);
+					rightmost = new Digit(CenterDigit.Second, CenterDigit.Third, CenterDigit.Fourth);
 					return new CompoundTree(leftmost, FTree<Digit>.Empty, rightmost);
 				}
 
@@ -70,7 +71,8 @@ namespace Solid
 					}
 					Digit leftmost;
 					Digit rightmost;
-					CenterDigit.AddRightSplit(item, out leftmost, out rightmost);
+					leftmost = new Digit(CenterDigit.First, CenterDigit.Second, CenterDigit.Third);
+					rightmost = new Digit(CenterDigit.Fourth, item);
 					return new CompoundTree(leftmost, FTree<Digit>.Empty, rightmost);
 				}
 
