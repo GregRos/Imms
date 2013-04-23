@@ -6,29 +6,30 @@
 \contentsline {subsection}{\numberline {1.5}Using the value abstraction for collections}{3}{subsection.1.5}
 \contentsline {section}{\numberline {2}The Collections}{4}{section.2}
 \contentsline {subsection}{\numberline {2.1}Flexible List}{4}{subsection.2.1}
-\contentsline {subsection}{\numberline {2.2}Ve\relax ctor}{4}{subsection.2.2}
+\contentsline {subsection}{\numberline {2.2}Ve\relax ctor}{5}{subsection.2.2}
 \contentsline {section}{\numberline {3}Library Features}{5}{section.3}
-\contentsline {subsection}{\numberline {3.1}Implicit optimization}{5}{subsection.3.1}
-\contentsline {subsection}{\numberline {3.2}Permissive license}{5}{subsection.3.2}
-\contentsline {subsection}{\numberline {3.3}Compatibility features}{6}{subsection.3.3}
-\contentsline {subsection}{\numberline {3.4}Negative indexing}{6}{subsection.3.4}
-\contentsline {subsection}{\numberline {3.5}Fast functional operations}{6}{subsection.3.5}
-\contentsline {subsection}{\numberline {3.6}Zero dependencies}{7}{subsection.3.6}
-\contentsline {subsection}{\numberline {3.7}Full documentation}{7}{subsection.3.7}
-\contentsline {subsection}{\numberline {3.8}Support for \texttt {F\#}\xspace and \texttt {C\#}\xspace }{7}{subsection.3.8}
-\contentsline {subsection}{\numberline {3.9}Exceptions}{8}{subsection.3.9}
-\contentsline {subsection}{\numberline {3.10}Naming convention}{8}{subsection.3.10}
+\contentsline {subsection}{\numberline {3.1}High performance and functionality}{5}{subsection.3.1}
+\contentsline {subsection}{\numberline {3.2}Implicit optimization}{5}{subsection.3.2}
+\contentsline {subsection}{\numberline {3.3}Permissive license}{6}{subsection.3.3}
+\contentsline {subsection}{\numberline {3.4}Compatibility features}{6}{subsection.3.4}
+\contentsline {subsection}{\numberline {3.5}Negative indexing}{6}{subsection.3.5}
+\contentsline {subsection}{\numberline {3.6}Fast functional operations}{7}{subsection.3.6}
+\contentsline {subsection}{\numberline {3.7}Zero dependencies}{7}{subsection.3.7}
+\contentsline {subsection}{\numberline {3.8}Full documentation}{7}{subsection.3.8}
+\contentsline {subsection}{\numberline {3.9}Support for \texttt {F\#}\xspace and \texttt {C\#}\xspace }{8}{subsection.3.9}
+\contentsline {subsection}{\numberline {3.10}Exceptions}{8}{subsection.3.10}
+\contentsline {subsection}{\numberline {3.11}Naming convention}{8}{subsection.3.11}
 \contentsline {section}{\numberline {4}C\# Interface}{9}{section.4}
 \contentsline {subsection}{\numberline {4.1}Easy creation of collections}{9}{subsection.4.1}
 \contentsline {section}{\numberline {5}F\# Interface}{10}{section.5}
-\contentsline {subsection}{\numberline {5.1}Module interface}{10}{subsection.5.1}
-\contentsline {subsection}{\numberline {5.2}F\# Overloads}{10}{subsection.5.2}
+\contentsline {subsection}{\numberline {5.1}Module interface}{11}{subsection.5.1}
+\contentsline {subsection}{\numberline {5.2}F\# Overloads}{11}{subsection.5.2}
 \contentsline {subsection}{\numberline {5.3}Operators}{11}{subsection.5.3}
-\contentsline {subsection}{\numberline {5.4}Collection comprehensions}{11}{subsection.5.4}
+\contentsline {subsection}{\numberline {5.4}Collection comprehensions}{12}{subsection.5.4}
 \contentsline {subsection}{\numberline {5.5}Active patterns}{12}{subsection.5.5}
 \contentsline {section}{\numberline {6}How Specific Operations are Handled}{12}{section.6}
-\contentsline {subsection}{\numberline {6.1}Addition to the beginning}{12}{subsection.6.1}
-\contentsline {subsection}{\numberline {6.2}Insertion}{12}{subsection.6.2}
+\contentsline {subsection}{\numberline {6.1}Addition to the beginning}{13}{subsection.6.1}
+\contentsline {subsection}{\numberline {6.2}Insertion}{13}{subsection.6.2}
 \contentsline {subsection}{\numberline {6.3}Removal}{13}{subsection.6.3}
 \contentsline {subsection}{\numberline {6.4}Empty collections}{13}{subsection.6.4}
 \contentsline {section}{\numberline {7}Not Done Yet}{13}{section.7}
