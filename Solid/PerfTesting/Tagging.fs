@@ -7,6 +7,9 @@ open System.Collections.Generic
 //These objects are used to tag and log the parameters and results of benchmarks.
 open Solid
 
+//We define a primitive memoization mechanism.
+//This doesn't participate in the benchmarks. It's here to improve the performance of the surrounding code.
+//Without this some collections and generated needlessly and things become very time consuming.
 module Cache = 
     type MutableDict<'k, 'v> = Dictionary<'k, 'v>
     let  dict = Dictionary<obj,obj>()
@@ -20,6 +23,7 @@ module Cache =
             dict.[(owner, member_name)] <- res
             res
 
+//A colleciton generated used as input for things like AddRange.
 type DataSource = 
     | Invalid
     | Array of int
@@ -39,7 +43,7 @@ type DataSource =
             | Invalid -> 0
             | Array n| FlexibleList n | FSharpList n| Range n -> n
             
-
+//An attribute providing additional information about a specific benchmark.
 type Meta= 
 | Initial_size of int
 | Iterations of int
@@ -63,7 +67,8 @@ type MetaList =
         str
     member x.On f = MetaList(f x.List)
 
-
+//A tag giving a summary of a single benchmark and its result.
+//The record fields are mutable to improve compatibility with serialization code.
 type Tag = 
     {
         mutable Kind : string

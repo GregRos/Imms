@@ -3,16 +3,25 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Solid", "Solid\Solid.csproj", "{7AF97CC1-4B4C-4112-82AF-BF9FC4B16407}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SolidFS", "SolidFS\SolidFS.fsproj", "{4AE0206D-527D-43D7-9DCB-E88A8E1D47B6}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Solid.FSharp", "SolidFS\Solid.FSharp.fsproj", "{4AE0206D-527D-43D7-9DCB-E88A8E1D47B6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9FA6751B-0904-4E51-A06D-D9540E1AF0AB}"
 	ProjectSection(SolutionItems) = preProject
 		License.txt = License.txt
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolidCSTests", "SolidCSTests\SolidCSTests.csproj", "{8730E426-DF0C-4609-85D6-53177BBDC9DA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Solid.CSharp.Tests", "SolidCSTests\Solid.CSharp.Tests.csproj", "{8730E426-DF0C-4609-85D6-53177BBDC9DA}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Benchmarks", "PerfTesting\Benchmarks.fsproj", "{7EC95555-CA5B-4E87-A8DA-525FA4E01FAC}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Solid.Benchmarking", "PerfTesting\Solid.Benchmarking.fsproj", "{7EC95555-CA5B-4E87-A8DA-525FA4E01FAC}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Solid.FSharp.Tests", "Solid.FSharp.Tests\Solid.FSharp.Tests.fsproj", "{1EEABA1E-037C-4C73-A34D-D618228DFB8D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{A9CC174D-6F25-401E-806A-13DC81AD444C}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,6 +45,10 @@ Global
 		{7EC95555-CA5B-4E87-A8DA-525FA4E01FAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7EC95555-CA5B-4E87-A8DA-525FA4E01FAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7EC95555-CA5B-4E87-A8DA-525FA4E01FAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1EEABA1E-037C-4C73-A34D-D618228DFB8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EEABA1E-037C-4C73-A34D-D618228DFB8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1EEABA1E-037C-4C73-A34D-D618228DFB8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1EEABA1E-037C-4C73-A34D-D618228DFB8D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

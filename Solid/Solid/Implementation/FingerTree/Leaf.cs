@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-
+using Solid.Common;
 namespace Solid
 {
 	internal class Leaf<TValue> : FingerTree<TValue>.Measured<Leaf<TValue>>

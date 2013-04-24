@@ -8,6 +8,14 @@ namespace Solid
 {
 	static partial class FingerTree<TValue>
 	{
+		public static FTree<Leaf<TValue>> Empty = FTree<Leaf<TValue>>.Empty;
+		public static FTree<Leaf<TValue>> MUTABLE_Empty
+		{
+			get
+			{
+				return FTree<Leaf<TValue>>.EmptyTree.MUTABLE_Instance;
+			}
+		}
 		internal abstract partial class FTree<TChild>
 		{
 			internal sealed class EmptyTree : FTree<TChild>
@@ -15,6 +23,13 @@ namespace Solid
 			{
 				public static readonly EmptyTree Instance = new EmptyTree();
 
+				public static EmptyTree MUTABLE_Instance
+				{
+					get
+					{
+						return new EmptyTree();
+					}
+				}
 				private EmptyTree()
 					: base(0, TreeType.Empty)
 				{
@@ -50,6 +65,16 @@ namespace Solid
 					{
 						throw Errors.Is_empty;
 					}
+				}
+
+				public override FTree<TChild> MUTATES_AddRight(TChild item)
+				{
+					return new Single(new Digit(item));
+				}
+
+				public override FTree<TChild> MUTATES_AddLeft(TChild item)
+				{
+					return new Single(new Digit(item));
 				}
 
 				public override FTree<TChild> AddLeft(TChild item)

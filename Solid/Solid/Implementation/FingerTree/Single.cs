@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Solid.Common;
 
 namespace Solid
 {
@@ -50,16 +51,41 @@ namespace Solid
 					}
 				}
 
+				public override FTree<TChild> MUTATES_AddLeft(TChild item)
+				{
+					
+					if (CenterDigit.Size < 4)
+					{
+						this.CenterDigit.MUTATES_AddLeft(item);
+						this.Measure += item.Measure;
+						return this;
+					}
+					var leftmost = new Digit(item, CenterDigit.First);
+					var rightmost = new Digit(CenterDigit.Second, CenterDigit.Third, CenterDigit.Fourth);
+					return new CompoundTree(leftmost, FTree<Digit>.Empty, rightmost);
+				}
+
+				public override FTree<TChild> MUTATES_AddRight(TChild item)
+				{
+					if (CenterDigit.Size < 4)
+					{
+						this.CenterDigit.MUTATES_AddRight(item);
+						this.Measure += item.Measure;
+						return this;
+					}
+					var leftmost = new Digit(CenterDigit.First, CenterDigit.Second, CenterDigit.Third);
+					var rightmost = new Digit(CenterDigit.Fourth, item);
+					return new CompoundTree(leftmost, FTree<Digit>.Empty, rightmost);
+				}
+
 				public override FTree<TChild> AddLeft(TChild item)
 				{
 					if (CenterDigit.Size < 4)
 					{
 						return new Single(CenterDigit.AddLeft(item));
 					}
-					Digit leftmost;
-					Digit rightmost;
-					leftmost = new Digit(item, CenterDigit.First);
-					rightmost = new Digit(CenterDigit.Second, CenterDigit.Third, CenterDigit.Fourth);
+					var leftmost = new Digit(item, CenterDigit.First);
+					var rightmost = new Digit(CenterDigit.Second, CenterDigit.Third, CenterDigit.Fourth);
 					return new CompoundTree(leftmost, FTree<Digit>.Empty, rightmost);
 				}
 
@@ -69,10 +95,8 @@ namespace Solid
 					{
 						return new Single(CenterDigit.AddRight(item));
 					}
-					Digit leftmost;
-					Digit rightmost;
-					leftmost = new Digit(CenterDigit.First, CenterDigit.Second, CenterDigit.Third);
-					rightmost = new Digit(CenterDigit.Fourth, item);
+					var leftmost = new Digit(CenterDigit.First, CenterDigit.Second, CenterDigit.Third);
+					var rightmost = new Digit(CenterDigit.Fourth, item);
 					return new CompoundTree(leftmost, FTree<Digit>.Empty, rightmost);
 				}
 

@@ -91,6 +91,15 @@ namespace Solid.Common
 			}
 		}
 
+		internal static T[] ToArrayFastExact<T>(this IEnumerable<T> items)
+		{
+			var len = 0;
+			var fast = items.ToArrayFast(out len);
+			Array.Resize(ref fast, len);
+			return fast;
+
+		}
+
 		private static TOut[] UsingLengthHint<TOut>(this IEnumerable<TOut> o, ref int length, double multiplier = 2)
 
 		{

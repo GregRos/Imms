@@ -97,9 +97,9 @@ namespace Solid
 				private const int
 					OUTSIDE = 7;
 
-				public readonly FTree<Digit> DeepTree;
-				public readonly Digit LeftDigit;
-				public readonly Digit RightDigit;
+				public  FTree<Digit> DeepTree;
+				public  Digit LeftDigit;
+				public  Digit RightDigit;
 
 				public CompoundTree(Digit leftDigit, FTree<Digit> deepTree, Digit rightDigit)
 					: base(leftDigit.Measure + deepTree.Measure + rightDigit.Measure, TreeType.Compound)
@@ -113,6 +113,8 @@ namespace Solid
 					RightDigit = rightDigit;
 					LeftDigit = leftDigit;
 				}
+
+
 
 				private static FTree<TChild> CreateCheckNull(Digit left = null, FTree<Digit> deep = null,
 				                                             Digit right = null)
@@ -175,6 +177,48 @@ namespace Solid
 					}
 				}
 
+				public override FTree<TChild> MUTATES_AddLeft(TChild item)
+				{
+	
+					if (LeftDigit.Size < 3)
+					{
+						LeftDigit.MUTATES_AddLeft(item);
+						this.Measure += item.Measure;
+						return this;
+					}
+					
+					var leftmost = new Digit(item, LeftDigit.First);
+					leftmost = new Digit(item);
+					
+					var rightmost = new Digit(LeftDigit.Second, LeftDigit.Third, LeftDigit.Fourth);
+					rightmost = LeftDigit;
+					this.LeftDigit = leftmost;
+					this.DeepTree = this.DeepTree.MUTATES_AddLeft(rightmost);
+					this.Measure += item.Measure;
+					return this;
+				}
+
+				public override FTree<TChild> MUTATES_AddRight(TChild item)
+				{
+			
+					if (RightDigit.Size < 4)
+					{
+						RightDigit.MUTATES_AddRight(item);
+						this.Measure += item.Measure;
+						return this;
+					}
+					//var leftmost = new Digit(RightDigit.First, RightDigit.Second, RightDigit.Third);
+					
+					
+					//var rightmost = new Digit(RightDigit.Fourth, item);
+					var leftmost = RightDigit;
+					var rightmost = new Digit(item);
+					this.RightDigit = rightmost;
+					this.DeepTree = this.DeepTree.MUTATES_AddRight(leftmost);
+					this.Measure += item.Measure;
+					return this;
+				}
+
 				public override bool IsFragment
 				{
 					get
@@ -205,10 +249,8 @@ namespace Solid
 					{
 						return new CompoundTree(LeftDigit.AddLeft(item), DeepTree, RightDigit);
 					}
-					Digit leftmost;
-					Digit rightmost;
-					leftmost = new Digit(item, LeftDigit.First);
-					rightmost = new Digit(LeftDigit.Second, LeftDigit.Third, LeftDigit.Fourth);
+					var leftmost = new Digit(item, LeftDigit.First);
+					var rightmost = new Digit(LeftDigit.Second, LeftDigit.Third, LeftDigit.Fourth);
 					var newDeep = DeepTree.AddLeft(rightmost);
 					return new CompoundTree(leftmost, newDeep, RightDigit);
 				}
@@ -220,10 +262,8 @@ namespace Solid
 						return new CompoundTree(LeftDigit, DeepTree, RightDigit.AddRight(item));
 					}
 
-					Digit leftmost;
-					Digit rightmost;
-					leftmost = new Digit(RightDigit.First, RightDigit.Second, RightDigit.Third);
-					rightmost = new Digit(RightDigit.Fourth, item);
+					var leftmost = new Digit(RightDigit.First, RightDigit.Second, RightDigit.Third);
+					var rightmost = new Digit(RightDigit.Fourth, item);
 					var newDeep = DeepTree.AddRight(leftmost);
 					return new CompoundTree(LeftDigit, newDeep, rightmost);
 				}
@@ -470,7 +510,7 @@ namespace Solid
 				{
 					var whereIsThisIndex = WhereIsThisIndex(count);
 #if DEBUG
-					count.Is(i => i < Measure && i >= 0);
+					count.Is(i => i <= Measure && i >= 0);
 #endif
 
 					switch (whereIsThisIndex)

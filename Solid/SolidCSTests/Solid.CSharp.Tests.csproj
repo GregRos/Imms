@@ -11,6 +11,8 @@
     <AssemblyName>SolidCSTests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -57,6 +59,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SolidFS\Solid.FSharp.fsproj">
+      <Project>{4ae0206d-527d-43d7-9dcb-e88a8e1d47b6}</Project>
+      <Name>Solid.FSharp</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Solid\Solid.csproj">
       <Project>{7af97cc1-4b4c-4112-82af-bf9fc4b16407}</Project>
       <Name>Solid</Name>
@@ -73,6 +79,7 @@
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

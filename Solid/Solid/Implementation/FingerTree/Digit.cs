@@ -114,12 +114,12 @@ namespace Solid
 				private const int
 					IN_START_OF_4 = 6;
 
-				public readonly TChild First;
-				public readonly TChild Fourth;
-				public readonly TChild Second;
-				public readonly int Size;
-				public readonly TChild Third;
-
+				public TChild First;
+				public TChild Fourth;
+				public TChild Second;
+				public int Size;
+				public TChild Third;
+				
 				//In the following constructors, we take the measure as a parameter (instead of calculating it ourselves) for performance reasons.
 				//Almost always the external code can find the measure using fewer operations (that is, if it's not available from the beginning).
 				//The overhead associated with calculating and accessing the measure can bottleneck the data structure.
@@ -178,6 +178,54 @@ namespace Solid
 				private Digit()
 					: base(0)
 				{
+				}
+
+				public void MUTATES_AddRight(TChild item)
+				{
+				
+					switch (Size)
+					{
+						case 1:
+							this.Second = item;
+							break;
+						case 2:
+							this.Third = item;
+							break;
+						case 3:
+							this.Fourth = item;
+							break;
+						default:
+							throw Errors.Invalid_digit_size;
+					}
+					this.Size += 1;
+					this.Measure += item.Measure;
+				}
+
+				public void MUTATES_AddLeft(TChild item)
+				{
+
+					switch (Size)
+					{
+						case 1:
+							this.Second = this.First;
+							this.First = item;
+							break;
+						case 2:
+							this.Third = this.Second;
+							this.Second = this.First;
+							this.First = item;
+							break;
+						case 3:
+							this.Fourth = this.Third;
+							this.Third = this.Second;
+							this.Second = this.First;
+							this.First = item;
+							break;
+						default:
+							throw Errors.Invalid_digit_size;
+					}
+					this.Size += 1;
+					this.Measure += item.Measure;
 				}
 
 				//This method is used when we don't know the exact size of the digit we want to create.

@@ -1,6 +1,7 @@
 \documentclass[]{article}
 
 %packages
+\usepackage{amsmath}
 \usepackage{longtable}
 \usepackage{etoolbox}
 \usepackage{array}
@@ -18,7 +19,7 @@
 \usepackage{xesearch}
 \usepackage{letltxmacro}
 \usepackage{etextools}
-
+\usepackage{csvsimple}
 %global presentation
 \SetParskip{3pt minus 1pt}
 \setmonofont{Consolas}
@@ -43,7 +44,7 @@
 \newcommand{\iface}[1]{{\interfaceformat #1}}
 \newcommand{\class}[1]{{\classformat #1}}
 \newcommand{\method}[1]{{\methodformat #1}}
-\newcommand{\code}[1]{\mbox{\texttt{#1}}}
+\newcommand{\code}[1]{\texttt{#1}}
 \newcommand{\dotnet}{\texttt{.NET}\xspace}
 \newcommand{\solid}{\texttt{Solid}\xspace}
 \newcommand{\term}[1]{\emph{#1}}
@@ -177,20 +178,15 @@ This section surveys the unique features of the collections currently available 
 
 Complexity information was deliberately simplified here.
 \subsection{Flexible List}\label{sec:xlist}
-FlexibleList is a general purpose sequential data structure that offers every operation you are likely to need.
-
-All of these operations are very fast and due to their $O(\log n)$ complexity, they scale very slowly with the size of the collection. 
-
-This data structure is implemented as a 2-3 finger tree.
+FlexibleList is a general purpose sequential data structure that offers every operation you are likely to need. 
 \begin{description}
-	\item[Queue operations] Supports instantaneous addition, removal, and peek at either end. $O(1)$
+	\item[Peek operations] Instantaneous peek at either end. $O(1)$
+	\item[Queue operations] Very fast addition and removal from either end. $O(1)\; amortized$
 	\item[Random access] Slightly slower lookup, update, insert, and remove at any index. $O(\log n)$
-	\item[Large operations] Slightly slower concatenation, insertion of lists at index, slices from index to index. $O(\log n)$
+	\item[Operations with other lists] Concatenation, insertion of lists at index, slices from index to index. $O(\log n)$
 \end{description}
 
-This is in addition all the operations offered by all \solid data structures, of course. 
-
-In terms of performance, 
+These operations are in addition to those offered by all \solid data structures, of course. 
 
 \subsection{Ve\relax ctor}\label{sec:vector}
 Vector<T> is a more specialized collection that boasts fewer features but much better performance. 

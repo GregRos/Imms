@@ -1,7 +1,9 @@
 ﻿namespace Benchmarks.Wrappers
 #nowarn"20"
+///A module with light-weight wrappers for the various System.Collections.Immutable classes.
 module Sys = 
     open System.Collections.Immutable
+    ///A light-weight wrapper for ImmutableList.
     [<Struct>]
     type List<'t> = 
         val public inner : ImmutableList<'t>
@@ -23,6 +25,7 @@ module Sys =
         member inline x.Remove i = List(x.inner.RemoveAt(i))
         member inline x.IsEmpty = x.inner.IsEmpty
         static member inline FromSeq (vs : 'a seq) = List(ImmutableList.Create<'a>(vs))
+    ///A light-weight wrapper for ImmutableQueue.
     [<Struct>]
     type Queue<'t> = 
         val public inner : ImmutableQueue<'t>
@@ -34,6 +37,7 @@ module Sys =
         member inline x.IsEmpty = x.inner.IsEmpty
         member inline x.Count = x.inner |> Seq.length
         static member inline FromSeq (vs : 'a seq) = Queue(ImmutableQueue.Create<'a>(vs))
+    ///A light-weight wrapper for ImmutableStack
     [<Struct>]
     type Stack<'t> = 
         val public inner : ImmutableStack<'t>
@@ -45,10 +49,12 @@ module Sys =
         member inline x.IsEmpty = x.inner.IsEmpty
         member inline x.Count = x.inner |> Seq.length
         static member inline FromSeq(vs : 'a seq) = Stack(ImmutableStack.Create<'a>(vs))
+///A module that contains light-weight wrappers for FSharpx collections.
 module FSharpx' = 
     module Vector' = FSharpx.Collections.Vector
     module Deque' = FSharpx.Collections.Deque
     module RanAccList' = FSharpx.Collections.RandomAccessList
+    ///A light-weight wrapper for FSharpx.Vector
     [<Struct>]
     type Vector<'t when 't : equality> = 
         val public inner : FSharpx.Collections.Vector<'t>
@@ -66,6 +72,7 @@ module FSharpx' =
             for v in vs do inner <- inner.Conj v
             Vector(inner)
         static member inline FromSeq(vs : 'a seq) = Vector(Vector'.ofSeq vs)
+    ///A light-weight wrapper for FSharpx.Deque
     [<Struct>]
     type Deque<'t> = 
         val public inner : FSharpx.Collections.Deque<'t>
@@ -77,6 +84,7 @@ module FSharpx' =
         member inline x.DropFirst() = Deque(x.inner.Uncons |> snd)
         member inline x.Count = x.inner.Length
         static member inline FromSeq(vs : 'a seq) = Deque(Deque'.ofSeq vs)
+    ///A light-weight wrapper for FSharpx.RandomAccessList
     [<Struct>]    
     type RanAccList<'t when 't : equality> = 
         val public inner : FSharpx.Collections.RandomAccessList<'t>

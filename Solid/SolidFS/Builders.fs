@@ -1,5 +1,5 @@
 ﻿[<AutoOpen>]
-module SolidFS.Builders
+module Solid.FSharp.Builders
 open Solid
 
 type Step<'a> = 

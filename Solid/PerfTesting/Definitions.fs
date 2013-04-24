@@ -3,15 +3,13 @@ open System
 open System.Collections.Generic
 open Solid
 
-
-
-
 //Here we define targets of benchmarks.
 type ITarget<'s> = 
     abstract Name : string
     abstract Object : 's
     abstract Metadata : Meta list
 
+//A target annotated with a size.
 [<ReferenceEqualityAttribute; NoComparisonAttribute>]
 type TargetWithSize<'s> = 
     {
@@ -26,19 +24,19 @@ type TargetWithSize<'s> =
         member x.Metadata = Initial_size(x.Size)::x.Metadata
 
 
-//This erased test is what gets executed and logged by the test bench.
+///A fully bound test and additional metadata. 
+///It is erased of all type information and parameters.
 type IErasedTest = 
     abstract Test : (unit -> unit)
     abstract Tag : Tag
 
-//This is an unbound test (meaning, a test without a specific target).
-
+///An unbound test for a specific collection type.
 type ITest<'s> = 
     abstract Test : ('s -> unit)
     abstract Metadata : Meta list  
     abstract Name : string
     abstract Kind : string
-//This is a more specialized type of test that includes iterations.
+///A test for a specific collection type. Annotated with a number of iterations.
 [<ReferenceEqualityAttribute; NoComparisonAttribute>]
 type TestWithIterations<'s> = 
     {
@@ -52,6 +50,8 @@ type TestWithIterations<'s> =
         member x.Metadata = Meta.Iterations(x.Iterations)::x.Metadata
         member x.Name = x.Name
         member x.Kind = "Test with iterations."
+
+///A test for a specific collection type. Annotated with iterations and a data source.
 [<ReferenceEqualityAttribute; NoComparisonAttribute>]
 type TestWithData<'s, 'a> = 
     {
@@ -73,6 +73,8 @@ type TestWithData<'s, 'a> =
 [<AutoOpen>]
 module Ext = 
     type ITest<'s> with
+        ///Binds a test for a specific collection type to a concrete instance of the collection.
+        ///Results in a test annotated with logging information, but erased of all type information.
         member me.Bind (target : ITarget<'s>) = 
             let test = me.Test
             let targ = target.Object

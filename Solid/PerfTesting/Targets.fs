@@ -3,6 +3,7 @@ open Solid
 open System.Collections.Immutable
 open Benchmarks.Wrappers
 
+///A module that defines test targets annotated with metadata.
 [<CompilationRepresentationAttribute(CompilationRepresentationFlags.ModuleSuffix)>]
 module Target =  
        
@@ -13,12 +14,9 @@ module Target =
         member x.ToImmutableStack() = ImmutableStack.Create<'a>(x)
         member x.ToImmutableQueue() = ImmutableQueue.Create<'a>(x)
 
-    //Each target is constructed using an object expression. 
-    
-    let inline NewTarget name size extra_params ctor =
-        { Name = name; Size = size; Ctor = ctor; Metadata=extra_params}:>ITarget<_>
-
+    ///A module that defines test bindings for Solid classes.
     module My = 
+        ///Returns a target binding for a Solid.FlexibleList<int>
         let List size = 
             {
                 Name = "Solid.FlexibleList"
@@ -26,7 +24,7 @@ module Target =
                 Ctor = fun o -> o.Size.ToRange.ToFlexList()
                 Metadata = []
             }:>ITarget<_>
-
+        ///Returns a target binding for a Solid.Vector<int>
         let Vector size = 
             {
                 Name = "Solid.Vector"
@@ -34,8 +32,9 @@ module Target =
                 Ctor = fun o -> o.Size.ToRange.ToVector()
                 Metadata = []
             }:>ITarget<_>
-
+    ///A module that defines test bindings for System.Collections.Immutable classes.
     module Sys = 
+        ///Returns a target binding for a System.ImmutableList<int>
         let List size = 
             {
                 Name = "System.ImmutableList"
@@ -43,7 +42,7 @@ module Target =
                 Ctor = fun o -> Sys.List<_>.FromSeq o.Size.ToRange
                 Metadata = []
             }:>ITarget<_>
-
+        ///Returns a target binding for a System.ImmutableQueue<int>
         let Queue size = 
             {
                 Name = "System.ImmutableQueue"
@@ -51,7 +50,7 @@ module Target =
                 Ctor = fun o -> Sys.Queue<_>.FromSeq o.Size.ToRange
                 Metadata = []
             }:>ITarget<_>
-    
+        ///Returns a target binding for a System.ImmutableStack
         let Stack size = 
             {
                 Name = "System.ImmutableStack"
@@ -59,7 +58,9 @@ module Target =
                 Ctor = fun o -> Sys.Stack<_>.FromSeq o.Size.ToRange
                 Metadata = []
             }:>ITarget<_>
+    ///A module that defines test bindings for FSharpx.Collections classes
     module FSharpx = 
+        ///Returns a target binding for a FSharpx.Deque<int>
         let Deque size= 
             {
                 Name = "FSharpx.Deque"
@@ -68,7 +69,7 @@ module Target =
                 Metadata = []
             }:>ITarget<_>
     
-    
+        ///Returns a target binding for a FSharpx.Vector<int>
         let Vector size = 
             {
                 Name = "FSharpx.Vector"
@@ -76,7 +77,7 @@ module Target =
                 Ctor = fun o -> FSharpx'.Vector<_>.FromSeq o.Size.ToRange
                 Metadata = []
             }:>ITarget<_>
-
+        ///Returns a target binding for a FSharpx.RandomAccessList<int>
         let RanAccList size = 
             {
                 Name = "FSharpx.RanAccList"
@@ -84,8 +85,3 @@ module Target =
                 Ctor = fun o -> FSharpx'.RanAccList<_>.FromSeq o.Size.ToRange
                 Metadata = []
             }:>ITarget<_>   
-
-
-    let Many (targets:#seq<_>) (ns:#seq<_>) = 
-        let crs = List.cross targets ns
-        crs |> List.mapPairs (fun targ arg -> targ arg)

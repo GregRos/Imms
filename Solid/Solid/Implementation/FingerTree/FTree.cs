@@ -25,14 +25,17 @@ namespace Solid
 			//  Due to virtual method table lookups. 
 			//  The second option would require having the backing field in the FTree<TChild> class anyway, and performs noticeably worse.
 
-			public readonly int Kind;
-			public readonly int Measure;
-
+			public int Kind;
+			public int Measure;
+			
 			private FTree(int measure, int kind)
 			{
 				Kind = kind;
 				Measure = measure;
+
 			}
+
+
 
 			public static FTree<TChild> Concat(FTree<TChild> first, FTree<TChild> last)
 			{
@@ -145,6 +148,9 @@ namespace Solid
 			public abstract TChild Left { get; }
 			public abstract TChild Right { get; }
 
+			public abstract FTree<TChild> MUTATES_AddRight(TChild item);
+
+			public abstract FTree<TChild> MUTATES_AddLeft(TChild item);
 			public FTree<TChild> AddLeft(FTree<TChild> list)
 			{
 				return Concat(list, this);

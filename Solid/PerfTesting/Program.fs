@@ -7,26 +7,17 @@ open System.Diagnostics
 open CsvHelper
 open System.Collections.Immutable
 open System.IO
-open Benchmarks.TestSuite
 open Benchmarks
 open System.Linq
 
+///Power over integers.
 let inline (^*) (a : int) (b : int) = pown a b
-
-open Test
-
-       
+ 
 [<EntryPoint>]
 let  main argv =
-    //let res = Bench.Invoke (Test.InsertRandom(1000000).Bind(Target.My.List(1000000)))
+    //let res = Bench.invoke (Test.InsertRandom(1000000).Bind(Target.My.List(1000000)))
 
-    
     let lowIters = 100
-    //In the following section I generate targets of different sizes
-    //And bind several performance tests to each.
-    //The type parameter of Builder<'s> is set to the type of target I bound last.
-    //Whenever I call Builder.next, the type of the builder is reset to an unknown type.
-    //In the next call to Builder.addTarget(s), type inference assigns the type parameter of the target I add.
     let initial = 0.5 * (10. ** 5.) |> int
     let iters = 0.5 * (10. ** 5.) |> int
     //let vect = Vector.Empty.AddLastRange([0 .. 10000000])
@@ -75,8 +66,8 @@ let  main argv =
                                Test.GetRandom iters; Test.SetRandom iters]
         |> Builder.finish
 
-    
-    //let tests = tests |> List.filter (fun t -> t.Tag.Target = "Solid.Vector")
+    let test = XList.ofSeq [0 .. 100000]
+    //let tests = tests |> List.filter (fun t -> t.Tag.Target = "Solid.FlexibleList")
     let filename = "results.csv"
     do
         use file = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.ReadWrite)
@@ -84,7 +75,7 @@ let  main argv =
         use csvWriter = new CsvWriter(stream)
         stream.AutoFlush<- true
         for test in tests do
-            let result = Bench.Invoke test
+            let result = Bench.invoke test
             csvWriter.WriteRecord(result)
 
             stream.Flush()

@@ -14,12 +14,13 @@ namespace Solid
 		internal abstract class Measured<TObject>
 			where TObject : Measured<TObject>
 		{
-			public readonly int Measure;
-
+			public int Measure;
+		
 			protected Measured(int measure)
 			{
 				Measure = measure;
 			}
+
 
 			public abstract Leaf<TValue> this[int index] { get; }
 

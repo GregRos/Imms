@@ -1,5 +1,5 @@
 ﻿[<CompilationRepresentationAttribute(CompilationRepresentationFlags.ModuleSuffix)>]
-module SolidFS.Vector 
+module Solid.FSharp.Vector 
 open System
 open Solid
 ///O(1). Gets if the Vector is empty.

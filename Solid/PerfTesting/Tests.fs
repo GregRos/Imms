@@ -1,6 +1,7 @@
 ﻿namespace Benchmarks
 #nowarn"66"
 #nowarn"20"
+///A module that defines various different concrete tests.
 module Test = 
     open Solid
     open System.Collections.Immutable
@@ -8,21 +9,10 @@ module Test =
     open System.Linq
     let inline itersOf t = (^s : (member Iterations : int) t)
     let inline dataOf t = (^s : (member DataLoaded : 'seq) t) 
-        
-    //Here we use an object expression to instantiate a test parameterized with iterations.
-    //Note that the test function itself is external.
-    let inline NewIterTest name test iterations extra_params=
-        { TestWithIterations.Name = name; Test = test; Iterations = iterations; Metadata = extra_params}:>ITest<_>
 
-
- 
     let rnd = Random()
     let PercentileData = [|for i = 0. to 10. ** 6. do yield rnd.NextDouble()|]
     
-    let inline Many (tests : #seq<'a -> #ITest<'s>>) pars= 
-        pars |> List.cross tests |> List.mapPairs (fun test par -> test par)
-
-
     let inline AddFirst iters = 
         let inline test t col = 
             let iters = itersOf t

@@ -1,5 +1,6 @@
 ﻿[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
-module SolidFS.XList
+module Solid.FSharp.XList
+open Solid.FSharp.Overloads
 open Solid
 open System
 ///O(1). Gets the first element.

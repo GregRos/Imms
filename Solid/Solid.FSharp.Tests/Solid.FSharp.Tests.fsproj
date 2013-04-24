@@ -5,13 +5,12 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>4ae0206d-527d-43d7-9dcb-e88a8e1d47b6</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>SolidFS</RootNamespace>
-    <AssemblyName>SolidFS</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <Name>SolidFS</Name>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <ProjectGuid>1eeaba1e-037c-4c73-a34d-d618228dfb8d</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Solid.FSharp.Tests</RootNamespace>
+    <AssemblyName>Solid.FSharp.Tests</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <Name>Solid.FSharp.Tests</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -22,7 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\SolidFS.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\Solid.FSharp.Tests.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -33,31 +32,28 @@
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Release\SolidFS.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\Solid.FSharp.Tests.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FSharp.Core, Version=2.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <Reference Include="mscorlib" />
+    <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
-    <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="Compatibility.fs" />
-    <Compile Include="GeneralizedOps.fs" />
-    <Compile Include="PublicOperators.fs" />
-    <Compile Include="FlexibleListOverloads.fs" />
-    <Compile Include="VectorOverloads.fs" />
-    <Compile Include="VectorModule.fs" />
-    <Compile Include="FlexListModule.fs" />
-    <Compile Include="Builders.fs" />
-    <Compile Include="Patterns.fs" />
+    <Compile Include="Program.fs" />
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SolidFS\Solid.FSharp.fsproj">
+      <Name>Solid.FSharp</Name>
+      <Project>{4ae0206d-527d-43d7-9dcb-e88a8e1d47b6}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\Solid\Solid.csproj">
       <Name>Solid</Name>
       <Project>{7af97cc1-4b4c-4112-82af-bf9fc4b16407}</Project>

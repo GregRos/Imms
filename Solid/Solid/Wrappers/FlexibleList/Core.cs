@@ -170,10 +170,10 @@ namespace Solid
 			{
 				return this.AddFirstList(items as FlexibleList<T>);
 			}
-			var ftree = emptyFTree;
+			var ftree = FingerTree<T>.MUTABLE_Empty;
 			foreach (var item in items)
 			{
-				ftree = ftree.AddRight(new Leaf<T>(item));
+				ftree = ftree.AddLeft(new Leaf<T>(item));
 			}
 			ftree = ftree.AddRight(_root);
 			return new FlexibleList<T>(ftree);
@@ -219,11 +219,12 @@ namespace Solid
 			{
 				return AddLastList(items as FlexibleList<T>);
 			}
-			var ftree = _root;
+			var ftree = FingerTree<T>.MUTABLE_Empty;
 			foreach (var item in items)
 			{
-				ftree = ftree.AddRight(new Leaf<T>(item));
+				ftree = ftree.MUTATES_AddRight(new Leaf<T>(item));
 			}
+			ftree = _root.AddRight(ftree);
 			return new FlexibleList<T>(ftree);
 		}
 
@@ -329,12 +330,25 @@ namespace Solid
 			
 			FingerTree<T>.FTree<Leaf<T>> part1, part2;
 			_root.Split(index + 1, out part1, out part2);
+			var ftree = FingerTree<T>.MUTABLE_Empty;
 			foreach (var item in items)
 			{
-				part1 = part1.AddRight(new Leaf<T>(item));
+				ftree = ftree.MUTATES_AddRight(new Leaf<T>(item));
 			}
-			part1 = part1.AddRight(part2);
-			return new FlexibleList<T>(part1);
+			var part1C = index + 1;
+			var middleC = ftree.Measure;
+			var part2C = this.Count - index - 1;
+			if (index < this.Count / 2)
+			{
+				ftree = ftree.AddRight(part2);
+				ftree = ftree.AddLeft(part1);
+			}
+			else
+			{
+				ftree = part1.AddRight(ftree);
+				ftree = ftree.AddRight(part2);
+			}
+			return new FlexibleList<T>(ftree);
 		}
 
 		/// <summary>

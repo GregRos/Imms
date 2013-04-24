@@ -4,7 +4,7 @@ open System.Diagnostics
 open System
 open System.Threading
 type MutableList<'t> = System.Collections.Generic.List<'t>
-//This is the test bench that runs the tests.
+///The module that executes benchmarks.
 module Bench = 
     let Results = MutableList<Tag>()
     let mutable Watch = Stopwatch()
@@ -19,7 +19,7 @@ module Bench =
             GC.Collect()
             GC.WaitForPendingFinalizers()
 
-    let Invoke (test : IErasedTest) = 
+    let invoke (test : IErasedTest) = 
         
         let run = test.Test
         let tag = test.Tag

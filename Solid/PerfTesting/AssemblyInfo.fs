@@ -3,9 +3,9 @@ open System.Diagnostics;
 open System.ComponentModel;
 open System.Runtime.InteropServices;
 open System.Reflection;
-[<assembly: AssemblyName("Benchmarks")>]
-[<assembly: AssemblyTitle("Benchmarks")>]
-[<assembly: AssemblyDescription("Perf testing library")>]
-[<assembly: AssemblyVersion("0.3.0.0")>]
+[<assembly: AssemblyName("Solid.Benchmarking")>]
+[<assembly: AssemblyTitle("Solid.Benchmarking")>]
+[<assembly: AssemblyDescription("Solid collection benchmarking library")>]
+[<assembly: AssemblyVersion("0.4.*")>]
 
 do()
