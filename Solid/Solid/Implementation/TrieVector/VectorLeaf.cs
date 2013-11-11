@@ -97,7 +97,6 @@ namespace Solid
 			public override TrieVector<TOut>.VectorNode Apply<TOut>(Func<TValue, TOut> transform)
 			{
 				var newArr = new TOut[Arr.Length];
-				Arr.CopyTo(newArr, 0);
 				for (var i = 0; i < newArr.Length; i++)
 				{
 					newArr[i] = transform(Arr[i]);
