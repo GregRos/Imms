@@ -121,6 +121,7 @@ Funq also provides a few other features, besides the core collection library.
 
 ###### Benchmark Procedure
 Benchmarks are divided into several types:
+
 1. **Simple**: These involve single operations on single elements, such as `AddLast`, which adds one element to the end. For these, 50,000 iterations were performed. The result of each operation is conserved, so the collection is filled or emptied.
 2. **Data Structure:** These involve inserting data structures. For these, arrays consisting of 5,000 elements were used, and the operation was iterated 10 times. The result of the operation is conserved. If the operation is a concat operation, a data structure of the same type as the original is used.
 3. **Subsequence:** These involve taking a starting/ending subsequence. The length of the subsequence is determined randomly. The result is *not* conserved.
