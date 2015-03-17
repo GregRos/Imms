@@ -8,7 +8,7 @@ namespace Funq.Collections
 	using Funq.Abstract;
 	using Linq = System.Linq;
 	
-	public partial class FunqOrderedMap<TKey,TValue> : Trait_KeyValueMap<TKey,TValue,FunqOrderedMap<TKey,TValue>>
+	public partial class FunqOrderedMap<TKey,TValue> : Trait_MapLike<TKey,TValue,FunqOrderedMap<TKey,TValue>>
 	{
 		private FunqOrderedMap<TKey2,TValue2> GetPrototype<TKey2,TValue2>(IComparer<TKey2> ph)
 		{
@@ -82,7 +82,7 @@ namespace Funq.Collections
 		/// <param name="other"></param>
 		/// <param name="collision"></param>
 		/// <returns></returns>
-		public FunqOrderedMap<TKey, TRValue> Join<TValue2, TRValue>(ITrait_KeyValueMap<TKey, TValue2> other, Func<TKey, TValue, TValue2, TRValue> collision)
+		public FunqOrderedMap<TKey, TRValue> Join<TValue2, TRValue>(ITrait_MapLike<TKey, TValue2> other, Func<TKey, TValue, TValue2, TRValue> collision)
 		{
 			if (other == null) throw Errors.Is_null;
 			if (collision == null) throw Errors.Is_null;

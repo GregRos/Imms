@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Funq.Abstract
 {
-	partial class Trait_KeyValueMap<TKey, TValue, TMap>
+	partial class Trait_MapLike<TKey, TValue, TMap>
 	{
 		protected internal abstract class DebugView
 		{

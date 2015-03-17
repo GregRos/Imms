@@ -150,7 +150,7 @@
     <Compile Include="Wrappers\Array\Debugging.cs" />
     <Compile Include="Wrappers\Array\Interfaces.cs" />
     <Compile Include="Wrappers\Array\Operators.cs" />
-    <Compile Include="Wrappers\Array\FunqArray.cs" />
+    <Compile Include="Wrappers\Array\FunqVector.cs" />
     <Compile Include="Wrappers\Templates\ConvertionMethods.cs" />
     <Compile Include="Wrappers\Templates\OrderedSetLikeClass.cs" Condition="$(DefineConstants.Contains('DEBUG'))" />
     <Compile Include="Wrappers\Templates\OrderedMapLikeClass.cs" Condition="$(DefineConstants.Contains('DEBUG'))" />

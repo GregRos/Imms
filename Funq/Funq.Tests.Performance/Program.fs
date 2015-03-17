@@ -57,8 +57,17 @@ let  main argv =
     let mutable i = 0;
     if Directory.Exists("Results\Logs") |> not then
         Directory.CreateDirectory("Results\Logs") |> ignore
+    if Directory.Exists("Results\Charts") |> not then
+        Directory.CreateDirectory("Results\Charts") |> ignore
+
+    for file in DirectoryInfo("Results\Charts").EnumerateFiles() do
+        file.Delete()
+
+    for file in DirectoryInfo("Results\Logs").EnumerateFiles() do
+        file.Delete()
+
     for chart in charts do
-        chart.ShowChart()
+        chart.ShowChart() |> ignore
         
 
     let charts = Application.OpenForms |> Seq.cast<Form>
@@ -73,23 +82,5 @@ let  main argv =
     let copy = charts |> List.ofSeq
     copy |> List.iter (fun chart -> chart.Close())
     results |> Presentation.printToFile "Results\Logs" "benchmarks" "csv"
-    //Application.Run(charts |> Seq.head)
-
-    //Application.Run(form)
-    
-    
     0
         
-        (*
-        use file = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.ReadWrite)
-        use stream = new StreamWriter(file)
-        use csvWriter = new CsvWriter(stream)
-        stream.AutoFlush<- true
-        
-        for test in tests do
-            let result = Bench.invoke test
-            csvWriter.WriteRecord(result)
-
-            stream.Flush()
-        stream.Flush()0*)
-     // return an integer exit code

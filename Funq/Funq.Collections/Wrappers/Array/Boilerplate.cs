@@ -10,16 +10,16 @@ namespace Funq.Collections
 	using Linq = System.Linq;
 	using Enumerable = System.Linq.Enumerable;
 	
-	public partial class FunqArray<T> : Trait_Sequential<T, FunqArray<T>> {
-		private static readonly FunqArray<T> _instance = new FunqArray<T>();
+	public partial class FunqVector<T> : Trait_Sequential<T, FunqVector<T>> {
+		private static readonly FunqVector<T> _instance = new FunqVector<T>();
 	
-		private FunqArray()
+		private FunqVector()
 		{
 		}
 	
-		private FunqArray<TElem2> GetPrototype<TElem2>()
+		private FunqVector<TElem2> GetPrototype<TElem2>()
 		{
-			return FunqArray<TElem2>._instance;
+			return FunqVector<TElem2>._instance;
 		}
 	
 	
@@ -29,7 +29,7 @@ namespace Funq.Collections
 		/// <typeparam name="TRElem">The type of the result element.</typeparam>
 		/// <param name="selector">The selector.</param>
 		/// <returns></returns>
-		public FunqArray<TRElem> Select<TRElem>(Func<T, TRElem> selector)
+		public FunqVector<TRElem> Select<TRElem>(Func<T, TRElem> selector)
 		{
 			if (selector == null) throw Errors.Is_null;
 			return base.Select(GetPrototype<TRElem>(), selector);
@@ -44,7 +44,7 @@ namespace Funq.Collections
 		/// <typeparam name="TRElem">The type of the output collection element.</typeparam>
 		/// <param name="selector">The selector.</param>
 		/// <returns></returns>
-		public FunqArray<TRElem> Select<TRElem>(Func<T, Option<TRElem>> selector)
+		public FunqVector<TRElem> Select<TRElem>(Func<T, Option<TRElem>> selector)
 		{
 			if (selector == null) throw Errors.Is_null;
 			return base.Choose(this.GetPrototype<TRElem>(), selector);
@@ -57,7 +57,7 @@ namespace Funq.Collections
 		/// <typeparam name="TRElem">The type of the output collection element.</typeparam>
 		/// <param name="selector">The selector.</param>
 		/// <returns></returns>
-		public FunqArray<TRElem> Choose<TRElem>(Func<T, Option<TRElem>> selector)
+		public FunqVector<TRElem> Choose<TRElem>(Func<T, Option<TRElem>> selector)
 		{
 			if (selector == null) throw Errors.Is_null;
 			return base.Choose(this.GetPrototype<TRElem>(), selector);
@@ -70,7 +70,7 @@ namespace Funq.Collections
 		/// <typeparam name="TRElem">The type of the ouput collection elem.</typeparam>
 		/// <param name="selector">The selector.</param>
 		/// <returns></returns>
-		public FunqArray<TRElem> SelectMany<TRElem>(Func<T, IEnumerable<TRElem>> selector)
+		public FunqVector<TRElem> SelectMany<TRElem>(Func<T, IEnumerable<TRElem>> selector)
 		{
 			if (selector == null) throw Errors.Is_null;
 			return base.SelectMany(GetPrototype<TRElem>(), selector);
@@ -86,7 +86,7 @@ namespace Funq.Collections
 		/// <param name="selector">The element selector.</param>
 		/// <param name="rSelector">The result selector.</param>
 		/// <returns></returns>
-		public FunqArray<TRElem> SelectMany<TElem2, TRElem>(Func<T, IEnumerable<TElem2>> selector,
+		public FunqVector<TRElem> SelectMany<TElem2, TRElem>(Func<T, IEnumerable<TElem2>> selector,
 			                                                         Func<T, IEnumerable<TElem2>, TRElem> rSelector)
 		{
 			if (selector == null) throw Errors.Is_null;
@@ -105,7 +105,7 @@ namespace Funq.Collections
 		/// <param name="iKeySelector">The inner key selector (for the specified sequence).</param>
 		/// <param name="rSelector">The result selector.</param>
 		/// <returns></returns>
-		public FunqArray<TRElem> Join<TRElem, TInner, TKey>(IEnumerable<TInner> inner, Func<T, TKey> oKeySelector,
+		public FunqVector<TRElem> Join<TRElem, TInner, TKey>(IEnumerable<TInner> inner, Func<T, TKey> oKeySelector,
 			                                                         Func<TInner, TKey> iKeySelector, Func<T, TInner, TRElem> rSelector,
 			                                                         IEqualityComparer<TKey> eq = null)
 		{
@@ -128,7 +128,7 @@ namespace Funq.Collections
 		/// <param name="iKeySelector">The inner key selector (for the specified sequence).</param>
 		/// <param name="rSelector">The result selector.</param>
 		/// <returns></returns>
-		public FunqArray<Tuple<T,TInner>> Join<TInner, TKey>(IEnumerable<TInner> inner, Func<T, TKey> oKeySelector,
+		public FunqVector<Tuple<T,TInner>> Join<TInner, TKey>(IEnumerable<TInner> inner, Func<T, TKey> oKeySelector,
 																						Func<TInner, TKey> iKeySelector, IEqualityComparer<TKey> eq = null)
 		{
 			if (inner == null) throw Errors.Is_null;
@@ -150,7 +150,7 @@ namespace Funq.Collections
 		/// <param name="rSelector">The result selector.</param>
 		/// <param name="eq">The equality comparer.</param>
 		/// <returns></returns>
-		public FunqArray<TRElem> GroupBy<TRElem, TElem2, TKey>(Func<T, TKey> keySelector, Func<T, TElem2> valueSelector,
+		public FunqVector<TRElem> GroupBy<TRElem, TElem2, TKey>(Func<T, TKey> keySelector, Func<T, TElem2> valueSelector,
 			                                                            Func<TKey, IEnumerable<TElem2>, TRElem> rSelector, IEqualityComparer<TKey> eq = null)
 		{
 			if (keySelector == null) throw Errors.Is_null;
@@ -170,21 +170,21 @@ namespace Funq.Collections
 		/// <param name="rSelector">The result selector.</param>
 		/// <param name="eq">The equality comparer.</param>
 		/// <returns></returns>
-		public FunqArray<Tuple<TKey, IEnumerable<T>>> GroupBy<TKey>(Func<T, TKey> keySelector,  IEqualityComparer<TKey> eq = null)
+		public FunqVector<Tuple<TKey, IEnumerable<T>>> GroupBy<TKey>(Func<T, TKey> keySelector,  IEqualityComparer<TKey> eq = null)
 		{
 			if (keySelector == null) throw Errors.Is_null;
 			return this.GroupBy(keySelector, x => x, (key, vs) => Tuple.Create(key,vs), eq ?? EqualityComparer<TKey>.Default);
 		}
 	
-		public FunqArray<TRElem> Cast<TRElem>()
+		public FunqVector<TRElem> Cast<TRElem>()
 		{
-			return base.Cast<TRElem, FunqArray<TRElem>>(GetPrototype<TRElem>());
+			return base.Cast<TRElem, FunqVector<TRElem>>(GetPrototype<TRElem>());
 		}
 	
-		public FunqArray<TRElem> OfType<TRElem>()
+		public FunqVector<TRElem> OfType<TRElem>()
 		{
 			
-			return base.OfType<TRElem, FunqArray<TRElem>>(GetPrototype<TRElem>());
+			return base.OfType<TRElem, FunqVector<TRElem>>(GetPrototype<TRElem>());
 		}
 	
 		/// <summary>
@@ -194,7 +194,7 @@ namespace Funq.Collections
 		/// <param name="initial">The initial value for the accumulator.</param>
 		/// <param name="accumulator">The accumulator.</param>
 		/// <returns></returns>
-		public FunqArray<TRElem> Scan<TRElem>(TRElem initial, Func<TRElem, T, TRElem> accumulator)
+		public FunqVector<TRElem> Scan<TRElem>(TRElem initial, Func<TRElem, T, TRElem> accumulator)
 		{
 			if (accumulator == null) throw Errors.Is_null;
 			return base.Scan(GetPrototype<TRElem>(), initial, accumulator);
@@ -207,18 +207,18 @@ namespace Funq.Collections
 		/// <param name="initial">The initial value for the accumulator.</param>
 		/// <param name="accumulator">The accumulator.</param>
 		/// <returns></returns>
-		public FunqArray<TRElem> ScanBack<TRElem>(TRElem initial, Func<TRElem, T, TRElem> accumulator)
+		public FunqVector<TRElem> ScanBack<TRElem>(TRElem initial, Func<TRElem, T, TRElem> accumulator)
 		{
 			if (accumulator == null) throw Errors.Is_null;
 			return base.ScanBack(GetPrototype<TRElem>(), initial, accumulator);
 		}
 	
-		public FunqArray<TRElem> Zip<TElem2, TRElem>(IEnumerable<TElem2> other, Func<T, TElem2, TRElem> selector)
+		public FunqVector<TRElem> Zip<TElem2, TRElem>(IEnumerable<TElem2> other, Func<T, TElem2, TRElem> selector)
 		{
 			return base.Zip(GetPrototype<TRElem>(), other, selector);
 		}
 	
-		public FunqArray<Tuple<T, TElem2>> Zip<TElem2>(IEnumerable<TElem2> other)
+		public FunqVector<Tuple<T, TElem2>> Zip<TElem2>(IEnumerable<TElem2> other)
 		{
 			return this.Zip(other, Tuple.Create);
 		}

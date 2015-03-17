@@ -6,21 +6,21 @@ using Funq.Collections.Common;
 
 namespace Funq.Collections
 {
-	public partial class FunqArray<T>
+	public partial class FunqVector<T>
 	{
-		public static FunqArray<T> operator +(FunqArray<T> list, T item)
+		public static FunqVector<T> operator +(FunqVector<T> list, T item)
 		{
 			if (ReferenceEquals(list, null)) throw Funq.Errors.Argument_null("list");
 			return list.AddLast(item);
 		}
 
-		public static FunqArray<T> operator +(FunqArray<T> list, IEnumerable<T> items)
+		public static FunqVector<T> operator +(FunqVector<T> list, IEnumerable<T> items)
 		{
 			if (ReferenceEquals(list, null)) throw Funq.Errors.Argument_null("list");
 			return list.AddLastRange(items);
 		}
 
-		public static FunqArray<T> operator +(IEnumerable<T> items, FunqArray<T> list)
+		public static FunqVector<T> operator +(IEnumerable<T> items, FunqVector<T> list)
 		{
 			if (ReferenceEquals(list, null)) throw Funq.Errors.Argument_null("list");
 			return list.AddFirstRange(items);

@@ -25,7 +25,7 @@ type FunqModuleBase<'elem, 'seq, 'builder when 'seq :> Trait_Iterable<'elem, 'se
     member x.forAll f (s : 'seq) = s.All(toFunc1 f)
     member x.count f (s: 'seq) = s.Count(toFunc1 f)
     
-type FunqMapBase<'k, 'v, 'map when 'map :> Trait_KeyValueMap<'k, 'v, 'map>> internal () =
+type FunqMapBase<'k, 'v, 'map when 'map :> Trait_MapLike<'k, 'v, 'map>> internal () =
     inherit FunqModuleBase<Kvp<'k,'v>, 'map, MapBuilder<'k,'v>>()
     static let _instance = FunqMapBase<'k,'v, 'map>()
     static member internal instance = _instance
@@ -66,34 +66,34 @@ type FunqSeqModule<'elem, 'list when 'list :> Trait_Sequential<'elem,'list>> int
     member x.findIndex f (s : 'list) = s.FindIndex(toFunc1 f)
 
 [<EditorBrowsable(EditorBrowsableState.Never)>]
-type FunqArrayModule<'elem> internal () =
-    inherit FunqSeqModule<'elem, FunqArray<'elem>>()
-    static let _instance  = FunqArrayModule<'elem>()
+type FunqVectorModule<'elem> internal () =
+    inherit FunqSeqModule<'elem, FunqVector<'elem>>()
+    static let _instance  = FunqVectorModule<'elem>()
     static member internal instance = _instance
-    member x.empty = FunqArray<'elem>.Empty
-    member x.ofItem v= FunqArray<'elem>.Empty <+ v
+    member x.empty = FunqVector<'elem>.Empty
+    member x.ofItem v= FunqVector<'elem>.Empty <+ v
     member x.cast<'elem2> (s : 'elem FunqList) = s.Cast<'elem2>()
     member x.ofType<'elem2> (s : 'elem FunqList) = s.OfType<'elem2>()
-    member x.addLast v (s : _ FunqArray)  = s.AddLast(v)
-    member x.addLastRange vs (s :_ FunqArray) = s.AddLastRange(vs)
-    member x.dropLast (s :_ FunqArray) = s.DropLast()
-    member x.update i v (s : _ FunqArray) = s.Update(i, v)
-    member x.map (f : 'elem -> 'relem) (s :_ FunqArray) = s.Select<'relem>(toFunc1 f)
-    member x.collect f (s :_ FunqArray) = s.SelectMany(toFunc1 f)
-    member x.choose (f : 'elem -> 'relem option) (s :_ FunqArray) =
+    member x.addLast v (s : _ FunqVector)  = s.AddLast(v)
+    member x.addLastRange vs (s :_ FunqVector) = s.AddLastRange(vs)
+    member x.dropLast (s :_ FunqVector) = s.DropLast()
+    member x.update i v (s : _ FunqVector) = s.Update(i, v)
+    member x.map (f : 'elem -> 'relem) (s :_ FunqVector) = s.Select<'relem>(toFunc1 f)
+    member x.collect f (s :_ FunqVector) = s.SelectMany(toFunc1 f)
+    member x.choose (f : 'elem -> 'relem option) (s :_ FunqVector) =
         let f' = f >> toOption |> toFunc1
         s.Select<'relem>(f')
 
-    member x.groupBy<'key when 'key : equality> (keySelector : 'elem -> 'key) (s : 'elem FunqArray)=
+    member x.groupBy<'key when 'key : equality> (keySelector : 'elem -> 'key) (s : 'elem FunqVector)=
         s.GroupBy(keySelector |> toFunc1)
 
-    member x.scan (initial : 'relem) (accumulator : 'relem -> 'elem -> 'relem) (s : 'elem FunqArray) = 
+    member x.scan (initial : 'relem) (accumulator : 'relem -> 'elem -> 'relem) (s : 'elem FunqVector) = 
         s.Scan(initial, toFunc2 accumulator)
 
-    member x.scanBack (initial : 'relem) (accumulator : 'relem -> 'elem -> 'relem) (s : 'elem FunqArray) = 
+    member x.scanBack (initial : 'relem) (accumulator : 'relem -> 'elem -> 'relem) (s : 'elem FunqVector) = 
         s.ScanBack(initial, accumulator |> toFunc2)
 
-    member x.zip (other : 'elem2 seq) (s : 'elem FunqArray) = 
+    member x.zip (other : 'elem2 seq) (s : 'elem FunqVector) = 
         s.Zip(other)
     
 

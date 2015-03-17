@@ -9,7 +9,7 @@ using Funq.Collections;
 namespace Funq.Collections
 {
 	//This file implements some interfaces for .NET compatibility.
-	public partial class FunqArray<T> : IList<T>, IReadOnlyList<T>, IList {
+	public partial class FunqVector<T> : IList<T>, IReadOnlyList<T>, IList {
 		void IList.RemoveAt(int index) {
 			throw Errors.Collection_readonly;
 		}

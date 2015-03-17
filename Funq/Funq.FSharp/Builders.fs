@@ -7,7 +7,7 @@ open Funq.FSharp.Implementation
 open Funq.FSharp.Operators.Extra
 open Funq.FSharp.Implementation.BuilderTypes
 
-let private array_ops<'elem> : collection_ops<'elem, 'elem FunqList, 'elem FunqArray> = seq_build (fun list -> list.ToFunqArray())
+let private array_ops<'elem> : collection_ops<'elem, 'elem FunqList, 'elem FunqVector> = seq_build (fun list -> list.ToFunqVector())
 
 let private list_ops<'elem> : collection_ops<'elem, 'elem FunqList, 'elem FunqList> = seq_build id
 
@@ -20,7 +20,7 @@ let private map_ops<'k, 'v> eq : collection_ops<'k * 'v, FunqMap<'k,'v>, FunqMap
 let private ordered_map_ops<'k, 'v> cm : collection_ops<'k * 'v, FunqOrderedMap<'k,'v>, FunqOrderedMap<'k,'v>> = map_build cm
 
 let funqList<'elem> = GenericBuilder(list_ops<'elem>)
-let funqArray<'elem> = GenericBuilder(array_ops<'elem>)
+let FunqVector<'elem> = GenericBuilder(array_ops<'elem>)
 let funqMapWith<'k,'v>(eq : 'k Eq) = GenericBuilder(map_ops<'k,'v>(eq))
 let funqSetWith<'elem> eq = GenericBuilder(set_ops<'elem>(eq))
 let funqSet<'elem when 'elem : equality> = funqSetWith<'elem>(Eq.Default)

@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="Abstractions\Iterable\Debugging.cs" />
     <Compile Include="Abstractions\MapLike\Debugging.cs" />
+    <Compile Include="Abstractions\MapLike\ITrait_KeyValueMap.cs" />
     <Compile Include="Abstractions\Sequential\Debugging.cs" />
     <Compile Include="Equality and Comparison\Equality Handlers\CachingEqualityComparer.cs" />
     <Compile Include="Equality and Comparison\Comparison.cs" />
@@ -56,9 +57,8 @@
     <Compile Include="Equality and Comparison\Equality Handlers\SequenceEquality.cs" />
     <Compile Include="Equality and Comparison\Equality Handlers\SetEquality.cs" />
     <Compile Include="Abstractions\Iterable\ITrait_Iterable.cs" />
-    <Compile Include="Abstractions\MapLike\ITrait_KeyValueMap.cs" />
     <Compile Include="Abstractions\MapLike\MapBuilder.cs" />
-    <Compile Include="Abstractions\MapLike\Trait_KeyValueMap.cs" />
+    <Compile Include="Abstractions\MapLike\Trait_MapLike.cs" />
     <Compile Include="Abstractions\MapLike\IMapBuilder.cs" />
     <Compile Include="Abstractions\Sequential\ITrait_Sequential.cs" />
     <Compile Include="Abstractions\Iterable\IIterableBuilder.cs" />

@@ -84,8 +84,7 @@ namespace Funq.Abstract
 			return Intersect(other as ITrait_SetLike<TElem>);
 		}
 
-		public SetRelation RelatesTo(ITrait_SetLike<TElem> other)
-		{
+		public SetRelation RelatesTo(ITrait_SetLike<TElem> other) {
 			if (IsEmpty && other.IsEmpty) return SetRelation.Equal | SetRelation.Disjoint;
 			if (IsEmpty && !other.IsEmpty) return SetRelation.ProperSubsetOf | SetRelation.Disjoint ;
 			if (!IsEmpty && other.IsEmpty) return SetRelation.ProperSupersetOf | SetRelation.Disjoint;

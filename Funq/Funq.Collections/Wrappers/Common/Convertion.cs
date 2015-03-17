@@ -21,9 +21,9 @@ namespace Funq.Collections
 		}
 	}
 
-	public static class FunqArray {
-		public static FunqArray<T> Empty<T>() {
-			return FunqArray<T>.Empty;
+	public static class FunqVector {
+		public static FunqVector<T> Empty<T>() {
+			return FunqVector<T>.Empty;
 		}
 
 		/// <summary>
@@ -32,9 +32,9 @@ namespace Funq.Collections
 		/// <typeparam name="T"> The type of value. </typeparam>
 		/// <param name="items"> The sequence. </param>
 		/// <returns> </returns>
-		public static FunqArray<T> ToFunqArray<T>(this IEnumerable<T> items)
+		public static FunqVector<T> ToFunqVector<T>(this IEnumerable<T> items)
 		{
-			return FunqArray<T>.Empty.AddLastRange(items);
+			return FunqVector<T>.Empty.AddLastRange(items);
 		}
 	}
 

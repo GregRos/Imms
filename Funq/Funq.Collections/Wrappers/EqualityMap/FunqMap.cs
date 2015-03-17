@@ -10,7 +10,7 @@ using Funq.Collections.Implementation;
 
 namespace Funq.Collections
 {
-	public partial class FunqMap<TKey, TValue> : Trait_KeyValueMap<TKey, TValue, FunqMap<TKey, TValue>>
+	public partial class FunqMap<TKey, TValue> : Trait_MapLike<TKey, TValue, FunqMap<TKey, TValue>>
 	{
 		private readonly HashedAvlTree<TKey, TValue>.Node _root;
 		private readonly IEqualityComparer<TKey> _equality; 

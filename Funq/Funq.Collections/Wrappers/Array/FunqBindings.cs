@@ -10,7 +10,7 @@ using Funq.Collections.Implementation;
 
 namespace Funq.Collections
 {
-	public partial class FunqArray<T>
+	public partial class FunqVector<T>
 	{
 		internal class Builder : IterableBuilder<T>
 		{
@@ -18,11 +18,11 @@ namespace Funq.Collections
 			private readonly Lineage lineage;
 
 			public Builder()
-				: this(FunqArray<T>.Empty)
+				: this(FunqVector<T>.Empty)
 			{
 			}
 
-			public Builder(FunqArray<T> inner)
+			public Builder(FunqVector<T> inner)
 			{
 				this.inner = inner.root;
 				lineage = Lineage.Mutable();
@@ -34,7 +34,7 @@ namespace Funq.Collections
 			{
 				get
 				{
-					return new FunqArray<T>(inner);
+					return new FunqVector<T>(inner);
 				}
 			}
 
@@ -57,12 +57,12 @@ namespace Funq.Collections
 			}
 		}
 
-		protected override FunqArray<T> ProviderFrom(IterableBuilder<T> builder)
+		protected override FunqVector<T> ProviderFrom(IterableBuilder<T> builder)
 		{
-			return (FunqArray<T>)builder.Result;
+			return (FunqVector<T>)builder.Result;
 		}
 
-		protected override IterableBuilder<T> BuilderFrom(FunqArray<T> provider)
+		protected override IterableBuilder<T> BuilderFrom(FunqVector<T> provider)
 		{
 			return new Builder(provider);
 		}

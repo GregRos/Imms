@@ -10,8 +10,8 @@ using Funq;
 namespace Funq.Collections
 {
 	[DebuggerDisplay("{DebuggerDisplay,nq}")]
-	[DebuggerTypeProxy(typeof(FunqArray<>.ArrayDebugView))]
-	public partial class FunqArray<T>
+	[DebuggerTypeProxy(typeof(FunqVector<>.ArrayDebugView))]
+	public partial class FunqVector<T>
 	{
 		public bool Contains(T item)
 		{
@@ -20,7 +20,7 @@ namespace Funq.Collections
 
 		private class ArrayDebugView
 		{
-			public ArrayDebugView(FunqArray<T> arr)
+			public ArrayDebugView(FunqVector<T> arr)
 			{
 				View = new SequentialDebugView(arr);
 			}

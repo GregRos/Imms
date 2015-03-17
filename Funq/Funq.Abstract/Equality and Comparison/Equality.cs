@@ -5,7 +5,7 @@ namespace Funq.Abstract
 {
 	internal static class Equality
 	{
-		public static int Map_HashCode<TKey, TValue>(ITrait_KeyValueMap<TKey, TValue> map, IEqualityComparer<TKey> kEquality = null, IEqualityComparer<TValue> vEquality = null)
+		public static int Map_HashCode<TKey, TValue>(ITrait_MapLike<TKey, TValue> map, IEqualityComparer<TKey> kEquality = null, IEqualityComparer<TValue> vEquality = null)
 		{
 			var hash = 0;
 			unchecked
@@ -15,7 +15,7 @@ namespace Funq.Abstract
 			return hash;
 		}
 
-		public static bool Map_Equate<TKey, TValue>(ITrait_KeyValueMap<TKey, TValue> x, ITrait_KeyValueMap<TKey, TValue> y, IEqualityComparer<TValue> vEquality = null)
+		public static bool Map_Equate<TKey, TValue>(ITrait_MapLike<TKey, TValue> x, ITrait_MapLike<TKey, TValue> y, IEqualityComparer<TValue> vEquality = null)
 		{
 			vEquality = vEquality ?? EqualityComparer<TValue>.Default;
 			var boiler = Boilerplate(x, y);

@@ -7,7 +7,7 @@ using Funq.Collections.Implementation;
 
 namespace Funq.Collections
 {
-	public sealed partial class FunqOrderedMap<TKey, TValue> : Trait_KeyValueMap<TKey, TValue, FunqOrderedMap<TKey, TValue>>
+	public sealed partial class FunqOrderedMap<TKey, TValue> : Trait_MapLike<TKey, TValue, FunqOrderedMap<TKey, TValue>>
 	{
 		internal readonly OrderedAvlTree<TKey, TValue>.Node _root;
 		private readonly IComparer<TKey> _comparer; 

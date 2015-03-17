@@ -4,14 +4,14 @@ using Enumerable = System.Linq.Enumerable;
 #pragma warning disable 279
 namespace Funq.Abstract
 {
-	public  abstract partial class Trait_KeyValueMap<TKey, TValue, TMap>
-		: Trait_Iterable<Kvp<TKey, TValue>, TMap, MapBuilder<TKey, TValue>>, ITrait_KeyValueMap<TKey, TValue>
-		where TMap : Trait_KeyValueMap<TKey, TValue, TMap>
+	public  abstract partial class Trait_MapLike<TKey, TValue, TMap>
+		: Trait_Iterable<Kvp<TKey, TValue>, TMap, MapBuilder<TKey, TValue>>, ITrait_MapLike<TKey, TValue>
+		where TMap : Trait_MapLike<TKey, TValue, TMap>
 	{
 
 
 
-		public static implicit operator TMap(Trait_KeyValueMap<TKey, TValue, TMap> self)
+		public static implicit operator TMap(Trait_MapLike<TKey, TValue, TMap> self)
 		{
 			return self as object as TMap;
 		}
@@ -40,7 +40,7 @@ namespace Funq.Abstract
 		/// <typeparam name="TOutValue">The type of the tr value.</typeparam>
 		/// <param name="bFactory">The b factory.</param>
 		protected internal virtual TOutMap Cast<TOutMap, TOutKey, TOutValue>(TOutMap bFactory)
-			where TOutMap : ITrait_KeyValueMap<TOutKey, TOutValue>
+			where TOutMap : ITrait_MapLike<TOutKey, TOutValue>
 		{
 			return base.Select(bFactory, kvp => Kvp.Of(kvp.Key.Cast<TOutKey>(), kvp.Value.Cast<TOutValue>()));
 		}
@@ -101,7 +101,7 @@ namespace Funq.Abstract
 		/// <param name="bFactory">The b factory.</param>
 		/// <param name="selector">The selector.</param>
 		protected internal virtual TRProvider SelectValues<TRProvider, TRValue>(TRProvider bFactory, Func<TKey, TValue, TRValue> selector )
-			where TRProvider : ITrait_KeyValueMap<TKey, TRValue>
+			where TRProvider : ITrait_MapLike<TKey, TRValue>
 		{
 			return base.Select(bFactory, kvp => Kvp.Of(kvp.Key, selector(kvp.Key, kvp.Value)));
 		}
@@ -145,8 +145,8 @@ namespace Funq.Abstract
 		/// <param name="bFactory">A prototype instance used as a builder factory.</param>
 		/// <param name="other">The other map.</param>
 		/// <param name="collision">The collision resolution function.</param>
-		protected internal virtual TRMap Join<TValue2, TRMap, TRValue>(TRMap bFactory, ITrait_KeyValueMap<TKey, TValue2> other,Func<TKey, TValue, TValue2, TRValue> collision)
-			where TRMap : ITrait_KeyValueMap<TKey, TRValue>
+		protected internal virtual TRMap Join<TValue2, TRMap, TRValue>(TRMap bFactory, ITrait_MapLike<TKey, TValue2> other,Func<TKey, TValue, TValue2, TRValue> collision)
+			where TRMap : ITrait_MapLike<TKey, TRValue>
 		{
 			using (var builder = bFactory.EmptyBuilder)
 			{
@@ -165,7 +165,7 @@ namespace Funq.Abstract
 		/// Returns a new map without all those keys present in the specified map.
 		/// </summary>
 		/// <param name="other">The other.</param>
-		public virtual TMap Except<TValue2>(ITrait_KeyValueMap<TKey, TValue2> other)
+		public virtual TMap Except<TValue2>(ITrait_MapLike<TKey, TValue2> other)
 		{
 			using (var builder = EmptyBuilder)
 			{
@@ -183,7 +183,7 @@ namespace Funq.Abstract
 		/// Returns a new map containing only those key-value pairs present in exactly one of the maps.
 		/// </summary>
 		/// <param name="other">The other.</param>
-		public virtual TMap Difference(ITrait_KeyValueMap<TKey, TValue> other)
+		public virtual TMap Difference(ITrait_MapLike<TKey, TValue> other)
 		{
 			var joined = this.Join(this, other, (k, v1, v2) => v1);
 			var merged = this.Merge(other, (k, v1, v2) => v1);
@@ -194,7 +194,7 @@ namespace Funq.Abstract
 		/// </summary>
 		/// <param name="other">The other.</param>
 		/// <param name="collision">The collision resolution function. If null, the maps are assumed to have no keys in common, and a collision throws an exception.</param>
-		public virtual TMap Merge(ITrait_KeyValueMap<TKey, TValue> other, Func<TKey, TValue, TValue, TValue> collision = null)
+		public virtual TMap Merge(ITrait_MapLike<TKey, TValue> other, Func<TKey, TValue, TValue, TValue> collision = null)
 		{
 			collision = collision ?? ((k, v1, v2) =>
 			                          {
@@ -218,7 +218,7 @@ namespace Funq.Abstract
 		/// <param name="collision">The collision resolution function. If null, the maps are assumed to have no keys in common, and a collision throws an exception.</param>
 		public virtual TMap Merge(TMap other, Func<TKey, TValue, TValue, TValue> collision = null)
 		{
-			return this.Merge(other as ITrait_KeyValueMap<TKey, TValue>, collision);
+			return this.Merge(other as ITrait_MapLike<TKey, TValue>, collision);
 		}
 
 		/// <summary>
@@ -228,7 +228,7 @@ namespace Funq.Abstract
 		/// <param name="collision">The collision.</param>
 		public virtual TMap Join(TMap other, Func<TKey, TValue, TValue, TValue> collision)
 		{
-			return this.Join(this, other as ITrait_KeyValueMap<TKey, TValue>, collision);
+			return this.Join(this, other as ITrait_MapLike<TKey, TValue>, collision);
 		}
 
 		/// <summary>
@@ -237,7 +237,7 @@ namespace Funq.Abstract
 		/// <param name="other">The other.</param>
 		public virtual TMap Except(TMap other)
 		{
-			return this.Except(other as ITrait_KeyValueMap<TKey, TValue>);
+			return this.Except(other as ITrait_MapLike<TKey, TValue>);
 		}
 
 		/// <summary>
@@ -246,7 +246,7 @@ namespace Funq.Abstract
 		/// <param name="other">The other.</param>
 		public virtual TMap Difference(TMap other)
 		{
-			return this.Difference(other as ITrait_KeyValueMap<TKey, TValue>);
+			return this.Difference(other as ITrait_MapLike<TKey, TValue>);
 		}
 
 		/// <summary>
@@ -257,7 +257,7 @@ namespace Funq.Abstract
 		/// <typeparam name="TRValue">The type of the return value.</typeparam>
 		/// <param name="bFactory">A prototype instance of the return map.</param>
 		protected internal virtual TRMap OfType<TRMap, TRKey, TRValue>(TRMap bFactory)
-			where TRMap : ITrait_KeyValueMap<TRKey, TRValue>
+			where TRMap : ITrait_MapLike<TRKey, TRValue>
 		{
 			return base.Choose(bFactory, kvp =>
 			                             {

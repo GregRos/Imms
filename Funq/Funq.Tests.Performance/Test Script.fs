@@ -115,8 +115,31 @@ let sequential(initial,iters) =
         |> builder.AddTests
     let builder = 
         [Test.IterDirect] |> List.cross_apply1 [1] |> builder.AddTests
-    builder.Next().Bound
 
+    //[[test list of Sasa.FingerTree]]
+    (* //Sasa.FingerTree is broken and unusable
+    let builder = builder.Next().AddTarget (Data.Sasa.FingerTree initial src)
+    let builder = 
+        [Test.AddLast; Test.AddFirst; Test.Iter]
+        |> List.cross_apply1 simple_iters |> builder.AddTests
+    let builder = 
+        [Test.AddLastRange; Test.AddFirstRange] 
+        |> List.cross_apply1 data_iters |> builder.AddTests
+    let builder = 
+        [Test.AddLastRange; Test.AddFirstRange] 
+        |> List.cross_apply1 [bulkIters, Data.Sasa.FingerTree dSize src] 
+        |> List.chain_iter (fun test -> test?Name <- test?Name + " (concat operation)")
+        |> builder.AddTests
+    //[[Test list for Sasa.Vector]]
+    let builder = builder.Next().AddTarget (Data.Sasa.Vector initial src)
+    let builder = 
+        [Test.AddLast; Test.GetRandom; Test.SetRandom; Test.Iter]
+        |> List.cross_apply1 simple_iters |> builder.AddTests
+    let builder = 
+        [Test.AddLastRange; Test.AddFirstRange] 
+        |> List.cross_apply1 data_iters |> builder.AddTests
+    *)
+    builder.Next().Bound
 let mapLike(initial, iters, src) = 
     let data = src |> Data.Basic.Array (iters / 10)
     let bulkIters = 9

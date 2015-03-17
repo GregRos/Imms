@@ -119,9 +119,6 @@ namespace Funq.Collections.Implementation
 				public int Size;
 				public TChild Third;
 
-				//In the following constructors, we take the measure as a parameter (instead of calculating it ourselves) for performance reasons.
-				//Almost always the external code can find the measure using fewer operations (that is, if it's not available from the beginning).
-				//The overhead associated with calculating and accessing the measure can bottleneck the data structure.
 				public Digit(TChild one, Lineage lineage)
 					: base(one.Measure, lineage)
 				{

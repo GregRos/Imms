@@ -8,7 +8,7 @@ namespace Funq.Collections
 	using Funq.Abstract;
 	using Linq = System.Linq;
 	
-	public partial class FunqMap<TKey,TValue> : Trait_KeyValueMap<TKey,TValue,FunqMap<TKey,TValue>>
+	public partial class FunqMap<TKey,TValue> : Trait_MapLike<TKey,TValue,FunqMap<TKey,TValue>>
 	{
 		private FunqMap<TKey2,TValue2> GetPrototype<TKey2,TValue2>(IEqualityComparer<TKey2> ph)
 		{
@@ -82,7 +82,7 @@ namespace Funq.Collections
 		/// <param name="other"></param>
 		/// <param name="collision"></param>
 		/// <returns></returns>
-		public FunqMap<TKey, TRValue> Join<TValue2, TRValue>(ITrait_KeyValueMap<TKey, TValue2> other, Func<TKey, TValue, TValue2, TRValue> collision)
+		public FunqMap<TKey, TRValue> Join<TValue2, TRValue>(ITrait_MapLike<TKey, TValue2> other, Func<TKey, TValue, TValue2, TRValue> collision)
 		{
 			if (other == null) throw Errors.Is_null;
 			if (collision == null) throw Errors.Is_null;

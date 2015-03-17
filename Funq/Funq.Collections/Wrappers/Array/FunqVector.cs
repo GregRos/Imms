@@ -13,12 +13,12 @@ namespace Funq.Collections
 	/// Implements a random access list.
 	/// </summary>
 	/// <typeparam name="T">The type of value stored in the list.</typeparam>
-	public sealed partial class FunqArray<T>
+	public sealed partial class FunqVector<T>
 	{
 		/// <summary>
 		/// The empty
 		/// </summary>
-		internal static readonly FunqArray<T> empty = new FunqArray<T>(TrieVector<T>.Node.Empty);
+		internal static readonly FunqVector<T> empty = new FunqVector<T>(TrieVector<T>.Node.Empty);
 
 		/// <summary>
 		/// The data structure is limited by a 30-bit address space. This number returns its exact maximum capacity.
@@ -32,10 +32,10 @@ namespace Funq.Collections
 		internal readonly TrieVector<T>.Node root;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="FunqArray{T}"/> class.
+		/// Initializes a new instance of the <see cref="FunqVector{T}"/> class.
 		/// </summary>
 		/// <param name="root">The root.</param>
-		internal FunqArray(TrieVector<T>.Node root)
+		internal FunqVector(TrieVector<T>.Node root)
 		{
 			this.root = root;
 		}
@@ -43,7 +43,7 @@ namespace Funq.Collections
 		/// <summary>
 		/// Returns the empty array.
 		/// </summary>
-		public static FunqArray<T> Empty
+		public static FunqVector<T> Empty
 		{
 			get
 			{
@@ -90,16 +90,16 @@ namespace Funq.Collections
 		/// Adds the specified element to the end of the vector. O(logn), fast.
 		/// </summary>
 		/// <param name="item">The item to add.</param>
-		/// <returns>FunqArray{`0}.</returns>
+		/// <returns>FunqVector{`0}.</returns>
 		/// <exception cref="InvalidOperationException">Thrown if the data structure exceeds its maximum capacity.</exception>
-		public FunqArray<T> AddLast(T item)
+		public FunqVector<T> AddLast(T item)
 		{
 #if DEBUG
 			var expected = Length + 1;
 #endif
 			if (root.Length >= MaxCapacity) throw Funq.Errors.Capacity_exceeded();
 
-			FunqArray<T> ret = root.Add(item, Lineage.Immutable);
+			FunqVector<T> ret = root.Add(item, Lineage.Immutable);
 #if DEBUG
 			ret.Last.Is(item);
 			ret.Length.Is(expected);
@@ -136,7 +136,7 @@ namespace Funq.Collections
 		/// <exception cref="ArgumentNullException">Thrown if the argument is null.</exception>
 		/// <exception cref="InvalidOperationException">Thrown if the collection exceeds its capacity.</exception>
 		/// <remarks>This member performs a lot better when the specified sequence is an array.</remarks>
-		public FunqArray<T> AddLastRange(IEnumerable<T> items)
+		public FunqVector<T> AddLastRange(IEnumerable<T> items)
 		{
 			if (items == null) throw Funq.Errors.Argument_null("items");
 #if DEBUG
@@ -148,7 +148,7 @@ namespace Funq.Collections
 			var arr = items.ToArrayFast(out len);
 			var old_len = len;
 			if (root.Length + len >= MaxCapacity) throw Funq.Errors.Capacity_exceeded();
-			FunqArray<T> ret = root.AddMany(arr, Lineage.Mutable(), 6, ref s, ref len);
+			FunqVector<T> ret = root.AddMany(arr, Lineage.Mutable(), 6, ref s, ref len);
 #if DEBUG
 			ret.Length.Is(expected + old_len);
 			if (arr.Length > 0) ret.Last.Is(arr[old_len - 1]);
@@ -163,17 +163,17 @@ namespace Funq.Collections
 		/// <exception cref="ArgumentNullException">Thrown if the sequence is null.</exception>
 		/// <exception cref="InvalidOperationException">Thrown if the collection exceeds its capacity.</exception>
 		/// <returns></returns>
-		public FunqArray<T> AddFirstRange(IEnumerable<T> items)
+		public FunqVector<T> AddFirstRange(IEnumerable<T> items)
 		{
 			if (items == null) throw Funq.Errors.Argument_null("items");
 
-			var asFunqArray = items as FunqArray<T>;
+			var asFunqArray = items as FunqVector<T>;
 			if (asFunqArray != null)
 			{
 				return asFunqArray.AddLastRange(this);
 			}
 
-			FunqArray<T> ret = empty.AddLastRange(items).AddLastRange(this);
+			FunqVector<T> ret = empty.AddLastRange(items).AddLastRange(this);
 			return ret;
 		}
 
@@ -185,7 +185,7 @@ namespace Funq.Collections
 		/// <param name="count">The count.</param>
 		/// <exception cref="ArgumentNullException">Thrown if the array is null.</exception>
 		/// <exception cref="InvalidOperationException">Thrown if the collection exceeds its capacity.</exception>
-		public FunqArray<T> CopyFrom(T[] arr, int startIndex, int count)
+		public FunqVector<T> CopyFrom(T[] arr, int startIndex, int count)
 		{
 			if (arr == null) throw Funq.Errors.Argument_null("arr");
 			if (root.Length + arr.Length >= MaxCapacity) throw Funq.Errors.Capacity_exceeded();
@@ -199,14 +199,14 @@ namespace Funq.Collections
 		/// Removes the last item from the collection.
 		/// </summary>
 		/// <exception cref="InvalidOperationException">Thrown if the data structure is empty.</exception>
-		public FunqArray<T> DropLast()
+		public FunqVector<T> DropLast()
 		{
 			if (root.Length == 0) throw Funq.Errors.Is_empty;
 #if DEBUG
 			var expected = Length - 1;
 #endif
 			var lineage = Lineage.Mutable();
-			FunqArray<T> ret =  root.Drop(lineage);
+			FunqVector<T> ret =  root.Drop(lineage);
 #if DEBUG
 			ret.Length.Is(expected);
 			if (Length > 1) ret.Last.Is(this[-2]);
@@ -218,9 +218,9 @@ namespace Funq.Collections
 		/// Removes several items from the end of the list. O(logn)
 		/// </summary>
 		/// <param name="count">The number of items to remove.</param>
-		/// <returns>FunqArray{`0}.</returns>
+		/// <returns>FunqVector{`0}.</returns>
 		/// <exception cref="ArgumentOutOfRangeException">Thrown if there aren't enough elements.</exception>
-		public FunqArray<T> DropLast(int count)
+		public FunqVector<T> DropLast(int count)
 		{
 			if (root.Length < count) throw Errors.Arg_out_of_range("count");
 			return this.Take(Length - count);
@@ -232,7 +232,7 @@ namespace Funq.Collections
 		/// <param name="index">The index of the item to update.</param>
 		/// <param name="item">The new value of the item</param>
 		/// <exception cref="ArgumentOutOfRangeException">Thrown if the index doesn't exist in the data structure.</exception>
-		public FunqArray<T> Update(int index, T item)
+		public FunqVector<T> Update(int index, T item)
 		{
 #if DEBUG
 			var expected_length = Length;
@@ -248,7 +248,7 @@ namespace Funq.Collections
 			return ret;
 		}
 
-		public override FunqArray<T> Take(int count)
+		public override FunqVector<T> Take(int count)
 		{
 			if (count < 0 || count > Length) throw Funq.Errors.Arg_out_of_range("count", count);
 			if (count == 0) return empty;

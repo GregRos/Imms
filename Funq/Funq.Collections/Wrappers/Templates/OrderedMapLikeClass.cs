@@ -4,7 +4,7 @@ using System;
 using Funq.Abstract;
 using Linq = System.Linq;
 
-public partial class __OrderedMapLikeClass__<TKey,TValue> : Trait_KeyValueMap<TKey,TValue,__OrderedMapLikeClass__<TKey,TValue>>
+public partial class __OrderedMapLikeClass__<TKey,TValue> : Trait_MapLike<TKey,TValue,__OrderedMapLikeClass__<TKey,TValue>>
 {
 	private __OrderedMapLikeClass__<TKey2,TValue2> GetPrototype<TKey2,TValue2>(__HandlerObject__<TKey2> ph)
 	{
@@ -78,7 +78,7 @@ public partial class __OrderedMapLikeClass__<TKey,TValue> : Trait_KeyValueMap<TK
 	/// <param name="other"></param>
 	/// <param name="collision"></param>
 	/// <returns></returns>
-	public __OrderedMapLikeClass__<TKey, TRValue> Join<TValue2, TRValue>(ITrait_KeyValueMap<TKey, TValue2> other, Func<TKey, TValue, TValue2, TRValue> collision)
+	public __OrderedMapLikeClass__<TKey, TRValue> Join<TValue2, TRValue>(ITrait_MapLike<TKey, TValue2> other, Func<TKey, TValue, TValue2, TRValue> collision)
 	{
 		if (other == null) throw Errors.Is_null;
 		if (collision == null) throw Errors.Is_null;

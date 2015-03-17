@@ -4,12 +4,12 @@
 	{
 		internal abstract partial class Node
 		{
-			public static implicit operator FunqArray<TValue>(Node node)
+			public static implicit operator FunqVector<TValue>(Node node)
 			{
-				return new FunqArray<TValue>(node);
+				return new FunqVector<TValue>(node);
 			}
 
-			public static implicit operator Node (FunqArray<TValue> vect)
+			public static implicit operator Node (FunqVector<TValue> vect)
 			{
 				return vect.root;
 			}

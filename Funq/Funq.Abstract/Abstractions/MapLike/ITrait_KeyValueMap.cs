@@ -1,6 +1,6 @@
 namespace Funq.Abstract
 {
-	public interface ITrait_KeyValueMap<TKey, TValue> : ITrait_CollectionBuilderFactory<Kvp<TKey, TValue>, MapBuilder<TKey,TValue>>
+	public interface ITrait_MapLike<TKey, TValue> : ITrait_CollectionBuilderFactory<Kvp<TKey, TValue>, MapBuilder<TKey,TValue>>
 	{
 		Option<TValue> TryGet(TKey key);
 

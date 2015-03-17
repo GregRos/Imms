@@ -13,7 +13,9 @@ namespace Funq.Abstract
 	/// <typeparam name="TElem"> he type of element stored in the collection. </typeparam>
 	/// <typeparam name="TIterable">This is a self-reference to the class that implements this trait.</typeparam>
 	/// <typeparam name="TBuilder"> The type of collection builder used by the collection that implements this trait. </typeparam>
-	public abstract partial class Trait_Iterable<TElem, TIterable, TBuilder> : ITrait_CollectionBuilderFactory<TElem, TBuilder> where TBuilder : IterableBuilder<TElem>
+	public abstract partial class Trait_Iterable<TElem, TIterable, TBuilder> 
+		: ITrait_CollectionBuilderFactory<TElem, TBuilder> 
+		where TBuilder : IterableBuilder<TElem>
 		where TIterable : Trait_Iterable<TElem, TIterable, TBuilder>
 	{
 		/// <summary>
@@ -381,7 +383,7 @@ namespace Funq.Abstract
 		/// <returns></returns>
 		protected virtual TROuterMap GroupBy<TROuterMap, TRInnerSeq, TElem2, TKey>(
 			TROuterMap mapFactory, TRInnerSeq seqFactory, Func<TElem, TKey> keySelector, Func<TElem, TElem2> valueSelector, IEqualityComparer<TKey> eq)
-			where TROuterMap : ITrait_KeyValueMap<TKey, TRInnerSeq>
+			where TROuterMap : ITrait_MapLike<TKey, TRInnerSeq>
 			where TRInnerSeq : ITrait_CollectionBuilderFactory<TElem2, IterableBuilder<TElem2>>
 		{
 			return GroupBy(mapFactory, keySelector, valueSelector, (k, vs) =>
@@ -766,7 +768,7 @@ namespace Funq.Abstract
 		/// <returns> </returns>
 		protected virtual TRMap ToMapLike<TKey, TValue, TRMap>(
 			TRMap bFactory, Func<TElem, Kvp<TKey, TValue>> selector)
-			where TRMap : ITrait_KeyValueMap<TKey, TValue>
+			where TRMap : ITrait_MapLike<TKey, TValue>
 		{
 			using (var builder = bFactory.EmptyBuilder)
 			{

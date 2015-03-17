@@ -11,10 +11,12 @@ type MutableList<'t> = System.Collections.Generic.List<'t>
 [<StructuredFormatDisplayAttribute("{AsString}")>]
 type Time =
     | TimedOut
+    | Error
     | Time of float
     override x.ToString() = 
         match x with
         | TimedOut -> "Timed Out"
+        | Error -> "Error"
         | Time t -> sprintf "%.3f" t
     member x.AsString = x.ToString()
 ///The module that executes benchmarks.
@@ -51,12 +53,18 @@ module Bench =
             Watch.Stop()
 
         let thread = Thread(ThreadStart(runner))
-        thread.Start()
-        let finished = thread.Join(Timeout)
-        let elapsed = Watch.Elapsed.TotalMilliseconds
-        let time = Watch.Elapsed.TotalMilliseconds / (float Runs)
-        tag?Time <- if finished then Time(time) else TimedOut
-        fprintfn writer "Ending Test: '%s' for '%s' with time, '%A'\n" tag?Test?Name tag?Target?Name tag?Time
-        writer.Pop()
-        if not finished then thread.Abort()
-        tag
+        try
+            thread.Start()
+            let finished = thread.Join(Timeout)
+            let elapsed = Watch.Elapsed.TotalMilliseconds
+            let time = Watch.Elapsed.TotalMilliseconds / (float Runs)
+            tag?Time <- if finished then Time(time) else TimedOut
+            fprintfn writer "Ending Test: '%s' for '%s' with time, '%A'\n" tag?Test?Name tag?Target?Name tag?Time
+            writer.Pop()
+            if not finished then thread.Abort()
+            tag
+        with
+            | ex -> 
+                fprintfn writer "Ending Test: '%s' for '%s' due to exception of type '%s'" tag?Test?Name tag?Target?Name (ex.GetType().ToString())
+                tag?Time <- Error
+                tag

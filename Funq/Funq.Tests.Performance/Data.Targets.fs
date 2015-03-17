@@ -12,7 +12,7 @@ module Shorthand =
 module Funq = 
     open Funq.Tests.Performance.Wrappers
     let List size s = data (FunqList.ToFunqList) "FunqList" size s
-    let Array size s= data (FunqArray.ToFunqArray) "FunqArray" size s
+    let Array size s= data (FunqVector.ToFunqVector) "FunqArray" size s
     let Set size s = data    (Set.FromSeq) "FunqSet" size s
     let OrderedSet size s = data (OrderedSet.FromSeq) "FunqOrderedSet" size s
     let Map size s = data (FunqMap.FromSeq) "FunqMap" size s
@@ -40,3 +40,10 @@ module FSharpx =
 
 module FSharp = 
     let Map size s = data (FSharp.Map<_>.FromSeq) "FSharp.Map" size s
+
+(*
+module Sasa = 
+    open Funq.Tests.Performance.Wrappers
+    let Vector size s = data (Sasa.Vector.FromSeq) "Sasa.Vector" size s
+    let FingerTree size s = data (Sasa.FingerTree.FromSeq) "Sasa.FingerTree" size s
+*)
