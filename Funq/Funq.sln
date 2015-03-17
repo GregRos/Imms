@@ -1,0 +1,54 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9FA6751B-0904-4E51-A06D-D9540E1AF0AB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Funq.Abstract", "Funq.Abstract\Funq.Abstract.csproj", "{D971396E-7A09-40A5-BDA1-B28FC734C73C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Funq.Collections", "Funq.Collections\Funq.Collections.csproj", "{7AF97CC1-4B4C-4112-82AF-BF9FC4B16407}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Funq.Shared", "Funq.Shared\Funq.Shared.csproj", "{91009F69-3102-4138-A211-DD55EC86D662}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Funq.FSharp", "Funq.FSharp\Funq.FSharp.fsproj", "{4AE0206D-527D-43D7-9DCB-E88A8E1D47B6}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Funq.Tests.Integrity", "Funq.Tests.Integrity\Funq.Tests.Integrity.fsproj", "{6A693DCA-603F-4BFF-A18D-C8383A062B67}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Funq.Tests.Performance", "Funq.Tests.Performance\Funq.Tests.Performance.fsproj", "{7EC95555-CA5B-4E87-A8DA-525FA4E01FAC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D971396E-7A09-40A5-BDA1-B28FC734C73C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D971396E-7A09-40A5-BDA1-B28FC734C73C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D971396E-7A09-40A5-BDA1-B28FC734C73C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D971396E-7A09-40A5-BDA1-B28FC734C73C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7AF97CC1-4B4C-4112-82AF-BF9FC4B16407}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7AF97CC1-4B4C-4112-82AF-BF9FC4B16407}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7AF97CC1-4B4C-4112-82AF-BF9FC4B16407}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7AF97CC1-4B4C-4112-82AF-BF9FC4B16407}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91009F69-3102-4138-A211-DD55EC86D662}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91009F69-3102-4138-A211-DD55EC86D662}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91009F69-3102-4138-A211-DD55EC86D662}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91009F69-3102-4138-A211-DD55EC86D662}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4AE0206D-527D-43D7-9DCB-E88A8E1D47B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4AE0206D-527D-43D7-9DCB-E88A8E1D47B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4AE0206D-527D-43D7-9DCB-E88A8E1D47B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4AE0206D-527D-43D7-9DCB-E88A8E1D47B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A693DCA-603F-4BFF-A18D-C8383A062B67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A693DCA-603F-4BFF-A18D-C8383A062B67}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A693DCA-603F-4BFF-A18D-C8383A062B67}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A693DCA-603F-4BFF-A18D-C8383A062B67}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7EC95555-CA5B-4E87-A8DA-525FA4E01FAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7EC95555-CA5B-4E87-A8DA-525FA4E01FAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7EC95555-CA5B-4E87-A8DA-525FA4E01FAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7EC95555-CA5B-4E87-A8DA-525FA4E01FAC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
