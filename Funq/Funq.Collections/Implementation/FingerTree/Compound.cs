@@ -103,7 +103,7 @@ namespace Funq.Collections.Implementation
 				public Digit RightDigit;
 
 				public Compound(Digit leftDigit, FTree<Digit> deepTree, Digit rightDigit, Lineage lineage)
-					: base(leftDigit.Measure + deepTree.Measure + rightDigit.Measure, TreeType.Compound, lineage)
+					: base(leftDigit.Measure + deepTree.Measure + rightDigit.Measure, TreeType.Compound, lineage, 3)
 				{
 #if DEBUG2
 					leftDigit.IsNotNull();
@@ -113,7 +113,7 @@ namespace Funq.Collections.Implementation
 					_mutate(leftDigit, deepTree, rightDigit);
 				}
 
-				private static FTree<TChild> CreateCheckNull(Lineage lineage, Digit left = null, FTree<Digit> deep = null, Digit right = null)
+				private FTree<TChild> CreateCheckNull(Lineage lineage, Digit left = null, FTree<Digit> deep = null, Digit right = null)
 				{
 					var memberPermutation = left != null ? 1 << 0 : 0;
 					memberPermutation |= (deep != null && deep.Measure != 0) ? 1 << 1 : 0;
@@ -128,13 +128,13 @@ namespace Funq.Collections.Implementation
 						case 1 << 0 | 1 << 1:
 							var deep_1 = deep.DropLast(lineage);
 							var r_2 = deep.Right;
-							return new Compound(left, deep.DropLast(lineage), deep.Right, lineage);
+							return MutateOrCreate(left, deep.DropLast(lineage), deep.Right, lineage);
 						case 1 << 0 | 1 << 1 | 1 << 2:
-							return new Compound(left, deep, right, lineage);
+							return MutateOrCreate(left, deep, right, lineage);
 						case 1 << 1 | 1 << 2:
-							return new Compound(deep.Left, deep.DropFirst(lineage), right, lineage);
+							return MutateOrCreate(deep.Left, deep.DropFirst(lineage), right, lineage);
 						case 1 << 0 | 1 << 2:
-							return new Compound(left, deep, right, lineage);
+							return MutateOrCreate(left, deep, right, lineage);
 						case 1 << 1:
 							left = deep.Left;
 							deep = deep.DropFirst(lineage);
@@ -142,7 +142,7 @@ namespace Funq.Collections.Implementation
 							{
 								right = deep.Right;
 								deep = deep.DropLast(lineage);
-								return new Compound(left, deep, right, lineage);
+								return MutateOrCreate(left, deep, right, lineage);
 							}
 							return new Single(left, lineage);
 						case 1 << 2:
@@ -666,8 +666,19 @@ namespace Funq.Collections.Implementation
 					return OUTSIDE;
 				}
 
-		
 
+				public override WeaklyTypedElement GetGrouping(int index) {
+					switch (index) {
+						case 0:
+							return LeftDigit;
+						case 1:
+							return DeepTree;
+						case 2:
+							return RightDigit;
+						default:
+							throw Errors.Arg_out_of_range("index");
+					}
+				}
 			}
 		}
 	}

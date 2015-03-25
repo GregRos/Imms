@@ -12,6 +12,14 @@ namespace Funq.Collections.Implementation
 			return Value.GetHashCode();
 		}
 
+		public override WeaklyTypedElement GetGrouping(int index) {
+			throw ImplErrors.Invalid_null_invocation;
+		}
+
+		public override bool HasValue {
+			get { return true; }
+		}
+
 		private class LeafEnumerator : FingerTree<TValue>.IReusableEnumerator<Leaf<TValue>>
 		{
 			private Leaf<TValue> _inner;
@@ -77,7 +85,7 @@ namespace Funq.Collections.Implementation
 		}
 
 		public Leaf(TValue value)
-			: base(1, Lineage.Immutable)
+			: base(1, Lineage.Immutable, 0)
 		{
 			Value = value;
 		}

@@ -73,11 +73,6 @@
       <Project>{7af97cc1-4b4c-4112-82af-bf9fc4b16407}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Funq.Shared\Funq.Shared.csproj">
-      <Name>Funq.Shared</Name>
-      <Project>{91009f69-3102-4138-a211-dd55ec86d662}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

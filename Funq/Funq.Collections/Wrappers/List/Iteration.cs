@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Funq;
 using Funq.Collections.Common;
+using Funq.Collections.Implementation;
 
 namespace Funq.Collections
 {
@@ -26,13 +27,8 @@ namespace Funq.Collections
 		///   Gets a new enumerator that iterates over the list.
 		/// </summary>
 		/// <returns> </returns>
-		protected override IEnumerator<T> GetEnumerator()
-		{
-			var enumerator = _root.GetEnumerator(true);
-			for (; enumerator.MoveNext();)
-			{
-				yield return enumerator.Current.Value;
-			}
+		protected override IEnumerator<T> GetEnumerator() {
+			return new FingerTreeIterator<T>(_root);
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()

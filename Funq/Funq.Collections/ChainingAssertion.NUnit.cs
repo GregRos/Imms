@@ -261,7 +261,7 @@ namespace Funq.Collections
 		{
 			if (typeof (T) != typeof (string) && typeof (IEnumerable).IsAssignableFrom(typeof (T)))
 			{
-				((IEnumerable) actual).Cast<object>().IsNot(((IEnumerable) notExpected).Cast<object>(), message);
+				Fun.Cast<object>(((IEnumerable) actual)).IsNot(Fun.Cast<object>(((IEnumerable) notExpected)), message);
 				return;
 			}
 

@@ -71,13 +71,11 @@ namespace Funq.Abstract
 			var boiler = Boilerplate(x, y);
 			if (boiler.IsSome) return boiler;
 			if (x.Length != y.Length) return false;
-			using (var yIter = y.GetEnumerator())
-			{
-				return x.ForEachWhile(v =>
-				                      {
-					                      if (!yIter.MoveNext()) return false;
-					                      return equality.Equals(v, yIter.Current);
-				                      });
+			using (var yIter = y.GetEnumerator()) {
+				return x.ForEachWhile(v => {
+					if (!yIter.MoveNext()) return false;
+					return equality.Equals(v, yIter.Current);
+				});
 			}
 		}
 
@@ -115,19 +113,7 @@ namespace Funq.Abstract
 		{
 			return new CachingEqualityComparer<T>(eq);
 		}
-
-		internal static int ToInt(this Cmp r)
-		{
-			return r == Cmp.Equal ? 0 : r == Cmp.Greater ? 1 : -1;
-		}
-
-		internal static Cmp ToCmp(this int r)
-		{
-			return r == 0 ? Cmp.Equal : r > 0 ? Cmp.Greater : Cmp.Lesser;
-		}
-
-
-		public static Cmp List_CompareLex<TElem>(ITrait_Iterable<TElem> x, ITrait_Iterable<TElem> y, IComparer<TElem> comparer = null)
+		public static int List_CompareLex<TElem>(ITrait_Iterable<TElem> x, ITrait_Iterable<TElem> y, IComparer<TElem> comparer = null)
 		{
 			comparer = comparer ?? Comparer<TElem>.Default;
 			using (var yIter = y.GetEnumerator())
@@ -141,16 +127,13 @@ namespace Funq.Abstract
 					               finalResult = compResult;
 					               return false;
 				               });
-				return finalResult.ToCmp();
+				return finalResult;
 			}
 		}
 
-		public static Cmp List_CompareNum<TElem>(ITrait_Sequential<TElem> x, ITrait_Sequential<TElem> y, IComparer<TElem> comparer = null)
-		{
-			var xLen = x.Length;
-			var yLen = y.Length;
-			if (xLen > yLen) return Cmp.Greater;
-			if (xLen < yLen) return Cmp.Lesser;
+		public static int List_CompareNum<TElem>(ITrait_Sequential<TElem> x, ITrait_Sequential<TElem> y, IComparer<TElem> comparer = null) {
+			var difLen = x.Length - y.Length;
+			if (difLen != 0) return difLen;
 			return List_CompareLex(x, y, comparer);
 		}
 
@@ -164,7 +147,7 @@ namespace Funq.Abstract
 		/// <returns> </returns>
 		public static IComparer<T> Invert<T>(this IComparer<T> comparer)
 		{
-			return new LambdaComparer<T>((a, b) =>
+			return Comparer<T>.Create((a, b) =>
 			                             {
 				                             var result = comparer.Compare(a, b);
 				                             if (result < 0) return 1;

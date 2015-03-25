@@ -15,7 +15,7 @@ namespace Funq.Collections.Implementation
 				public static readonly EmptyTree Instance = new EmptyTree();
 
 				private EmptyTree()
-					: base(0, TreeType.Empty, Common.Lineage.Immutable)
+					: base(0, TreeType.Empty, Common.Lineage.Immutable, 0)
 				{
 				}
 
@@ -125,6 +125,10 @@ namespace Funq.Collections.Implementation
 				public override FTree<TChild> Update(int index, Leaf<TValue> leaf, Lineage lineage)
 				{
 					throw Funq.Errors.Is_empty;
+				}
+
+				public override WeaklyTypedElement GetGrouping(int index) {
+					throw ImplErrors.Invalid_null_invocation;
 				}
 			}
 		}

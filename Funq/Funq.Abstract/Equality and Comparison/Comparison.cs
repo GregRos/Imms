@@ -16,7 +16,7 @@ namespace Funq.Abstract
 		public static IComparer<T> ByKey<T, TKey>(Func<T, TKey> selector, IComparer<TKey> keyComparer = null)
 		{
 			keyComparer = keyComparer ?? Comparer<TKey>.Default;
-			return new LambdaComparer<T>((x, y) => keyComparer.Compare(selector(x), selector(y)));
+			return Comparer<T>.Create((x, y) => keyComparer.Compare(selector(x), selector(y)));
 		}
 	}
 }

@@ -13,11 +13,6 @@ namespace Funq.Abstract
 
 		int IComparer<ITrait_Sequential<TElem>>.Compare(ITrait_Sequential<TElem> x, ITrait_Sequential<TElem> y)
 		{
-			return this.Compare(x, y).ToInt();
-		}
-
-		public Cmp Compare(ITrait_Sequential<TElem> x, ITrait_Sequential<TElem> y)
-		{
 			return Equality.List_CompareNum(x, y, _comparer);
 		}
 	}

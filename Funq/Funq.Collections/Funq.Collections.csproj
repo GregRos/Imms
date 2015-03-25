@@ -56,6 +56,7 @@
     <DocumentationFile>bin\Release\Funq.Collections.xml</DocumentationFile>
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
@@ -75,7 +76,6 @@
     <Compile Include="Implementation\HashedAvlTree\TreeIterator.cs" />
     <Compile Include="Implementation\HashedAvlTree\Node.cs" />
     <Compile Include="Implementation\HashedAvlTree\Bucket.cs" />
-    <Compile Include="Common\Keys.cs" />
     <Compile Include="Implementation\OrderedAvlTree\Node.cs" />
     <Compile Include="Common\ArrayExt.cs" />
     <Compile Include="Common\Errors.cs" />
@@ -83,7 +83,10 @@
     <Compile Include="Implementation\TrieVector\VectorLeaf.cs" />
     <Compile Include="Implementation\TrieVector\VectorNode.cs" />
     <Compile Include="Implementation\TrieVector\VectorParent.cs" />
-    <Compile Include="Wrappers\Array\Boilerplate.cs">
+    <Compile Include="Wrappers\FunqOrderedSet\Debugging.cs" />
+    <Compile Include="Wrappers\FunqOrderedSet\FunqBindings.cs" />
+    <Compile Include="Wrappers\FunqOrderedSet\FunqOrderedSet.cs" />
+    <Compile Include="Wrappers\Vector\Boilerplate.cs">
       <DependentUpon>Boilerplate.tt</DependentUpon>
       <SubType>Code</SubType>
       <DesignTime>True</DesignTime>
@@ -99,22 +102,23 @@
     <Compile Include="Implementation\FingerTree\TreeType.cs" />
     <Compile Include="Implementation\FingerTree\Leaf.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Wrappers\EqualityMap\Boilerplate.cs">
+    <Compile Include="Wrappers\FunqMap\Boilerplate.cs">
       <DependentUpon>Boilerplate.tt</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="Wrappers\EqualityMap\Debugging.cs" />
-    <Compile Include="Wrappers\EqualityMap\FunqBindings.cs" />
-    <Compile Include="Wrappers\EqualityMap\Interfaces.cs" />
-    <Compile Include="Wrappers\EqualityMap\Operators.cs" />
-    <Compile Include="Wrappers\EqualitySet\Boilerplate.cs">
+    <Compile Include="Wrappers\FunqMap\Debugging.cs" />
+    <Compile Include="Wrappers\FunqMap\FunqBindings.cs" />
+    <Compile Include="Wrappers\FunqMap\Interfaces.cs" />
+    <Compile Include="Wrappers\FunqMap\Operators.cs" />
+    <Compile Include="Wrappers\FunqSet\Boilerplate.cs">
       <DependentUpon>Boilerplate.tt</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="Wrappers\EqualitySet\Debugging.cs" />
-    <Compile Include="Wrappers\EqualitySet\FunqBindings.cs" />
+    <Compile Include="Wrappers\FunqSet\Debugging.cs" />
+    <Compile Include="Wrappers\FunqSet\FunqBindings.cs" />
+    <Compile Include="Wrappers\FunqSet\FunqSet.cs" />
     <Compile Include="Wrappers\List\Boilerplate.cs">
       <DependentUpon>Boilerplate.tt</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -124,33 +128,29 @@
     <Compile Include="Wrappers\List\Debugging.cs" />
     <Compile Include="Wrappers\List\EqualityComparison.cs" />
     <Compile Include="Wrappers\List\FunqBindings.cs" />
-    <Compile Include="Wrappers\EqualityMap\FunqMap.cs" />
-    <Compile Include="Wrappers\SortedMap\Boilerplate.cs">
+    <Compile Include="Wrappers\FunqMap\FunqMap.cs" />
+    <Compile Include="Wrappers\FunqOrderedMap\Boilerplate.cs">
       <DependentUpon>Boilerplate.tt</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="Wrappers\SortedMap\Debugging.cs" />
-    <Compile Include="Wrappers\SortedMap\FunqBindings.cs" />
-    <Compile Include="Wrappers\SortedMap\FunqOrderedMap.cs" />
-    <Compile Include="Wrappers\EqualitySet\FunqSet.cs" />
-    <Compile Include="Wrappers\SortedSet\Boilerplate.cs">
+    <Compile Include="Wrappers\FunqOrderedMap\Debugging.cs" />
+    <Compile Include="Wrappers\FunqOrderedMap\FunqBindings.cs" />
+    <Compile Include="Wrappers\FunqOrderedMap\FunqOrderedMap.cs" />
+    <Compile Include="Wrappers\FunqOrderedSet\Boilerplate.cs">
       <DependentUpon>Boilerplate.tt</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="Wrappers\SortedSet\Debugging.cs" />
-    <Compile Include="Wrappers\SortedSet\FunqBindings.cs" />
-    <Compile Include="Wrappers\SortedSet\FunqSortedSet.cs" />
-    <Compile Include="Wrappers\Array\FunqBindings.cs" />
+    <Compile Include="Wrappers\Vector\FunqBindings.cs" />
     <Compile Include="Implementation\TrieVector\ImplementationHooks.cs" />
     <Compile Include="Wrappers\List\Interfaces.cs" />
     <Compile Include="Wrappers\List\Iteration.cs" />
     <Compile Include="Wrappers\List\Operators.cs" />
-    <Compile Include="Wrappers\Array\Debugging.cs" />
-    <Compile Include="Wrappers\Array\Interfaces.cs" />
-    <Compile Include="Wrappers\Array\Operators.cs" />
-    <Compile Include="Wrappers\Array\FunqVector.cs" />
+    <Compile Include="Wrappers\Vector\Debugging.cs" />
+    <Compile Include="Wrappers\Vector\Interfaces.cs" />
+    <Compile Include="Wrappers\Vector\Operators.cs" />
+    <Compile Include="Wrappers\Vector\FunqVector.cs" />
     <Compile Include="Wrappers\Templates\ConvertionMethods.cs" />
     <Compile Include="Wrappers\Templates\OrderedSetLikeClass.cs" Condition="$(DefineConstants.Contains('DEBUG'))" />
     <Compile Include="Wrappers\Templates\OrderedMapLikeClass.cs" Condition="$(DefineConstants.Contains('DEBUG'))" />
@@ -184,22 +184,19 @@
       <Project>{d971396e-7a09-40a5-bda1-b28fc734c73c}</Project>
       <Name>Funq.Abstract</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Funq.Shared\Funq.Shared.csproj">
-      <Project>{91009f69-3102-4138-a211-dd55ec86d662}</Project>
-      <Name>Funq.Shared</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
+    <None Include="Wrappers\FunqSet\Boilerplate.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Boilerplate.cs</LastGenOutput>
+    </None>
     <None Include="Wrappers\Templates\Reusable.ttinclude" />
-    <None Include="Wrappers\Array\Boilerplate.tt">
+    <None Include="Wrappers\Vector\Boilerplate.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Boilerplate.cs</LastGenOutput>
     </None>
-    <None Include="Wrappers\EqualityMap\Boilerplate.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Boilerplate.cs</LastGenOutput>
-    </None>
-    <None Include="Wrappers\EqualitySet\Boilerplate.tt">
+    <None Include="Wrappers\FunqMap\Boilerplate.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Boilerplate.cs</LastGenOutput>
     </None>
@@ -207,11 +204,11 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Boilerplate.cs</LastGenOutput>
     </None>
-    <None Include="Wrappers\SortedMap\Boilerplate.tt">
+    <None Include="Wrappers\FunqOrderedMap\Boilerplate.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Boilerplate.cs</LastGenOutput>
     </None>
-    <None Include="Wrappers\SortedSet\Boilerplate.tt">
+    <None Include="Wrappers\FunqOrderedSet\Boilerplate.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Boilerplate.cs</LastGenOutput>
     </None>

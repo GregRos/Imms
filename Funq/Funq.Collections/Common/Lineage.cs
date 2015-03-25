@@ -1,4 +1,4 @@
-﻿#define CONTROLLED_MUTATION
+﻿
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -26,7 +26,7 @@ namespace Funq.Collections.Common
 		
 		private Lineage(bool never)
 		{
-			neverMutate = true;
+			neverMutate = never;
 		}
 
 		/// <summary>
@@ -35,15 +35,18 @@ namespace Funq.Collections.Common
 		/// <returns></returns>
 		public static Lineage Mutable()
 		{
+#if NO_MUTATION
+			return Lineage.Immutable;
+#endif
 			return new Lineage();
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool AllowMutation(Lineage other)
 		{
-			//return true;
-			//return false;
-			var allow= !neverMutate && this == other;
-			return allow;
+#if NO_MUTATION
+			return false;
+#endif
+			return !neverMutate && this == other;
 		}
 	}
 }

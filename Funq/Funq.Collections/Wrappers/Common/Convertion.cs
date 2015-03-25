@@ -9,7 +9,7 @@ namespace Funq.Collections
 			return FunqList<T>.Empty;
 		}
 
-				/// <summary>
+		/// <summary>
 		///   Creates a FlexibleList from a sequence of items.
 		/// </summary>
 		/// <typeparam name="T"> The type of the value. </typeparam>
@@ -38,80 +38,89 @@ namespace Funq.Collections
 		}
 	}
 
-	public static class FunqSet
-	{
+	public static class FunqSet {
+		public static FunqSet<T> Empty<T>(IEqualityComparer<T> eq = null) {
+			return FunqSet<T>.Empty(eq);
+		}
 
-		public static FunqSet<T> ToFunqSet<T>(this IEnumerable<T> items, IEqualityComparer<T> eq = null)
+		public static FunqSet<T> ToFunqSet<T>(this IEnumerable<T> items, IEqualityComparer<T> eq = null) {
+			return FunqSet<T>.Empty(eq).AddRange(items);
+		}
+
+	}
+
+	public static class FunqOrderedSet {
+
+		public static FunqOrderedSet<T> Empty<T>(IComparer<T> comparer) {
+			return FunqOrderedSet<T>.Empty(comparer);
+		}
+
+		public static FunqOrderedSet<T> Empty<T>()
+			where T : IComparable<T>
 		{
-			return FunqSet.Simple(eq).AddMany(items);
+			return FunqOrderedSet<T>.Empty(null);
 		}
 
 		public static FunqOrderedSet<T> ToFunqOrderedSet<T>(this IEnumerable<T> items, IComparer<T> cmp)
 		{
-			return FunqSet.Ordered(cmp).AddMany(items);
+			return FunqOrderedSet<T>.Empty(cmp).AddRange(items);
 		}
 
 		public static FunqOrderedSet<T> ToFunqOrderedSet<T>(this IEnumerable<T> items)
 			where T : IComparable<T>
 		{
-			return FunqSet.Ordered<T>().AddMany(items);
-		}
-
-		public static FunqSet<T> Simple<T>(IEqualityComparer<T> equality = null)
-		{
-			equality = equality ?? EqualityComparer<T>.Default;
-			return FunqSet<T>.Empty(equality);
-		}
-
-		public static FunqOrderedSet<T> Ordered<T>() 
-			where T : IComparable<T>
-		{
-			return Ordered(Comparer<T>.Default);
-		}
-
-		public static FunqOrderedSet<T> Ordered<T>(IComparer<T> comparer)
-		{
-			return FunqOrderedSet<T>.Empty(comparer);
+			return FunqOrderedSet<T>.Empty(null).AddRange(items);
 		}
 	}
+	
 
 	public static class FunqMap
 	{
-		public static FunqMap<TKey, TValue> Simple<TKey, TValue>(IEqualityComparer<TKey> equality = null)
+		public static FunqMap<TKey, TValue> Empty<TKey, TValue>(IEqualityComparer<TKey> eq = null) {
+			return FunqMap<TKey, TValue>.Empty(eq);
+		}
+
+
+		public static FunqMap<TKey, TValue> ToFunqMap<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> kvps, IEqualityComparer<TKey> eq = null)
 		{
-			equality = equality ?? EqualityComparer<TKey>.Default;
-			return FunqMap<TKey, TValue>.Empty(equality);
+			return FunqMap<TKey, TValue>.Empty(eq).AddRange(kvps);
 		}
 
 		public static FunqMap<TKey, TValue> ToFunqMap<TKey, TValue>(this IEnumerable<Kvp<TKey, TValue>> kvps, IEqualityComparer<TKey> eq = null)
 		{
-			return FunqMap.Simple<TKey, TValue>().AddMany(kvps);
+			return FunqMap<TKey, TValue>.Empty(eq).AddRange(kvps);
 		}
+
+
+		
+	}
+
+	public static class FunqOrderedMap {
+
+
 
 		public static FunqOrderedMap<TKey, TValue> ToFunqOrderedMap<TKey, TValue>(this IEnumerable<Kvp<TKey, TValue>> kvps)
 			where TKey : IComparable<TKey>
 		{
-			return FunqMap.Ordered<TKey, TValue>().AddMany(kvps);
+			return FunqOrderedMap<TKey, TValue>.Empty(null).AddRange(kvps);
 		}
 
 		public static FunqOrderedMap<TKey, TValue> ToFunqOrderedMap<TKey, TValue>(this IEnumerable<Kvp<TKey, TValue>> kvps, IComparer<TKey> cmp)
 		{
-			return FunqMap.Ordered<TKey, TValue>(cmp).AddMany(kvps);
+			return FunqOrderedMap<TKey, TValue>.Empty(cmp).AddRange(kvps);
 		}
 
-		public static FunqOrderedMap<TKey, TValue> Ordered<TKey, TValue>()
-			where TKey : IComparable<TKey>
-		{
-			return Ordered<TKey, TValue>(Comparer<TKey>.Default);
-		} 
-
-		public static FunqOrderedMap<TKey, TValue> Ordered<TKey, TValue>(IComparer<TKey> comparer)
+		public static FunqOrderedMap<TKey, TValue> Empty<TKey, TValue>(IComparer<TKey> comparer)
 		{
 			return FunqOrderedMap<TKey, TValue>.Empty(comparer);
 		}
+
+		public static FunqOrderedMap<TKey, TValue> Empty<TKey, TValue>()
+			where TKey : IComparable<TKey>
+		{
+			return FunqOrderedMap<TKey, TValue>.Empty(null);
+		}
 	}
-
-
 
 	/// <summary>
 	///   Provides extension methods for converting between, to, and from Solid data structures.
@@ -126,16 +135,6 @@ namespace Funq.Collections
 		internal static FunqMap<TKey, TValue> WrapMap<TKey, TValue>(this HashedAvlTree<TKey, TValue>.Node root, IEqualityComparer<TKey> equality)
 		{
 			return new FunqMap<TKey, TValue>(root, equality);
-		}
-
-		internal static FunqSet<T> WrapSet<T>(this HashedAvlTree<T, bool>.Node root, IEqualityComparer<T> equality)
-		{
-			return new Funq.Collections.FunqSet<T>(root, equality);
-		}
-
-		internal static FunqOrderedSet<T> WrapSet<T>(this OrderedAvlTree<T, bool>.Node root, IComparer<T> comparer)
-		{
-			return new Funq.Collections.FunqOrderedSet<T>(root, comparer);
 		}
 
 		internal static FunqOrderedMap<TKey, TValue> WrapMap<TKey, TValue>(this OrderedAvlTree<TKey, TValue>.Node root, IComparer<TKey> comparer )

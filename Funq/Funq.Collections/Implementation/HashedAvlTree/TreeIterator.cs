@@ -11,7 +11,7 @@ namespace Funq.Collections.Implementation
 			private Node _current;
 			public TreeIterator(int maxHeight)
 			{
-				_future = new List<Marked<Node, bool>>(maxHeight);
+				_future = new List<Marked<Node, bool>>();
 			}
 
 			public TreeIterator(Node root)
@@ -28,8 +28,9 @@ namespace Funq.Collections.Implementation
 					if (cur.Mark) return SetCurrent(cur);
 					var node = cur.Object;
 					if (node.IsNull) continue;
-					if (!node.Right.IsNull) _future.Add(node.Right.Mark(false));			
-					_future.Add(node.Mark(true));
+					if (!node.Right.IsNull) _future.Add(node.Right.Mark(false));
+					cur.SetMark(true);
+					_future.Add(cur);
 					if (!node.Left.IsNull) _future.Add(node.Left.Mark(false));
 				}
 				return false;
@@ -40,7 +41,11 @@ namespace Funq.Collections.Implementation
 				var isEnded = SeekForwardCloseTo(hash);
 				if (!isEnded) return false;
 				if (_current.Hash >= hash) return true;
-				return this.MoveNext();
+				var res =  this.MoveNext();
+#if DEBUG
+				AssertEx.IsTrue(_current.Hash >= hash || !res);
+#endif
+				return res;
 			}
 
 			public bool IsEnded
@@ -78,6 +83,9 @@ namespace Funq.Collections.Implementation
 				while (_future.Count > 1)
 				{
 					var cur = _future.PopLast();
+#if DEBUG
+					cur.Object.IsNull.IsFalse();
+#endif
 					//We ignore all nodes other than parents we've already passed.
 					if (!cur.Mark) continue;
 					//If we haven't found the right node, we stop here:
@@ -93,24 +101,25 @@ namespace Funq.Collections.Implementation
 				{
 					var cur = _future.PopLast();
 					var node = cur.Object;
-					if (node.IsNull && _future.Count > 0) return SetCurrent(_future.LastItem());
-					if (node.IsNull) return false;
-					if (cur.Mark && node.Hash != hash) continue;
-					switch (hash > node.Hash ? Cmp.Greater : hash < node.Hash ? Cmp.Lesser : Cmp.Equal)
-					{
-						case Cmp.Greater:
-							if (node.Right.IsNull) return SetCurrent(node);
-							_future.Add(node.Right.Mark(false));
-							break;
-						case Cmp.Lesser:
-							if (!node.Right.IsNull) _future.Add(node.Right.Mark(false));
-							if (node.Left.IsNull) return SetCurrent(node);
-							_future.Add(node.Mark(true));
-							_future.Add(node.Left.Mark(false));
-							break;
-						case Cmp.Equal:
-							if (!cur.Mark && !node.Right.IsNull) _future.Add(node.Right.Mark(false));
-							return SetCurrent(node);
+#if DEBUG
+					node.IsNull.IsFalse();
+#endif
+					//if (node.IsNull && _future.Count > 0) return SetCurrent(_future.LastItem());
+					//if (node.IsNull) return false;
+					//if (cur.Mark && node.Hash != hash) continue;
+					if (hash > node.Hash) {
+						if (node.Right.IsNull) return SetCurrent(node);
+						_future.Add(node.Right.Mark(false));
+					}
+					else if (hash < node.Hash) {
+						if (!node.Right.IsNull) _future.Add(node.Right.Mark(false));
+						if (node.Left.IsNull) return SetCurrent(node);
+						_future.Add(node.Mark(true));
+						_future.Add(node.Left.Mark(false));
+					}
+					else {
+						if (!cur.Mark && !node.Right.IsNull) _future.Add(node.Right.Mark(false));
+						return SetCurrent(node);
 					}
 				}
 				return false;

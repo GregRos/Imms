@@ -24,63 +24,65 @@ let rec containsAny (lst) (trgt : string) =
     | [] -> false
     | h::t -> trgt.Contains(h) || trgt |> containsAny t
     
-let printToFile path filename ext (entries : MetaContainer list) = 
-    let rec getFreeName n =
-        let tryName = sprintf "%s\%s.%03d.%s" path filename n ext
-        if File.Exists(tryName) then
-            getFreeName (n+1)
+let getFreeDir path dir = 
+    let rec tryNum n = 
+        let tryName = sprintf "%s\%s%03d" path dir n
+        if Directory.Exists tryName then
+            tryNum (n+1)
         else
-            tryName
-    let filename = getFreeName 0
-    use file = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.ReadWrite)
-    let context = CsvContext()
-    use stream = new StreamWriter(file)
-    stream.AutoFlush<- true
-    context.Write(entries, stream)
+            Directory.CreateDirectory tryName |> ignore
+            tryName, n
+    tryNum 0
 
-    stream.Flush()
-     
-[<EntryPoint>]
-let  main argv =
-    //let res = Bench.invoke (Test.InsertRandom(1000000).Bind(Target.My.List(1000000)))
-
-    let tests = Scripts.sequential(50000, 50000) //@ Scripts.mapLike(10000, 10000, Seqs.Numbers.length(5, 11)) @ Scripts.setLike(1000, 100, 2000, Seqs.Numbers.length(1, 10), Seqs.Numbers.length(1, 10))
-   // let tests = Scripts.sequential(10, 10)
-    //let tests = Scripts.setLike(1000, 100, 2000, Seqs.Numbers.length(1, 10), Seqs.Numbers.length(1, 10))
-    //let tests = tests |> List.filter (fun x -> x.Entry.Test |> containsAny ["Add"; "Drop"; "Contains"])
-    let filename = "results.csv"
+let runTests (tests : ErasedTest list) = 
     use writer = new IndentedTextWriter(Console.Out)
+    let mutable results = []
+
     let results = tests |> List.map (Bench.invoke writer)
-    
     let charts = present results
-    let form = new Form()
     let mutable i = 0;
-    if Directory.Exists("Results\Logs") |> not then
-        Directory.CreateDirectory("Results\Logs") |> ignore
-    if Directory.Exists("Results\Charts") |> not then
-        Directory.CreateDirectory("Results\Charts") |> ignore
-
-    for file in DirectoryInfo("Results\Charts").EnumerateFiles() do
-        file.Delete()
-
-    for file in DirectoryInfo("Results\Logs").EnumerateFiles() do
-        file.Delete()
-
-    for chart in charts do
-        chart.ShowChart() |> ignore
-        
-
-    let charts = Application.OpenForms |> Seq.cast<Form>
-    for chart in charts do
-        chart.Width <- (chart.Width |> float) * 1.5 |> int
-        chart.Height <- (chart.Height |> float) * 1.5 |> int
-        use bmp = new Bitmap(chart.Width, chart.Height)
-        chart.DrawToBitmap(bmp, Rectangle(Point.Empty, bmp.Size))
-        bmp.Save(sprintf "Results\Charts\%d.png" i, ImageFormat.Png)
+    let basePath = "..\..\Benchmarks"
+    let resultFolder, n = getFreeDir basePath "benchmark"
+    let logsFolder = resultFolder
+    let chartsFolder = sprintf "%s\Charts" resultFolder
+    Directory.CreateDirectory chartsFolder |> ignore
+    
+    for chart, kind, name in charts do
+        let frm = chart.ShowChart()
+        frm.Text <- name
+        frm.Width <- (frm.Width |> float) * 1.5 |> int
+        frm.Height <- (frm.Height |> float) * 1.5 |> int
+        use bmp = new Bitmap(frm.Width, frm.Height)
+        frm.DrawToBitmap(bmp, Rectangle(Point.Empty, bmp.Size))
+        bmp.Save(sprintf "%s\%03d.%A.%s.png" chartsFolder n kind name, ImageFormat.Png)
+        frm.Close()
         i <- i + 1
     
-    let copy = charts |> List.ofSeq
-    copy |> List.iter (fun chart -> chart.Close())
-    results |> Presentation.printToFile "Results\Logs" "benchmarks" "csv"
+    let table = results |> Report.toTable
+    File.WriteAllText(sprintf "%s\\%03d.table.csv" logsFolder n, table)
+    let log = results |> Report.toLog
+    File.WriteAllText(sprintf "%s\\%03d.log.csv" logsFolder n, log)
+
+open Scripts
+[<EntryPoint>]
+let  main argv =    
+    let args = 
+        Scripts.AdvancedArgs<_>(
+           Simple_Iterations = 10000,
+           Target_Size = 10000,
+           DataSource_Size = 1000,
+           Full_Iterations = 1,
+           DataSource_Iterations = 5,
+           Generator1 = Seqs.Strings.distinctLetters(1, 10),
+           Generator2 = Seqs.Strings.distinctLetters(1, 10),
+           DropRatio = 0.3
+        )
+    let a = Scripts.sequential args
+    let b = Scripts.setLike args
+    let c = Scripts.mapLike args
+    let tests = a @ b @ c
+    
+    let tests = tests |> List.filter (fun x -> x.Target.Kind = Sequential)
+    runTests tests
     0
         

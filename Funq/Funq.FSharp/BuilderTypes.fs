@@ -4,6 +4,7 @@ open Funq.FSharp
 open System
 open Funq.FSharp.Implementation
 open Funq.FSharp.Operators.Extra
+open Funq.FSharp.Operators
 type internal collection_ops<'elem, 'many, 'col> = 
     {
         left_combine : 'elem -> 'many -> 'many

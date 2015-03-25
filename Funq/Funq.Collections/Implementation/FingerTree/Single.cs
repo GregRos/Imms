@@ -13,7 +13,7 @@ namespace Funq.Collections.Implementation
 				public Digit CenterDigit;
 
 				public Single(Digit centerDigit, Lineage lineage)
-					: base(centerDigit.Measure, TreeType.Single, lineage)
+					: base(centerDigit.Measure, TreeType.Single, lineage, 1)
 				{
 					CenterDigit = centerDigit;
 				}
@@ -216,6 +216,11 @@ namespace Funq.Collections.Implementation
 				public override FTree<TChild> Update(int index, Leaf<TValue> leaf, Lineage lineage)
 				{
 					return new Single(CenterDigit.Update(index, leaf, lineage), lineage);
+				}
+
+				public override WeaklyTypedElement GetGrouping(int index) {
+					if (index != 0) throw Errors.Arg_out_of_range("index");
+					return CenterDigit;
 				}
 			}
 		}

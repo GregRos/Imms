@@ -5,7 +5,6 @@ using Funq.Collections.Common;
 namespace Funq.Collections.Implementation
 {
 	internal static partial class TrieVector<TValue> {
-		static readonly IEqualityComparer<TValue> Eq = EqualityComparer<TValue>.Default;
 		internal abstract partial class Node
 		{
 			private static readonly Node empty = new Leaf(new TValue[0], Lineage.Immutable, 0);
@@ -54,11 +53,24 @@ namespace Funq.Collections.Implementation
 			/// </summary>
 			public abstract bool IsParent { get; }
 
+			public abstract IEnumerable<TValue> EnumerateFrom(int firstIndex); 
+
 			public abstract bool IterBackWhile(Func<TValue, bool> conditional);
 
 			public abstract bool IterWhile(Func<TValue, bool> conditional);
 
+			public abstract int RecursiveTotalLength();
+
+			/// <summary>
+			/// WARNING THE PARAMETER CALLED 'index' IS NOT THE INDEX IN THIS NODE, BUT IN THE ENTIRE TREE!!!! <br/>
+			/// IF YOU DO index &lt; this.Length you will get FALSE!!!!
+			/// </summary>
+			/// <param name="index"></param>
+			/// <param name="lineage"></param>
+			/// <returns></returns>
 			public abstract Node Take(int index, Lineage lineage);
+
+			public abstract bool IterWhileFrom(int index, Func<TValue, bool> conditional); 
 
 			public abstract Node Update(int index, TValue value, Lineage lineage);
 

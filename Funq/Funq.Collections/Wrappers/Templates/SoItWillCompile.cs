@@ -18,7 +18,7 @@ public interface __Parent__
 
 partial class __ListLikeClass__<T>
 {
-	protected override IterableBuilder<T> EmptyBuilder
+	protected internal override IterableBuilder<T> EmptyBuilder
 	{
 		get
 		{
@@ -26,12 +26,12 @@ partial class __ListLikeClass__<T>
 		}
 	}
 
-	protected override __ListLikeClass__<T> ProviderFrom(IterableBuilder<T> builder)
+	protected internal override __ListLikeClass__<T> ProviderFrom(IterableBuilder<T> builder)
 	{
 		throw new NotImplementedException();
 	}
 
-	protected override IterableBuilder<T> BuilderFrom(__ListLikeClass__<T> provider)
+	protected internal override IterableBuilder<T> BuilderFrom(__ListLikeClass__<T> provider)
 	{
 		throw new NotImplementedException();
 	}
@@ -68,7 +68,7 @@ partial class __OrderedSetLikeClass__<T>
 	}
 
 
-	protected override SetBuilder<T> EmptyBuilder
+	protected internal override SetBuilder<T> EmptyBuilder
 	{
 		get
 		{
@@ -77,7 +77,7 @@ partial class __OrderedSetLikeClass__<T>
 	}
 
 
-	protected override SetBuilder<T> BuilderFrom(__OrderedSetLikeClass__<T> provider)
+	protected internal override SetBuilder<T> BuilderFrom(__OrderedSetLikeClass__<T> provider)
 	{
 		throw new NotImplementedException();
 	}
@@ -87,7 +87,7 @@ partial class __OrderedSetLikeClass__<T>
 		throw new NotImplementedException();
 	}
 
-	protected override __OrderedSetLikeClass__<T> ProviderFrom(SetBuilder<T> builder)
+	protected internal override __OrderedSetLikeClass__<T> ProviderFrom(SetBuilder<T> builder)
 	{
 		throw new NotImplementedException();
 	}
@@ -119,7 +119,7 @@ partial class __SetLikeClass__<T>
 	}
 
 
-	protected override SetBuilder<T> EmptyBuilder
+	protected internal override SetBuilder<T> EmptyBuilder
 	{
 		get
 		{
@@ -128,7 +128,7 @@ partial class __SetLikeClass__<T>
 	}
 
 
-	protected override SetBuilder<T> BuilderFrom(__SetLikeClass__<T> provider)
+	protected internal override SetBuilder<T> BuilderFrom(__SetLikeClass__<T> provider)
 	{
 		throw new NotImplementedException();
 	}
@@ -138,7 +138,7 @@ partial class __SetLikeClass__<T>
 		throw new NotImplementedException();
 	}
 
-	protected override __SetLikeClass__<T> ProviderFrom(SetBuilder<T> builder)
+	protected internal override __SetLikeClass__<T> ProviderFrom(SetBuilder<T> builder)
 	{
 		throw new NotImplementedException();
 	}
@@ -173,7 +173,7 @@ partial class __MapLikeClass__<TKey, TValue>
 		}
 	}
 
-	protected override MapBuilder<TKey, TValue> EmptyBuilder
+	protected internal override MapBuilder<TKey, TValue> EmptyBuilder
 	{
 		get
 		{
@@ -181,7 +181,7 @@ partial class __MapLikeClass__<TKey, TValue>
 		}
 	}
 
-	protected override MapBuilder<TKey, TValue> BuilderFrom(__MapLikeClass__<TKey, TValue> provider)
+	protected internal override MapBuilder<TKey, TValue> BuilderFrom(__MapLikeClass__<TKey, TValue> provider)
 	{
 		throw new NotImplementedException();
 	}
@@ -191,7 +191,7 @@ partial class __MapLikeClass__<TKey, TValue>
 		throw new NotImplementedException();
 	}
 
-	protected override __MapLikeClass__<TKey, TValue> ProviderFrom(MapBuilder<TKey, TValue> builder)
+	protected internal override __MapLikeClass__<TKey, TValue> ProviderFrom(MapBuilder<TKey, TValue> builder)
 	{
 		throw new NotImplementedException();
 	}
@@ -232,7 +232,7 @@ partial class __OrderedMapLikeClass__<TKey, TValue>
 		}
 	}
 
-	protected override MapBuilder<TKey, TValue> EmptyBuilder
+	protected internal override MapBuilder<TKey, TValue> EmptyBuilder
 	{
 		get
 		{
@@ -240,7 +240,7 @@ partial class __OrderedMapLikeClass__<TKey, TValue>
 		}
 	}
 
-	protected override MapBuilder<TKey, TValue> BuilderFrom(__OrderedMapLikeClass__<TKey, TValue> provider)
+	protected internal override MapBuilder<TKey, TValue> BuilderFrom(__OrderedMapLikeClass__<TKey, TValue> provider)
 	{
 		throw new NotImplementedException();
 	}
@@ -250,7 +250,7 @@ partial class __OrderedMapLikeClass__<TKey, TValue>
 		throw new NotImplementedException();
 	}
 
-	protected override __OrderedMapLikeClass__<TKey, TValue> ProviderFrom(MapBuilder<TKey, TValue> builder)
+	protected internal override __OrderedMapLikeClass__<TKey, TValue> ProviderFrom(MapBuilder<TKey, TValue> builder)
 	{
 		throw new NotImplementedException();
 	}

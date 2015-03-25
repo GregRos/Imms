@@ -35,8 +35,20 @@ module String =
     let contains_insensitive (what : string) (where : string) = where.ToUpperInvariant().Contains(what.ToUpperInvariant())
 
 module Seq =
+    
+    let lazyDistinct sq = 
+        let mSet = System.Collections.Generic.HashSet<_>()
+        seq { for item in sq do 
+                if mSet.Contains item then 
+                    yield None 
+                else
+                    mSet.Add item |> ignore
+                    yield Some item
+        } |> Seq.choose id
+    
     let print (separator : string) (sq : #seq<'a>) = String.Join(separator, sq)
-
+    
+        
     let printWith separator (toString : 'b -> string) (sq : #seq<'b>)  = String.Join(separator, sq |> Seq.map toString)
        
     let printWordsWith f sq =

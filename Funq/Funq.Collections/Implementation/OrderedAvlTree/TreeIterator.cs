@@ -12,14 +12,16 @@ namespace Funq.Collections.Implementation
 		{
 			private readonly List<Marked<Node, bool>> _future;
 			private Node _current;
+			private readonly IComparer<TKey> Comparer;
 			public TreeIterator(int maxHeight)
 			{
-				_future = new List<Marked<Node, bool>>(maxHeight);
+				_future = new List<Marked<Node, bool>>();
 			}
 
 			public TreeIterator(Node root)
 				: this(root.MaxPossibleHeight)
 			{
+				Comparer = root.Comparer;
 				if (!root.IsNull)_future.Add(Marked.Create(root, false));
 			}
 
@@ -31,8 +33,9 @@ namespace Funq.Collections.Implementation
 					if (cur.Mark) return SetCurrent(cur);
 					var node = cur.Object;
 					if (node.IsNull) continue;
-					if (!node.Right.IsNull) _future.Add(node.Right.Mark(false));			
-					_future.Add(node.Mark(true));
+					if (!node.Right.IsNull) _future.Add(node.Right.Mark(false));		
+					cur.SetMark(true);
+					_future.Add(cur);
 					if (!node.Left.IsNull) _future.Add(node.Left.Mark(false));
 				}
 				return false;
@@ -45,16 +48,19 @@ namespace Funq.Collections.Implementation
 			/// <param name="key"></param>
 			/// <param name="cmpResult"></param>
 			/// <returns></returns>
-			public bool SeekGreaterThan(ComparableKey<TKey> key, out Cmp cmpResult)
+			public bool SeekGreaterThan(TKey key, out int cmpResult)
 			{
 
 				var isEnded = SeekForwardCloseTo(key, out cmpResult);
 				if (!isEnded) return false;
-				if (cmpResult == Cmp.Greater || cmpResult == Cmp.Equal) return true;
+				if (cmpResult >= 0) return true;
 				var tryNext = this.MoveNext();
 				if (!tryNext) return false;
 				var cur = Current;
-				cmpResult = cur.Key.CompareTo(key);
+				cmpResult = Comparer.Compare(cur.Key,key);
+#if DEBUG
+				AssertEx.IsTrue(cmpResult >= 0);
+#endif
 				return true;
 			}
 
@@ -85,26 +91,22 @@ namespace Funq.Collections.Implementation
 			/// </summary>
 			/// <param name="hash"></param>
 			/// <returns></returns>
-			private bool SeekForwardCloseTo(ComparableKey<TKey> key, out Cmp cmpResult)
+			private bool SeekForwardCloseTo(TKey key, out int cmpResult)
 			{
-				cmpResult = Cmp.Lesser;
+				cmpResult = -1;
 				//If we're already at the desired node, return true.
-				if (_current != null && _current.Key.CompareTo(key) != Cmp.Lesser) return true;
+				if (_current != null && Comparer.Compare(_current.Key, key) > 0) return true;
 				//Climb up until the current node is larger than the hash or until the root is reached.
 				while (_future.Count > 1)
 				{
 					var cur = _future.PopLast();
 					//We ignore all nodes other than parents we've already passed.
 					if (!cur.Mark) continue;
-					switch (key.CompareTo(cur.Object.Key))
-					{
-						case Cmp.Equal:
-						case Cmp.Greater:
-							_future.Add(cur);
-							goto end_climb_up;
-						case Cmp.Lesser:
-							continue;
-					} 
+					int compare = Comparer.Compare(cur.Object.Key,key);
+					if (compare >= 0) {
+						_future.Add(cur);
+						goto end_climb_up;
+					}
 				}
 	end_climb_up:
 				//Now we climb down again, in order to find the node in question.
@@ -112,35 +114,30 @@ namespace Funq.Collections.Implementation
 				{
 					var cur = _future.PopLast();
 					var node = cur.Object;
-					var compareResult = node.Key.CompareTo(key);
-					if (cur.Mark && compareResult != Cmp.Equal) continue;
-					switch (compareResult)
-					{
-						case Cmp.Lesser:
-							if (node.Right.IsNull)
-							{
-								cmpResult = Cmp.Lesser;
-								return SetCurrent(node);
-							}
-							_future.Add(node.Right.Mark(false));
-							break;
-						case Cmp.Greater:
-							if (!node.Right.IsNull) _future.Add(node.Right.Mark(false));
-							if (node.Left.IsNull)
-							{
-								cmpResult = Cmp.Greater;
-								return SetCurrent(node);
-							}
-							_future.Add(node.Mark(true));
-							_future.Add(node.Left.Mark(false));
-							break;
-						case Cmp.Equal:
-							if (!cur.Mark && !node.Right.IsNull) _future.Add(node.Right.Mark(false));
-							cmpResult = Cmp.Equal;
+					var compareResult = Comparer.Compare(node.Key, key); 
+					//if (cur.Mark && compareResult != Cmp.Equal) continue;
+					if (compareResult < 0) {
+						if (node.Right.IsNull) {
+							cmpResult = -1;
 							return SetCurrent(node);
+						}
+						_future.Add(node.Right.Mark(false));
+					}
+					else if (compareResult > 0) {
+						if (!node.Right.IsNull) _future.Add(node.Right.Mark(false));
+						if (node.Left.IsNull) {
+							cmpResult = 1;
+							return SetCurrent(node);
+						}
+						_future.Add(node.Mark(true));
+						_future.Add(node.Left.Mark(false));
+					}
+					else if (compareResult == 0) {
+						if (!cur.Mark && !node.Right.IsNull) _future.Add(node.Right.Mark(false));
+						cmpResult = 0;
+						return SetCurrent(node);
 					}
 				}
-				
 				return false;
 			}
 		}

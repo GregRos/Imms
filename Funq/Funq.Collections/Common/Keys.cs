@@ -6,31 +6,10 @@ using Funq.Collections.Common;
 
 namespace Funq.Collections
 {
-
-	internal static class KeyHelper
-	{
-		public static EquatableKey<T> WrapKey<T>(this IEqualityComparer<T> self, T key)
-		{
-			return new EquatableKey<T>(key, self);
-		}
-
-		public static ComparableKey<T> WrapKey<T>(this IComparer<T> self, T key)
-		{
-			return new ComparableKey<T>(key, self);
-
-		}
-
-		public static int ToInt(this Cmp cmp)
-		{
-			return cmp == Cmp.Greater ? 1 : cmp == Cmp.Lesser ? -1 : 0;
-		}
-
-		public static Cmp ToCmp(this int r)
-		{
-			return r > 0 ? Cmp.Greater : r < 0 ? Cmp.Lesser : Cmp.Equal;
-		}
-	}
-
+	/*
+	 * This struct business called performance problems so it was scrapped.
+	 */ 
+	/*
 	/// <summary>
 	/// A struct that wraps a key together with logic determining equality and hash code.
 	/// </summary>
@@ -115,6 +94,7 @@ namespace Funq.Collections
 			return key.Key;
 		}
 	}
+	 * 
 	/// <summary>
 	/// A struct that wraps a key together with logic for comparing it to other keys.
 	/// </summary>
@@ -170,4 +150,5 @@ namespace Funq.Collections
 			return ComparisonHandler(Key, other);
 		}
 	}
+	 * */
 }

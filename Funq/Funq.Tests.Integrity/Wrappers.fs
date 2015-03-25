@@ -1,10 +1,11 @@
 ﻿module Funq.Tests.Integrity.Wrappers
 open System.Collections
 open System.Collections.Generic
+open System.Collections.Immutable
 open Funq.Collections
 open Funq.FSharp.Implementation.Compatibility
 open System
-open System.Collections.Immutable
+
 open Funq.FSharp.Implementation
 exception OperationNotImplemented of string
 
@@ -101,14 +102,14 @@ type FunqListWrapper<'v>(inner : FunqList<'v>)=
     override x.Empty = FunqListWrapper(FunqList.Empty()):>_
     override x.Inner = inner:>_
 
-type FunqArrayWrapper<'v>(inner : FunqArray<'v>)= 
-    inherit TestWrapper<'v>("FunqArray")
+type FunqVectorWrapper<'v>(inner : FunqVector<'v>)= 
+    inherit TestWrapper<'v>("FunqVector")
     override x.GetEnumerator() = (inner :> 'v seq).GetEnumerator()
-    override x.AddLast v = FunqArrayWrapper(inner.AddLast v) :>_
-    override x.AddLastRange vs = FunqArrayWrapper(inner.AddLastRange vs) :>_
-    override x.DropLast() = FunqArrayWrapper(inner.DropLast()) :>_
-    override x.Take n = FunqArrayWrapper(inner.Take n) :>_
-    override x.Item(i1,i2) = FunqArrayWrapper(inner.[i1, i2]):>_
+    override x.AddLast v = FunqVectorWrapper(inner.AddLast v) :>_
+    override x.AddLastRange vs = FunqVectorWrapper(inner.AddLastRange vs) :>_
+    override x.DropLast() = FunqVectorWrapper(inner.DropLast()) :>_
+    override x.Take n = FunqVectorWrapper(inner.Take n) :>_
+    override x.Item(i1,i2) = FunqVectorWrapper(inner.[i1, i2]):>_
     override x.Item ix= inner.[ix]
     override x.First = inner.First
     override x.Last = inner.Last
@@ -116,8 +117,8 @@ type FunqArrayWrapper<'v>(inner : FunqArray<'v>)=
     override x.TryFirst = if x.IsEmpty then None else x.First |> Some
     override x.TryLast = if x.IsEmpty then None else x.Last |> Some
     override x.IsEmpty = inner.IsEmpty
-    override x.Update(i,v) = FunqArrayWrapper(inner.Update(i, v)) :>_
-    override x.Empty = FunqArrayWrapper(FunqArray.Empty()):>_
+    override x.Update(i,v) = FunqVectorWrapper(inner.Update(i, v)) :>_
+    override x.Empty = FunqVectorWrapper(FunqVector.Empty()):>_
     override x.Inner = inner:>_
 
 type CollisionFunc<'k,'v> = ('k -> 'v -> 'v -> 'v)
@@ -139,7 +140,7 @@ type MapWrapper<'k, 'v>(name : string) =
     abstract MinItem : 'k * 'v
     abstract Length : int
     abstract IsEmpty : bool
-    abstract DropMany : seq<'k> -> MapWrapper<'k, 'v>
+    abstract DropRange : seq<'k> -> MapWrapper<'k, 'v>
     abstract Union : MapWrapper<'k,'v> * CollisionFunc<'k,'v> -> MapWrapper<'k,'v>
     abstract Intersect : MapWrapper<'k,'v> * CollisionFunc<'k,'v> -> MapWrapper<'k,'v>
     abstract Except : MapWrapper<'k,'v> -> MapWrapper<'k,'v>
@@ -152,7 +153,7 @@ type MapWrapper<'k, 'v>(name : string) =
     default x.Intersect (_,_) = raise <|  OperationNotImplemented("Intersect")
     default x.Except _ = raise <|  OperationNotImplemented("Except")
     default x.Difference _ = raise <|  OperationNotImplemented("Difference")
-    default x.DropMany _ = raise <|  OperationNotImplemented("DropMany")
+    default x.DropRange _ = raise <|  OperationNotImplemented("DropRange")
 
 type FunqMapWrapper<'k,'v>(Inner : FunqMap<'k,'v>) =
     inherit MapWrapper<'k,'v>("FunqMap")
@@ -162,7 +163,7 @@ type FunqMapWrapper<'k,'v>(Inner : FunqMap<'k,'v>) =
     override x.Add(k,v) = Inner.Add(k,v) |> wrap
     override x.Drop k = Inner.Drop k |> wrap
     override x.Contains k = Inner.ContainsKey(k)
-    override x.Empty = FunqMap.Simple() |> wrap
+    override x.Empty = FunqMap.Empty() |> wrap
     override x.Get k = Inner.[k]
     override x.Set(k,v) = Inner.Set(k,v) |> wrap
     override x.Union(other, f) =
@@ -177,8 +178,8 @@ type FunqMapWrapper<'k,'v>(Inner : FunqMap<'k,'v>) =
     override x.Difference other = 
         let typed = other :?> FunqMapWrapper<'k,'v>
         Inner.Difference(typed.Inner) |> wrap
-    override x.DropMany vs = 
-        Inner.DropMany vs |> wrap
+    override x.DropRange vs = 
+        Inner.DropRange vs |> wrap
     override x.Length = Inner.Length
     override x.IsEmpty = Inner.IsEmpty
 
@@ -190,7 +191,7 @@ type FunqOrderedMapWrapper<'k,'v when 'k :> IComparable<'k>>(Inner : FunqOrdered
     override x.Add(k,v) = Inner.Add(k,v) |> wrap
     override x.Drop k = Inner.Drop k |> wrap
     override x.Contains k = Inner.ContainsKey(k)
-    override x.Empty = FunqMap.Ordered() |> wrap
+    override x.Empty = FunqOrderedMap.Empty() |> wrap
     override x.Get k = Inner.[k]
     override x.Set(k,v) = Inner.Set(k,v) |> wrap
     override x.Union(other, f) =
@@ -205,8 +206,8 @@ type FunqOrderedMapWrapper<'k,'v when 'k :> IComparable<'k>>(Inner : FunqOrdered
     override x.Difference other = 
         let typed = other :?> FunqOrderedMapWrapper<'k,'v>
         Inner.Difference(typed.Inner) |> wrap
-    override x.DropMany vs = 
-        Inner.DropMany vs |> wrap
+    override x.DropRange vs = 
+        Inner.DropRange vs |> wrap
     override x.Length = Inner.Length
     override x.IsEmpty = Inner.IsEmpty
     override x.MinItem = Inner.MinItem.Key,Inner.MinItem.Value
@@ -249,10 +250,10 @@ type ReferenceMapWrapper<'k,'v when 'k : comparison>(Inner : ImmutableSortedDict
                 tally <- tally.Add(k, f k v (other.Get(k)))
         tally
     override x.Except other =
-        x.DropMany(other |> Seq.map fst)
+        x.DropRange(other |> Seq.map fst)
     override x.Difference other = 
         x.Except(other).Union(other.Except x, fun k v1 v2 -> v1) 
-    override x.DropMany ks = Inner.RemoveRange(ks) |> wrap
+    override x.DropRange ks = Inner.RemoveRange(ks) |> wrap
     override x.IsEmpty = Inner.IsEmpty
     override x.Length = Inner.Count
     override x.ByOrder i = x |> Seq.nth i
@@ -274,7 +275,7 @@ type SetWrapper<'v>(name : string) =
     abstract Length : int
     abstract IsEmpty : bool
     abstract Empty : SetWrapper<'v>
-    abstract DropMany : seq<'v> -> SetWrapper<'v>
+    abstract DropRange : seq<'v> -> SetWrapper<'v>
     abstract Union : SetWrapper<'v> -> SetWrapper<'v>
     abstract Intersect : SetWrapper<'v> -> SetWrapper<'v>
     abstract Except : SetWrapper<'v> -> SetWrapper<'v>
@@ -286,7 +287,7 @@ type SetWrapper<'v>(name : string) =
     default x.Intersect _ = raise <|  OperationNotImplemented("Intersect")
     default x.Except _ = raise <|  OperationNotImplemented("Except")
     default x.Difference _ = raise <|  OperationNotImplemented("Difference")
-    default x.DropMany _ = raise <|  OperationNotImplemented("DropMany")
+    default x.DropRange _ = raise <|  OperationNotImplemented("DropRange")
 
 type ReferenceSetWrapper<'v>(Inner : ImmutableHashSet<'v>) = 
     inherit SetWrapper<'v>("ImmutableSet")
@@ -299,7 +300,7 @@ type ReferenceSetWrapper<'v>(Inner : ImmutableHashSet<'v>) =
     override x.Length = Inner.Count
     override x.Empty = ImmutableHashSet.Create() |> wrap
     override x.IsEmpty = Inner.IsEmpty
-    override x.DropMany vs =
+    override x.DropRange vs =
         let mutable is = Inner
         for v in vs do
             is <- is.Remove v
@@ -320,7 +321,7 @@ type ReferenceOrderedSetWrapper<'v>(Inner : ImmutableSortedSet<'v>) =
     override x.Length = Inner.Count
     override x.Empty = ImmutableSortedSet.Create() |> wrap
     override x.IsEmpty = Inner.IsEmpty
-    override x.DropMany vs =
+    override x.DropRange vs =
         let mutable is = Inner
         for v in vs do
             is <- is.Remove v
@@ -344,7 +345,7 @@ type FunqSetWrapper<'v when 'v : comparison>(Inner : FunqSet<'v>) =
     override x.Length = Inner.Length
     override x.Empty = FunqSet.Empty(Eq.Default)|> wrap
     override x.IsEmpty = Inner.IsEmpty
-    override x.DropMany vs = Inner.DropMany vs |> wrap
+    override x.DropRange vs = Inner.DropRange vs |> wrap
     override x.Union other = 
         match other with
         | :? FunqSetWrapper<'v> as wraped -> Inner.Union(wraped.Inner) |> wrap
@@ -369,7 +370,7 @@ type FunqOrderedSetWrapper<'v when 'v : comparison>(Inner : FunqOrderedSet<'v>) 
     override x.Length = Inner.Length
     override x.Empty = FunqOrderedSet.Empty(Cm.Default)|> wrap
     override x.IsEmpty = Inner.IsEmpty
-    override x.DropMany vs = Inner.DropMany vs |> wrap
+    override x.DropRange vs = Inner.DropRange vs |> wrap
     override x.Union other = 
         match other with
         | :? FunqSetWrapper<'v> as wraped -> Inner.Union(wraped.Inner) |> wrap

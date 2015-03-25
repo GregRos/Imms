@@ -48,7 +48,7 @@ namespace Funq.Collections
 			}
 		}
 
-		protected override IterableBuilder<T> EmptyBuilder
+		protected internal override IterableBuilder<T> EmptyBuilder
 		{
 			get
 			{
@@ -56,12 +56,12 @@ namespace Funq.Collections
 			}
 		}
 
-		protected override IterableBuilder<T> BuilderFrom(FunqList<T> provider)
+		protected internal override IterableBuilder<T> BuilderFrom(FunqList<T> provider)
 		{
 			return new Builder(provider);
 		}
 
-		protected override FunqList<T> ProviderFrom(IterableBuilder<T> builder)
+		protected internal override FunqList<T> ProviderFrom(IterableBuilder<T> builder)
 		{
 			return (FunqList<T>) builder.Result;
 		}

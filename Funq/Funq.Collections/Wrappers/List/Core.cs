@@ -131,10 +131,6 @@ namespace Funq.Collections
 			return list.AddLastList(this);
 		}
 
-	
-
-
-
 		/// <summary>
 		/// Joins the specified sequence or list to the beginning of this list.
 		/// </summary>
@@ -257,7 +253,7 @@ namespace Funq.Collections
 			if (index > _root.Measure || index < 0) throw Funq.Errors.Arg_out_of_range("index", index);
 			if (index == _root.Measure) return AddLast(item);
 			if (index == 0) return AddFirst(item);
-			var new_root = _root.Insert(index, item, Lineage.Immutable);
+			var new_root = _root.Insert(index, item, Lineage.Mutable());
 			var ret =  new_root.Wrap();
 #if DEBUG
 			ret[index].Is(item);
@@ -336,7 +332,7 @@ namespace Funq.Collections
 		{
 			index = index < 0 ? index + _root.Measure : index;
 			if (index < 0 || index >= _root.Measure) throw Funq.Errors.Arg_out_of_range("index", index);
-			var ret =  _root.Remove(index, Lineage.Immutable).Wrap();
+			var ret =  _root.Remove(index, Lineage.Mutable()).Wrap();
 #if DEBUG
 			if (Length > index + 1)
 			{
@@ -369,7 +365,7 @@ namespace Funq.Collections
 			if (index >= _root.Measure || index < 0) throw Funq.Errors.Arg_out_of_range("index", index);
 			if (index == 0) return DropFirst().AddFirst(item);
 			if (index == _root.Measure - 1) return DropLast().AddLast(item);
-			var ret = _root.Update(index, item, Lineage.Immutable).Wrap();
+			var ret = _root.Update(index, item, Lineage.Mutable()).Wrap();
 #if DEBUG
 			ret[index].Is(item);
 			ret.Length.Is(Length);

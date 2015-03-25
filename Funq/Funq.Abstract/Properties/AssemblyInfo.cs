@@ -14,6 +14,10 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCopyright("Copyright ©  2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
+[assembly: InternalsVisibleTo("Funq.Collections")]
+[assembly: InternalsVisibleTo("Funq.FSharp")]
+[assembly: InternalsVisibleTo("Funq.Tests.Performance")]
+[assembly: InternalsVisibleTo("Funq.Tests.Integrity")]
 //[assembly: InternalsVisibleTo("Funq.Collections")]
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 

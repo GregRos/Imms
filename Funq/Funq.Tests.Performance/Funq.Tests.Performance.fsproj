@@ -71,13 +71,14 @@
     <Compile Include="Data.Targets.fs" />
     <Compile Include="Test Script.fs" />
     <Compile Include="Presentation.fs" />
+    <Compile Include="Report.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="CsvHelper">
-      <HintPath>..\packages\CsvHelper.2.4.0\lib\net40-client\CsvHelper.dll</HintPath>
+      <HintPath>..\packages\CsvHelper.2.11.1.1\lib\net40-client\CsvHelper.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.Charting">
@@ -118,6 +119,7 @@
     </Reference>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Forms.DataVisualization" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Funq.Abstract\Funq.Abstract.csproj">
@@ -133,11 +135,6 @@
     <ProjectReference Include="..\Funq.FSharp\Funq.FSharp.fsproj">
       <Name>Funq.FSharp</Name>
       <Project>{4ae0206d-527d-43d7-9dcb-e88a8e1d47b6}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\Funq.Shared\Funq.Shared.csproj">
-      <Name>Funq.Shared</Name>
-      <Project>{91009f69-3102-4138-a211-dd55ec86d662}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

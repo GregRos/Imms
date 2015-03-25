@@ -3,191 +3,273 @@ open Funq.Tests.Performance
 open Funq.Tests
 do()
 open Funq.FSharp.Implementation
+open Funq.Tests.Performance.Test
+open System.Reflection
+open System.Runtime.CompilerServices
+
+type SimpleDataObject() = 
+    class end
+
+type BaseArgs 
+    (Simple_Iterations : int, 
+     Target_Size : int, 
+     DataSource_Size : int, 
+     Full_Iterations : int, 
+     DataSource_Iterations : int
+     ) = 
+     inherit SimpleDataObject()
+     member val Simple_Iterations = Simple_Iterations with get,set
+     member val Target_Size = Target_Size with get,set
+     member val DataSource_Size = DataSource_Size with get,set
+     member val Full_Iterations = Full_Iterations with get, set
+     member val DataSource_Iterations = DataSource_Iterations with get, set
+     
+type 
+    AdvancedArgs<'t>(
+                    Simple_Iterations : int, 
+                    Target_Size : int, 
+                    DataSource_Size : int, 
+                    Full_Iterations : int, 
+                    DataSource_Iterations : int,
+                    Generator1 : DataGenerator<'t>,
+                    Generator2 : DataGenerator<'t>,
+                    DropRatio : float
+                    ) = 
+     inherit BaseArgs(Simple_Iterations, Target_Size, DataSource_Size, Full_Iterations, DataSource_Iterations)
+     member val Generator1 = Generator1 with get, set
+     member val Generator2 = Generator2 with get, set
+     member val DropRatio = DropRatio with get, set
+
+[<AutoOpen>]
+[<Extension>]
+type Ext private() = 
+    [<Extension>]
+    static member Clone (sd : 'a :> SimpleDataObject) = 
+        let m = sd.GetType().GetMethod("MemberwiseClone", BindingFlags.NonPublic ||| BindingFlags.Instance)
+        m.Invoke(sd, null) :?> 'a
+    [<Extension>]
+    static member With (sd : 'a :> SimpleDataObject, f : 'a -> unit) = 
+        let clone = Ext.Clone(sd)
+        f clone
+        clone
+
 //This section contains the lists of tests each collection is assigned.
 //Note that this process only constructs a list of unit → unit functions that make up the actual test/target pairs, but it doesn't run them.
 //Each collection must be assigned to tests by hand, because this is the only way to allow the compiler to statically infer and generate everything.
 //Also, not all collections support all operations.
-let sequential(initial,iters) = 
-    let src = Seqs.Numbers.length(1, 30)
-    let dSize = iters / 10
-    let data = src |> Data.Basic.Array (dSize)
-    let sysList = Data.Sys.List dSize src
-    let bulkIters = 10
+let sequential(args : BaseArgs) =
+    let iters =  args.Simple_Iterations
+    let src = Seqs.Numbers.length(1, 4)
+    let src2 = src
+    let initial = args.Target_Size
+    let dSize = args.DataSource_Size
+    let dataSourceInit = (dSize,src2)
+    let targetInit = (initial,src)
+    let data = Data.Basic.Array dataSourceInit
+    
+    let fullIters = args.Full_Iterations
+    let bulkIters = args.DataSource_Iterations
     let builder = Builder.blank
     let simple_iters = [iters]
     let data_iters = [bulkIters,data]
     //List.cross_apply1 is used in case we later want to extend the argument list.
-    let builder = builder.AddTarget (Data.Funq.List initial src)
+    let builder = builder.AddTarget (Data.Funq.List targetInit)
     // [[Test list for Funq.FunqList]]
     let builder = 
-        [Test.AddFirst; Test.AddLast; Test.DropLast; Test.DropFirst; Test.InsertRandom; 
-         Test.RemoveRandom; Test.SetRandom; Test.Iter; Test.GetRandom] 
-         |> List.cross_apply1 simple_iters
+        [AddFirst;AddLast;DropLast;DropFirst;InsertRandom;RemoveRandom; SetRandom; Iter; GetRandom] 
+         |> List.apply1 iters
          |> builder.AddTests
+
     let builder = 
-        [Test.AddLastRange; Test.AddFirstRange; Test.InsertRangeRandom] 
+        [AddLastRange; AddFirstRange; InsertRangeRandom] 
         |> List.cross_apply1 data_iters 
         |> builder.AddTests
+
     let builder = 
-        [Test.AddLastRange; Test.AddFirstRange; Test.InsertRangeRandom] 
-        |> List.cross_apply1 [bulkIters,Data.Funq.List dSize src] 
-        |> List.chain_iter (fun test -> test?Name <- test?Name + " (concat operation)")
+        [AddLastRange; AddFirstRange; InsertRangeRandom] 
+        |> List.cross_apply1 [bulkIters,Data.Funq.List dataSourceInit] 
+        |> List.chain_iter (fun test -> test.Name <- test.Name + " (concat operation)")
         |> builder.AddTests
-    let builder = [Test.Take; Test.Skip] |> List.cross_apply1 [bulkIters] |> builder.AddTests
+
+    let builder = [Take; Skip] |> List.cross_apply1 [bulkIters] |> builder.AddTests
+
     let builder = 
-        [Test.IterDirect] 
+        [IterDirect] 
         |> List.cross_apply1 [1]
         |> builder.AddTests
+
     // [[end list]]
+
     // [[test list for Funq.FunqArray]]
-    let builder = builder.Next().AddTarget (Data.Funq.Array initial src)
+    let builder = builder.Next().AddTarget (Data.Funq.Vector targetInit)
     //note that after calling Next(), a builder with an unbound generic type 'a is returned (the parameter changes)
     //calling AddTarget on a collection of the specific type allows type inference to be resolved.
     let builder = 
-         [Test.AddLast; Test.DropLast; Test.Iter; Test.GetRandom; Test.SetRandom]
+         [AddLast; DropLast; Iter; GetRandom; SetRandom]
          |> List.cross_apply1 simple_iters
          |> builder.AddTests
+
     let builder = 
-        [Test.AddLastRange; Test.AddFirstRange] 
+        [AddLastRange; AddFirstRange;InsertRangeRandom] 
         |> List.cross_apply1 data_iters
         |> builder.AddTests
+
     let builder = 
-        [Test.AddLastRange; Test.AddFirstRange]
-        |> List.cross_apply1 [bulkIters,Data.Funq.Array dSize src]
-        |> List.chain_iter (fun test -> test?Name <- test?Name + " (concat operation)")
+        [AddLastRange;AddFirstRange;InsertRangeRandom]
+        |> List.cross_apply1 [bulkIters,Data.Funq.Vector dataSourceInit]
+        |> List.chain_iter (fun test -> test.Name <- test.Name + " (concat operation)")
         |> builder.AddTests
+
     let builder = 
-        [Test.Take] 
+        [Take; Skip] 
         |> List.cross_apply1 [bulkIters]
         |> builder.AddTests
+
     let builder = 
-        [Test.IterDirect] 
-        |> List.cross_apply1 [1]
+        [IterDirect] 
+        |> List.cross_apply1 [fullIters]
         |> builder.AddTests
+
     // [[end list]]
     // [[test list for System.ImmutableList]]
-    let builder = builder.Next().AddTarget (Data.Sys.List initial src)
+    let builder = builder.Next().AddTarget (Data.Sys.List targetInit)
     let builder = 
-        [Test.AddFirst; Test.AddLast; Test.Iter; Test.DropFirst; 
-         Test.DropLast; Test.InsertRandom; Test.RemoveRandom; 
-         Test.SetRandom; Test.GetRandom]
+        [AddFirst; AddLast; Iter; DropFirst; 
+         DropLast; InsertRandom; RemoveRandom; 
+         SetRandom; GetRandom]
          |> List.cross_apply1 simple_iters
          |> builder.AddTests    
     let builder = 
-        [Test.AddLastRange; Test.AddFirstRange]
-        |> List.cross_apply1 [bulkIters,Data.Sys.List dSize src]
-        |> List.chain_iter (fun test -> test?Name <- test?Name + " (concat operation)")
+        [AddLastRange; AddFirstRange; InsertRangeRandom]
+        |> List.cross_apply1 [bulkIters,Data.Sys.List dataSourceInit]
+        |> List.chain_iter (fun test -> test.Name <- test.Name + " (concat operation)")
         |> builder.AddTests
     let builder = 
-        [Test.AddLastRange; Test.AddFirstRange]
+        [AddLastRange; AddFirstRange; InsertRangeRandom]
         |> List.cross_apply1 data_iters
         |> builder.AddTests
     let builder = 
-        [Test.Take; Test.Skip]
+        [Take; Skip]
         |> List.cross_apply1 [bulkIters]
         |> builder.AddTests
     let builder = 
-        [Test.IterDirect] |> List.cross_apply1 [1]
+        [IterDirect] |> List.cross_apply1 [fullIters]
         |> builder.AddTests
     //[[end list]]
     //[[test list for FSharpx.Deque]]
-    let builder = builder.Next().AddTarget (Data.FSharpx.Deque initial src)
-    let builder = [Test.AddFirst; Test.AddLast; Test.Iter; Test.DropLast; Test.DropFirst] |> List.cross_apply1 simple_iters |> builder.AddTests
-    let builder = [Test.AddLastRange; Test.AddFirstRange] |> List.cross_apply1 data_iters |> builder.AddTests
+    let builder = builder.Next().AddTarget (Data.FSharpx.Deque targetInit)
+    let builder = [AddFirst; AddLast; Iter; DropLast; DropFirst] |> List.cross_apply1 simple_iters |> builder.AddTests
+    let builder = [AddLastRange; AddFirstRange] |> List.cross_apply1 data_iters |> builder.AddTests
     let builder = 
-        [Test.AddLastRange; Test.AddFirstRange] 
-        |> List.cross_apply1 [bulkIters, Data.FSharpx.Deque dSize src] 
-        |> List.chain_iter (fun test -> test?Name <- test?Name + " (concat operation)") 
+        [AddLastRange; AddFirstRange] 
+        |> List.cross_apply1 [bulkIters, Data.FSharpx.Deque dataSourceInit] 
+        |> List.chain_iter (fun test -> test.Name <- test.Name + " (concat operation)") 
         |> builder.AddTests
-    let builder = [Test.IterDirect] |> List.cross_apply1 [1] |> builder.AddTests
+    let builder = [IterDirect] |> List.cross_apply1 [fullIters] |> builder.AddTests
     //[[end list]]
     //[[test list for FSharpx.Vector]]
-    let builder = builder.Next().AddTarget (Data.FSharpx.Vector initial src)
+    let builder = builder.Next().AddTarget (Data.FSharpx.Vector targetInit)
     let builder = 
-        [Test.AddLast; Test.DropLast;Test.Iter; Test.GetRandom; Test.SetRandom] 
+        [AddLast; DropLast;Iter; GetRandom; SetRandom] 
         |> List.cross_apply1 simple_iters |> builder.AddTests
     let builder = 
-         [Test.AddLastRange] |> List.cross_apply1 data_iters |> builder.AddTests
+         [AddLastRange] |> List.cross_apply1 data_iters |> builder.AddTests
     let builder = 
-        [Test.AddLastRange; Test.AddFirstRange] 
-        |> List.cross_apply1 [bulkIters, Data.FSharpx.Vector dSize src] 
-        |> List.chain_iter (fun test -> test?Name <- test?Name + " (concat operation)")
+        [AddLastRange; AddFirstRange] 
+        |> List.cross_apply1 [bulkIters, Data.FSharpx.Vector dataSourceInit] 
+        |> List.chain_iter (fun test -> test.Name <- test.Name + " (concat operation)")
         |> builder.AddTests
     let builder = 
-        [Test.IterDirect] |> List.cross_apply1 [1] |> builder.AddTests
+        [IterDirect] |> List.cross_apply1 [fullIters] |> builder.AddTests
 
-    //[[test list of Sasa.FingerTree]]
-    (* //Sasa.FingerTree is broken and unusable
-    let builder = builder.Next().AddTarget (Data.Sasa.FingerTree initial src)
-    let builder = 
-        [Test.AddLast; Test.AddFirst; Test.Iter]
-        |> List.cross_apply1 simple_iters |> builder.AddTests
-    let builder = 
-        [Test.AddLastRange; Test.AddFirstRange] 
-        |> List.cross_apply1 data_iters |> builder.AddTests
-    let builder = 
-        [Test.AddLastRange; Test.AddFirstRange] 
-        |> List.cross_apply1 [bulkIters, Data.Sasa.FingerTree dSize src] 
-        |> List.chain_iter (fun test -> test?Name <- test?Name + " (concat operation)")
-        |> builder.AddTests
-    //[[Test list for Sasa.Vector]]
-    let builder = builder.Next().AddTarget (Data.Sasa.Vector initial src)
-    let builder = 
-        [Test.AddLast; Test.GetRandom; Test.SetRandom; Test.Iter]
-        |> List.cross_apply1 simple_iters |> builder.AddTests
-    let builder = 
-        [Test.AddLastRange; Test.AddFirstRange] 
-        |> List.cross_apply1 data_iters |> builder.AddTests
-    *)
     builder.Next().Bound
-let mapLike(initial, iters, src) = 
-    let data = src |> Data.Basic.Array (iters / 10)
-    let bulkIters = 9
-    
+let mapLike(args : AdvancedArgs<_>) =
+    let initial = args.Target_Size
+    let iters = args.Simple_Iterations
+    let src1 = args.Generator1
+    let src2 = args.Generator2
+    let dSize = args.DataSource_Size
+    let full_iters = args.Full_Iterations
+    let dataSourceInit = (dSize, src2)
+    let targetInit = (initial,src1)
+    let data = Data.Basic.Array dataSourceInit
+    let dataKvp = src2.Map (fun x -> System.Collections.Generic.KeyValuePair(x, x)) |> fun x -> Data.Basic.Array(dSize, x)
+    let bulkIters = args.DataSource_Iterations
+    let dropRatio = args.DropRatio
     let simple_args = [iters]
     let data_args = [bulkIters, data]
     let inline standard_tests() =
-        let a = [Test.GetKeyRandom; Test.Iter] |> List.cross_apply1 simple_args
-        let b = [Test.AddKeyRandom] |> List.cross_apply1 data_args
-        let c = [Test.IterDirect] |> List.cross_apply1 [1]
-        a @ b @ c
+        let a = [GetKeyRandom; Iter; DropKey] |> List.cross_apply1 simple_args
+        let b = [AddKeyRandom] |> List.cross_apply1 data_args
+        let c = [IterDirect] |> List.cross_apply1 [full_iters]
+        let d = [AddKeys]   |> List.cross_apply1 [bulkIters, dataKvp]
+        let e = [DropKeys] |> List.cross_apply1 [bulkIters, dropRatio]
+        a @ b @ c @ d @ e
     
     let builder = 
         Builder.blank
-        |> Builder.addTarget (Data.Funq.Map initial src) 
+        |> Builder.addTarget (Data.Funq.Map targetInit) 
         |> Builder.addTests (standard_tests())
         |> Builder.next
     let builder = 
-        builder |> Builder.addTarget (Data.Sys.Dict initial src)
+        builder |> Builder.addTarget (Data.Sys.Dict targetInit)
         |> Builder.addTests (standard_tests())
         |> Builder.next
+    let builder = 
+        builder |> Builder.addTarget (Data.FSharp.Map targetInit)
+        |> Builder.addTests (standard_tests())
+        |> Builder.next
+    let builder =
+        builder |> Builder.addTarget (Data.Sys.SortedDict targetInit)
+        |> Builder.addTests (standard_tests())
+        |> Builder.next
+    let builder = 
+        builder |> Builder.addTarget (Data.Funq.OrderedMap targetInit)
+        |> Builder.addTests (standard_tests())
+        |> Builder.next
+    
 
     builder |> Builder.finish
 
-let setLike(set1, set2, iters, src1, src2) = 
-    let bulkIters = 10
-    let arr = src2 |> Data.Basic.Array set2
-    let builder = Builder.blank |> Builder.addTarget (Data.Sys.Set set1 src1)
-
+let setLike(args : AdvancedArgs<_>) = //(set1, set2, iters, src1, src2) = 
+    let bulkIters = args.DataSource_Iterations
+    let iters = args.Simple_Iterations
+    let full_iters = args.Full_Iterations
+    let src1 = args.Generator1
+    let src2 = args.Generator2
+    let set1 = args.Target_Size
+    let set2 = args.DataSource_Size
+    let dataSourceInit = (set2,src2)
+    let targetInit = (set1,src1)
+    let dropRatio = args.DropRatio
+    let arr = Data.Basic.Array targetInit
     let inline standard_tests makeSet= 
         let a = 
-            [Test.UnionWithSet; Test.IntersectWithSet; 
-             Test.ExceptWithSet; Test.SymDifferenceWithSet; 
-             Test.ProperSubset; Test.ProperSuperset; Test.SetEquals]
-             |> List.cross_apply1 [iters, makeSet set2 src2]
+            [UnionWithSet; IntersectWithSet; 
+             ExceptWithSet; SymDifferenceWithSet;
+             ProperSubset; ProperSuperset; SetEquals]
+             |> List.cross_apply1 [bulkIters, makeSet dataSourceInit]
         let b = 
-            [Test.AddSetItem; Test.DropSetItem] |> List.cross_apply1 [iters, arr] 
-        let c = [Test.Contains] |> List.cross_apply1 [iters]
-        a @ b @ c
+            [AddSetItem] |> List.cross_apply1 [bulkIters, arr] 
+        let c = [Contains; DropSetItem; Iter] |> List.cross_apply1 [iters]
+        let d = [AddSetItems] |> List.cross_apply1 [bulkIters, arr]
+        let e = [DropSetItems] |> List.cross_apply1 [bulkIters, dropRatio]
+        let f = [IterDirect] |> List.cross_apply1 [full_iters]
+
+        a @ b @ c @ d @ e @ f
     let builder = 
         Builder.blank 
-        |> Builder.addTarget (Data.Sys.Set set1 src1)
-        |> Builder.addTests (standard_tests <| Data.Sys.Set) |> Builder.next
-        |> Builder.addTarget (Data.Funq.Set set1 src1)
+        |> Builder.addTarget (Data.Sys.Set targetInit)
+        |> Builder.addTests (standard_tests <| Data.Sys.Set) 
+        |> Builder.next
+        |> Builder.addTarget (Data.FSharp.Set targetInit)
+        |> Builder.addTests (standard_tests <| Data.FSharp.Set)
+        |> Builder.next
+        |> Builder.addTarget (Data.Funq.Set targetInit)
         |> Builder.addTests (standard_tests <| Data.Funq.Set) |> Builder.next
-        |> Builder.addTarget (Data.Funq.OrderedSet set1 src1)
+        |> Builder.addTarget (Data.Funq.OrderedSet targetInit)
         |> Builder.addTests (standard_tests <| Data.Funq.OrderedSet) |> Builder.next
-        |> Builder.addTarget (Data.Sys.SortedSet set1 src1)
+        |> Builder.addTarget (Data.Sys.SortedSet targetInit)
         |> Builder.addTests (standard_tests <| Data.Sys.SortedSet) |> Builder.next
     builder |> Builder.finish
 

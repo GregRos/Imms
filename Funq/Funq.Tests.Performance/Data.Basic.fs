@@ -2,6 +2,6 @@
 open Funq.Tests.Performance
 
 module Basic = 
-    let Array count generator  = DataStructure.Create("Array", count, generator, Seq.toArray)
-    let List count generator   = DataStructure.Create("FSharpList", count, generator, Seq.toList)
+    let Array(count, generator)  = DataStructure.Create("Array", Core, count,"System", generator, Seq.toArray)
+    let List(count, generator)   = DataStructure.Create("FSharpList", Core, count, "FSharp", generator, Seq.toList)
 

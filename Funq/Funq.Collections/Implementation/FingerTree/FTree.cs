@@ -7,7 +7,7 @@ namespace Funq.Collections.Implementation
 
 	static partial class FingerTree<TValue>
 	{
-		internal abstract partial class FTree<TChild>
+		internal abstract partial class FTree<TChild> : WeaklyTypedElement
 			where TChild : Measured<TChild>
 		{
 			public static readonly FTree<TChild> Empty = EmptyTree.Instance;
@@ -16,7 +16,7 @@ namespace Funq.Collections.Implementation
 			public readonly Lineage Lineage;
 			public int Measure;
 
-			private FTree(int measure, int kind, Lineage lineage)
+			private FTree(int measure, int kind, Lineage lineage, int groupings) : base(groupings)
 			{
 				Kind = kind;
 				Measure = measure;
@@ -152,6 +152,7 @@ namespace Funq.Collections.Implementation
 			public abstract FTree<TChild> DropFirst(Lineage lineage);
 
 			public abstract FTree<TChild> DropLast(Lineage lineage);
+
 
 			public abstract IEnumerator<Leaf<TValue>> GetEnumerator(bool forward);
 

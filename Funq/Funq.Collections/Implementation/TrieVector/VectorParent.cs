@@ -17,10 +17,11 @@ namespace Funq.Collections.Implementation
 				private readonly Parent _node;
 				private int index = -1;
 
-				public Enumerator(Parent node, bool forward)
+				public Enumerator(Parent node, bool forward, int startIndex = 0)
 				{
 					_node = node;
 					_forward = forward;
+					index = startIndex - 1;
 				}
 
 				public TValue Current
@@ -111,6 +112,13 @@ namespace Funq.Collections.Implementation
 					return Arr[(index & myBlock) >> offs][index];
 				}
 			}
+
+			public Option<TValue> TryGet(int index) {
+				var myIndex = (index & myBlock) >> offs;
+				if (myIndex < ArrSize) return Arr[myIndex][index];
+				return Option.None;
+			}
+
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			private Node _mutate(int count, int arrSize, Node[] arr)
 			{
@@ -119,6 +127,20 @@ namespace Funq.Collections.Implementation
 				Arr = arr;
 				IsFull = arrSize == 32 && arr[arrSize - 1].IsFull;
 				return this;
+			}
+
+			public override IEnumerable<TValue> EnumerateFrom(int firstIndex) {
+				return Fun.CreateEnumerable(() => new Enumerator(this, true, firstIndex));
+			}
+
+			public override bool IterWhileFrom(int index, Func<TValue, bool> conditional) {
+				var myIndex = (index & myBlock) >> offs;
+				for (int i = myIndex; i < ArrSize; i++) {
+					if (!Arr[i].IterWhileFrom(index, conditional)) {
+						return false;
+					}
+				}
+				return true;
 			}
 
 			private Node MutateOrCreate(int count, int arrSize, Node[] arr, Lineage lineage)
@@ -305,6 +327,8 @@ namespace Funq.Collections.Implementation
 				return true;
 			}
 
+
+
 			public override bool IterWhile(Func<TValue, bool> conditional)
 			{
 				for (var i = 0; i < ArrSize; i++)
@@ -317,10 +341,18 @@ namespace Funq.Collections.Implementation
 				return true;
 			}
 
+			public override int RecursiveTotalLength() {
+				var total = 0;
+				for (int i = 0; i < ArrSize; i++) {
+					total += Arr[i].RecursiveTotalLength();
+				}
+				return total;
+			}
+
 			public override Node Take(int index, Lineage lineage)
 			{
 #if DEBUG
-				var expected_last = index < Length ? Option.Some(this[index]) : Option.None;
+				var expected_last = TryGet(index);
 #endif
 				var myIndex = index & myBlock;
 				myIndex = myIndex >> (offs);
@@ -339,7 +371,6 @@ namespace Funq.Collections.Implementation
 				}
 
 #if DEBUG
-				ret.Length.Is(index + 1);
 				if (expected_last.IsSome) ret[ret.Length - 1].Is(expected_last.Value);
 #endif
 				return ret;

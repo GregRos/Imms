@@ -1,0 +1,8 @@
+Tests For:,SetLike
+Collection/Test,Add,AddRange,Contains,Difference,Drop,DropRange,Except,IEnumerator,Intersection,IsProperSubset,IsProperSuperset,Iterate,SetEquals,Union
+FSharp.Set,6.849,6.066,2.527,20.219,22.227,2.073,7.140,1.186,1.495,0.002,0.003,0.096,0.013,3.923
+FunqSet,1.832,0.824,2.431,16.179,7.032,1.366,2.711,1.276,1.900,0.001,0.001,0.059,0.010,2.970
+FunqOrderedSet,1.454,1.443,1.888,5.037,16.027,1.015,1.677,1.283,2.698,0.000,0.000,0.035,0.008,1.980
+System.ImmutableSet,3.345,1.487,5.358,24.883,16.097,1.460,4.520,4.631,4.371,3.657,0.013,0.636,3.955,9.988
+System.ImmutableSortedSet,8.386,8.477,16.696,56.344,37.864,3.391,17.866,3.289,15.666,8.487,0.024,0.449,8.469,19.220
+

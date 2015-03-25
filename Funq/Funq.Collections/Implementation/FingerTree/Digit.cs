@@ -120,7 +120,7 @@ namespace Funq.Collections.Implementation
 				public TChild Third;
 
 				public Digit(TChild one, Lineage lineage)
-					: base(one.Measure, lineage)
+					: base(one.Measure, lineage, 1)
 				{
 #if DEBUG
 
@@ -131,7 +131,7 @@ namespace Funq.Collections.Implementation
 				}
 
 				public Digit(TChild one, TChild two, Lineage lineage)
-					: base(one.Measure + two.Measure, lineage)
+					: base(one.Measure + two.Measure, lineage, 2)
 				{
 #if DEBUG
 
@@ -144,7 +144,7 @@ namespace Funq.Collections.Implementation
 				}
 
 				public Digit(TChild one, TChild two, TChild three, Lineage lineage)
-					: base(one.Measure + two.Measure + three.Measure, lineage)
+					: base(one.Measure + two.Measure + three.Measure, lineage, 3)
 				{
 #if DEBUG
 					AssertEx.AreNotNull(one, two, three);
@@ -158,7 +158,7 @@ namespace Funq.Collections.Implementation
 				}
 
 				public Digit(TChild one, TChild two, TChild three, TChild four, Lineage lineage)
-					: base(one.Measure + two.Measure + three.Measure + four.Measure, lineage)
+					: base(one.Measure + two.Measure + three.Measure + four.Measure, lineage, 4)
 				{
 #if DEBUG
 					AssertEx.AreNotNull(one, two, three, four);
@@ -171,13 +171,28 @@ namespace Funq.Collections.Implementation
 					Size = 4;
 				}
 
+				public override WeaklyTypedElement GetGrouping(int index) {
+					switch (index) {
+						case 0:
+							return First;
+						case 1:
+							return Second;
+						case 2:
+							return Third;
+						case 3:
+							return Fourth;
+						default:
+							throw Errors.Arg_out_of_range("index");
+					}
+				}
+
 				private Digit()
-					: base(0, Common.Lineage.Immutable)
+					: base(0, Common.Lineage.Immutable, 0)
 				{
 				}
 
 				//This method is used when we don't know the exact size of the digit we want to create.
-				public static Digit CreateCheckNull(Lineage lineage, TChild item1 = null, TChild item2 = null, TChild item3 = null, TChild item4 = null)
+				public Digit CreateCheckNull(Lineage lineage, TChild item1 = null, TChild item2 = null, TChild item3 = null, TChild item4 = null)
 				{
 					var items_present = item1 != null ? 1 : 0;
 					items_present |= item2 != null ? 2 : 0;
@@ -190,48 +205,48 @@ namespace Funq.Collections.Implementation
 							res = null;
 							break;
 						case 1 << 0:
-							res = new Digit(item1, lineage);
+							res = MutateOrCreate(item1, lineage);
 							break;
 						case 1 << 1:
-							res = new Digit(item2, lineage);
+							res = MutateOrCreate(item2, lineage);
 							break;
 						case 1 << 2:
-							res = new Digit(item3, lineage);
+							res = MutateOrCreate(item3, lineage);
 							break;
 						case 1 << 3:
-							res = new Digit(item4, lineage);
+							res = MutateOrCreate(item4, lineage);
 							break;
 						case 1 << 0 | 1 << 1:
-							res = new Digit(item1, item2, lineage);
+							res = MutateOrCreate(item1, item2, lineage);
 							break;
 						case 1 << 0 | 1 << 1 | 1 << 2:
-							if (lineage != null) res = new Digit(item1, item2, item3, lineage);
+							if (lineage != null) res = MutateOrCreate(item1, item2, item3, lineage);
 							break;
 						case 1 << 0 | 1 << 1 | 1 << 2 | 1 << 3:
-							res = new Digit(item1, item2, item3, item4, lineage);
+							res = MutateOrCreate(item1, item2, item3, item4, lineage);
 							break;
 						case 1 << 1 | 1 << 2:
-							res = new Digit(item2, item3, lineage);
+							res = MutateOrCreate(item2, item3, lineage);
 							break;
 						case 1 << 1 | 1 << 2 | 1 << 3:
-							res = new Digit(item2, item3, item4, lineage);
+							res = MutateOrCreate(item2, item3, item4, lineage);
 							break;
 						case 1 << 2 | 1 << 3:
-							res = new Digit(item3, item4, lineage);
+							res = MutateOrCreate(item3, item4, lineage);
 							break;
 						case 1 << 0 | 1 << 2:
-							res = new Digit(item1, item3, lineage);
+							res = MutateOrCreate(item1, item3, lineage);
 							break;
 						case 1 << 0 | 1 << 2 | 1 << 3:
-							res = new Digit(item1, item3, item4, lineage);
+							res = MutateOrCreate(item1, item3, item4, lineage);
 							break;
 						case 1 << 1 | 1 << 3:
-							res = new Digit(item2, item4, lineage);
+							res = MutateOrCreate(item2, item4, lineage);
 							break;
-						case 1 << 0 | 1 << 3: res = new Digit(item1, item4, lineage);
+						case 1 << 0 | 1 << 3: res = MutateOrCreate(item1, item4, lineage);
 							break;
 						case 1 << 0 | 1 << 1 | 1 << 3:
-							res = new Digit(item1, item2, item4, lineage);
+							res = MutateOrCreate(item1, item2, item4, lineage);
 							break;
 					}
 
@@ -242,8 +257,6 @@ namespace Funq.Collections.Implementation
 				{
 #if DEBUG
 					digit.IsNotNull();
-#endif
-#if DEBUG
 					other.IsNotNull();
 #endif
 					var match = digit.Size << 3 | other.Size;
@@ -390,6 +403,7 @@ namespace Funq.Collections.Implementation
 					Fourth = d;
 					Measure = measure;
 					Size = size;
+					NumberOfGroupings = size;
 					return this;
 				}
 

@@ -1,11 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using Funq.Abstract;
 using Funq.Collections.Common;
 
 
 namespace Funq.Collections.Implementation
 {
+
+
 	/// <summary>
 	/// A container class for an AVL tree ordered by key.
 	/// </summary>
@@ -13,6 +18,7 @@ namespace Funq.Collections.Implementation
 	/// <typeparam name="TValue"></typeparam>
 	internal static partial class OrderedAvlTree<TKey, TValue>
 	{
+
 		/// <summary>
 		/// A node in the AVL tree.
 		/// </summary>
@@ -23,19 +29,31 @@ namespace Funq.Collections.Implementation
 			/// </summary>
 			internal static readonly Node Null = new Node(true);
 			public TValue Value;
-			public ComparableKey<TKey> Key;
+			public readonly TKey Key;
 			public int Height;
 			public Node Left = Null;
 			public Node Right = Null;
 			public readonly bool IsNull;
-			private Lineage Lineage;
+			private readonly Lineage Lineage;
 			public int Count;
-
+			internal readonly IComparer<TKey> Comparer;
 			internal Node(bool isNull = false)
 			{
 				Height = 0;
 				Count = 0;
 				IsNull = isNull;
+				Comparer = FastComparer<TKey>.Value;
+			}
+
+			public Node(TKey key, TValue value, Node left, Node right, IComparer<TKey> comparer, Lineage lineage) {
+				Key = key;
+				Value = value;
+				Left = left;
+				Right = right;
+				Comparer = comparer;
+				Lineage = lineage;
+				Height = Math.Max(left.Height, right.Height) + 1;
+				Count = left.Count + right.Count + 1;
 			}
 
 			public int Factor
@@ -46,25 +64,24 @@ namespace Funq.Collections.Implementation
 				}
 			}
 
-			public static Node Construct(ComparableKey<TKey> key, TValue value, Node left, Node right, Lineage lin)
+			public Node NewForKvp(TKey k, TValue v, Lineage lineage)
 			{
-				return new Node()
-				{
-					Value = value,
-					Key = key,
-					Left = left,
-					Right = right,
-					Lineage = lin,
-					Count = left.Count + right.Count + 1,
-					Height = left.Height > right.Height ? left.Height + 1 : right.Height + 1,
-				};
+				return new Node(k, v, Null, Null, Comparer, lineage);
 			}
 
-			public static Node NewForKvp(ComparableKey<TKey> k, TValue v, Lineage lineage)
-			{
-				return Construct(k, v, Null, Null, lineage);
+			public Node MutateOrCreate(TValue value, Node left, Node right, Lineage lin) {
+				if (Lineage.AllowMutation(lin)) {
+					Value = value;
+					Left = left;
+					Right = right;
+					Height = left.Height > right.Height ? left.Height + 1 : right.Height + 1;
+					Count = 1 + left.Count + right.Count;
+					return this;
+				}
+				else {
+					return new Node(Key, value, left, right, Comparer, lin);
+				}
 			}
-
 
 			/// <summary>
 			/// Either constructs a new node or mutates the specified node, depending on Lineage.
@@ -75,21 +92,8 @@ namespace Funq.Collections.Implementation
 			/// <param name="lineage"></param>
 			/// <returns></returns>
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			public static Node WithChildren(Node node, Node left, Node right, Lineage lineage)
-			{
-				if (node.Lineage.AllowMutation(lineage))
-				{
-					node.Left = left;
-					node.Right = right;
-					node.Height = left.Height > right.Height ? left.Height + 1 : right.Height + 1;
-					node.Lineage = lineage;
-					node.Count = 1 + left.Count + right.Count;
-				}
-				else
-				{
-					node = Construct(node.Key, node.Value, left, right, lineage);
-				}
-				return node;
+			public static Node WithChildren(Node node, Node left, Node right, Lineage lineage) {
+				return node.MutateOrCreate(node.Value, left, right, lineage);
 			}
 
 			/// <summary>
@@ -106,7 +110,7 @@ namespace Funq.Collections.Implementation
 					basedOn.Value = newValue;
 					return basedOn;
 				}
-				return Construct(basedOn.Key, newValue, basedOn.Left, basedOn.Right, lineage);
+				return new Node(basedOn.Key, newValue, basedOn.Left, basedOn.Right, basedOn.Comparer, lineage);
 			}
 			
 			/// <summary>
@@ -165,6 +169,10 @@ namespace Funq.Collections.Implementation
 					}
 					return cur;
 				}
+			}
+
+			public Node InitializeFromNull(TKey key, TValue value, IComparer<TKey> comparer, Lineage lineage) {
+				return new Node(key, value, Null, Null, comparer, lineage);
 			}
 
 			/// <summary>
@@ -248,26 +256,26 @@ namespace Funq.Collections.Implementation
 			/// <param name="value"></param>
 			/// <param name="lineage"></param>
 			/// <returns></returns>
-			public Node AvlAdd(ComparableKey<TKey> key, TValue value, Lineage lineage)
+			public Node AvlAdd(TKey key, TValue value, Lineage lineage, bool overwrite)
 			{
 				if (this.IsNull)
 				{
 					return NewForKvp(key, value, lineage);
 				}
-				switch (key.CompareTo(Key))
-				{
-					case Cmp.Lesser:
-						var newLeft = Left.AvlAdd(key, value, lineage);
-						return AvlBalance(this, newLeft, Right, lineage);
-					case Cmp.Equal:
-						return WithValue(this, value, lineage);
-					case Cmp.Greater:
-						var newRight = Right.AvlAdd(key, value, lineage);
-						return AvlBalance(this, Left, newRight, lineage);
-					default:
-						throw ImplErrors.Invalid_execution_path;
+				var r = Comparer.Compare(key, Key);
+				if (r < 0) {
+					var newLeft = Left.IsNull ? NewForKvp(key, value, lineage) :Left.AvlAdd(key, value, lineage, overwrite);
+					if (newLeft == null) return null;
+					return AvlBalance(this, newLeft, Right, lineage);
 				}
-
+				else if (r == 0) {
+					return overwrite ? WithValue(this, value, lineage) : null;
+				}
+				else {
+					var newRight = Right.IsNull ? NewForKvp(key, value, lineage) : Right.AvlAdd(key, value, lineage, overwrite);
+						if (newRight == null) return null;
+						return AvlBalance(this, Left, newRight, lineage);
+				}
 			}
 			/// <summary>
 			/// Removes the minimum element. O(logn)
@@ -307,6 +315,19 @@ namespace Funq.Collections.Implementation
 				return Right;
 			}
 
+			public IEnumerable<Kvp<TKey, TValue>> DebugItems
+			{
+				get
+				{
+					var walker = new TreeIterator(this);
+					while (walker.MoveNext())
+					{
+						yield return Kvp.Of(walker.Current.Key, walker.Current.Value);
+					}
+				}
+
+			}
+
 			public IEnumerable<Kvp<TKey, TValue>> Items
 			{
 				get
@@ -314,7 +335,7 @@ namespace Funq.Collections.Implementation
 					var walker = new TreeIterator(this);
 					while (walker.MoveNext())
 					{
-						yield return Kvp.Of(walker.Current.Key.Key, walker.Current.Value);
+						yield return Kvp.Of(walker.Current.Key, walker.Current.Value);
 					}
 				}
 
@@ -333,30 +354,73 @@ namespace Funq.Collections.Implementation
 				max = this;
 				return Left;
 			}
+
+			public bool ForEachWhileNode(Func<Node, bool> iterator) {
+				if (IsNull) return true;
+				return Left.ForEachWhileNode(iterator) && iterator(this) && Right.ForEachWhileNode(iterator);
+			}
+
+			internal bool IsSupersetOf(Node other, Func<TKey, TValue, TValue, bool> isSuperOf = null)
+			{
+				if (other.Count > Count) return false;
+				var iter = new TreeIterator(this);
+				return other.ForEachWhileNode(node =>
+				{
+					if (!iter.MoveNext()) return false;
+					var myCur = iter.Current;
+					int compare = Comparer.Compare(node.Key, myCur.Key);
+					if (compare < 0) return false;
+					else if (compare == 0)
+						return isSuperOf == null || isSuperOf(myCur.Key, myCur.Value, node.Value);
+					else  return true;
+				});
+			}
 			/// <summary>
 			/// Tries to find a value matching the specified key. O(logn)
 			/// </summary>
 			/// <param name="key"></param>
 			/// <returns></returns>
-			public Option<TValue> Find(ComparableKey<TKey> key)
+			public Option<TValue> Find(TKey key)
 			{
-
 				var cur = this;
-				while (!cur.IsNull)
-				{
-					switch (key.CompareTo(cur.Key))
-					{
-						case Cmp.Lesser:
-							cur = cur.Left;
-							break;
-						case Cmp.Equal:
-							return Value;
-						case Cmp.Greater:
-							cur = cur.Right;
-							break;
+				while (!cur.IsNull) {
+					var r = Comparer.Compare(key, cur.Key);
+					if (r < 0) {
+						cur = cur.Left;
+					} else if (r == 0) {
+						return cur.Value;
+					}
+					else {
+						cur = cur.Right;
 					}
 				}
 				return Option.None;
+			}
+
+			/// <summary>
+			/// Tries to find a value matching the specified key. O(logn)
+			/// </summary>
+			/// <param name="key"></param>
+			/// <returns></returns>
+			public bool Contains(TKey key)
+			{
+				var cur = this;
+				while (!cur.IsNull)
+				{
+					var r = Comparer.Compare(key, cur.Key);
+					if (r < 0)
+					{
+						cur = cur.Left;
+					}
+					else if (r == 0) {
+						return true;
+					}
+					else
+					{
+						cur = cur.Right;
+					}
+				}
+				return false;
 			}
 
 			/// <summary>
@@ -373,11 +437,11 @@ namespace Funq.Collections.Implementation
 					return OrderedAvlTree<TKey, TValue2>.Node.Null;
 				}
 				var defaultNull = OrderedAvlTree<TKey, TValue2>.Node.Null;
-				var children = (Left.IsNull ? 0 : 1) << 1 | (Right.IsNull ? 0 : 1);
+				
 				var appliedLeft = Left.IsNull ? defaultNull : Left.Apply(selector, lineage);
 				var appliedValue = selector(Key, Value);
 				var appliedRight = Right.IsNull ? defaultNull : Right.Apply(selector, lineage);
-				return OrderedAvlTree<TKey, TValue2>.Node.Construct(Key, appliedValue, appliedLeft, appliedRight, lineage);
+				return new OrderedAvlTree<TKey, TValue2>.Node(Key, appliedValue, appliedLeft, appliedRight, Comparer, lineage);
 			}
 
 			/// <summary>
@@ -443,22 +507,21 @@ namespace Funq.Collections.Implementation
 			/// <param name="key"></param>
 			/// <param name="lineage"></param>
 			/// <returns></returns>
-			public Node AvlRemove(ComparableKey<TKey> key, Lineage lineage)
+			public Node AvlRemove(TKey key, Lineage lineage)
 			{
-				if (this.IsNull) return this;
-				switch (key.CompareTo(Key))
-				{
-					case Cmp.Lesser:
-						Node newLeft = Left.AvlRemove(key, lineage);
-						return AvlBalance(this, newLeft, Right, lineage);
-					case Cmp.Greater:
-						Node newRight = Right.AvlRemove(key, lineage);
-						return AvlBalance(this, Left, newRight, lineage);
-					case Cmp.Equal:
-						return this.AvlErase(lineage);
-					default:
-						throw ImplErrors.Invalid_execution_path;
+				if (this.IsNull) return null;
+				int compare = Comparer.Compare(key, Key);
+				if (compare  < 0) {
+					Node newLeft = Left.AvlRemove(key, lineage);
+					if (newLeft == null) return null;
+					return AvlBalance(this, newLeft, Right, lineage);
 				}
+				else if (compare > 0) {
+					Node newRight = Right.AvlRemove(key, lineage);
+					if (newRight == null) return null;
+					return AvlBalance(this, Left, newRight, lineage);
+				}
+				else return this.AvlErase(lineage);
 			}
 			/// <summary>
 			/// Concatenates leftBranch-pivot-rightBranch and balances the result. 
@@ -467,28 +530,29 @@ namespace Funq.Collections.Implementation
 			/// <param name="pivot"></param>
 			/// <param name="rightBranch"></param>
 			/// <returns></returns>
-			public static Node Concat(Node leftBranch, Node pivot, Node rightBranch)
+			public static Node Concat(Node leftBranch, Node pivot, Node rightBranch, Lineage lineage)
 			{
 				//if (leftBranch.IsNull) return rightBranch.UnionNode(leftBranch, Lineage.Immutable, null);
 				//if (rightBranch.IsNull) return leftBranch.UnionNode(rightBranch, Lineage.Immutable, null);
 				var newFactor = leftBranch.Height - rightBranch.Height;
+				var oldLeftCount = leftBranch.Count;
+				var oldRightCount = rightBranch.Count;
 				Node balanced;
-				if (newFactor >= -1 && newFactor <= 1)
-				{
-					balanced = Construct(pivot.Key, pivot.Value, leftBranch, rightBranch, Lineage.Immutable);
+				if (newFactor >= -1 && newFactor <= 1) {
+					balanced = WithChildren(pivot, leftBranch, rightBranch, lineage);
 				}
 				else if (newFactor >= 2)
 				{
-					var newRight = Concat(leftBranch.Right, pivot, rightBranch);
-					balanced = AvlBalance(leftBranch, leftBranch.Left, newRight, Lineage.Immutable);
+					var newRight = Concat(leftBranch.Right, pivot, rightBranch, lineage);
+					balanced = AvlBalance(leftBranch, leftBranch.Left, newRight, lineage);
 				}
 				else
 				{
-					var newLeft = Concat(leftBranch, pivot, rightBranch.Left);
-					balanced = AvlBalance(rightBranch, newLeft, rightBranch.Right, Lineage.Immutable);
+					var newLeft = Concat(leftBranch, pivot, rightBranch.Left, lineage);
+					balanced = AvlBalance(rightBranch, newLeft, rightBranch.Right, lineage);
 				}
 #if DEBUG
-				AssertEx.IsTrue(balanced.Count == 1 + leftBranch.Count + rightBranch.Count);
+				AssertEx.IsTrue(balanced.Count == 1 + oldLeftCount + oldRightCount);
 				AssertEx.IsTrue(balanced.IsBalanced);
 #endif
 				return balanced;
@@ -502,40 +566,37 @@ namespace Funq.Collections.Implementation
 			/// <param name="leftBranch"></param>
 			/// <param name="central"></param>
 			/// <param name="rightBranch"></param>
-			public void Split(ComparableKey<TKey> pivot, out Node leftBranch, out Option<TValue> central, out Node rightBranch)
-			{
+			public void Split(TKey pivot, out Node leftBranch, out Node central, out Node rightBranch, Lineage lin) {
 				if (this.IsNull)
 				{
 					leftBranch = this;
 					rightBranch = this;
-					central = Option.None;
+					central = null;
 					return;
 				}
-				switch (pivot.CompareTo(this.Key))
-				{
-					case Cmp.Lesser:
-						Node left_l, left_r;
-						this.Left.Split(pivot, out left_l, out central, out left_r);
-						leftBranch = left_l;
-						rightBranch = Concat(left_r, this, this.Right);
-						break;
-					case Cmp.Greater:
-						Node right_l, right_r;
-						this.Right.Split(pivot, out right_l, out central, out right_r);
-						leftBranch = Concat(this.Left, this, right_l);
-						rightBranch = right_r;
-						break;
-					case Cmp.Equal:
-						leftBranch = this.Left;
-						central = this.Value;
-						rightBranch = this.Right;
-						break;
-					default:
-						throw ImplErrors.Invalid_execution_path;
+				var oldCount = Count;
+				int compare = Comparer.Compare(pivot, Key);
+				if (compare < 0) {
+					Node left_l, left_r;
+					this.Left.Split(pivot, out left_l, out central, out left_r, lin);
+					leftBranch = left_l;
+					rightBranch = Concat(left_r, this, this.Right, lin);
 				}
+				else if (compare > 0) {
+					Node right_l, right_r;
+					this.Right.Split(pivot, out right_l, out central, out right_r, lin);
+					leftBranch = Concat(this.Left, this, right_l, lin);
+					rightBranch = right_r;
+				}
+				else {
+					leftBranch = this.Left;
+					central = this;
+					rightBranch = this.Right;
+				}
+
 #if DEBUG
-				var totalCount = leftBranch.Count + rightBranch.Count + (central.IsNone ? 0 : 1);
-				totalCount.Is(this.Count);
+				var totalCount = leftBranch.Count + rightBranch.Count + (central == null ? 0 : 1);
+				totalCount.Is(oldCount);
 #endif
 			}
 
@@ -556,13 +617,13 @@ namespace Funq.Collections.Implementation
 			/// <param name="left"></param>
 			/// <param name="right"></param>
 			/// <returns></returns>
-			public static Node Concat(Node left, Node right)
+			public static Node Concat(Node left, Node right, Lineage lin)
 			{
 				if (left.IsNull) return right;
 				if (right.IsNull) return left;
 				Node central;
-				left = left.ExtractMax(out central, Lineage.Immutable);
-				return Concat(left, central, right);
+				left = left.ExtractMax(out central, lin);
+				return Concat(left, central, right, lin);
 			}
 
 			/// <summary>
@@ -605,33 +666,91 @@ namespace Funq.Collections.Implementation
 			/// </summary>
 			/// <param name="other"></param>
 			/// <returns></returns>
-			public Node Except(Node other)
+			public Node Except(Node other, Lineage lin, Func<TKey, TValue, TValue, Option<TValue>> subtraction = null)
 			{
 				if (this.IsNull || other.IsNull) return this;
 				Node this_lesser, this_greater;
-				Option<TValue> central_opt;
-				this.Split(other.Key, out this_lesser, out central_opt, out this_greater);
-				var except_lesser = this_lesser.Except(other.Left);
-				var except_greater = this_greater.Except(other.Right);
-				Node ret;
-				ret = Concat(except_lesser, except_greater);
+				Node central_node;
 #if DEBUG
-				AssertEx.IsTrue(except_lesser.Count <= this_lesser.Count);
-				AssertEx.IsTrue(except_greater.Count <= this_greater.Count);
-				AssertEx.IsTrue(except_greater.Count + except_lesser.Count <= this_lesser.Count + this_greater.Count);
+				var expected = this.Pairs.Select(x => x.Key).Except(other.Pairs.Select(x => x.Key)).ToHashSet();
+#endif
+				this.Split(other.Key, out this_lesser, out central_node, out this_greater, lin);
+				var thisLesserCount = this_lesser.Count;
+				var thisGreaterCount = this_greater.Count;
+				var except_lesser = this_lesser.Except(other.Left, lin, subtraction);
+				var except_greater = this_greater.Except(other.Right, lin, subtraction);
+				var exceptLesserCount = except_lesser.Count;
+				var exceptGreaterCount = except_greater.Count;
+				Node ret;
+				if (central_node == null || subtraction == null) {
+					ret = Concat(except_lesser, except_greater, lin);
+				}
+				else {
+					var subtracted = subtraction(other.Key, central_node.Value, other.Value);
+					if (subtracted.IsNone) {
+						ret = Concat(except_lesser, except_greater, lin);
+					}
+					else {
+						central_node = WithValue(central_node, subtracted, lin);
+						ret = Concat(except_lesser, central_node, except_greater, lin);
+					}
+				}
+#if DEBUG
+				AssertEx.IsTrue(exceptLesserCount <= thisLesserCount);
+				AssertEx.IsTrue(exceptGreaterCount <= thisGreaterCount);
+				AssertEx.IsTrue(exceptGreaterCount + exceptLesserCount <= thisLesserCount + thisGreaterCount);
 				AssertEx.IsTrue(except_greater.IsBalanced);
+				var res = ret.Pairs.Select(x => x.Key).ToHashSet();
+				res.SetEquals(expected).IsTrue();
 #endif
 				return ret;
 			}
 
-			/// <summary>
-			/// Returns the set-theoretic symmetric difference between the two trees. 
-			/// </summary>
-			/// <param name="b"></param>
-			/// <returns></returns>
-			public Node SymDifference(Node b)
+			public Node SymDifference(Node b, Lineage lin)
 			{
-				return b.Union(this, null).Except(b.Intersect(this, null, Lineage.Immutable));
+#if DEBUG
+				var expected = this.Pairs.Select(x => x.Key).ToHashSet();
+				expected.SymmetricExceptWith(b.Pairs.Select(x => x.Key));
+#endif
+				var ret = this.Except(b, lin).Union(b.Except(this, lin), null, lin);
+#if DEBUG
+				var retSet = ret.Pairs.Select(x => x.Key).ToHashSet();
+				retSet.SetEquals(expected).IsTrue();
+#endif
+				return ret;
+			}
+
+			public bool Debug_Union(Node other, Node result)
+			{
+				var expected = this.Pairs.Select(x => x.Key).Union(other.Pairs.Select(x => x.Key)).ToHashSet();
+				var got = result.Pairs.Select(x => x.Key).ToHashSet();
+				var res = expected.SetEquals(got);
+				if (!res) Debugger.Break();
+				return res;
+			}
+
+			public IEnumerable<Kvp<TKey, TValue>> Pairs {
+				get {
+					return Items;
+				}
+			}
+
+			public bool Debug_Intersect(List<TKey> result, Node other) {
+				var kvps = new HashSet<TKey>(result);
+				var list = new HashSet<TKey>();
+				foreach (var item in this.Pairs)
+				{
+					if (other.Find(item.Key).IsSome)
+					{
+						list.Add(item.Key);
+					}
+				}
+				var ret = kvps.SetEquals(list);
+				if (!ret)
+				{
+					Debugger.Break();
+				}
+				return ret;
 			}
 
 			/// <summary>
@@ -641,24 +760,37 @@ namespace Funq.Collections.Implementation
 			/// <param name="b"></param>
 			/// <param name="collision"></param>
 			/// <returns></returns>
-			public Node Union(Node b, Func<TKey, TValue, TValue, TValue> collision)
+			public Node Union(Node b, Func<TKey, TValue, TValue, TValue> collision, Lineage lin)
 			{
 				if (IsNull) return b;
 				if (b.IsNull) return this;
-				Node a_lesser, a_greater;
-				Option<TValue> center_val_opt;
-				Split(b.Key, out a_lesser, out center_val_opt, out a_greater);
-				var unitedLeft = a_lesser.Union(b.Left, collision);
-
-				var unitedRight = a_greater.Union(b.Right, collision);
-				var center_val = center_val_opt.IsNone || collision == null ? b.Value : collision(b.Key, center_val_opt, b.Value);
-				var newCenter = Construct(b.Key, center_val, unitedLeft, unitedRight, Lineage.Immutable);
-				var concated = Concat(unitedLeft, newCenter, unitedRight);
 #if DEBUG
-				AssertEx.IsTrue(concated.Count <= Count + b.Count);
-				AssertEx.IsTrue(concated.Count >= Count);
-				AssertEx.IsTrue(concated.Count >= b.Count);
+				var expected = this.Pairs.Select(x => x.Key).Union(b.Pairs.Select(x => x.Key)).ToHashSet();
+#endif
+				Node a_lesser, a_greater;
+				Node center_node;
+				var oldThisCount = Count;
+				var oldBCount = b.Count;
+				Split(b.Key, out a_lesser, out center_node, out a_greater, lin);
+				var unitedLeft = a_lesser.Union(b.Left, collision, lin);
+
+				var unitedRight = a_greater.Union(b.Right, collision, lin);
+				
+				if (center_node == null || collision == null) {
+					center_node = WithChildren(b, unitedLeft, unitedRight, lin);
+				}
+				else {
+					var newValue = collision(b.Key, center_node.Value, b.Value);
+					center_node = center_node.MutateOrCreate(newValue, unitedLeft, unitedRight, lin);
+				}
+				var concated = Concat(unitedLeft, center_node, unitedRight, lin);
+#if DEBUG
+				AssertEx.IsTrue(concated.Count <= oldThisCount + oldBCount);
+				AssertEx.IsTrue(concated.Count >= oldThisCount);
+				AssertEx.IsTrue(concated.Count >= oldBCount);
 				AssertEx.IsTrue(concated.IsBalanced);
+				var result = concated.Pairs.Select(x => x.Key).ToHashSet();
+				result.SetEquals(expected).IsTrue();
 #endif
 				return concated;
 			}
@@ -671,17 +803,17 @@ namespace Funq.Collections.Implementation
 			/// <param name="endIndex"></param>
 			/// <param name="lineage"></param>
 			/// <returns></returns>
-			public static Node FromSortedList(List<Kvp<ComparableKey<TKey>, TValue>> sorted, int startIndex, int endIndex, Lineage lineage)
+			public static Node FromSortedList(List<Kvp<TKey, TValue>> sorted, int startIndex, int endIndex, IComparer<TKey> comparer, Lineage lineage)
 			{
 				if (startIndex > endIndex)
 				{
 					return Null;
 				}
 				int pivotIndex = startIndex + (endIndex - startIndex) / 2;
-				Node left = FromSortedList(sorted, startIndex, pivotIndex - 1, lineage);
-				Node right = FromSortedList(sorted, pivotIndex + 1, endIndex, lineage);
+				Node left = FromSortedList(sorted, startIndex, pivotIndex - 1, comparer, lineage);
+				Node right = FromSortedList(sorted, pivotIndex + 1, endIndex, comparer, lineage);
 				var pivot = sorted[pivotIndex];
-				return Construct(pivot.Key, pivot.Value, left, right, lineage);
+				return new Node(pivot.Key, pivot.Value, left, right, comparer, lineage);
 			}
 
 			public Option<Node> ByOrder(int index) {
@@ -695,6 +827,23 @@ namespace Funq.Collections.Implementation
 					return this;
 				}
 				return Right.ByOrder(index - Left.Count - 1);
+			}
+
+			public bool IsDisjoint(Node other)
+			{
+				var areDisjoint = true;
+				var iter = other.Pairs.GetEnumerator();
+				ForEachWhile((k, v) =>
+				{
+					if (!iter.MoveNext()) return false;
+					if (Comparer.Compare(k, iter.Current.Key) == 0)
+					{
+						areDisjoint = false;
+						return false;
+					}
+					return true;
+				});
+				return areDisjoint;
 			}
 
 			/// <summary>
@@ -714,11 +863,11 @@ namespace Funq.Collections.Implementation
 				while (!a_iterator.IsEnded || !b_iterator.IsEnded)
 				{
 					var trySeekIn = pivotInA ? b_iterator : a_iterator;
-					Cmp cmpResult;
+					int cmpResult;
 					success = trySeekIn.SeekGreaterThan(pivot.Key, out cmpResult);
 					if (!success) break;
 					var maybePivot = trySeekIn.Current;
-					if (cmpResult == Cmp.Equal)
+					if (cmpResult == 0)
 					{
 						yield return StructTuple.Create(pivot, maybePivot);
 						pivotInA = !pivotInA;
@@ -734,7 +883,6 @@ namespace Funq.Collections.Implementation
 					}
 				}
 			}
-
 			/// <summary>
 			/// Returns the set-thereotic intersection between the two trees, and applies the collision resolution function on each shared key-value pair. O(min(m+n,nlogm)) where n ≤ m. <br/>
 			/// If the collision resolution function is null, it is ignored and the value is kept is arbitrary.
@@ -746,13 +894,16 @@ namespace Funq.Collections.Implementation
 			public Node Intersect(Node other, Func<TKey, TValue, TValue, TValue> collision, Lineage lineage)
 			{
 				var intersection = this.IntersectElements(other);
-				var list = new List<Kvp<ComparableKey<TKey>, TValue>>();
+				var list = new List<Kvp<TKey, TValue>>();
 				foreach (var pair in intersection)
 				{
 					var newValue = collision == null ? pair.First.Value : collision(pair.First.Key, pair.First.Value, pair.Second.Value);
 					list.Add(Kvp.Of(pair.First.Key, newValue));
 				}
-				return FromSortedList(list, 0, list.Count - 1, lineage);
+#if DEBUG
+				Debug_Intersect(list.Select(x=>x.Key).ToList(), other).IsTrue();
+#endif
+				return FromSortedList(list, 0, list.Count - 1, Comparer, lineage);
 			}
 		}
 	}

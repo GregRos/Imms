@@ -1,4 +1,6 @@
-﻿namespace Funq.FSharp.Implementation
+﻿//+
+[<AutoOpen>]
+module Funq.FSharp.Implementation.Metadata
 open System
 open System.Collections.Generic
 open System.Collections
@@ -8,16 +10,41 @@ open Funq.FSharp.Implementation
 open System.Runtime.CompilerServices
 open System.Collections.Generic
 open System.Text
+open System.Reflection
 type IDict<'k,'v> = IDictionary<'k,'v>
+(* 
+    This file contains metadata classes. 
+*)
 
 
-[<StructuredFormatDisplay("{AsString}")>]
-type Meta(name : string, value : obj) = 
+///Specifies that this property or field is part of the object's meta data, which should be printed in a report.
+[<AttributeUsage(AttributeTargets.Property ||| AttributeTargets.Field)>]
+type IsMetaAttribute() =
+    inherit Attribute()
+
+///An abstract metadata object which can be a concrete key-value pair
+[<StructuredFormatDisplay("{AsString}"); AbstractClass>]
+type AbstractMeta(name : string) = 
     member val Name = name
-    member val Value = value
-    member x.ValueType = value.GetType()
-    override x.ToString() = sprintf "%s = %A" name value
+    abstract Value : obj with get,set
+    abstract ValueType : Type
     member x.AsString = x.ToString()
+    override x.ToString() = sprintf "%s = %A" x.Name x.Value
+
+type Meta(name : string, value : obj) = 
+    inherit AbstractMeta(name)
+    let mutable value = value
+    override x.Value 
+        with get() = value
+        and  set(v) = value <- v
+    override x.ValueType = value.GetType()
+
+type ReflectionMeta(property : PropertyInfo, instance : obj) =
+    inherit AbstractMeta(property.Name)
+    override x.ValueType = property.PropertyType
+    override x.Value 
+        with get() = property.GetValue(instance)
+        and  set v = property.SetValue(instance, v)
 
 module Dict = 
     let(|Kvp|) (kvp : KeyValuePair<_,_>) = Kvp(kvp.Key,kvp.Value)
@@ -57,13 +84,18 @@ and MetadataCollisionException(name) =
    
 and Delete = Delete
 and[<StructuredFormatDisplay("{AsString}")>]
- MetaContainer private (dict : IDictionary<string,Meta>) = 
-    new (?metas : Meta seq) = MetaContainer(metas |> Option.orValue (Seq.empty) |> Seq.map (fun meta -> meta.Name, meta) |> Dict.ofSeq)
-
+ MetaContainer private (dict : IDictionary<string,AbstractMeta>) as x= 
+    do 
+        x.GetType()
+            .GetProperties()
+            |> Seq.filter (fun x -> x.GetCustomAttribute<IsMetaAttribute>(true) <> Unchecked.defaultof<IsMetaAttribute>)
+            |> Seq.map (fun prop -> ReflectionMeta(prop, x))
+            |> Seq.iter (x.Add)
+    new (?metas : AbstractMeta seq) = MetaContainer(metas |> Option.orValue (Seq.empty) |> Seq.map (fun meta -> meta.Name, meta) |> Dict.ofSeq)
     member x.AsSeq = dict.Values
-    member x.Add (meta : Meta) = 
+    member x.Add (meta : AbstractMeta) = 
         dict.[meta.Name] <- meta
-    member x.AddNew (meta : Meta) = 
+    member x.AddNew (meta : AbstractMeta) = 
         if dict.ContainsKey meta.Name then
             raise <| MetadataCollisionException(meta.Name)
         else
@@ -98,14 +130,11 @@ and[<StructuredFormatDisplay("{AsString}")>]
         for meta in metas do
             x.AddNew meta
     member x.TryGetOr name alt = if x.Has name then x.Get name else alt
-        
-    member x.Merge (other : MetaContainer) = 
-        MetaContainer(x.Clone.AsSeq |> Seq.append (other.Clone.AsSeq))
     override x.ToString() = 
         let strs = dict |> Dict.values |> Seq.toList |> List.map (fun m -> m.ToString())
         String.Join("; ", strs) |> sprintf "[%s]" 
     member x.AsString = x.ToString()
-    static member Empty = MetaContainer()
+
 
 [<AutoOpen>]
 module MetaOps = 
@@ -123,11 +152,12 @@ module MetaOps =
     let (<+) (container : #MetaContainer) meta =
         container.AddNew meta
         container
+[<Extension>]
 [<ComplRep(ComplFlags.ModuleSuffix)>]
 module Meta = 
     let toPairs (l : MetaContainer) = l.AsSeq |> Seq.map (fun meta -> meta.Name, meta.Value)
-    let ofList (l : Meta list) = MetaContainer(l)
-    let ofSeq (l : Meta seq) = MetaContainer(l)
+    let ofList (l : Meta list) = MetaContainer(l |> Seq.map (fun x -> x :> _))
+    let ofSeq (l : Meta seq) = MetaContainer(l |> Seq.map (fun x -> x :> _))
     let ofSeqPairs (l : (_ * _) seq) = l |> Seq.map (fun (a,b) -> Meta(a, b)) |> ofSeq
     let ( <++ ) (a : _ list) (b : _ seq) = a @ (b |> List.ofSeq)
     let ( ++> ) (b : _ seq) (a : _ list) = (b |> List.ofSeq) @ a
@@ -140,6 +170,8 @@ module Meta =
     let copyMetadata (source : MetaContainer) (target : 's :> MetaContainer) = 
         target.AddMany(source.AsSeq)
         target
+
+
 
 
         

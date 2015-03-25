@@ -19,7 +19,7 @@ namespace Funq.Collections.Common
 		[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
 		public readonly T Object;
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		public readonly TMark Mark;		
+		public TMark Mark;		
 		public Marked(T o, TMark mark)
 		{
 			Mark = mark;
@@ -32,6 +32,10 @@ namespace Funq.Collections.Common
 			{
 				return string.Format("Marked {0}", Mark.ToString());
 			}
+		}
+
+		public void SetMark(TMark mark) {
+			Mark = mark;
 		}
 
 		/// <summary>

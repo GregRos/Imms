@@ -165,15 +165,20 @@ namespace Funq.Abstract
 		/// Returns a new map without all those keys present in the specified map.
 		/// </summary>
 		/// <param name="other">The other.</param>
-		public virtual TMap Except<TValue2>(ITrait_MapLike<TKey, TValue2> other)
+		public virtual TMap Except<TValue2>(ITrait_MapLike<TKey, TValue2> other, Func<TKey, TValue, TValue2, Option<TValue>> subtraction = null)
 		{
 			using (var builder = EmptyBuilder)
 			{
-				foreach (var item in this)
-				{
-					if (other.TryGet(item.Key).IsNone)
-					{
+				foreach (var item in this) {
+					var res = other.TryGet(item.Key);
+					if (res.IsNone) {
 						builder.Add(item);
+					}
+					else if (subtraction != null) {
+						var newValue = subtraction(item.Key, item.Value, res.Value);
+						if (newValue.IsSome) {
+							builder.Add(item.Key, newValue);
+						}
 					}
 				}
 				return ProviderFrom(builder);
@@ -194,7 +199,7 @@ namespace Funq.Abstract
 		/// </summary>
 		/// <param name="other">The other.</param>
 		/// <param name="collision">The collision resolution function. If null, the maps are assumed to have no keys in common, and a collision throws an exception.</param>
-		public virtual TMap Merge(ITrait_MapLike<TKey, TValue> other, Func<TKey, TValue, TValue, TValue> collision = null)
+		public virtual TMap Merge(ITrait_MapLike<TKey, TValue> other, Func<TKey, TValue, TValue, TValue> collision)
 		{
 			collision = collision ?? ((k, v1, v2) =>
 			                          {
@@ -216,7 +221,7 @@ namespace Funq.Abstract
 		/// </summary>
 		/// <param name="other">The other.</param>
 		/// <param name="collision">The collision resolution function. If null, the maps are assumed to have no keys in common, and a collision throws an exception.</param>
-		public virtual TMap Merge(TMap other, Func<TKey, TValue, TValue, TValue> collision = null)
+		public virtual TMap Merge(TMap other, Func<TKey, TValue, TValue, TValue> collision)
 		{
 			return this.Merge(other as ITrait_MapLike<TKey, TValue>, collision);
 		}
@@ -235,7 +240,7 @@ namespace Funq.Abstract
 		/// Removes all keys present in the specified map.
 		/// </summary>
 		/// <param name="other">The other.</param>
-		public virtual TMap Except(TMap other)
+		public virtual TMap Except(TMap other, Func<TKey, TValue, TValue, Option<TValue>> subtraction = null)
 		{
 			return this.Except(other as ITrait_MapLike<TKey, TValue>);
 		}
@@ -244,9 +249,8 @@ namespace Funq.Abstract
 		/// Returns a new map containing only those key-value pairs present in exactly one of the maps.
 		/// </summary>
 		/// <param name="other">The other.</param>
-		public virtual TMap Difference(TMap other)
-		{
-			return this.Difference(other as ITrait_MapLike<TKey, TValue>);
+		public virtual TMap Difference(TMap other) {
+			return this.Except(other).Merge(other.Except(this), null);
 		}
 
 		/// <summary>

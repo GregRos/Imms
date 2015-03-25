@@ -16,10 +16,11 @@ namespace Funq.Collections.Implementation
 				private readonly Leaf _node;
 				private int index = -1;
 
-				public Enumerator(Leaf node, bool forward)
+				public Enumerator(Leaf node, bool forward, int startIndex = 0)
 				{
 					_node = node;
 					_forward = forward;
+					index = startIndex - 1;
 				}
 
 				public TValue Current
@@ -141,6 +142,24 @@ namespace Funq.Collections.Implementation
 				ret[ret.Length - 1].Is(item);
 #endif
 				return ret;
+			}
+
+			public override int RecursiveTotalLength() {
+				return ArrSize;
+			}
+
+			public override bool IterWhileFrom(int index, Func<TValue, bool> conditional) {
+				var myIndex = index & myBlock;
+				for (int i = myIndex; i < ArrSize; i++) {
+					if (!conditional(Arr[i])) {
+						return false;
+					}
+				}
+				return true;
+			}
+
+			public override IEnumerable<TValue> EnumerateFrom(int firstIndex) {
+				return Fun.CreateEnumerable(() => new Enumerator(this, true, firstIndex & myBlock));
 			}
 
 			public override Node AddMany(TValue[] arr, Lineage lineage, int maxHeight, ref int start, ref int count)

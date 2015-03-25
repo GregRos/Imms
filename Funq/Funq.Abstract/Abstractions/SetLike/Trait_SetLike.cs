@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Configuration;
 
 namespace Funq.Abstract
 {
@@ -98,6 +99,29 @@ namespace Funq.Abstract
 			return SetRelation.None;
 		}
 
+		public bool IsProperSubsetOf(TProvider other) {
+			return other.IsProperSupersetOf(this);
+		}
+
+		public virtual bool IsSupersetOf(TProvider other) {
+			return this.Length >= other.Length && ((RelatesTo(other) & (SetRelation.ProperSupersetOf | SetRelation.Equal)) != 0);
+		}
+
+		public bool IsSubsetOf(TProvider other) {
+			return other.IsSupersetOf(this);
+		}
+
+		public virtual bool IsDisjointWith(TProvider other) {
+			return RelatesTo(other) == SetRelation.Disjoint;
+		}
+
+		public bool IsProperSupersetOf(TProvider other) {
+			return other.Length < Length && this.IsSupersetOf(other);
+		}
+
+		public bool SetEquals(TProvider other) {
+			return other.Length == Length && this.IsSupersetOf(other);
+		}
 
 		public virtual SetRelation RelatesTo(TProvider other)
 		{
