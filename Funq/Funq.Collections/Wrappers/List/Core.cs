@@ -115,7 +115,7 @@ namespace Funq.Collections
 			var ret =  _root.AddFirst(item, Lineage.Immutable).Wrap();
 #if ASSERTS
 			ret.First.Is(item);
-			ret.Last.Is(Last);
+			if (!IsEmpty) ret.Last.Is(Last);
 #endif
 			return ret;
 		}
@@ -339,6 +339,12 @@ namespace Funq.Collections
 				ret[index].Is(this[index + 1]);
 			}
 			ret.Length.Is(Length - 1);
+			for (int i = 0; i < index; i++) {
+				this[i].Is(ret[i]);
+			}
+			for (int i = index; i < ret.Length; i++) {
+				this[i+1].Is(ret[i]);
+			}
 #endif
 			return ret;
 		}

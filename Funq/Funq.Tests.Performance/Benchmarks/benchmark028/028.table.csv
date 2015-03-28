@@ -1,0 +1,8 @@
+Tests For:,Sequential
+Collection/Test,AddFirst,AddFirstRange,AddFirstRange (concat operation),AddLast,AddLastRange,AddLastRange (concat operation),DropFirst,DropLast,IEnumerator,Insert,Insert Range,Insert Range (concat operation),Iterate,Lookup,Remove,Skip,Take,Update
+FSharpx.Deque,0.438,0.226,0.322,0.440,0.351,0.306,0.587,1.343,0.211,X,X,X,0.267,X,X,X,X,X
+FSharpx.Vector,X,X,2.590,1.981,2.411,3.082,X,5.147,0.207,X,X,X,0.339,0.333,X,X,X,7.633
+FunqList,2.017,0.514,0.010,2.105,0.503,0.011,0.917,0.922,0.530,40.362,0.469,0.048,0.097,1.868,11.254,0.013,0.012,7.801
+FunqVector,X,0.019,0.090,2.846,0.018,0.049,X,2.258,0.145,X,0.321,0.364,0.059,0.141,X,0.280,0.002,2.745
+System.ImmutableList,11.378,2.473,3.469,8.250,2.512,3.462,4.115,16.293,1.726,29.247,2.319,3.499,2.147,1.691,17.375,3.136,4.030,8.968
+

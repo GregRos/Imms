@@ -1,5 +1,5 @@
 ﻿module Funq.Tests.Integrity.Target
-let lst n = Caching.memoize <@ [0..n] @>
+let lst n = [0..n]
 module Funq = 
     let List n = FunqListWrapper<_>.FromSeq (lst n)
     let Vector n= FunqVectorWrapper<_>.FromSeq (lst n)

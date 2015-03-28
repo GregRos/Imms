@@ -7,6 +7,7 @@ using Funq.Collections.Common;
 using System.Linq;
 using Funq.Collections.Implementation;
 
+
 namespace Funq.Collections
 {
 	/// <summary>
@@ -101,7 +102,7 @@ namespace Funq.Collections
 			var oldLength = Length;
 			var arrInsert = items.ToArrayFast(out len);
 			var arrAfter =  new T[oldLength - index];
-			CopyTo(arrAfter, index + 1, 0, oldLength - index);
+			CopyTo(arrAfter, index, 0, oldLength - index);
 			var arrLength = len;
 			if (len == 0) return this;
 			if (oldLength + len >= MaxCapacity) throw Funq.Errors.Capacity_exceeded();
@@ -124,7 +125,8 @@ namespace Funq.Collections
 		public override void CopyTo(T[] arr, int myStart, int arrStart, int count) {
 			int ix = arrStart;
 			root.IterWhileFrom(myStart, item => {
-				if (ix >= arrStart + count) return false;
+				if (ix >= arrStart + count) 
+						return false;
 				arr[ix] = item;
 				ix++;
 				return true;
@@ -191,7 +193,47 @@ namespace Funq.Collections
 		{
 			root.Iter(action);
 		}
+		/// <summary>
+		/// Very, very inefficient. Shouldn't be used.
+		/// </summary>
+		/// <param name="index"></param>
+		/// <returns></returns>
+		internal FunqVector<T> Remove(int index)
+		{
+			if (index == 0) return Skip(1);
+			if (index == Length - 1) return DropLast();
+			var lineage = Lineage.Mutable();
+			var take = root.Take(index - 1, lineage);
+			var arr = new T[Length - index - 1];
+			CopyTo(arr, index + 1, 0, Length - index - 1);
+			var len = arr.Length;
+			var s = 0;
+			var ret = take.AddMany(arr, lineage, 6, ref s, ref len);
+			return ret;
+		}
 
+		/// <summary>
+		/// Very inefficient.
+		/// </summary>
+		/// <param name="index"></param>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		internal FunqVector<T> Insert(int index, T value) {
+			if (index == Length) return AddLast(value);
+			if (index == 0) return AddFirstRange(new[] {value});
+			var lineage = Lineage.Mutable();
+			var take = root.Take(index - 1, lineage);
+			take = take.Add(value, lineage);
+			var arr = new T[Length - index];
+			CopyTo(arr, index, 0, Length - index);
+			var len = arr.Length;
+			var s = 0;
+			var ret = take.AddMany(arr, lineage, 6, ref s, ref len);
+#if ASSERTS
+			ret.Length.Is(Length + 1);
+#endif
+			return ret;
+		}
 
 		/// <summary>
 		/// Adds a sequence of items to the end of the collection.
@@ -215,7 +257,7 @@ namespace Funq.Collections
 			FunqVector<T> ret = root.AddMany(arr, Lineage.Mutable(), 6, ref s, ref len);
 #if ASSERTS
 			ret.Length.Is(expected + old_len);
-			if (arr.Length > 0) ret.Last.Is(arr[old_len - 1]);
+			if (arr.Length > 0 && old_len > 0) ret.Last.Is(arr[old_len - 1]);
 			else if (old_last.IsSome) ret.Last.Is(old_last.Value);
 #endif
 			return ret;

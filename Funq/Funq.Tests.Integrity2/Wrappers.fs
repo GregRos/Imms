@@ -10,8 +10,6 @@ open Funq.Abstract
 open Funq
 open Funq.FSharp.Implementation
 
-
-
 [<AbstractClass>]
 type SeqWrapper<'v>(name : string) = 
     inherit TargetMetadata(name)
@@ -118,9 +116,14 @@ type FunqVectorWrapper<'v>(inner : FunqVector<'v>)=
     override x.GetEnumerator() = (inner :> 'v seq).GetEnumerator()
     override x.AddLast v = FunqVectorWrapper(inner.AddLast v) :>_
     override x.SelfTest() = true
+    override x.Insert(i,v) = FunqVectorWrapper(inner.Insert(i,v)):>_
     override x.AddLastRange vs = FunqVectorWrapper(inner.AddLastRange vs) :>_
     override x.DropLast() = FunqVectorWrapper(inner.DropLast()) :>_
+    override x.InsertRange(i,vs) = FunqVectorWrapper(inner.InsertRange(i,vs)) :>_
+    override x.AddFirstRange vs = FunqVectorWrapper(inner.AddFirstRange vs) :> _
     override x.Take n = FunqVectorWrapper(inner.Take n) :>_
+    override x.Skip n = FunqVectorWrapper(inner.Skip n) :>_
+    override x.Remove i = FunqVectorWrapper(inner.Remove i) :>_
     override x.Item(i1,i2) = FunqVectorWrapper(inner.[i1, i2]):>_
     override x.Item ix= inner.[ix]
     override x.First = inner.First

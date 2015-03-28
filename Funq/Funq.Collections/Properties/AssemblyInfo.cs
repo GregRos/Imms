@@ -14,7 +14,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Solid")]
 [assembly: InternalsVisibleTo("Funq.FSharp")]
+
 [assembly: InternalsVisibleTo("Funq.Tests.Performance")]
+[assembly: InternalsVisibleTo("Funq.Tests.Integrity")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

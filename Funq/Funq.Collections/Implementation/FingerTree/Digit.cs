@@ -264,27 +264,27 @@ namespace Funq.Collections.Implementation
 					switch (match)
 					{
 						case 1 << 3 | 1:
-							leftmost = new Digit(digit.First, other.First, lineage);
+							leftmost = digit.MutateOrCreate(digit.First, other.First, lineage);
 							rightmost = null;
 							middle = null;
 							return;
 						case 1 << 3 | 2:
-							leftmost = new Digit(digit.First, other.First, other.Second, lineage);
+							leftmost = digit.MutateOrCreate(digit.First, other.First, other.Second, lineage);
 							rightmost = null;
 							middle = null;
 							return;
 						case 1 << 3 | 3:
-							leftmost = new Digit(digit.First, other.First, other.Second, other.Third, lineage);
+							leftmost = digit.MutateOrCreate(digit.First, other.First, other.Second, other.Third, lineage);
 							rightmost = null;
 							middle = null;
 							return;
 						case 1 << 3 | 4:
 							leftmost = new Digit(digit.First, other.First, lineage);
-							middle = new Digit(other.Second, other.Third, other.Fourth, lineage);
+							middle = digit.MutateOrCreate(other.Second, other.Third, other.Fourth, lineage);
 							rightmost = null;
 							return;
 						case 2 << 3 | 1:
-							leftmost = new Digit(digit.First, digit.Second, other.First, lineage);
+							leftmost = digit.MutateOrCreate(digit.First, digit.Second, other.First, lineage);
 							middle = null;
 							rightmost = null;
 							return;
@@ -298,34 +298,34 @@ namespace Funq.Collections.Implementation
 							return;
 						case 2 << 3 | 4:
 							leftmost = new Digit(digit.First, digit.Second, other.First, lineage);
-							middle = new Digit(other.Second, other.Third, other.Fourth, lineage);
+							middle = digit.MutateOrCreate(other.Second, other.Third, other.Fourth, lineage);
 							rightmost = null;
 							return;
 						case 3 << 3 | 4:
 							leftmost = digit;
 							middle = new Digit(other.First, other.Second, lineage);
-							rightmost = new Digit(other.Third, other.Fourth, lineage);
+							rightmost = other.MutateOrCreate(other.Third, other.Fourth, lineage);
 							return;
 						case 3 << 3 | 1:
 							leftmost = new Digit(digit.First, digit.Second, lineage);
-							middle = new Digit(digit.Third, other.First, lineage);
+							middle = digit.MutateOrCreate(digit.Third, other.First, lineage);
 							rightmost = null;
 							return;
 						case 4 << 3 | 1:
 							leftmost = new Digit(digit.First, digit.Second, lineage);
-							middle = new Digit(digit.Third, digit.Fourth, other.First, lineage);
+							middle = digit.MutateOrCreate(digit.Third, digit.Fourth, other.First, lineage);
 							rightmost = null;
 							return;
 						case 4 << 3 | 2:
 						case 4 << 3 | 3:
 							leftmost = new Digit(digit.First, digit.Second, lineage);
-							middle = new Digit(digit.Third, digit.Fourth, lineage);
+							middle = digit.MutateOrCreate(digit.Third, digit.Fourth, lineage);
 							rightmost = other;
 							return;
 						case 4 << 3 | 4:
 							leftmost = new Digit(digit.First, digit.Second, digit.Third, lineage);
 							middle = new Digit(digit.Fourth, other.First, other.Second, lineage);
-							rightmost = new Digit(other.Third, other.Fourth, lineage);
+							rightmost = digit.MutateOrCreate(other.Third, other.Fourth, lineage);
 							return;
 					}
 					//we should've handled all the cases in the Switch statement. Otherwise, produce this error.
@@ -487,10 +487,10 @@ namespace Funq.Collections.Implementation
 						case IN_START:
 						case IN_MIDDLE_OF_1:
 							First.Insert(index, leaf, out my_leftmost, out my_rightmost, lineage);
-							if (Size == 4 && my_rightmost != null)
-							{
+							if (Size == 4 && my_rightmost != null) {
+								var snd = Second;
 								leftmost = new Digit(my_leftmost, my_rightmost, Second, lineage);
-								rightmost = new Digit(Third, Fourth, lineage);
+								rightmost = MutateOrCreate(Third, Fourth, lineage);
 								return;
 							}
 							leftmost = my_rightmost != null
@@ -504,7 +504,7 @@ namespace Funq.Collections.Implementation
 							if (Size == 4 && my_rightmost != null)
 							{
 								leftmost = new Digit(First, my_leftmost, my_rightmost, lineage);
-								rightmost = new Digit(Third, Fourth, lineage);
+								rightmost = MutateOrCreate(Third, Fourth, lineage);
 								return;
 							}
 							leftmost = my_rightmost != null
@@ -518,7 +518,7 @@ namespace Funq.Collections.Implementation
 							if (Size == 4 && my_rightmost != null)
 							{
 								leftmost = new Digit(First, Second, my_leftmost, lineage);
-								rightmost = new Digit(my_rightmost, Fourth, lineage);
+								rightmost = MutateOrCreate(my_rightmost, Fourth, lineage);
 								return;
 							}
 							leftmost =
@@ -533,10 +533,10 @@ namespace Funq.Collections.Implementation
 							if (Size == 4 && my_rightmost != null)
 							{
 								leftmost = new Digit(First, Second, Third, lineage);
-								rightmost = new Digit(my_leftmost, my_rightmost, lineage);
+								rightmost = MutateOrCreate(my_leftmost, my_rightmost, lineage);
 								return;
 							}
-							leftmost = new Digit(First, Second, Third, my_leftmost, lineage);
+							leftmost = MutateOrCreate(First, Second, Third, my_leftmost, lineage);
 							rightmost = null;
 							return;
 					}

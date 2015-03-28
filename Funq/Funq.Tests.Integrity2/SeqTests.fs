@@ -261,17 +261,21 @@ type SeqTests(?seed : int) =
             let v2 = rnd.Next(0,n)
             let v3 = rnd.Next(0,n)
             let old_len = s.Length
+            let oldVal = s.[ix]
             s <- s.Insert(ix, v1)
+            if ix < s.Length - 1 then
+                assert_eq(s.[ix+1], oldVal)
             assert_eq(s.[ix], v1)
+            
             assert_eq(s.Length, old_len + 1)
             let expected_value = if ix2 = s.Length - 1 then None else Some <| s.[ix2 + 1]
-            s <- s.Remove(ix2)
-            assert_eq(s.Length, old_len)
+            let newS = s.Remove(ix2)
+            assert_eq(newS.Length, old_len)
             if expected_value.IsSome then
-                assert_eq(s.[ix2], expected_value.Value)
-            s <- s.Update(ix3, v3)
-            assert_eq(s.[ix3], v3)
-            assert_eq(s.Length, old_len)
+                assert_eq(newS.[ix2], expected_value.Value)
+ 
+            assert_eq(newS.Length, old_len)
+            s <- newS
         s
 
     member private x.inner_take  n (s : SeqWrapper<int>) = 
@@ -338,6 +342,14 @@ type SeqTests(?seed : int) =
                 assert_eq(s.[where], old_value)
         s
     
+    member private x.inner_remove n (s : SeqWrapper<int>) = 
+        let mutable s = s
+        let rnd = Random(seed)
+        for i = 0 to n do
+            let ix = rnd.Next(0, s.Length)
+            s <- s.Remove(ix)
+            s <- s.AddLast i
+        s
     member private x.inner_insert_concat  n (s : SeqWrapper<int>) = 
         let mutable s = s
         let rnd = Random(seed)
@@ -397,7 +409,7 @@ type SeqTests(?seed : int) =
 
     member private x.inner_complex_all_operations n (s : _ SeqWrapper) = 
         let mutable s = s
-        let lower_n = (n |> float |> sqrt |> int) / 2
+        let lower_n = (n |> float |> sqrt |> sqrt |> int)
         let r = Random seed
         let rnd() = r.Next(0,lower_n)
         let mutable mSeq = []
@@ -434,3 +446,4 @@ type SeqTests(?seed : int) =
     member x.complex_add_drop_first_last n = test_of n "Complex add/drop first/last sequence" (x.inner_complex_add_drop_first_last n >> toList1) 
     member x.complex_add_last_take_and_indexing n = test_of n "Complex add/drop last + update/indexing" (x.inner_complex_add_last_take_and_indexing n)
     member x.complex_add_and_take_and_indexing n = test_of n "Complex add/drop first/last + update/indexing" (x.inner_complex_all_operations n)
+    member x.remove_add n = test_of n "Remove add" (x.inner_remove n >> toList1)

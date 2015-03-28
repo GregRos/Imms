@@ -79,11 +79,6 @@
       <Project>{4ae0206d-527d-43d7-9dcb-e88a8e1d47b6}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Funq.Tests.Performance\Funq.Tests.Performance.fsproj">
-      <Name>Funq.Tests.Performance</Name>
-      <Project>{7ec95555-ca5b-4e87-a8da-525fa4e01fac}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

@@ -4,11 +4,21 @@ module Funq.Tests.Integrity.Main
 open Funq.FSharp.Implementation
 open System.CodeDom.Compiler
 open System
-
+open System.IO
 type String with
     member str.ContainsWords (words : string) = 
         let split = words.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
         split |> Seq.forall (fun s -> String.contains_insensitive s str)
+
+type MultiTextWriter(writers : TextWriter list) = 
+    inherit TextWriter()
+    member x.F = 4
+    override x.Encoding = writers.Head.Encoding
+    override x.WriteLine str = 
+        writers |> List.iter (fun w -> w.WriteLine(str : string))
+    override x.Write (str : string) = 
+        writers |> List.iter (fun w -> w.Write(str))
+    override x.WriteLine() = writers |> List.iter (fun w -> w.WriteLine())
 
 let seqTests initial parameter = 
     let x = SeqTests()
@@ -18,7 +28,17 @@ let seqTests initial parameter =
         [x.add_drop_first;
          x.insert_range; 
          x.insert; 
-         x.complex_add_last_take_and_indexing]
+         x.update;
+         x.remove_add
+         x.add_first_range;
+         x.complex_add_last_take_and_indexing;
+         x.complex_add_and_take_and_indexing;
+         x.insert_remove_update;
+         x.insert_range_concat;
+         x.concat;
+         x.update;
+         x.get_index;
+         x.insert_range]
         |> List.apply1 parameter
         |> Test.bindAll reference targets
     tests
@@ -50,7 +70,9 @@ let mapTests initial parameter dataSet =
 [<EntryPoint>]
 let main argv = 
     let x = SeqTests()
-    let writer = new IndentedTextWriter(Console.Out)
+    let fs = File.OpenWrite("log.txt")
+    let writer = Console.Out
+    
     let initial = 10000
     let param = 3000
     let ds = 10000
@@ -62,8 +84,9 @@ let main argv =
         let initial, param, ds = r.Next(0, 3000), r.Next(100, 1000), r.Next( 5000, 10000)
         printfn "Initial: %d, Param: %d, ds: %d" initial param ds
         tests <- allTests initial param ds @ tests
-    let tests = tests |> List.filter (fun t -> t.Test.Kind = MapLike || t.Test.Kind = SetLike )
+    let tests = tests |> List.filter (fun t -> t.Test.Kind = ListLike)
     tests |> Test.runAll writer |> Report.byTest writer 
     Console.Read() |> ignore
+    fs.Flush()
     printfn "%A" argv
     0 // return an integer exit code

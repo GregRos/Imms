@@ -179,8 +179,7 @@ type TestMapping<'v when 'v :> TargetMetadata>(Test : Test<'v>, Reference : 'v, 
         if not ref_result.Succeeded then
             let r = ReferenceDidNotFinish refObj
             TestSummary(Test, Targets |> List.cast<_,_>, refObj, r)
-        else
-            
+        else   
             let rec resultList : 'v list -> TestInstance list = function
                 | [] -> []
                 | target::rest -> 

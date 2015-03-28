@@ -121,7 +121,6 @@
  * (mock.privateField as string).Is("mogumogu");
  * 
  * -- more details see project home --*/
-
 #if ASSERTS
 using System;
 using System.Collections;
@@ -138,7 +137,7 @@ using NUnit.Framework;
 namespace Funq.Collections
 {
 
-	#region Extensions
+#region Extensions
 
 	internal static class AssertEx
 	{
@@ -162,13 +161,13 @@ namespace Funq.Collections
 			}
 		}
 
-		[Conditional("DEBUG")]
+		[Conditional("ASSERTS")]
 		public static void AreNotNull<T>(params T[] items)
 		{
 			items.AreNotNull();
 		}
 
-		[Conditional("DEBUG")]
+		[Conditional("ASSERTS")]
 		public static void AreNotNull<T>(this IEnumerable<T> me)
 		{
 			me.IsNotNull();
@@ -183,7 +182,7 @@ namespace Funq.Collections
 		/// <summary>
 		///   Assert.AreEqual, if T is IEnumerable then CollectionAssert.AreEqual
 		/// </summary>
-		[Conditional("DEBUG")]
+		[Conditional("ASSERTS")]
 		public static void Is<T>(this T actual, T expected, string message = "")
 		{
 			Assert.AreEqual(expected, actual, message);
@@ -192,7 +191,7 @@ namespace Funq.Collections
 		/// <summary>
 		///   Assert.IsTrue(predicate(value))
 		/// </summary>
-		[Conditional("DEBUG")]
+		[Conditional("ASSERTS")]
 		public static void Is<T>(this T value, Func<T, bool> predicate, string message = "")
 		{
 			Assert.IsTrue(predicate(value));
@@ -201,7 +200,7 @@ namespace Funq.Collections
 		/// <summary>
 		///   CollectionAssert.AreEqual
 		/// </summary>
-		[Conditional("DEBUG")]
+		[Conditional("ASSERTS")]
 		public static void Is<T>(this IEnumerable<T> actual, params T[] expected)
 		{
 			Is(actual, expected.AsEnumerable());
@@ -210,7 +209,7 @@ namespace Funq.Collections
 		/// <summary>
 		///   CollectionAssert.AreEqual
 		/// </summary>
-		[Conditional("DEBUG")]
+		[Conditional("ASSERTS")]
 		public static void Is<T>(this IEnumerable<T> actual, IEnumerable<T> expected, string message = "")
 		{
 			CollectionAssert.AreEqual(expected.ToArray(), actual.ToArray(), message);
@@ -219,7 +218,7 @@ namespace Funq.Collections
 		/// <summary>
 		///   CollectionAssert.AreEqual
 		/// </summary>
-		[Conditional("DEBUG")]
+		[Conditional("ASSERTS")]
 		public static void Is<T>(this IEnumerable<T> actual, IEnumerable<T> expected, IEqualityComparer<T> comparer, string message = "")
 		{
 			Is(actual, expected, comparer.Equals, message);
@@ -236,7 +235,7 @@ namespace Funq.Collections
 		/// <summary>
 		///   Is(false)
 		/// </summary>
-		[Conditional("DEBUG")]
+		[Conditional("ASSERTS")]
 		public static void IsFalse(this bool value, string message = "")
 		{
 #if ASSERTS
@@ -256,7 +255,7 @@ namespace Funq.Collections
 		/// <summary>
 		///   Assert.AreNotEqual, if T is IEnumerable then CollectionAssert.AreNotEqual
 		/// </summary>
-		[Conditional("DEBUG")]
+		[Conditional("ASSERTS")]
 		public static void IsNot<T>(this T actual, T notExpected, string message = "")
 		{
 			if (typeof (T) != typeof (string) && typeof (IEnumerable).IsAssignableFrom(typeof (T)))
@@ -271,7 +270,7 @@ namespace Funq.Collections
 		/// <summary>
 		///   CollectionAssert.AreNotEqual
 		/// </summary>
-		[Conditional("DEBUG")]
+		[Conditional("ASSERTS")]
 		public static void IsNot<T>(this IEnumerable<T> actual, params T[] notExpected)
 		{
 			IsNot(actual, notExpected.AsEnumerable());
@@ -280,7 +279,7 @@ namespace Funq.Collections
 		/// <summary>
 		///   CollectionAssert.AreNotEqual
 		/// </summary>
-		[Conditional("DEBUG")]
+		[Conditional("ASSERTS")]
 		public static void IsNot<T>(this IEnumerable<T> actual, IEnumerable<T> notExpected, string message = "")
 		{
 			CollectionAssert.AreNotEqual(notExpected.ToArray(), actual.ToArray(), message);
@@ -289,7 +288,7 @@ namespace Funq.Collections
 		/// <summary>
 		///   CollectionAssert.AreNotEqual
 		/// </summary>
-		[Conditional("DEBUG")]
+		[Conditional("ASSERTS")]
 		public static void IsNot<T>(this IEnumerable<T> actual, IEnumerable<T> notExpected, IEqualityComparer<T> comparer, string message = "")
 		{
 			IsNot(actual, notExpected, comparer.Equals, message);
@@ -298,7 +297,7 @@ namespace Funq.Collections
 		/// <summary>
 		///   CollectionAssert.AreNotEqual
 		/// </summary>
-		[Conditional("DEBUG")]
+		[Conditional("ASSERTS")]
 		public static void IsNot<T>(this IEnumerable<T> actual, IEnumerable<T> notExpected, Func<T, T, bool> equalityComparison, string message = "")
 		{
 			CollectionAssert.AreNotEqual(notExpected.ToArray(), actual.ToArray(), new ComparisonComparer<T>(equalityComparison), message);
@@ -315,7 +314,7 @@ namespace Funq.Collections
 		/// <summary>
 		///   Assert.IsNotNull
 		/// </summary>
-		[Conditional("DEBUG")]
+		[Conditional("ASSERTS")]
 		public static void IsNotNull<T>(this T value, string message = "")
 		{
 			Assert.IsNotNull(value, message);
@@ -332,7 +331,7 @@ namespace Funq.Collections
 		/// <summary>
 		///   Assert.IsNull
 		/// </summary>
-		[Conditional("DEBUG")]
+		[Conditional("ASSERTS")]
 		public static void IsNull<T>(this T value, string message = "")
 		{
 			Assert.IsNull(value, message);
@@ -341,7 +340,7 @@ namespace Funq.Collections
 		/// <summary>
 		///   Assert.AreSame
 		/// </summary>
-		[Conditional("DEBUG")]
+		[Conditional("ASSERTS")]
 		public static void IsSameReferenceAs<T>(this T actual, T expected, string message = "")
 		{
 			Assert.AreSame(expected, actual, message);
@@ -350,7 +349,7 @@ namespace Funq.Collections
 		/// <summary>
 		///   Is(true)
 		/// </summary>
-		[Conditional("DEBUG")]
+		[Conditional("ASSERTS")]
 		public static void IsTrue(this bool value, string message = "")
 		{
 #if ASSERTS

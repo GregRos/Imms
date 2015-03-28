@@ -37,7 +37,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;NO_MUTATION ASSERTS</DefineConstants>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -64,12 +64,12 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="nunit.framework" Condition="$(DefineConstants.Contains('DEBUG'))">
+    <Reference Include="nunit.framework" Condition="$(DefineConstants.Contains('ASSERTS'))">
       <HintPath>..\NUnit-2.6.2\bin\framework\nunit.framework.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChainingAssertion.NUnit.cs" Condition="$(DefineConstants.Contains('DEBUG'))" />
+    <Compile Include="ChainingAssertion.NUnit.cs" Condition="$(DefineConstants.Contains('ASSERTS'))" />
     <Compile Include="Common\ChangeMarker.cs" />
     <Compile Include="Common\Marked.cs" />
     <Compile Include="Implementation\OrderedAvlTree\TreeIterator.cs" />

@@ -14,14 +14,14 @@ However, Funq has several distinguishing and important features that make it dif
 **Note:** Funq collections can't be called *purely functional* because they involve mutations behind the scenes. This is for performance reasons, as object allocation is expensive in .NET. However, all the mutations Funq performs are invisible, in the sense that they do not change the state of any object visible to the user.
 
 ## Current Status
-The collections are in an early version right now, and not fit for production use.
+The collections are in an early version right now, and not fit for production use. They're definitely usable and stable, though some things like edge cases and error messages probably need to be worked out.
 
 The collections have reached a very satisfactory level of optimization and functionality, so there is no reason to work on those for now. The following things need to be done:
 
 1. **Design:** Some final design decisions need to be made to finalize the interface, especially the F# interface and things like operators. Also make sure to hide everything that needs to be hidden.
 2. **Exceptions:** Make sure the collections throw the right exceptions at the right time.
-2. **Integrity testing:** Running all kinds of operations on the collections and checking the result is correct. The collections check themselves through asserts in the code, but a systematic integrity check is required to find the remaining bugs (there are always remaining bugs).
-2. **Unit testing:** Hand-testing edge cases and exception, mainly.
+2. **Integrity testing:** Running all kinds of operations on the collections and checking the result is correct. The collections check themselves through asserts in the code, but a systematic integrity check is required to find the remaining bugs (there are always remaining bugs). This part is mostly done.
+2. **Unit testing:** Hand-testing edge cases and exception, mainly. 
 2. **Documentation:** Document the entire API. Large parts of it are documented already, but not everything. In particular, the F# side is poorly documented. Internal documentation should also be added to explain how the classes work, in case people fork the project/want to work on it. Some of the code is tricky and messy.
 
 ## The Collections
@@ -54,11 +54,11 @@ These are the benchmark results for the sequential collections, compared with si
 
 	| Collection/Test      | AddFirst | AddFirstRange | AddFirstRange (concat) | AddLast | AddLastRange | AddLastRange (concat) | DropFirst | DropLast | IEnumerator | Insert | Insert Range | Insert Range (concat operation) | Iterate | Lookup | Remove | Skip  | Take  | Update |
 	|----------------------|----------|---------------|------------------------|---------|--------------|-----------------------|-----------|----------|-------------|--------|--------------|---------------------------------|---------|--------|--------|-------|-------|--------|
-	| FSharpx.Deque        | 0.444    | 4.729         | 6.676                  | 0.434   | 4.928        | 6.038                 | 0.473     | 1.275    | 0.239       | X      | X            | X                               | 0.304   | X      | X      | X     | X     | X      |
-	| FSharpx.Vector       | X        | X             | 17.841                 | 2.267   | 16.115       | 18.134                | X         | 4.848    | 0.196       | X      | X            | X                               | 0.209   | 0.328  | X      | X     | X     | 5.991  |
-	| FunqList             | 3.18     | 7.058         | 0.017                  | 3.478   | 7.257        | 0.013                 | 1.325     | 1.379    | 0.479       | 26.378 | 7.311        | 0.029                           | 0.105   | 1.703  | 11.057 | 0.011 | 0.013 | 8.093  |
-	| FunqVector           | X        | 0.247         | 0.514                  | 2.697   | 0.258        | 0.563                 | X         | 2.447    | 0.144       | X      | 0.503        | 0.772                           | 0.033   | 0.181  | X      | 0.094 | 0.002 | 2.881  |
-	| System.ImmutableList | 8.402    | 25.83         | 38.93                  | 9.003   | 25.659       | 40.994                | 4.48      | 4.421    | 1.852       | 14.851 | 28.187       | 42.459                          | 2.14    | 2.153  | 10.531 | 1.646 | 5.124 | 10.226 |
+	| FSharpx.Deque        | 0.438    | 0.226         | 0.322                  | 0.44    | 0.351        | 0.306                 | 0.587     | 1.343    | 0.211       | X      | X            | X                               | 0.267   | X      | X      | X     | X     | X      |
+	| FSharpx.Vector       | X        | X             | 2.59                   | 1.981   | 2.411        | 3.082                 | X         | 5.147    | 0.207       | X      | X            | X                               | 0.339   | 0.333  | X      | X     | X     | 7.633  |
+	| FunqList             | 2.017    | 0.514         | 0.01                   | 2.105   | 0.503        | 0.011                 | 0.917     | 0.922    | 0.53        | 40.362 | 0.469        | 0.048                           | 0.097   | 1.868  | 11.254 | 0.013 | 0.012 | 7.801  |
+	| FunqVector           | X        | 0.019         | 0.09                   | 2.846   | 0.018        | 0.049                 | X         | 2.258    | 0.145       | X      | 0.321        | 0.364                           | 0.059   | 0.141  | X      | 0.28  | 0.002 | 2.745  |
+	| System.ImmutableList | 11.378   | 2.473         | 3.469                  | 8.25    | 2.512        | 3.462                 | 4.115     | 16.293   | 1.726       | 29.247 | 2.319        | 3.499                           | 2.147   | 1.691  | 17.375 | 3.136 | 4.03  | 8.968  |
 ### Sets
 Sets are collections that store unique elements. They provide methods for adding elements, removing them, and checking if they already exist in the set. They also provide set-theoretic relations (e.g. set equality, superset, subset), and set-theoretic operations, such as intersection and union. Funq provides two set-like collections.
 
@@ -175,13 +175,13 @@ The library is stand-alone and requires no dependencies.
 
 **Funq.Abstract** offers the following collection abstractions:
  
-* `Trait_Iterable`, the parent class for all collections that support some form of iteration. Implements LINQ-operations such as `Any, All, Find, ForEach, Aggregate` and provides partial implementations for operations such as `Cast, Select, GroupBy`.
+* `AbstractIterable`, the parent class for all collections that support some form of iteration. Implements LINQ-operations such as `Any, All, Find, ForEach, Aggregate` and provides partial implementations for operations such as `Cast, Select, GroupBy`.
 
-* `Trait_Sequential`, the parent class for all sequential collections (where one element follows another in order).  Naively implements operations such as `this[int]`, `FindIndex`, `OrderBy`, and `Take`. 
+* `AbstractSequential`, the parent class for all sequential collections (where one element follows another in order).  Naively implements operations such as `this[int]`, `FindIndex`, `OrderBy`, and `Take`. 
 
-* `Trait_MapLike`, the parent class for all map- or dictionary-like collections, offering implementations for set-like operations over maps, such as `Join` (joins by key), `Merge` (merge by key), and so forth. Also offers specialized versions of some of the operations implemented on `Trait_Iterable`.
+* `AbstractMap`, the parent class for all map- or dictionary-like collections, offering implementations for set-like operations over maps, such as `Join` (joins by key), `Merge` (merge by key), and so forth. Also offers specialized versions of some of the operations implemented on `Trait_Iterable`.
 
-* `Trait_SetLike`, the parent class of all set-like collections, offering naive implementations for standard set operations.
+* `AbstractSet`, the parent class of all set-like collections, offering naive implementations for standard set operations.
 
 ## Possibilities
 Funq is designed with users directly in mind. However, its combination of power and performance can provide the basis for other libraries. Here are some of the things that could be implemented using the features provided by Funq:

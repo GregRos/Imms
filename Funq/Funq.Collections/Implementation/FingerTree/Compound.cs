@@ -355,9 +355,9 @@ namespace Funq.Collections.Implementation
 						LeftDigit.Fuse(fromDeep, out first, out last, lineage);
 						if (last == null)
 						{
-							return new Compound(first, newDeep, RightDigit, lineage);
+							return MutateOrCreate(first, newDeep, RightDigit, lineage);
 						}
-						return new Compound(first, newDeep.AddFirst(last, lineage), RightDigit, lineage);
+						return MutateOrCreate(first, newDeep.AddFirst(last, lineage), RightDigit, lineage);
 					}
 				}
 
@@ -381,11 +381,13 @@ namespace Funq.Collections.Implementation
 						var newDeep = DeepTree.DropLast(lineage);
 						Digit first, last;
 						fromDeep.Fuse(RightDigit, out first, out last, lineage);
-						if (last == null)
-						{
-							return new Compound(LeftDigit, newDeep, first, lineage);
+						if (last == null) {
+							ret = MutateOrCreate(LeftDigit, newDeep, first, lineage);
 						}
-						ret = new Compound(LeftDigit, newDeep.AddFirst(first, lineage), last, lineage);
+						else {
+							ret = MutateOrCreate(LeftDigit, newDeep.AddLast(first, lineage), last, lineage);
+						}
+						
 					}
 #if ASSERTS
 					ret.Measure.Is(this.Measure);
@@ -492,39 +494,42 @@ namespace Funq.Collections.Implementation
 					{
 						case IN_START:
 						case IN_MIDDLE_OF_LEFT:
-							if (LeftDigit.IsFragment)
-							{
+							if (LeftDigit.IsFragment) {
 								var fixedTree = FixLeftDigit(lineage);
-								return fixedTree.Remove(index, lineage);
+								ret = fixedTree.Remove(index, lineage);
 							}
-							newLeft = LeftDigit.Remove(index, lineage);
-							ret = CreateCheckNull(lineage, newLeft, DeepTree, RightDigit);
+							else {
+								newLeft = LeftDigit.Remove(index, lineage);
+								ret = CreateCheckNull(lineage, newLeft, DeepTree, RightDigit);
+							}
 							break;
 						case IN_START_OF_DEEP:
 						case IN_MIDDLE_OF_DEEP:
 							if (DeepTree.Measure == 0) goto case IN_START_OF_RIGHT;
 							var deep = DeepTree;
 							FTree<Digit> newDeep;
-							if (deep.IsFragment)
-							{
+							if (deep.IsFragment) {
 								newDeep = deep.AddFirst(LeftDigit, lineage);
 								newDeep = newDeep.Remove(index, lineage);
 								newLeft = newDeep.Left;
 								newDeep = newDeep.DropFirst(lineage);
-								return new Compound(newLeft, newDeep, RightDigit, lineage);
+								ret = MutateOrCreate(newLeft, newDeep, RightDigit, lineage);
 							}
-							newDeep = DeepTree.Remove(index - LeftDigit.Measure, lineage);
-							ret =  CreateCheckNull(lineage, LeftDigit, newDeep, RightDigit);
+							else {
+								newDeep = DeepTree.Remove(index - LeftDigit.Measure, lineage);
+								ret = CreateCheckNull(lineage, LeftDigit, newDeep, RightDigit);
+							}
 							break;
 						case IN_START_OF_RIGHT:
 						case IN_MIDDLE_OF_RIGHT:
-							if (RightDigit.IsFragment)
-							{
+							if (RightDigit.IsFragment) {
 								var fixedTree = FixRightDigit(lineage);
-								return fixedTree.Remove(index, lineage);
+								ret = fixedTree.Remove(index, lineage);
 							}
-							var newRight = RightDigit.Remove(index - LeftDigit.Measure - DeepTree.Measure, lineage);
-							ret =  CreateCheckNull(lineage, LeftDigit, DeepTree, newRight);
+							else {
+								var newRight = RightDigit.Remove(index - LeftDigit.Measure - DeepTree.Measure, lineage);
+								ret = CreateCheckNull(lineage, LeftDigit, DeepTree, newRight);
+							}
 							break;
 						default:
 							throw ImplErrors.Invalid_execution_path;

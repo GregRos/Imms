@@ -135,8 +135,11 @@ namespace Funq.Collections.Implementation
 
 			public override bool IterWhileFrom(int index, Func<TValue, bool> conditional) {
 				var myIndex = (index & myBlock) >> offs;
-				for (int i = myIndex; i < ArrSize; i++) {
-					if (!Arr[i].IterWhileFrom(index, conditional)) {
+				if (!Arr[myIndex].IterWhileFrom(index, conditional)) {
+					return false;
+				}
+				for (int i = myIndex + 1; i < ArrSize; i++) {
+					if (!Arr[i].IterWhile(conditional)) {
 						return false;
 					}
 				}

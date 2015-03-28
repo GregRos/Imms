@@ -5,6 +5,7 @@ open System.CodeDom.Compiler
 open System
 open System.Collections.Generic
 open Funq.FSharp
+open System.Diagnostics
 ///A module with some extra sequence processing functions.
 let inline (^*) (a : int) (b : int) = pown a b
 
@@ -43,7 +44,12 @@ module Seq =
     let equalsWith areEqual a b = 
         let rec iter (it1 :_ Iter) (it2 : _ Iter) = 
             match it1.MoveNext(), it2.MoveNext() with
-            | true, true -> areEqual(it1.Current)(it2.Current) && iter it1 it2
+            | true, true ->
+                 let eq = areEqual(it1.Current)(it2.Current)
+                 if not eq then 
+                    let blah = 4
+                    ()
+                 eq && iter it1 it2
             | false, false -> true
             | _ -> false
         iter (a |> getIter) (b |> getIter)
