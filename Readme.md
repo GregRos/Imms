@@ -25,8 +25,10 @@ The collections have reached a very satisfactory level of optimization and funct
 2. **Documentation:** Document the entire API. Large parts of it are documented already, but not everything. In particular, the F# side is poorly documented. Internal documentation should also be added to explain how the classes work, in case people fork the project/want to work on it. Some of the code is tricky and messy.
 
 ## The Collections
+To see up to date benchmarks you can go to the [benchmarks folder](https://github.com/GregRos/Funq/tree/master/Funq/Funq.Tests.Performance/Benchmarks). Each set of benchmarks includes charts, a CSV table, and a CSV log file with explicit information about the parameters of the benchmark.
 
 ### Sequential Collections
+
 Funq provides two sequential collections:
 
  1. **FunqList:** Is not just a list. It's a very versatile sequential collection that efficiently implements pretty much every operation you can name, as you can see from the table below. This includes additional and removal from the ends, indexed operations (look up, update, insert, remove), concatenation (including in the middle), and slices. 
