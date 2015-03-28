@@ -80,13 +80,7 @@ namespace Funq.Collections
 			return FunqMap<TKey, TValue>.Empty(eq);
 		}
 
-
 		public static FunqMap<TKey, TValue> ToFunqMap<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> kvps, IEqualityComparer<TKey> eq = null)
-		{
-			return FunqMap<TKey, TValue>.Empty(eq).AddRange(kvps);
-		}
-
-		public static FunqMap<TKey, TValue> ToFunqMap<TKey, TValue>(this IEnumerable<Kvp<TKey, TValue>> kvps, IEqualityComparer<TKey> eq = null)
 		{
 			return FunqMap<TKey, TValue>.Empty(eq).AddRange(kvps);
 		}
@@ -99,13 +93,13 @@ namespace Funq.Collections
 
 
 
-		public static FunqOrderedMap<TKey, TValue> ToFunqOrderedMap<TKey, TValue>(this IEnumerable<Kvp<TKey, TValue>> kvps)
+		public static FunqOrderedMap<TKey, TValue> ToFunqOrderedMap<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> kvps)
 			where TKey : IComparable<TKey>
 		{
 			return FunqOrderedMap<TKey, TValue>.Empty(null).AddRange(kvps);
 		}
 
-		public static FunqOrderedMap<TKey, TValue> ToFunqOrderedMap<TKey, TValue>(this IEnumerable<Kvp<TKey, TValue>> kvps, IComparer<TKey> cmp)
+		public static FunqOrderedMap<TKey, TValue> ToFunqOrderedMap<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> kvps, IComparer<TKey> cmp)
 		{
 			return FunqOrderedMap<TKey, TValue>.Empty(cmp).AddRange(kvps);
 		}

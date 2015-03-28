@@ -8,7 +8,7 @@ namespace Funq.Collections
 	using Funq.Abstract;
 	using Linq = System.Linq;
 	
-	public partial class FunqMap<TKey,TValue> : Trait_MapLike<TKey,TValue,FunqMap<TKey,TValue>>
+	public partial class FunqMap<TKey,TValue> : AbstractMap<TKey,TValue,FunqMap<TKey,TValue>>
 	{
 		private FunqMap<TKey2,TValue2> GetPrototype<TKey2,TValue2>(IEqualityComparer<TKey2> ph)
 		{
@@ -23,7 +23,7 @@ namespace Funq.Collections
 		/// <param name="selector">The selector.</param>
 		/// <param name="handler">A new equality or comparison handler for constructing the resulting map.</param>
 		/// <returns></returns>
-		public FunqMap<TRKey,TRValue> Select<TRKey,TRValue>(Func<Kvp<TKey,TValue>, Kvp<TRKey,TRValue>> selector, IEqualityComparer<TRKey> handler = null)
+		public FunqMap<TRKey,TRValue> Select<TRKey,TRValue>(Func<KeyValuePair<TKey,TValue>, KeyValuePair<TRKey,TRValue>> selector, IEqualityComparer<TRKey> handler = null)
 		{
 			if (selector == null) throw Errors.Is_null;
 			return base.Select(GetPrototype<TRKey,TRValue>(handler), selector);
@@ -37,7 +37,7 @@ namespace Funq.Collections
 		/// <param name="selector">The selector.</param>
 		/// <param name="handler">A new equality or comparison handler for constructing the resulting map.</param>
 		/// <returns></returns>
-		public FunqMap<TRKey, TRValue> Select<TRKey, TRValue>(Func<Kvp<TKey, TValue>, Option<Kvp<TRKey, TRValue>>> selector, IEqualityComparer<TRKey> handler = null)
+		public FunqMap<TRKey, TRValue> Select<TRKey, TRValue>(Func<KeyValuePair<TKey, TValue>, Option<KeyValuePair<TRKey, TRValue>>> selector, IEqualityComparer<TRKey> handler = null)
 		{
 			if (selector == null) throw Errors.Is_null;
 			return base.Choose(this.GetPrototype<TRKey,TRValue>(handler), selector);
@@ -51,7 +51,7 @@ namespace Funq.Collections
 		/// <param name="selector">The selector.</param>
 		/// <param name="handler">A new equality or comparison handler for constructing the resulting map.</param>
 		/// <returns></returns>
-		public FunqMap<TRKey,TRValue> Select<TRKey,TRValue>(Func<TKey, TValue, Kvp<TRKey,TRValue>> selector, IEqualityComparer<TRKey> handler = null)
+		public FunqMap<TRKey,TRValue> Select<TRKey,TRValue>(Func<TKey, TValue, KeyValuePair<TRKey,TRValue>> selector, IEqualityComparer<TRKey> handler = null)
 		{
 			if (selector == null) throw Errors.Is_null;
 			return base.Select(this.GetPrototype<TRKey, TRValue>(handler), kvp => selector(kvp.Key, kvp.Value));
@@ -82,7 +82,7 @@ namespace Funq.Collections
 		/// <param name="other"></param>
 		/// <param name="collision"></param>
 		/// <returns></returns>
-		public FunqMap<TKey, TRValue> Join<TValue2, TRValue>(ITrait_MapLike<TKey, TValue2> other, Func<TKey, TValue, TValue2, TRValue> collision)
+		public FunqMap<TKey, TRValue> Join<TValue2, TRValue>(IAnyMapLike<TKey, TValue2> other, Func<TKey, TValue, TValue2, TRValue> collision)
 		{
 			if (other == null) throw Errors.Is_null;
 			if (collision == null) throw Errors.Is_null;
@@ -99,8 +99,8 @@ namespace Funq.Collections
 		/// <param name="rSelector">The r selector.</param>
 		/// <param name="handler">A new equality or comparison handler for constructing the resulting map.</param>
 		/// <returns></returns>
-		public FunqMap<TRKey,TRValue> SelectMany<TRKey,TRValue,TProject>(Func<Kvp<TKey,TValue>, IEnumerable<TProject>> selector,
-																						Func<Kvp<TKey,TValue>, IEnumerable<TProject>, Kvp<TRKey,TRValue>> rSelector, IEqualityComparer<TRKey> handler = null)
+		public FunqMap<TRKey,TRValue> SelectMany<TRKey,TRValue,TProject>(Func<KeyValuePair<TKey,TValue>, IEnumerable<TProject>> selector,
+																						Func<KeyValuePair<TKey,TValue>, IEnumerable<TProject>, KeyValuePair<TRKey,TRValue>> rSelector, IEqualityComparer<TRKey> handler = null)
 		{
 			if (selector == null) throw Errors.Is_null;
 			if (rSelector == null) throw Errors.Is_null;

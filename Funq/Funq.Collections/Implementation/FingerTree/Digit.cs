@@ -29,7 +29,7 @@ namespace Funq.Collections.Implementation
 					{
 						get
 						{
-#if DEBUG
+#if ASSERTS
 							_inner.IsNotNull();
 #endif
 							return _inner.Current;
@@ -122,7 +122,7 @@ namespace Funq.Collections.Implementation
 				public Digit(TChild one, Lineage lineage)
 					: base(one.Measure, lineage, 1)
 				{
-#if DEBUG
+#if ASSERTS
 
 					one.IsNotNull();
 #endif
@@ -133,7 +133,7 @@ namespace Funq.Collections.Implementation
 				public Digit(TChild one, TChild two, Lineage lineage)
 					: base(one.Measure + two.Measure, lineage, 2)
 				{
-#if DEBUG
+#if ASSERTS
 
 					one.IsNotNull();
 					two.IsNotNull();
@@ -146,7 +146,7 @@ namespace Funq.Collections.Implementation
 				public Digit(TChild one, TChild two, TChild three, Lineage lineage)
 					: base(one.Measure + two.Measure + three.Measure, lineage, 3)
 				{
-#if DEBUG
+#if ASSERTS
 					AssertEx.AreNotNull(one, two, three);
 
 #endif
@@ -160,7 +160,7 @@ namespace Funq.Collections.Implementation
 				public Digit(TChild one, TChild two, TChild three, TChild four, Lineage lineage)
 					: base(one.Measure + two.Measure + three.Measure + four.Measure, lineage, 4)
 				{
-#if DEBUG
+#if ASSERTS
 					AssertEx.AreNotNull(one, two, three, four);
 
 #endif
@@ -255,7 +255,7 @@ namespace Funq.Collections.Implementation
 
 				public static void ReformDigitsForConcat(Lineage lineage, Digit digit, Digit other, out Digit leftmost, out Digit middle, out Digit rightmost)
 				{
-#if DEBUG
+#if ASSERTS
 					digit.IsNotNull();
 					other.IsNotNull();
 #endif
@@ -336,7 +336,7 @@ namespace Funq.Collections.Implementation
 				{
 					get
 					{
-#if DEBUG
+#if ASSERTS
 						index.Is(i => i < Measure);
 #endif
 						var m_1 = First.Measure;
@@ -473,7 +473,7 @@ namespace Funq.Collections.Implementation
 
 				public override void Insert(int index, Leaf<TValue> leaf, out Digit leftmost, out Digit rightmost, Lineage lineage)
 				{
-#if DEBUG
+#if ASSERTS
 					leaf.IsNotNull();
 #endif
 
@@ -546,7 +546,7 @@ namespace Funq.Collections.Implementation
 
 				public override void Iter(Action<Leaf<TValue>> action)
 				{
-#if DEBUG
+#if ASSERTS
 					action.IsNotNull();
 #endif
 					switch (Size)
@@ -575,7 +575,7 @@ namespace Funq.Collections.Implementation
 
 				public override void IterBack(Action<Leaf<TValue>> action)
 				{
-#if DEBUG
+#if ASSERTS
 					action.IsNotNull();
 #endif
 					switch (Size)
@@ -604,7 +604,7 @@ namespace Funq.Collections.Implementation
 
 				public override bool IterBackWhile(Func<Leaf<TValue>, bool> action)
 				{
-#if DEBUG
+#if ASSERTS
 					action.IsNotNull();
 #endif
 					if (Fourth != null)
@@ -624,7 +624,7 @@ namespace Funq.Collections.Implementation
 
 				public override bool IterWhile(Func<Leaf<TValue>, bool> action)
 				{
-#if DEBUG
+#if ASSERTS
 					action.IsNotNull();
 #endif
 
@@ -673,7 +673,7 @@ namespace Funq.Collections.Implementation
 				public override Digit Remove(int index, Lineage lineage)
 				{
 					var whereIsThisIndex = WhereIsThisIndex(index);
-#if DEBUG
+#if ASSERTS
 					Size.IsNot(1);
 #endif
 					TChild res;
@@ -743,7 +743,7 @@ namespace Funq.Collections.Implementation
 
 				public override void Split(int index, out Digit leftmost, out Digit rightmost, Lineage lineage)
 				{
-#if DEBUG
+#if ASSERTS
 					index.Is(i => i <= Measure);
 #endif
 					var whereIsThisIndex = WhereIsThisIndex(index);
@@ -796,7 +796,7 @@ namespace Funq.Collections.Implementation
 				public override Digit Update(int index, Leaf<TValue> leaf, Lineage lineage)
 				{
 					if (Lineage.AllowMutation(lineage)) return Update_MUTATES(index, leaf);
-#if DEBUG
+#if ASSERTS
 					leaf.IsNotNull();
 #endif
 					var whereIsThisIndex = WhereIsThisIndex(index);
@@ -856,7 +856,7 @@ namespace Funq.Collections.Implementation
 				/// <returns> </returns>
 				private int WhereIsThisIndex(int index)
 				{
-#if DEBUG
+#if ASSERTS
 					index.Is(i => i < Measure);
 #endif
 					var measure_1 = First.Measure;

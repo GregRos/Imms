@@ -105,7 +105,7 @@ namespace Funq.Collections.Implementation
 				public Compound(Digit leftDigit, FTree<Digit> deepTree, Digit rightDigit, Lineage lineage)
 					: base(leftDigit.Measure + deepTree.Measure + rightDigit.Measure, TreeType.Compound, lineage, 3)
 				{
-#if DEBUG2
+#if ASSERTS2
 					leftDigit.IsNotNull();
 					deepTree.IsNotNull();
 					rightDigit.IsNotNull();
@@ -156,7 +156,7 @@ namespace Funq.Collections.Implementation
 				{
 					get
 					{
-#if DEBUG
+#if ASSERTS
 						index.Is(i => i < Measure);
 #endif
 						var m1 = LeftDigit.Measure;
@@ -233,7 +233,7 @@ namespace Funq.Collections.Implementation
 				public override FTree<TChild> AddFirst(TChild item, Lineage lineage)
 				{
 					FTree<TChild> ret;
-#if DEBUG
+#if ASSERTS
 					var expected_size = Measure + item.Measure;
 #endif
 					if (LeftDigit.Size < 4)
@@ -247,7 +247,7 @@ namespace Funq.Collections.Implementation
 						var newDeep = DeepTree.AddFirst(rightmost, lineage);
 						ret =  MutateOrCreate(leftmost, newDeep, RightDigit, lineage);
 					}
-#if DEBUG
+#if ASSERTS
 					ret.Measure.Is(expected_size);
 					ret.Left.Is(item);
 #endif
@@ -258,7 +258,7 @@ namespace Funq.Collections.Implementation
 
 				public override FTree<TChild> AddLast(TChild item, Lineage lineage)
 				{
-#if DEBUG
+#if ASSERTS
 					var expected_size = Measure + item.Measure;
 #endif
 					FTree<TChild> ret;
@@ -273,7 +273,7 @@ namespace Funq.Collections.Implementation
 						var newDeep = DeepTree.AddLast(leftmost, lineage);
 						ret =  MutateOrCreate(LeftDigit, newDeep, rightmost, lineage);
 					}
-#if DEBUG
+#if ASSERTS
 					ret.Measure.Is(expected_size);
 					ret.Right.Is(item);
 #endif
@@ -285,7 +285,7 @@ namespace Funq.Collections.Implementation
 				public override FTree<TChild> DropFirst(Lineage lineage)
 				{
 					FTree<TChild> ret;
-#if DEBUG
+#if ASSERTS
 					var expected = Measure - Left.Measure;
 #endif
 
@@ -301,7 +301,7 @@ namespace Funq.Collections.Implementation
 						ret =  MutateOrCreate(new_left, new_deep, RightDigit, lineage);
 					}
 					else ret =  new Single(RightDigit, lineage);
-#if DEBUG
+#if ASSERTS
 					ret.Measure.Is(expected);
 #endif
 					return ret;
@@ -311,7 +311,7 @@ namespace Funq.Collections.Implementation
 				public override FTree<TChild> DropLast(Lineage lineage)
 				{
 					FTree<TChild> ret;
-#if DEBUG
+#if ASSERTS
 					var expected_size = Measure - Right.Measure;
 #endif
 					if (RightDigit.Size > 1)
@@ -329,7 +329,7 @@ namespace Funq.Collections.Implementation
 					{
 						ret = new Single(LeftDigit, lineage);
 					}
-#if DEBUG
+#if ASSERTS
 					ret.Measure.Is(expected_size);
 #endif
 					return ret;
@@ -387,7 +387,7 @@ namespace Funq.Collections.Implementation
 						}
 						ret = new Compound(LeftDigit, newDeep.AddFirst(first, lineage), last, lineage);
 					}
-#if DEBUG
+#if ASSERTS
 					ret.Measure.Is(this.Measure);
 #endif
 					return ret;
@@ -401,7 +401,7 @@ namespace Funq.Collections.Implementation
 				public override FTree<TChild> Insert(int index, Leaf<TValue> leaf, Lineage lineage)
 				{
 					var whereIsThisIndex = WhereIsThisIndex(index);
-#if DEBUG
+#if ASSERTS
 					var new_measure = Measure + 1;
 					var old_value = this[index].Value;
 #endif
@@ -432,7 +432,7 @@ namespace Funq.Collections.Implementation
 							res = MutateOrCreate(LeftDigit, new_deep, right_r, lineage);
 							break;
 					}
-#if DEBUG
+#if ASSERTS
 					res.Measure.Is(new_measure);
 					res[index].Value.Is(leaf.Value);
 					res[index + 1].Value.Is(old_value);
@@ -444,7 +444,7 @@ namespace Funq.Collections.Implementation
 
 				public override void Iter(Action<Leaf<TValue>> action)
 				{
-#if DEBUG
+#if ASSERTS
 					action.IsNotNull();
 #endif
 					LeftDigit.Iter(action);
@@ -454,7 +454,7 @@ namespace Funq.Collections.Implementation
 
 				public override void IterBack(Action<Leaf<TValue>> action)
 				{
-#if DEBUG
+#if ASSERTS
 					action.IsNotNull();
 #endif
 					RightDigit.IterBack(action);
@@ -483,7 +483,7 @@ namespace Funq.Collections.Implementation
 					var whereIsThisIndex = WhereIsThisIndex(index);
 					Digit newLeft;
 					FTree<TChild> ret = this;
-#if DEBUG
+#if ASSERTS
 					var new_measure = Measure - 1;
 					var expected_at_index = index != Measure - 1 ? this[index + 1] : null;
 					var expected_before_index = index != 0 ? this[index - 1] : null;
@@ -529,7 +529,7 @@ namespace Funq.Collections.Implementation
 						default:
 							throw ImplErrors.Invalid_execution_path;
 					}
-#if DEBUG
+#if ASSERTS
 					ret.Measure.Is(new_measure);
 					if (expected_at_index != null) ret[index].Value.Is(expected_at_index.Value);
 					if (expected_before_index != null) ret[index-1].Value.Is(expected_before_index.Value);
@@ -547,7 +547,7 @@ namespace Funq.Collections.Implementation
 				public override void Split(int count, out FTree<TChild> leftmost, out FTree<TChild> rightmost, Lineage lineage)
 				{
 					var whereIsThisIndex = WhereIsThisIndex(count);
-#if DEBUG
+#if ASSERTS
 					count.Is(i => i <= Measure && i >= 0);
 					var my_measure = Measure;
 					var expected_leftmost_last = count > 0 ? this[count - 1] : null;
@@ -595,7 +595,7 @@ namespace Funq.Collections.Implementation
 						default:
 							throw ImplErrors.Invalid_execution_path;
 					}
-#if DEBUG
+#if ASSERTS
 					leftmost.Measure.Is(count);
 					rightmost.Measure.Is(Measure - count);
 					if (expected_leftmost_first != null) leftmost[0].Is(expected_leftmost_first);
@@ -611,7 +611,7 @@ namespace Funq.Collections.Implementation
 				{
 					var whereIsThisIndex = WhereIsThisIndex(index);
 					FTree<TChild> ret;
-#if DEBUG
+#if ASSERTS
 					var old_size = Measure;
 #endif
 					switch (whereIsThisIndex)
@@ -635,7 +635,7 @@ namespace Funq.Collections.Implementation
 						default:
 							throw Funq.Errors.Arg_out_of_range("index", index);
 					}
-#if DEBUG
+#if ASSERTS
 					ret.Measure.Is(old_size);
 					ret[index].Is(leaf);
 #endif

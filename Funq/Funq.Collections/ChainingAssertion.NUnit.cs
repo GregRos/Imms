@@ -60,10 +60,10 @@
  * var upper = new[] { "A", "B", "C" };
  *
  * // EqualityComparer CollectionAssert, use IEqualityComparer<T> or Func<T,T,bool> delegate
- * #if DEBUG 
+ * #if ASSERTS 
  lower.Is(upper, StringComparer.InvariantCultureIgnoreCase); 
  #endif
- * #if DEBUG 
+ * #if ASSERTS 
  lower.Is(upper, (x, y) => x.ToUpper() == y.ToUpper()); 
  #endif
  *
@@ -122,6 +122,7 @@
  * 
  * -- more details see project home --*/
 
+#if ASSERTS
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -130,10 +131,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-#if DEBUG
 using NUnit.Framework;
 
-#endif
+
 
 namespace Funq.Collections
 {
@@ -239,7 +239,7 @@ namespace Funq.Collections
 		[Conditional("DEBUG")]
 		public static void IsFalse(this bool value, string message = "")
 		{
-#if DEBUG
+#if ASSERTS
 			value.Is(false, message);
 #endif
 		}
@@ -353,7 +353,7 @@ namespace Funq.Collections
 		[Conditional("DEBUG")]
 		public static void IsTrue(this bool value, string message = "")
 		{
-#if DEBUG
+#if ASSERTS
 			value.Is(true, message);
 #endif
 		}
@@ -361,3 +361,4 @@ namespace Funq.Collections
 
 	#endregion
 }
+#endif

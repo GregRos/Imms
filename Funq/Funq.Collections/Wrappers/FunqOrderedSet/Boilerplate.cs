@@ -7,7 +7,7 @@ namespace Funq.Collections
 	using Funq;
 	using Funq.Abstract;
 	
-	public partial class FunqOrderedSet<T> : Trait_SetLike<T, FunqOrderedSet<T>>
+	public partial class FunqOrderedSet<T> : AbstractSet<T, FunqOrderedSet<T>>
 	{
 		private FunqOrderedSet<TElem2> GetPrototype<TElem2>(IComparer<TElem2> ph)
 		{

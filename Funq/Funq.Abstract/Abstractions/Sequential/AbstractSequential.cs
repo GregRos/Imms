@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
+using System.Reflection;
 
 #pragma warning disable 279 //"doesn't implement collection pattern..." yes, I know.
 namespace Funq.Abstract
@@ -10,13 +12,14 @@ namespace Funq.Abstract
 	/// </summary>
 	/// <typeparam name="TList"> The type of the underlying collection. </typeparam>
 	/// <typeparam name="TElem"> The type of element stored in the collection. </typeparam>
-	/// <typeparam name="TList"> The type of the provider which implements this class. </typeparam>
-	public abstract partial class Trait_Sequential<TElem, TList> : Trait_Iterable<TElem, TList, IterableBuilder<TElem>>, ITrait_Sequential<TElem> where TList : Trait_Sequential<TElem, TList>
+	public abstract partial class AbstractSequential<TElem, TList>
+		: AbstractIterable<TElem, TList, IterableBuilder<TElem>>, IAnySequential<TElem> 
+		where TList : AbstractSequential<TElem, TList>
 	{
 
 		public override int GetHashCode()
 		{
-			return Equality.List_HashCode(this);
+			return Equality.Seq_HashCode(this);
 		}
 
 		/// <summary>
@@ -73,7 +76,6 @@ namespace Funq.Abstract
 				index = index < 0 ? index + Length : index;
 				if (index < 0 || index > Length) throw Errors.Arg_out_of_range("index");
 				return this.GetItem(index);
-
 			}
 		}
 
@@ -167,7 +169,7 @@ namespace Funq.Abstract
 		/// <param name="other"></param>
 		/// <exception cref="ArgumentNullException">Thrown if the argument is null.</exception>
 		/// <returns></returns>
-		public TList Concat(ITrait_Iterable<TElem> other)
+		public TList Concat(IAnyIterable<TElem> other)
 		{
 			if (other == null) throw Errors.Argument_null("other");
 			using (var builder = BuilderFrom(this))
@@ -195,20 +197,22 @@ namespace Funq.Abstract
 		///   Copies a range of elements from the collection to the specified array.
 		/// </summary>
 		/// <param name="arr"> The array. </param>
-		/// <param name="start"> The index at which to start copying. </param>
+		/// <param name="myStart"> The index of the collection at which to start copying. </param>
+		/// <param name="arrStart">The index of the array at which to start copying.</param>
 		/// <param name="count"> The number of items to copy. </param>
 		/// <exception cref="ArgumentNullException">Thrown if the array is null.</exception>
 		/// /// <exception cref="ArgumentOutOfRangeException">Thrown if the array doesn't contain enough elements.</exception>
-		public virtual void CopyTo(TElem[] arr, int start, int count)
+		public virtual void CopyTo(TElem[] arr, int myStart, int arrStart, int count)
 		{
 			if (arr == null) throw Errors.Argument_null("arr");
-			if (arr.Length < count) throw Errors.Arg_out_of_range("count");
+			if (arr.Length < arrStart + count || Length < myStart + count) throw Errors.Arg_out_of_range("count");
+			var ix = 0;
 			ForEachWhileI((v, i) =>
 			              {
-				              if (i < start) return true;
-				              if (start >= count) return false;
-				              arr[start] = v;
-				              start++;
+				              if (i < myStart) return true;
+				              if (ix >= count) return false;
+				              arr[myStart + ix] = v;
+							  ix++;
 				              return true;
 			              });
 		}
@@ -245,11 +249,12 @@ namespace Funq.Abstract
 		{
 			if (predicate == null) throw Errors.Argument_null("predicate");
 			var item = Option.NoneOf<TElem>();
-			ForEachBackWhile(v =>
-			                 {
-				                 item = v;
-				                 return false;
-			                 });
+			Option<TElem> found = Option.None;
+			ForEach(x => {
+				if (predicate(x)) {
+					found = x;
+				}
+			});
 			return item;
 		}
 
@@ -278,9 +283,10 @@ namespace Funq.Abstract
 		public virtual bool ForEachBackWhile(Func<TElem, bool> iterator)
 		{
 			if (iterator == null) throw Errors.Argument_null("iterator");
-			foreach (var item in Reverse())
-			{
-				if (!iterator(item)) return false;
+			var list = new List<TElem>(Length);
+			ForEach(list.Add);
+			for (int i = list.Count - 1; i >= 0; i--) {
+				if (!iterator(list[i])) return false;
 			}
 			return true;
 		}
@@ -319,7 +325,7 @@ namespace Funq.Abstract
 			where TKey : IComparable
 		{
 			if (keySelector == null) throw Errors.Argument_null("keySelector");
-			return OrderBy(Comparison.ByKey(keySelector));
+			return OrderBy(Comparers.KeyComparer(keySelector));
 		}
 		/// <summary>
 		/// Sorts the current collection using a key selector.
@@ -332,7 +338,7 @@ namespace Funq.Abstract
 			where TKey : IComparable
 		{
 			if (keySelector == null) throw Errors.Argument_null("keySelector");
-			return OrderByDescending(Comparison.ByKey(keySelector));
+			return OrderByDescending(Comparers.KeyComparer(keySelector));
 		}
 		/// <summary>
 		/// Sorts the current collection using a comparer.
@@ -347,7 +353,7 @@ namespace Funq.Abstract
 		}
 
 		/// <summary>
-		///   Applies an accumulator on each element in the sequence. Begins by applying the accumulator on the first two elements. Runs from last to first.
+		///   Applies a selector on the first element to convert it, and applies the accumulator over the sequence. 
 		/// </summary>
 		/// <typeparam name="TResult"> The type of the result. </typeparam>
 		/// <param name="fold"> The accumulator </param>
@@ -381,7 +387,6 @@ namespace Funq.Abstract
 		{
 			using (var builder = EmptyBuilder)
 			{
-				builder.EnsureCapacity(Length);
 				ForEachBack((v) => builder.Add(v));
 				return ProviderFrom(builder);
 			}
@@ -398,8 +403,8 @@ namespace Funq.Abstract
         /// <exception cref="ArgumentNullException">Thrown if the argument null.</exception>
 		/// <returns> </returns>
 		protected virtual TRSeq ScanBack<TElem2, TRSeq>(TRSeq bFactory, TElem2 initial, Func<TElem2, TElem, TElem2> accumulator)
-			where TRSeq : ITrait_Sequential<TElem2>
-		{
+			where TRSeq : IAnySequential<TElem2> {
+			bFactory.IsNotNull("bFactory");
 			if (accumulator == null) throw Errors.Argument_null("accumulator");
 			using (var builder = bFactory.EmptyBuilder)
 			{
@@ -409,7 +414,7 @@ namespace Funq.Abstract
 					                       builder.Add(r);
 					                       return r;
 				                       });
-				return (TRSeq) bFactory.ProviderFrom(builder);
+				return (TRSeq) bFactory.IterableFrom(builder);
 			}
 		}
 
@@ -424,7 +429,6 @@ namespace Funq.Abstract
 		    if (count < 0) throw Errors.Invalid_arg_value("count", "0 or greater.");
 			using (var builder = EmptyBuilder)
 			{
-				builder.EnsureCapacity(count);
 				ForEachWhileI((v, i) =>
 				              {
 					              if (i >= count) builder.Add(v);
@@ -447,6 +451,10 @@ namespace Funq.Abstract
 			return Skip(index + 1);
 		}
 
+		public sealed override void CopyTo(TElem[] arr, int arrStart, int count) {
+			CopyTo(arr,0, arrStart, count);
+		}
+
 		/// <summary>
         ///   Returns a subsequence consisting of the specified number of elements. Returns empty if <paramref name="count"/> is greater than Length.
 		/// </summary>
@@ -458,7 +466,6 @@ namespace Funq.Abstract
             if (count < 0) throw Errors.Invalid_arg_value("count", "0 or greater.");
 			using (var builder = EmptyBuilder)
 			{
-				builder.EnsureCapacity(count);
 				ForEachWhileI((v, i) =>
 				              {
 					              if (i < count)
@@ -497,7 +504,7 @@ namespace Funq.Abstract
 		/// <param name="selector"> The selector. </param>
 		/// <returns> </returns>
 		protected virtual TRSeq Zip<TRElem, TRSeq, TInner>(TRSeq bFactory, IEnumerable<TInner> o, Func<TElem, TInner, TRElem> selector)
-			where TRSeq : ITrait_Sequential<TRElem>
+			where TRSeq : IAnySequential<TRElem>
 		{
 			using (var builder = bFactory.EmptyBuilder)
 			using (var iterator = o.GetEnumerator())
@@ -509,7 +516,7 @@ namespace Funq.Abstract
 					             builder.Add(selector(otr, inr));
 					             return true;
 				             });
-				return (TRSeq) bFactory.ProviderFrom(builder);
+				return (TRSeq) bFactory.IterableFrom(builder);
 			}
 		}
 	}

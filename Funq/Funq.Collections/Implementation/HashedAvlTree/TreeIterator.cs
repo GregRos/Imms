@@ -42,7 +42,7 @@ namespace Funq.Collections.Implementation
 				if (!isEnded) return false;
 				if (_current.Hash >= hash) return true;
 				var res =  this.MoveNext();
-#if DEBUG
+#if ASSERTS
 				AssertEx.IsTrue(_current.Hash >= hash || !res);
 #endif
 				return res;
@@ -83,7 +83,7 @@ namespace Funq.Collections.Implementation
 				while (_future.Count > 1)
 				{
 					var cur = _future.PopLast();
-#if DEBUG
+#if ASSERTS
 					cur.Object.IsNull.IsFalse();
 #endif
 					//We ignore all nodes other than parents we've already passed.
@@ -101,7 +101,7 @@ namespace Funq.Collections.Implementation
 				{
 					var cur = _future.PopLast();
 					var node = cur.Object;
-#if DEBUG
+#if ASSERTS
 					node.IsNull.IsFalse();
 #endif
 					//if (node.IsNull && _future.Count > 0) return SetCurrent(_future.LastItem());

@@ -186,7 +186,7 @@ partial class __MapLikeClass__<TKey, TValue>
 		throw new NotImplementedException();
 	}
 
-	protected override IEnumerator<Kvp<TKey, TValue>> GetEnumerator()
+	protected override IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
 	{
 		throw new NotImplementedException();
 	}
@@ -245,7 +245,7 @@ partial class __OrderedMapLikeClass__<TKey, TValue>
 		throw new NotImplementedException();
 	}
 
-	protected override IEnumerator<Kvp<TKey, TValue>> GetEnumerator()
+	protected override IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
 	{
 		throw new NotImplementedException();
 	}

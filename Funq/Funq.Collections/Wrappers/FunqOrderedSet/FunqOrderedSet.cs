@@ -11,7 +11,7 @@ namespace Funq.Collections
 			return new FunqOrderedSet<T>(inner);
 		}
 	}
-	public partial class FunqOrderedSet<T> : Trait_SetLike<T, FunqOrderedSet<T>> {
+	public partial class FunqOrderedSet<T> : AbstractSet<T, FunqOrderedSet<T>> {
 		private readonly FunqOrderedMap<T, bool> _inner;
 
 		public static FunqOrderedSet<T> Empty(IComparer<T> cm) {

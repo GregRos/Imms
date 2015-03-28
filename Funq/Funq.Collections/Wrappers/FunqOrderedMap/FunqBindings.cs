@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using Funq.Abstract;
 using Funq.Collections.Common;
 using Funq.Collections.Implementation;
@@ -31,13 +32,7 @@ namespace Funq.Collections
 					return _inner.WrapMap(_comparer);
 				}
 			}
-
-			public override void EnsureCapacity(int n)
-			{
-				
-			}
-
-			protected override void add(Kvp<TKey, TValue> item)
+			protected override void add(KeyValuePair<TKey, TValue> item)
 			{
 				_inner = _inner.AvlAdd(item.Key, item.Value, _lineage, true);
 			}
@@ -48,6 +43,7 @@ namespace Funq.Collections
 			}
 		}
 
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		protected internal override MapBuilder<TKey, TValue> EmptyBuilder
 		{
 			get
@@ -55,13 +51,13 @@ namespace Funq.Collections
 				return new Builder(Empty(Comparer));
 			}
 		}
-
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		protected internal override FunqOrderedMap<TKey, TValue> ProviderFrom(MapBuilder<TKey, TValue> builder)
 		{
 			return (FunqOrderedMap<TKey, TValue>)builder.Result;
 
 		}
-
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		protected internal override MapBuilder<TKey, TValue> BuilderFrom(FunqOrderedMap<TKey, TValue> provider)
 		{
 			return new Builder(provider);

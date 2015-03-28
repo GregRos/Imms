@@ -4,23 +4,30 @@ using Enumerable = System.Linq.Enumerable;
 #pragma warning disable 279
 namespace Funq.Abstract
 {
-	public  abstract partial class Trait_MapLike<TKey, TValue, TMap>
-		: Trait_Iterable<Kvp<TKey, TValue>, TMap, MapBuilder<TKey, TValue>>, ITrait_MapLike<TKey, TValue>
-		where TMap : Trait_MapLike<TKey, TValue, TMap>
+	public  abstract partial class AbstractMap<TKey, TValue, TMap>
+		: AbstractIterable<KeyValuePair<TKey, TValue>, TMap, MapBuilder<TKey, TValue>>, IAnyMapLike<TKey, TValue>
+		where TMap : AbstractMap<TKey, TValue, TMap>
 	{
+		private static readonly bool IsDifferenceImplemented;
+		private static readonly bool IsExceptImplemented;
+		private static readonly bool IsJoinImplemented;
+		private static readonly bool IsMergeImplemented;
+
+		static AbstractMap()
+		{
+			IsDifferenceImplemented = ReflectExt.DoesImplementMethod<TMap>("Difference", typeof(TMap));
+			IsExceptImplemented = ReflectExt.DoesImplementMethod<TMap>("Except", typeof(TMap), typeof(Func<TKey, TValue, TValue, Option<TValue>>));
+			IsJoinImplemented = ReflectExt.DoesImplementMethod<TMap>("Join", typeof(TMap), typeof(Func<TKey, TValue, TValue, TValue>));
+			IsMergeImplemented = ReflectExt.DoesImplementMethod<TMap>("Merge", typeof(TMap), typeof(Func<TKey, TValue, TValue, TValue>));
+		} 
 
 
-
-		public static implicit operator TMap(Trait_MapLike<TKey, TValue, TMap> self)
+		public static implicit operator TMap(AbstractMap<TKey, TValue, TMap> self)
 		{
 			return self as object as TMap;
 		}
 
 
-		public TValue Get(TKey k)
-		{
-			return TryGet(k).ValueOrError(Errors.Key_not_found);
-		}
 		/// <summary>
 		/// Applies the specified accumulator on each key-value pair.
 		/// </summary>
@@ -29,6 +36,7 @@ namespace Funq.Abstract
 		/// <param name="accumulator">The accumulator.</param>
 		public TResult Aggregate<TResult>(TResult initial, Func<TResult, TKey, TValue, TResult> accumulator)
 		{
+			accumulator.IsNotNull("accumulator");
 			return base.Aggregate(initial, (result, item) => accumulator(result, item.Key, item.Value));
 		}
 
@@ -40,9 +48,20 @@ namespace Funq.Abstract
 		/// <typeparam name="TOutValue">The type of the tr value.</typeparam>
 		/// <param name="bFactory">The b factory.</param>
 		protected internal virtual TOutMap Cast<TOutMap, TOutKey, TOutValue>(TOutMap bFactory)
-			where TOutMap : ITrait_MapLike<TOutKey, TOutValue>
+			where TOutMap : IAnyMapLike<TOutKey, TOutValue>
 		{
 			return base.Select(bFactory, kvp => Kvp.Of(kvp.Key.Cast<TOutKey>(), kvp.Value.Cast<TOutValue>()));
+		}
+
+		public bool MapEquals(IEnumerable<KeyValuePair<TKey, TValue>> other, IEqualityComparer<TValue> valueEq = null) {
+			other.IsNotNull("other");
+			return Equality.Map_Equate(this, other, valueEq);
+		}
+
+		public virtual bool MapEquals(TMap other, IEqualityComparer<TValue> valueEq = null) {
+			other.IsNotNull("other");
+			return MapEquals((IEnumerable<KeyValuePair<TKey, TValue>>) other, valueEq);
+
 		}
 
 		/// <summary>
@@ -60,9 +79,8 @@ namespace Funq.Abstract
 		/// </summary>
 		/// <param name="find">The value.</param>
 		/// <param name="eq">Optionally, an equality handler. Otherwise the default handler is used.</param>
-		public bool ContainsValue(TValue find, IEqualityComparer<TValue> eq = null )
-		{
-			eq = eq ?? EqualityComparer<TValue>.Default;
+		public bool ContainsValue(TValue find, IEqualityComparer<TValue> eq = null ) {
+			eq = eq ?? FastEquality<TValue>.Default;
 			return Find((k, v) => eq.Equals(v, find)).IsSome;
 		}
 
@@ -72,6 +90,7 @@ namespace Funq.Abstract
 		/// <param name="predicate">The predicate.</param>
 		public int Count(Func<TKey, TValue, bool> predicate)
 		{
+			predicate.IsNotNull("predicate");
 			return base.Count(kvp => predicate(kvp.Key, kvp.Value));
 		}
 
@@ -79,9 +98,18 @@ namespace Funq.Abstract
 		/// Iterates unconditionally over each key-value pair.
 		/// </summary>
 		/// <param name="act">The act.</param>
-		public void ForEach(Action<TKey, TValue> act)
-		{
+		public void ForEach(Action<TKey, TValue> act) {
+			act.IsNotNull("act");
 			base.ForEach(kvp => act(kvp.Key, kvp.Value));
+		}
+		/// <summary>
+		/// Returns true if any key-value pair matches the specified predicate.
+		/// </summary>
+		/// <param name="predicate">The predicate.</param>
+		/// <returns></returns>
+		public bool Any(Func<TKey, TValue, bool> predicate) {
+			predicate.IsNotNull("predicate");
+			return base.Any(kvp => predicate(kvp.Key, kvp.Value));
 		}
 
 		/// <summary>
@@ -90,6 +118,7 @@ namespace Funq.Abstract
 		/// <param name="act">The predicate.</param>
 		public bool ForEachWhile(Func<TKey, TValue, bool> act)
 		{
+			act.IsNotNull("act");
 			return base.ForEachWhile(kvp => act(kvp.Key, kvp.Value));
 		}
 
@@ -101,8 +130,9 @@ namespace Funq.Abstract
 		/// <param name="bFactory">The b factory.</param>
 		/// <param name="selector">The selector.</param>
 		protected internal virtual TRProvider SelectValues<TRProvider, TRValue>(TRProvider bFactory, Func<TKey, TValue, TRValue> selector )
-			where TRProvider : ITrait_MapLike<TKey, TRValue>
-		{
+			where TRProvider : IAnyMapLike<TKey, TRValue> {
+			bFactory.IsNotNull("bFactory");
+			selector.IsNotNull("selector");
 			return base.Select(bFactory, kvp => Kvp.Of(kvp.Key, selector(kvp.Key, kvp.Value)));
 		}
 
@@ -110,9 +140,8 @@ namespace Funq.Abstract
 		/// Finds the first key-value pair that matches the specified predicate.
 		/// </summary>
 		/// <param name="predicate">The predicate.</param>
-		public Option<Kvp<TKey, TValue>> Find(Func<TKey, TValue, bool> predicate)
+		public Option<KeyValuePair<TKey, TValue>> Find(Func<TKey, TValue, bool> predicate)
 		{
-
 			return base.Find(kvp => predicate(kvp.Key, kvp.Value));
 		}
 
@@ -145,9 +174,11 @@ namespace Funq.Abstract
 		/// <param name="bFactory">A prototype instance used as a builder factory.</param>
 		/// <param name="other">The other map.</param>
 		/// <param name="collision">The collision resolution function.</param>
-		protected internal virtual TRMap Join<TValue2, TRMap, TRValue>(TRMap bFactory, ITrait_MapLike<TKey, TValue2> other,Func<TKey, TValue, TValue2, TRValue> collision)
-			where TRMap : ITrait_MapLike<TKey, TRValue>
-		{
+		protected internal virtual TRMap Join<TValue2, TRMap, TRValue>(TRMap bFactory, IAnyMapLike<TKey, TValue2> other,Func<TKey, TValue, TValue2, TRValue> collision)
+			where TRMap : IAnyMapLike<TKey, TRValue> {
+			bFactory.IsNotNull("bFactory");
+			other.IsNotNull("other");
+
 			using (var builder = bFactory.EmptyBuilder)
 			{
 				foreach (var item in this)
@@ -155,18 +186,40 @@ namespace Funq.Abstract
 					var pair = other.TryGet(item.Key);
 					if (pair.IsSome)
 					{
+						if (collision == null) {
+							throw Errors.Maps_not_disjoint(item.Key);
+						}
 						builder.Add(item.Key, collision(item.Key, item.Value, pair.Value));
 					}
 				}
-				return (TRMap)bFactory.ProviderFrom(builder);
+				return (TRMap)bFactory.IterableFrom(builder);
 			}
 		}
+
+		/// <summary>
+		/// Joins this map with another map.
+		/// </summary>
+		/// <typeparam name="TValue2">The type of value of the second map.</typeparam>
+		/// <param name="other">The other map.</param>
+		/// <param name="collision">The collision function that generates the value of the new map.</param>
+		/// <returns></returns>
+		public TMap Join<TValue2>(IAnyMapLike<TKey, TValue2> other, Func<TKey, TValue, TValue2, TValue> collision) {
+			if (other is TMap && IsJoinImplemented) {
+				return Join((TMap) other, (Func<TKey, TValue, TValue, TValue>) (object) collision);
+			}
+			return Join(this, other, collision);
+		}
+
 		/// <summary>
 		/// Returns a new map without all those keys present in the specified map.
 		/// </summary>
 		/// <param name="other">The other.</param>
-		public virtual TMap Except<TValue2>(ITrait_MapLike<TKey, TValue2> other, Func<TKey, TValue, TValue2, Option<TValue>> subtraction = null)
-		{
+		/// <param name="subtraction">The subtraction function that generates the value </param>
+		public virtual TMap Except<TValue2>(IAnyMapLike<TKey, TValue2> other, Func<TKey, TValue, TValue2, Option<TValue>> subtraction = null) {
+			other.IsNotNull("other");
+			if (other is TMap && IsExceptImplemented) {
+				return Except((TMap)other, (Func<TKey, TValue, TValue, Option<TValue>>)(object)subtraction);
+			}
 			using (var builder = EmptyBuilder)
 			{
 				foreach (var item in this) {
@@ -184,23 +237,17 @@ namespace Funq.Abstract
 				return ProviderFrom(builder);
 			}
 		}
-		/// <summary>
-		/// Returns a new map containing only those key-value pairs present in exactly one of the maps.
-		/// </summary>
-		/// <param name="other">The other.</param>
-		public virtual TMap Difference(ITrait_MapLike<TKey, TValue> other)
-		{
-			var joined = this.Join(this, other, (k, v1, v2) => v1);
-			var merged = this.Merge(other, (k, v1, v2) => v1);
-			return joined.Except(merged);
-		}
+
 		/// <summary>
 		/// Merges the two maps, applying the specified collision resolution function for every key that appears in both maps.
 		/// </summary>
 		/// <param name="other">The other.</param>
 		/// <param name="collision">The collision resolution function. If null, the maps are assumed to have no keys in common, and a collision throws an exception.</param>
-		public virtual TMap Merge(ITrait_MapLike<TKey, TValue> other, Func<TKey, TValue, TValue, TValue> collision)
-		{
+		public virtual TMap Merge(IAnyMapLike<TKey, TValue> other, Func<TKey, TValue, TValue, TValue> collision) {
+			other.IsNotNull("other");
+			if (other is TMap && IsMergeImplemented) {
+				return Merge((TMap) other, collision);
+			}
 			collision = collision ?? ((k, v1, v2) =>
 			                          {
 				                          throw Errors.Maps_not_disjoint(k);
@@ -223,7 +270,8 @@ namespace Funq.Abstract
 		/// <param name="collision">The collision resolution function. If null, the maps are assumed to have no keys in common, and a collision throws an exception.</param>
 		public virtual TMap Merge(TMap other, Func<TKey, TValue, TValue, TValue> collision)
 		{
-			return this.Merge(other as ITrait_MapLike<TKey, TValue>, collision);
+			other.IsNotNull("other");
+			return this.Merge(other as IAnyMapLike<TKey, TValue>, collision);
 		}
 
 		/// <summary>
@@ -233,16 +281,29 @@ namespace Funq.Abstract
 		/// <param name="collision">The collision.</param>
 		public virtual TMap Join(TMap other, Func<TKey, TValue, TValue, TValue> collision)
 		{
-			return this.Join(this, other as ITrait_MapLike<TKey, TValue>, collision);
+			other.IsNotNull("other");
+			return this.Join(this, other as IAnyMapLike<TKey, TValue>, collision);
 		}
 
 		/// <summary>
-		/// Removes all keys present in the specified map.
+		/// Performs the Except operation, potentially removing all the keys present in the other map.
 		/// </summary>
-		/// <param name="other">The other.</param>
+		/// <param name="other">The other map.</param>
+		/// <param name="subtraction">A substraction selector that determines the new value (if any) when a collision occurs. If null, colliding keys are removed.</param>
 		public virtual TMap Except(TMap other, Func<TKey, TValue, TValue, Option<TValue>> subtraction = null)
 		{
-			return this.Except(other as ITrait_MapLike<TKey, TValue>);
+			other.IsNotNull("other");
+			return this.Except(other as IAnyMapLike<TKey, TValue>);
+		}
+
+		/// <summary>
+		/// Returns true if all the key-value pairs satisfy the predicate.
+		/// </summary>
+		/// <param name="predicate">The predicate.</param>
+		/// <returns></returns>
+		public bool All(Func<TKey, TValue, bool> predicate) {
+			predicate.IsNotNull("predicate");
+			return base.All(kvp => predicate(kvp.Key, kvp.Value));
 		}
 
 		/// <summary>
@@ -250,6 +311,7 @@ namespace Funq.Abstract
 		/// </summary>
 		/// <param name="other">The other.</param>
 		public virtual TMap Difference(TMap other) {
+			other.IsNotNull("other");
 			return this.Except(other).Merge(other.Except(this), null);
 		}
 
@@ -261,8 +323,9 @@ namespace Funq.Abstract
 		/// <typeparam name="TRValue">The type of the return value.</typeparam>
 		/// <param name="bFactory">A prototype instance of the return map.</param>
 		protected internal virtual TRMap OfType<TRMap, TRKey, TRValue>(TRMap bFactory)
-			where TRMap : ITrait_MapLike<TRKey, TRValue>
+			where TRMap : IAnyMapLike<TRKey, TRValue>
 		{
+			bFactory.IsNotNull("bFactory");
 			return base.Choose(bFactory, kvp =>
 			                             {
 				                             var key = kvp.Key;
@@ -322,6 +385,7 @@ namespace Funq.Abstract
 		/// <param name="predicate">The predicate.</param>
 		public TMap Where(Func<TKey, TValue, bool> predicate)
 		{
+			predicate.IsNotNull("predicate");
 			return base.Where(kvp => predicate(kvp.Key, kvp.Value));
 		}
 

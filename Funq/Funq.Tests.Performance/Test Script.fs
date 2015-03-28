@@ -6,9 +6,8 @@ open Funq.FSharp.Implementation
 open Funq.Tests.Performance.Test
 open System.Reflection
 open System.Runtime.CompilerServices
+open Funq.FSharp
 
-type SimpleDataObject() = 
-    class end
 
 type BaseArgs 
     (Simple_Iterations : int, 
@@ -17,7 +16,7 @@ type BaseArgs
      Full_Iterations : int, 
      DataSource_Iterations : int
      ) = 
-     inherit SimpleDataObject()
+     interface ICloneableObject
      member val Simple_Iterations = Simple_Iterations with get,set
      member val Target_Size = Target_Size with get,set
      member val DataSource_Size = DataSource_Size with get,set
@@ -40,18 +39,7 @@ type
      member val Generator2 = Generator2 with get, set
      member val DropRatio = DropRatio with get, set
 
-[<AutoOpen>]
-[<Extension>]
-type Ext private() = 
-    [<Extension>]
-    static member Clone (sd : 'a :> SimpleDataObject) = 
-        let m = sd.GetType().GetMethod("MemberwiseClone", BindingFlags.NonPublic ||| BindingFlags.Instance)
-        m.Invoke(sd, null) :?> 'a
-    [<Extension>]
-    static member With (sd : 'a :> SimpleDataObject, f : 'a -> unit) = 
-        let clone = Ext.Clone(sd)
-        f clone
-        clone
+
 
 //This section contains the lists of tests each collection is assigned.
 //Note that this process only constructs a list of unit → unit functions that make up the actual test/target pairs, but it doesn't run them.

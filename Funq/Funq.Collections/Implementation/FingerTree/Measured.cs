@@ -36,7 +36,7 @@ namespace Funq.Collections.Implementation
 		public bool MoveNext() {
 			//_past.Push(_current);
 			var top = _future.Peek();
-#if DEBUG
+#if ASSERTS
 			AssertEx.IsTrue(top.Object.NumberOfGroupings > 0 || top.Object.CanProvideValue || _future.Count == 1); //only possible if tree is empty
 #endif
 			while (top.Mark >= top.Object.NumberOfGroupings - 1) {
@@ -55,7 +55,7 @@ namespace Funq.Collections.Implementation
 				return true;
 			}
 			if (nextObj.NumberOfGroupings == 0) {
-#if DEBUG
+#if ASSERTS
 				//this can only happen if we're in Compound(Digit, Empty, Digit).
 				obj.NumberOfGroupings.Is(3);
 				top.Mark.Is(0);

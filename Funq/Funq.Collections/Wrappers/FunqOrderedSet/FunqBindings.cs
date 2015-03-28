@@ -23,11 +23,6 @@ namespace Funq.Collections
 			}
 
 
-			public override void EnsureCapacity(int n)
-			{
-
-			}
-
 			protected override void add(T item) {
 				_inner = _inner;
 			}

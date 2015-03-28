@@ -6,7 +6,7 @@ using Funq.Abstract;
 using Linq = System.Linq;
 using Enumerable = System.Linq.Enumerable;
 
-public partial class __ListLikeClass__<T> : Trait_Sequential<T, __ListLikeClass__<T>> {
+public partial class __ListLikeClass__<T> : AbstractSequential<T, __ListLikeClass__<T>> {
 	private static readonly __ListLikeClass__<T> _instance = new __ListLikeClass__<T>();
 
 	private __ListLikeClass__()

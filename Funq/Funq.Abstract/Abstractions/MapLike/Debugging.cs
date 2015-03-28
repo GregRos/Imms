@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Funq.Abstract
 {
-	partial class Trait_MapLike<TKey, TValue, TMap>
+	partial class AbstractMap<TKey, TValue, TMap>
 	{
 		protected internal abstract class DebugView
 		{
@@ -18,7 +18,7 @@ namespace Funq.Abstract
 				_map = map;
 			}
 
-			public Kvp<TKey,TValue>[] Items
+			public KeyValuePair<TKey,TValue>[] Items
 			{
 				get
 				{
@@ -27,6 +27,15 @@ namespace Funq.Abstract
 			}
 		}
 
-		
+
+		bool IReadOnlyDictionary<TKey, TValue>.TryGetValue(TKey key, out TValue value) {
+			var r = TryGet(key);
+			if (r.IsNone) {
+				value = default(TValue);
+				return false;
+			}
+			value = r.Value;
+			return true;
+		}
 	}
 }

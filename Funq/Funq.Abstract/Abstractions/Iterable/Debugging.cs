@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Funq.Abstract
 {
-	partial class Trait_Iterable<TElem, TIterable, TBuilder>
+	partial class AbstractIterable<TElem, TIterable, TBuilder>
 	{
 		/// <summary>
 		/// A string representation of this object, for use with the DebuggerDisplay attribute.

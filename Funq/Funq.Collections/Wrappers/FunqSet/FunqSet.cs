@@ -14,7 +14,7 @@ namespace Funq.Collections
 
 
 
-	public partial class FunqSet<T> : Trait_SetLike<T, FunqSet<T>> {
+	public partial class FunqSet<T> : AbstractSet<T, FunqSet<T>> {
 		private readonly FunqMap<T, bool> _inner;
 
 		public static FunqSet<T> Empty(IEqualityComparer<T> eq) {
@@ -36,7 +36,7 @@ namespace Funq.Collections
 		}
 
 		public FunqSet<T> AddRange(IEnumerable<T> items) {
-			return _inner.AddRange(items).Wrap();
+			return _inner.AddSetRange(items).Wrap();
 		}
 
 		public override bool Contains(T item) {

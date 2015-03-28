@@ -10,7 +10,7 @@ namespace Funq.Collections
 	using Linq = System.Linq;
 	using Enumerable = System.Linq.Enumerable;
 	
-	public partial class FunqList<T> : Trait_Sequential<T, FunqList<T>> {
+	public partial class FunqList<T> : AbstractSequential<T, FunqList<T>> {
 		private static readonly FunqList<T> _instance = new FunqList<T>();
 	
 		private FunqList()

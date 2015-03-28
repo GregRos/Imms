@@ -137,7 +137,7 @@ namespace Funq.Collections.Implementation
 					var newLeaf = new Leaf(item, lineage);
 					ret = new Parent(this, newLeaf, lineage);
 				}
-#if DEBUG
+#if ASSERTS
 				ret.Length.Is(expected_length);
 				ret[ret.Length - 1].Is(item);
 #endif
@@ -179,7 +179,7 @@ namespace Funq.Collections.Implementation
 					var myParent = new Parent(1, ret.Length, parentArr, lineage, 2);
 					ret = myParent.AddMany(arr, lineage, maxHeight, ref start, ref count);
 				}
-#if DEBUG
+#if ASSERTS
 				ret.Length.Is(old_length + origCount - count);
 				if (len != 0) ret[ret.Length - 1].Is(arr[start - 1]);
 #endif
@@ -198,7 +198,7 @@ namespace Funq.Collections.Implementation
 
 			public override Node Drop(Lineage lineage)
 			{
-#if DEBUG
+#if ASSERTS
 				var old_length = Length;
 				var old_arr_size = ArrSize;
 				var before_last = Length > 1 ? Option.Some(this[Length - 2]) : Option.None;
@@ -213,7 +213,7 @@ namespace Funq.Collections.Implementation
 					var newArr = Arr.Take(ArrSize - 1);
 					ret =  new Leaf(newArr, lineage, ArrSize - 1);
 				}
-#if DEBUG
+#if ASSERTS
 				ret.Length.Is(old_length - 1);
 				ret.ArrSize.Is(old_arr_size - 1);
 				if (before_last.IsSome) ret[ret.Length - 1].Is(before_last.Value);
@@ -235,7 +235,7 @@ namespace Funq.Collections.Implementation
 
 			public override void Iter(Action<TValue> action)
 			{
-#if DEBUG
+#if ASSERTS
 				action.IsNotNull();
 #endif
 				for (var i = 0; i < ArrSize; i++)
@@ -246,7 +246,7 @@ namespace Funq.Collections.Implementation
 
 			public override void IterBack(Action<TValue> action)
 			{
-#if DEBUG
+#if ASSERTS
 				action.IsNotNull();
 #endif
 				for (var i = ArrSize - 1; i >= 0; i--)
@@ -257,7 +257,7 @@ namespace Funq.Collections.Implementation
 
 			public override bool IterBackWhile(Func<TValue, bool> conditional)
 			{
-#if DEBUG
+#if ASSERTS
 				conditional.IsNotNull();
 #endif
 				for (var i = ArrSize - 1; i >= 0; i--)
@@ -292,13 +292,13 @@ namespace Funq.Collections.Implementation
 
 			public override Node Take(int index, Lineage lineage)
 			{
-#if DEBUG
+#if ASSERTS
 				var expected_last = index < Length ? this[index].AsSome() : Option.None;
 #endif
 				var bits = index & myBlock;
 				var newArr = Arr.Take(bits + 1);
 				Node ret = new Leaf(newArr, lineage, bits + 1);
-#if DEBUG
+#if ASSERTS
 				ret.Length.Is(bits + 1);
 				if (expected_last.IsSome) ret[ret.Length - 1].Is(expected_last.Value);
 #endif
@@ -308,13 +308,13 @@ namespace Funq.Collections.Implementation
 			public override Node Update(int index, TValue value, Lineage lineage)
 			{
 				var bits = index & myBlock;
-#if DEBUG
+#if ASSERTS
 				var expected_length = Length;
 				bits.Is(i => i >= 0 && i < Length);
 #endif
 				var myCopy = UpdateStore(bits, value, lineage);
 				var ret =  MutateOrCreate(ArrSize, myCopy, lineage);
-#if DEBUG
+#if ASSERTS
 				ret[index].Is(value);
 				ret.Length.Is(expected_length);
 #endif

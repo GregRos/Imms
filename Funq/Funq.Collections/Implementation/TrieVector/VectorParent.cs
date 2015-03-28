@@ -82,14 +82,14 @@ namespace Funq.Collections.Implementation
 			public Parent(int height, int length, Node[] arr, Lineage lineage, int arrSize)
 				: base(height, length, arrSize == 32 && arr[arrSize - 1].IsFull, lineage, arrSize)
 			{
-#if DEBUG
+#if ASSERTS
 				arr.IsNotNull();
 #endif
 
 				Arr = arr;
 				offs = height * 5;
 				myBlock = ((1 << 5) - 1) << offs;
-#if DEBUG
+#if ASSERTS
 				Length.Is(Arr.Take(ArrSize).Aggregate(0, (tot, cur) => cur != null ? tot + cur.Length : tot));
 				var leafIndex = Array.FindIndex(arr, node => node != null && !node.IsParent);
 				var parentIndex = Array.FindLastIndex(arr, node => node != null && node.IsParent);
@@ -146,7 +146,7 @@ namespace Funq.Collections.Implementation
 			private Node MutateOrCreate(int count, int arrSize, Node[] arr, Lineage lineage)
 			{
 				var ret =  Lineage.AllowMutation(lineage) ? _mutate(count, arrSize, arr) : new Parent(Height, count, arr, lineage, arrSize);
-#if DEBUG
+#if ASSERTS
 				ret.Length.Is(arr.Take(ret.ArrSize).Aggregate(0, (tot, cur) => cur != null ? tot + cur.Length : tot));
 				var leafIndex = Array.FindIndex(arr, node => node != null && !node.IsParent);
 				var parentIndex = Array.FindLastIndex(arr, node => node != null && node.IsParent);
@@ -216,7 +216,7 @@ namespace Funq.Collections.Implementation
 					var newArr = new Node[] {this, new Leaf(item, lineage)};
 					ret = new Parent(Height + 1, Length + 1, newArr, lineage, 2);
 				}
-#if DEBUG
+#if ASSERTS
 				ret.Length.Is(expected_length);
 				ret[ret.Length - 1].Is(item);
 #endif
@@ -226,7 +226,7 @@ namespace Funq.Collections.Implementation
 			public override Node AddMany(TValue[] arr, Lineage lineage, int maxHeight, ref int start, ref int count)
 			{
 				if (count == 0) return this;
-#if DEBUG
+#if ASSERTS
 				var old_length = Length;
 #endif
 				var newArr = Arr.Take(32);
@@ -243,7 +243,7 @@ namespace Funq.Collections.Implementation
 					var myParent = new Parent(ret, Empty, lineage);
 					ret = myParent.AddMany(arr, lineage, maxHeight, ref start, ref count);
 				}
-#if DEBUG
+#if ASSERTS
 				ret.Length.Is(old_length + startCount - count);
 				if (startCount - count > 0) ret[ret.Length - 1].Is(arr[start - 1]);
 #endif
@@ -263,7 +263,7 @@ namespace Funq.Collections.Implementation
 			public override Node Drop(Lineage lineage)
 			{
 				Node ret;
-#if DEBUG
+#if ASSERTS
 				var expected_length = Length - 1;
 				var expected_last = Length > 1 ? Option.Some(this[Length - 2]) : Option.None;
 #endif
@@ -283,7 +283,7 @@ namespace Funq.Collections.Implementation
 					var newArr = UpdateStore(ArrSize - 1, newLast, lineage);
 					ret =  MutateOrCreate(Length - 1, ArrSize, newArr, lineage);
 				}
-#if DEBUG
+#if ASSERTS
 				ret.Length.Is(expected_length);
 				if (expected_last.IsSome) ret[ret.Length - 1].Is(expected_last.Value);
 #endif
@@ -298,7 +298,7 @@ namespace Funq.Collections.Implementation
 
 			public override void Iter(Action<TValue> action)
 			{
-#if DEBUG
+#if ASSERTS
 				action.IsNotNull();
 #endif
 				for (var i = 0; i < ArrSize; i++)
@@ -351,7 +351,7 @@ namespace Funq.Collections.Implementation
 
 			public override Node Take(int index, Lineage lineage)
 			{
-#if DEBUG
+#if ASSERTS
 				var expected_last = TryGet(index);
 #endif
 				var myIndex = index & myBlock;
@@ -370,7 +370,7 @@ namespace Funq.Collections.Implementation
 					ret = new Parent(Height, Arr[0].Length * (myIndex) + myNewLast.Length, myArrFirst, lineage, myIndex + 1);
 				}
 
-#if DEBUG
+#if ASSERTS
 				if (expected_last.IsSome) ret[ret.Length - 1].Is(expected_last.Value);
 #endif
 				return ret;
@@ -378,7 +378,7 @@ namespace Funq.Collections.Implementation
 
 			public override Node Update(int index, TValue value, Lineage lineage)
 			{
-#if DEBUG
+#if ASSERTS
 				var expected_length = Length;
 #endif
 				var myIndex = (index) & myBlock;
@@ -386,7 +386,7 @@ namespace Funq.Collections.Implementation
 				var updatedChild = Arr[myIndex].Update(index, value, lineage);
 				var newArr = UpdateStore(myIndex, updatedChild, lineage);
 				Node ret = MutateOrCreate(Length, ArrSize, newArr, lineage);
-#if DEBUG
+#if ASSERTS
 				ret.Length.Is(expected_length);
 				ret[index].Is(value);
 #endif

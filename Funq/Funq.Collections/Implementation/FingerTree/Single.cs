@@ -66,7 +66,7 @@ namespace Funq.Collections.Implementation
 				public override FTree<TChild> AddFirst(TChild item, Lineage lineage)
 				{
 					FTree<TChild> ret;
-#if DEBUG
+#if ASSERTS
 					var expected = Measure + item.Measure;
 #endif
 					if (CenterDigit.Size < 4)
@@ -79,7 +79,7 @@ namespace Funq.Collections.Implementation
 						var rightmost = CenterDigit.DropFirst(lineage);
 						ret = new Compound(leftmost, FTree<Digit>.Empty, rightmost, lineage);
 					}
-#if DEBUG
+#if ASSERTS
 					ret.Measure.Is(expected);
 					ret.Left.Is(item);
 #endif
@@ -89,7 +89,7 @@ namespace Funq.Collections.Implementation
 
 				public override FTree<TChild> AddLast(TChild item, Lineage lineage)
 				{
-#if DEBUG
+#if ASSERTS
 					var expected = Measure + item.Measure;
 #endif
 					FTree<TChild> ret;
@@ -104,7 +104,7 @@ namespace Funq.Collections.Implementation
 
 						ret = new Compound(leftmost, FTree<Digit>.Empty, rightmost, lineage);
 					}
-#if DEBUG
+#if ASSERTS
 					ret.Measure.Is(expected);
 					ret.Right.Is(item);
 #endif
@@ -115,7 +115,7 @@ namespace Funq.Collections.Implementation
 				public override FTree<TChild> DropFirst(Lineage lineage)
 				{
 					FTree<TChild> ret;
-#if DEBUG
+#if ASSERTS
 					var expected = Measure - Left.Measure;
 					var expected_first = Measure > 1 ? this.CenterDigit.Second : null;
 #endif
@@ -128,7 +128,7 @@ namespace Funq.Collections.Implementation
 					{
 						ret = Empty;
 					}
-#if DEBUG
+#if ASSERTS
 					ret.Measure.Is(expected);
 					if (expected_first != null) ret.Left.Is(expected_first);
 #endif
@@ -187,7 +187,7 @@ namespace Funq.Collections.Implementation
 					{
 						return EmptyTree.Instance;
 					}
-#if DEBUG
+#if ASSERTS
 					CenterDigit.IsFragment.Is(false);
 #endif
 

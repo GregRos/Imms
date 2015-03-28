@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using Enumerable = System.Linq.Enumerable;
 #pragma warning disable 279
 namespace Funq.Abstract
@@ -13,17 +14,16 @@ namespace Funq.Abstract
 	/// <typeparam name="TElem"> he type of element stored in the collection. </typeparam>
 	/// <typeparam name="TIterable">This is a self-reference to the class that implements this trait.</typeparam>
 	/// <typeparam name="TBuilder"> The type of collection builder used by the collection that implements this trait. </typeparam>
-	public abstract partial class Trait_Iterable<TElem, TIterable, TBuilder> 
-		: ITrait_CollectionBuilderFactory<TElem, TBuilder> 
-		where TBuilder : IterableBuilder<TElem>
-		where TIterable : Trait_Iterable<TElem, TIterable, TBuilder>
+	public abstract partial class AbstractIterable<TElem, TIterable, TBuilder> 
+		: IAnyBuilderFactory<TElem, TBuilder>, IReadOnlyCollection<TElem> where TBuilder : IterableBuilder<TElem>
+		where TIterable : AbstractIterable<TElem, TIterable, TBuilder>
 	{
 		/// <summary>
 		///   Implicit conversion into the generic provider type.
 		/// </summary>
 		/// <param name="o"> The o. </param>
 		/// <returns> </returns>
-		public static implicit operator TIterable(Trait_Iterable<TElem, TIterable, TBuilder> o)
+		public static implicit operator TIterable(AbstractIterable<TElem, TIterable, TBuilder> o)
 		{
 			return (TIterable) (object) o;
 		}
@@ -38,12 +38,13 @@ namespace Funq.Abstract
 		/// <param name="items"></param>
 		/// <returns></returns>
 		protected static TRSeq ToIterable<TRSeq, TRElem>(TRSeq bFactory, IEnumerable<TRElem> items)
-			where TRSeq : ITrait_CollectionBuilderFactory<TRElem, IterableBuilder<TRElem>>
-		{
+			where TRSeq : IAnyBuilderFactory<TRElem, IterableBuilder<TRElem>> {
+			bFactory.IsNotNull("bFactory");
+			items.IsNotNull("items");
 			using (var builder = bFactory.EmptyBuilder)
 			{
 				foreach (var item in items) builder.Add(item);
-				return (TRSeq) bFactory.ProviderFrom(builder);
+				return (TRSeq) bFactory.IterableFrom(builder);
 			}
 		}
 
@@ -52,13 +53,24 @@ namespace Funq.Abstract
 			get;
 		}
 
-		TBuilder ITrait_CollectionBuilderFactory<TElem, TBuilder>.EmptyBuilder
+		public virtual void CopyTo(TElem[] arr, int arrStart, int count) {
+			int i = 0;
+			this.ForEachWhile(x => {
+				arr[arrStart + i] = x;
+				i++;
+				return i < count;
+			});
+		}
+
+		TBuilder IAnyBuilderFactory<TElem, TBuilder>.EmptyBuilder
 		{
 			get
 			{
 				return EmptyBuilder;
 			}
 		}
+
+		
 
 
 		/// <summary>
@@ -90,8 +102,8 @@ namespace Funq.Abstract
 		/// <param name="initial"> The initial value. </param>
 		/// <param name="accumulator"> The accumulator. </param>
 		/// <returns> </returns>
-		public TResult Aggregate<TResult>(TResult initial, Func<TResult, TElem, TResult> accumulator)
-		{
+		public TResult Aggregate<TResult>(TResult initial, Func<TResult, TElem, TResult> accumulator) {
+			accumulator.IsNotNull("accumulator");
 			ForEach(v => initial = accumulator(initial, v));
 			return initial;
 		}
@@ -103,6 +115,7 @@ namespace Funq.Abstract
 		/// <returns> </returns>
 		public bool All(Func<TElem, bool> pred)
 		{
+			pred.IsNotNull("pred");
 			return Find(x => !pred(x)).IsNone;
 		}
 
@@ -113,29 +126,30 @@ namespace Funq.Abstract
 		/// <returns> </returns>
 		public bool Any(Func<TElem, bool> predicate)
 		{
+			predicate.IsNotNull("predicate");
 			return !ForEachWhile(v => !predicate(v));
 		}
 		
 		protected internal abstract TBuilder BuilderFrom(TIterable provider);
 
-		TBuilder ITrait_CollectionBuilderFactory<TElem, TBuilder>.BuilderFrom(ITrait_Iterable<TElem> provider)
+		TBuilder IAnyBuilderFactory<TElem, TBuilder>.BuilderFrom(IAnyIterable<TElem> provider)
 		{
+			provider.IsNotNull("provider");
 			return BuilderFrom(provider as TIterable);
 		}
 
 		/// <summary>
 		/// Returns a string representation of the elements of this collection.
 		/// </summary>
+		/// <param name="sep">A seperator character.</param>
 		/// <param name="printFunc">Optionally, a function that converts every element to its string representation. </param>
 		/// <returns></returns>
-		public virtual string Print(Func<TElem, string> printFunc = null)
+		public virtual string Print(string sep = "; ",Func<TElem, string> printFunc = null)
 		{
 			printFunc = printFunc ?? (x => x.ToString());
-			var joined = string.Join("; ", Enumerable.Select(this, printFunc));
+			var joined = string.Join(sep, Enumerable.Select(this, printFunc));
 			return string.Format("{{{0}}}", joined);
 		}
-
-
 
 		/// <summary>
 		/// (Implementation) Cartesian product between two iterable collections. You can supply a selector to apply on the result. The current instance is the left operand of the product.
@@ -150,14 +164,17 @@ namespace Funq.Abstract
 		/// This method basically applies a function on every combination of elements from the left operand and the right operand.
 		/// </remarks>
 		/// <returns></returns>
-		protected virtual TOutIter Cartesian<TRight, TOut, TOutIter>(TOutIter bFactory, ITrait_Iterable<TRight> right,
+		protected virtual TOutIter Cartesian<TRight, TOut, TOutIter>(TOutIter bFactory, IAnyIterable<TRight> right,
 		                                                           Func<TElem, TRight, TOut> selector)
-			where TOutIter : ITrait_CollectionBuilderFactory<TOut, IterableBuilder<TOut>>
+			where TOutIter : IAnyBuilderFactory<TOut, IterableBuilder<TOut>>
 		{
+			bFactory.IsNotNull("bFactory");
+			right.IsNotNull("right");
+			selector.IsNotNull("selector");
 			using (var builder = bFactory.EmptyBuilder)
 			{
 				ForEach(x => { right.ForEach(y => { builder.Add(selector(x, y)); }); });
-				return (TOutIter) bFactory.ProviderFrom(builder);
+				return (TOutIter) bFactory.IterableFrom(builder);
 			}
 		}
 
@@ -176,8 +193,13 @@ namespace Funq.Abstract
 		/// <returns></returns>
 		protected virtual TOIter Cartesian<TRight, TOut, TOIter>(TOIter bFactory, IEnumerable<TRight> right,
 		                                                           Func<TElem, TRight, TOut> selector)
-			where TOIter : ITrait_CollectionBuilderFactory<TOut, IterableBuilder<TOut>>
-		{
+			where TOIter : IAnyBuilderFactory<TOut, IterableBuilder<TOut>> {
+			bFactory.IsNotNull("bFactory");
+			right.IsNotNull("right");
+			selector.IsNotNull("selector");
+			if (right is IAnyIterable<TElem>) {
+				return Cartesian(bFactory, (IAnyIterable<TRight>) right, selector);
+			}
 			using (var builder = bFactory.EmptyBuilder)
 			{
 				ForEach(x =>
@@ -187,7 +209,7 @@ namespace Funq.Abstract
 						        builder.Add(selector(x, item));
 					        }
 				        });
-				return (TOIter) bFactory.ProviderFrom(builder);
+				return (TOIter) bFactory.IterableFrom(builder);
 			}
 		}
 
@@ -199,7 +221,7 @@ namespace Funq.Abstract
 		/// <param name="bFactory"> A prototype instance of the resulting collection used as a builder factory. </param>
 		/// <returns> </returns>
 		protected virtual TOIter Cast<TOut, TOIter>(TOIter bFactory)
-			where TOIter : ITrait_CollectionBuilderFactory<TOut, IterableBuilder<TOut>>
+			where TOIter : IAnyBuilderFactory<TOut, IterableBuilder<TOut>>
 		{
 			return Select(bFactory, (v) => (TOut) (object) v);
 		}
@@ -213,8 +235,9 @@ namespace Funq.Abstract
 		/// <param name="selector"> The selector. </param>
 		/// <returns> </returns>
 		protected virtual TOutIter Choose<TOut, TOutIter>(TOutIter bFactory, Func<TElem, Option<TOut>> selector)
-			where TOutIter : ITrait_CollectionBuilderFactory<TOut, IterableBuilder<TOut>>
-		{
+			where TOutIter : IAnyBuilderFactory<TOut, IterableBuilder<TOut>> {
+			bFactory.IsNotNull("bFactory");
+			selector.IsNotNull("selector");
 			using (var builder = bFactory.EmptyBuilder)
 			{
 				ForEach((v) =>
@@ -222,18 +245,8 @@ namespace Funq.Abstract
 					        var res = selector(v);
 					        if (res.IsSome) builder.Add(res.Value);
 				        });
-				return (TOutIter) bFactory.ProviderFrom(builder);
+				return (TOutIter) bFactory.IterableFrom(builder);
 			}
-		}
-
-
-		/// <summary>
-		///   Returns a shallow copy of this collection.
-		/// </summary>
-		/// <returns> </returns>
-		public virtual TIterable Copy()
-		{
-			return Select(this, (x) => x);
 		}
 
 		/// <summary>
@@ -241,8 +254,8 @@ namespace Funq.Abstract
 		/// </summary>
 		/// <param name="predicate"> The predicate. </param>
 		/// <returns> </returns>
-		public int Count(Func<TElem, bool> predicate)
-		{
+		public int Count(Func<TElem, bool> predicate) {
+			predicate.IsNotNull("predicate");
 			return Aggregate(0, (r, v) => predicate(v) ? r + 1 : r);
 		}
 
@@ -344,9 +357,13 @@ namespace Funq.Abstract
 			TOutMap bFactory, Func<TElem, TKey> keySelector,
 			Func<TElem, TElem2> valueSelector,
 			Func<TKey, IEnumerable<TElem2>, TOut> resultSelector,
-			IEqualityComparer<TKey> eq)
-			where TOutMap : ITrait_CollectionBuilderFactory<TOut, IterableBuilder<TOut>>
+			IEqualityComparer<TKey> eq = null)
+			where TOutMap : IAnyBuilderFactory<TOut, IterableBuilder<TOut>>
 		{
+			keySelector.IsNotNull("keySelector");
+			valueSelector.IsNotNull("valueSelector");
+			resultSelector.IsNotNull("resultSelector");
+			eq = eq ?? FastEquality<TKey>.Default;
 			using (var builder = bFactory.EmptyBuilder)
 			{
 				var groups = new Dictionary<TKey, List<TElem2>>(eq);
@@ -358,13 +375,12 @@ namespace Funq.Abstract
 						groups[key] = new List<TElem2>();
 					groups[key].Add(valueSelector(x));
 				});
-				var groupList = new List<TOut>();
 				foreach (var kvp in groups)
 				{
 					var myGrouping = resultSelector(kvp.Key, kvp.Value);
 					builder.Add(myGrouping);
 				}
-				return (TOutMap)bFactory.ProviderFrom(builder);
+				return (TOutMap)bFactory.IterableFrom(builder);
 			}
 		}
 
@@ -383,8 +399,8 @@ namespace Funq.Abstract
 		/// <returns></returns>
 		protected virtual TROuterMap GroupBy<TROuterMap, TRInnerSeq, TElem2, TKey>(
 			TROuterMap mapFactory, TRInnerSeq seqFactory, Func<TElem, TKey> keySelector, Func<TElem, TElem2> valueSelector, IEqualityComparer<TKey> eq)
-			where TROuterMap : ITrait_MapLike<TKey, TRInnerSeq>
-			where TRInnerSeq : ITrait_CollectionBuilderFactory<TElem2, IterableBuilder<TElem2>>
+			where TROuterMap : IAnyMapLike<TKey, TRInnerSeq>
+			where TRInnerSeq : IAnyBuilderFactory<TElem2, IterableBuilder<TElem2>>
 		{
 			return GroupBy(mapFactory, keySelector, valueSelector, (k, vs) =>
 			                                                       {
@@ -410,9 +426,14 @@ namespace Funq.Abstract
 		protected virtual TOutIter GroupJoin<TOut, TOutIter, TInner, TKey>(TOutIter bFactory, IEnumerable<TInner> inner,
 																							Func<TElem, TKey> oKeySelector, Func<TInner, TKey> iKeySelector,
 																							Func<TElem, IEnumerable<TInner>, TOut> rSelector,
-																							IEqualityComparer<TKey> eq)
-			where TOutIter : ITrait_CollectionBuilderFactory<TOut, IterableBuilder<TOut>>
-		{
+																							IEqualityComparer<TKey> eq = null)
+			where TOutIter : IAnyBuilderFactory<TOut, IterableBuilder<TOut>> {
+			bFactory.IsNotNull("bFactory");
+			inner.IsNotNull("inner");
+			oKeySelector.IsNotNull("oKeySelector");
+			iKeySelector.IsNotNull("iKeySelector");
+			rSelector.IsNotNull("rSelector");
+			eq = eq ?? FastEquality<TKey>.Default;
 			using (var builder = bFactory.EmptyBuilder)
 			{
 				var dict = new Dictionary<TKey, List<TInner>>(eq);
@@ -428,7 +449,7 @@ namespace Funq.Abstract
 					var ins = dict[k];
 					builder.Add(rSelector(v, ins));
 				});
-				return (TOutIter)bFactory.ProviderFrom(builder);
+				return (TOutIter)bFactory.IterableFrom(builder);
 			}
 		}
 
@@ -451,8 +472,13 @@ namespace Funq.Abstract
 		protected virtual TOutIter Join<TOut, TOutIter, TInner, TKey>(TOutIter bFactory, IEnumerable<TInner> inner, Func<TElem, TKey> oKeySelector,
 																					 Func<TInner, TKey> iKeySelector, Func<TElem, TInner, TOut> rSelector,
 																					 IEqualityComparer<TKey> eq)
-			where TOutIter : ITrait_CollectionBuilderFactory<TOut, IterableBuilder<TOut>>
+			where TOutIter : IAnyBuilderFactory<TOut, IterableBuilder<TOut>>
 		{
+			bFactory.IsNotNull("bFactory");
+			inner.IsNotNull("inner");
+			oKeySelector.IsNotNull("oKeySelector");
+			iKeySelector.IsNotNull("iKeySelector");
+			rSelector.IsNotNull("rSelector");
 			using (var builder = bFactory.EmptyBuilder)
 			{
 				var dict = new Dictionary<TKey, List<TInner>>(eq);
@@ -469,7 +495,7 @@ namespace Funq.Abstract
 					var ins = dict[k];
 					ins.ForEach(u => builder.Add(rSelector(v, u)));
 				});
-				return (TOutIter)bFactory.ProviderFrom(builder);
+				return (TOutIter)bFactory.IterableFrom(builder);
 			}
 		}
 
@@ -479,9 +505,8 @@ namespace Funq.Abstract
 		/// <param name="comp"> The comparer. </param>
 		/// <returns> </returns>
         /// <exception cref="ArgumentNullException">Thrown if the argument null.</exception>
-		public virtual TElem Max(IComparer<TElem> comp)
-		{
-		    if (comp == null) throw Errors.Argument_null("comp");
+		public virtual TElem Max(IComparer<TElem> comp) {
+			comp.IsNotNull("comp");
 			return Reduce((r, v) => comp.Compare(v, r) < 0 ? v : r);
 		}
 
@@ -492,9 +517,9 @@ namespace Funq.Abstract
 		/// <param name="selector"> The selector. </param>
 		/// <returns> </returns>
 		public TElem Max<TKey>(Func<TElem, TKey> selector)
-			where TKey : IComparable<TKey>
-		{
-			return Max(Comparison.ByKey(selector));
+			where TKey : IComparable<TKey> {
+			selector.IsNotNull("selector");
+			return Max(Comparers.KeyComparer(selector));
 		}
 
 		/// <summary>
@@ -508,7 +533,7 @@ namespace Funq.Abstract
 			where TKey : IComparable<TKey>
 		{
 		    if (selector == null) throw Errors.Argument_null("selector");
-			return Min(Comparison.ByKey(selector));
+			return Min(Comparers.KeyComparer(selector));
 		}
 
 		/// <summary>
@@ -516,8 +541,8 @@ namespace Funq.Abstract
 		/// </summary>
 		/// <param name="comp"> </param>
 		/// <returns> </returns>
-		public virtual TElem Min(IComparer<TElem> comp)
-		{
+		public virtual TElem Min(IComparer<TElem> comp) {
+			comp.IsNotNull("comp");
 			return Reduce((r, v) => comp.Compare(v, r) > 0 ? v : r);
 		}
 
@@ -529,8 +554,8 @@ namespace Funq.Abstract
 		/// <param name="bFactory"> A prototype instance of the resulting collection used as a builder factory. </param>
 		/// <returns> </returns>
 		protected virtual TRSeq OfType<TElem2, TRSeq>(TRSeq bFactory)
-			where TRSeq : ITrait_CollectionBuilderFactory<TElem2, IterableBuilder<TElem2>>
-		{
+			where TRSeq : IAnyBuilderFactory<TElem2, IterableBuilder<TElem2>> {
+			bFactory.IsNotNull("bFactory");
 			return Choose(bFactory, v => v.TryCast<TElem2>());
 		}
 
@@ -542,14 +567,15 @@ namespace Funq.Abstract
 		/// <param name="comparer"></param>
 		/// <returns></returns>
 		protected internal virtual TRList OrderBy<TRList>(TRList bFactory, IComparer<TElem> comparer)
-			where TRList : ITrait_Sequential<TElem>
-		{
+			where TRList : IAnySequential<TElem> {
+			bFactory.IsNotNull("bFactory");
+			comparer.IsNotNull("comparer");
 			var arr = ToArray();
 			Array.Sort(arr, comparer);
 			using (var builder = bFactory.EmptyBuilder)
 			{
 				Array.ForEach(arr, x => builder.Add(x));
-				return (TRList) bFactory.ProviderFrom(builder);
+				return (TRList) bFactory.IterableFrom(builder);
 			}
 		}
 
@@ -562,8 +588,9 @@ namespace Funq.Abstract
 		/// <returns></returns>
 
 		protected internal virtual TRList OrderByDescending<TRList>(TRList bFactory, IComparer<TElem> comparer)
-			where TRList : ITrait_Sequential<TElem>
-		{
+			where TRList : IAnySequential<TElem> {
+			bFactory.IsNotNull("bFactory");
+			comparer.IsNotNull("comparer");
 			return OrderBy(bFactory, comparer.Invert());
 		}
 
@@ -611,8 +638,9 @@ namespace Funq.Abstract
 		/// <returns></returns>
 		protected internal abstract TIterable ProviderFrom(TBuilder builder);
 
-		ITrait_CollectionBuilderFactory<TElem, TBuilder> ITrait_CollectionBuilderFactory<TElem, TBuilder>.ProviderFrom(IterableBuilder<TElem> builder)
+		IAnyBuilderFactory<TElem, TBuilder> IAnyBuilderFactory<TElem, TBuilder>.IterableFrom(IterableBuilder<TElem> builder)
 		{
+			builder.IsNotNull("builder");
 			return ProviderFrom((TBuilder) builder);
 		}
 
@@ -625,7 +653,6 @@ namespace Funq.Abstract
 		public TElem Reduce(Func<TElem, TElem, TElem> fold)
 		{
             if (fold == null) throw Errors.Argument_null("fold");
-		    if (fold == null) throw Errors.Argument_null("fold");
 			return Reduce(x => x, fold);
 		}
 
@@ -656,8 +683,9 @@ namespace Funq.Abstract
 		protected virtual TRSeq Scan<TElem2, TRSeq>(TRSeq bFactory,
 		                                            TElem2 initial,
 		                                            Func<TElem2, TElem, TElem2> accumulator)
-			where TRSeq : ITrait_CollectionBuilderFactory<TElem2, IterableBuilder<TElem2>>
-		{
+			where TRSeq : IAnyBuilderFactory<TElem2, IterableBuilder<TElem2>> {
+			bFactory.IsNotNull("bFactory");
+			accumulator.IsNotNull("accumulator");
 			using (var builder = bFactory.EmptyBuilder)
 			{
 				Aggregate(initial, (r, v) =>
@@ -666,7 +694,7 @@ namespace Funq.Abstract
 					                   builder.Add(r);
 					                   return r;
 				                   });
-				return (TRSeq) bFactory.ProviderFrom(builder);
+				return (TRSeq) bFactory.IterableFrom(builder);
 			}
 		}
 
@@ -679,12 +707,13 @@ namespace Funq.Abstract
 		/// <param name="selector"> The selector. </param>
 		/// <returns> </returns>
 		protected virtual TRSeq Select<TElem2, TRSeq>(TRSeq bFactory, Func<TElem, TElem2> selector)
-			where TRSeq : ITrait_CollectionBuilderFactory<TElem2, IterableBuilder<TElem2>>
-		{
+			where TRSeq : IAnyBuilderFactory<TElem2, IterableBuilder<TElem2>> {
+			bFactory.IsNotNull("bFactory");
+			selector.IsNotNull("selector");
 			using (var builder = bFactory.EmptyBuilder)
 			{
 				ForEach(v => builder.Add(selector(v)));
-				return (TRSeq) bFactory.ProviderFrom(builder);
+				return (TRSeq) bFactory.IterableFrom(builder);
 			}
 		}
 
@@ -699,8 +728,9 @@ namespace Funq.Abstract
 		/// <returns> </returns>
 		protected virtual TOutIter SelectMany<TOut, TOutIter>(
 	TOutIter bFactory, Func<TElem, IEnumerable<TOut>> selector)
-			where TOutIter : ITrait_CollectionBuilderFactory<TOut, IterableBuilder<TOut>>
-		{
+			where TOutIter : IAnyBuilderFactory<TOut, IterableBuilder<TOut>> {
+			bFactory.IsNotNull("bFactory");
+			selector.IsNotNull("selector");
 			using (var builder = bFactory.EmptyBuilder)
 			{
 				ForEach(v =>
@@ -708,7 +738,7 @@ namespace Funq.Abstract
 					        var r = selector(v);
 							  builder.AddMany(r);
 				        });
-				return (TOutIter) bFactory.ProviderFrom(builder);
+				return (TOutIter) bFactory.IterableFrom(builder);
 			}
 		}
 
@@ -724,8 +754,10 @@ namespace Funq.Abstract
 		/// <returns> </returns>
 		protected virtual TRSeq SelectMany<TRElem, TRSeq, TElem2>(TRSeq bFactory, Func<TElem, IEnumerable<TElem2>> selector,
 		                                                          Func<TElem, IEnumerable<TElem2>, TRElem> rSelector)
-			where TRSeq : ITrait_CollectionBuilderFactory<TRElem, IterableBuilder<TRElem>>
-		{
+			where TRSeq : IAnyBuilderFactory<TRElem, IterableBuilder<TRElem>> {
+			bFactory.IsNotNull("bFactory");
+			selector.IsNotNull("selector");
+			rSelector.IsNotNull("rSelector");
 			using (var builder = bFactory.EmptyBuilder)
 			{
 				ForEach(v =>
@@ -733,7 +765,7 @@ namespace Funq.Abstract
 					        var vs = selector(v);
 					        builder.Add(rSelector(v, vs));
 				        });
-				return (TRSeq) bFactory.ProviderFrom(builder);
+				return (TRSeq) bFactory.IterableFrom(builder);
 			}
 		}
 
@@ -767,9 +799,10 @@ namespace Funq.Abstract
 		/// <param name="selector"> A selector that returns a key-value pair. </param>
 		/// <returns> </returns>
 		protected virtual TRMap ToMapLike<TKey, TValue, TRMap>(
-			TRMap bFactory, Func<TElem, Kvp<TKey, TValue>> selector)
-			where TRMap : ITrait_MapLike<TKey, TValue>
-		{
+			TRMap bFactory, Func<TElem, KeyValuePair<TKey, TValue>> selector)
+			where TRMap : IAnyMapLike<TKey, TValue> {
+			bFactory.IsNotNull("bFactory");
+			selector.IsNotNull("selector");
 			using (var builder = bFactory.EmptyBuilder)
 			{
 				ForEach((v) =>
@@ -777,7 +810,7 @@ namespace Funq.Abstract
 					        var kvp = selector(v);
 					        builder.Add(kvp);
 				        });
-				return (TRMap) bFactory.ProviderFrom(builder);
+				return (TRMap) bFactory.IterableFrom(builder);
 			}
 		}
 
@@ -788,8 +821,8 @@ namespace Funq.Abstract
 		/// <param name="bFactory"> A prototype instance of the resulting collection provider, used as a builder factory. </param>
 		/// <returns> </returns>
 		protected virtual TRSeq ToIterable<TRSeq>(TRSeq bFactory)
-			where TRSeq : ITrait_CollectionBuilderFactory<TElem, IterableBuilder<TElem>>
-		{
+			where TRSeq : IAnyBuilderFactory<TElem, IterableBuilder<TElem>> {
+			bFactory.IsNotNull("bFactory");
 			return Select(bFactory, x => x);
 		}
 
@@ -800,12 +833,13 @@ namespace Funq.Abstract
 		/// <param name="bFactory"></param>
 		/// <returns></returns>
 		protected virtual TRSet ToSetLike<TRSet>(TRSet bFactory)
-			where TRSet : ITrait_SetLike<TElem>
+			where TRSet : IAnySetLike<TElem>
 		{
+			bFactory.IsNotNull("bFactory");
 			using (var builder = bFactory.EmptyBuilder)
 			{
 				ForEach(v => { builder.Add(v); });
-				return (TRSet) bFactory.ProviderFrom(builder);
+				return (TRSet) bFactory.IterableFrom(builder);
 			}
 		}
 
@@ -822,6 +856,12 @@ namespace Funq.Abstract
 			{
 				ForEach(v => { if (predicate(v)) builder.Add(v); });
 				return ProviderFrom(builder);
+			}
+		}
+
+		int IReadOnlyCollection<TElem>.Count {
+			get {
+				return this.Length;
 			}
 		}
 	}

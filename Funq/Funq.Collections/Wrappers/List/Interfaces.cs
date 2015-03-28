@@ -125,7 +125,7 @@ namespace Funq.Collections
 		/// <param name="arrayIndex"> The index at which to start copying. </param>
 		public void CopyTo(T[] array, int arrayIndex)
 		{
-			base.CopyTo(array, arrayIndex, Length);
+			base.CopyTo(array, 0, arrayIndex, Length);
 		}
 
 

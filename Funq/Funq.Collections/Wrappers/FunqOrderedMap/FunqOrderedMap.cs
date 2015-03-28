@@ -7,7 +7,7 @@ using Funq.Collections.Implementation;
 
 namespace Funq.Collections
 {
-	public sealed partial class FunqOrderedMap<TKey, TValue> : Trait_MapLike<TKey, TValue, FunqOrderedMap<TKey, TValue>>
+	public sealed partial class FunqOrderedMap<TKey, TValue> : AbstractMap<TKey, TValue, FunqOrderedMap<TKey, TValue>>
 	{
 		internal readonly OrderedAvlTree<TKey, TValue>.Node Root;
 		internal readonly IComparer<TKey> Comparer;
@@ -18,7 +18,7 @@ namespace Funq.Collections
 		
 		public static FunqOrderedMap<TKey, TValue> Empty(IComparer<TKey> comparer)
 		{
-			return new FunqOrderedMap<TKey, TValue>(OrderedAvlTree<TKey, TValue>.Node.Null, comparer ?? FastComparer<TKey>.Value);
+			return new FunqOrderedMap<TKey, TValue>(OrderedAvlTree<TKey, TValue>.Node.Null, comparer ?? FastComparer<TKey>.Default);
 		}
 
 		internal FunqOrderedMap(OrderedAvlTree<TKey, TValue>.Node root, IComparer<TKey> comparer )
@@ -31,11 +31,11 @@ namespace Funq.Collections
 			return Add(pair.Item1, pair.Item2);
 		}
 
-		public FunqOrderedMap<TKey, TValue> Add(Kvp<TKey, TValue> pair) {
+		public FunqOrderedMap<TKey, TValue> Add(KeyValuePair<TKey, TValue> pair) {
 			return Add(pair.Key, pair.Value);
 		}
 
-		protected override IEnumerator<Kvp<TKey, TValue>> GetEnumerator()
+		protected override IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
 		{
 			return Root.Items.GetEnumerator();
 		}
@@ -53,7 +53,7 @@ namespace Funq.Collections
 			}
 		}
 
-		public override bool ForEachWhile(System.Func<Kvp<TKey, TValue>, bool> iterator)
+		public override bool ForEachWhile(System.Func<KeyValuePair<TKey, TValue>, bool> iterator)
 		{
 			if (iterator == null) throw Errors.Is_null;
 			return Root.ForEachWhile((k, v) => Kvp.Of(k, v).Pipe(iterator));
@@ -67,8 +67,7 @@ namespace Funq.Collections
 			}
 		}
 
-		public override FunqOrderedMap<TKey, TValue> Merge(FunqOrderedMap<TKey, TValue> other, System.Func<TKey, TValue, TValue, TValue> collision)
-		{
+		public override FunqOrderedMap<TKey, TValue> Merge(FunqOrderedMap<TKey, TValue> other, System.Func<TKey, TValue, TValue, TValue> collision) {
 			if (other == null) throw Errors.Is_null;
 			return Root.Union(other.Root, collision, Lineage.Mutable()).WrapMap(Comparer);
 		}
@@ -96,7 +95,7 @@ namespace Funq.Collections
 			return Root.Except(other.Root, Lineage.Mutable(), subtraction).WrapMap(Comparer);
 		}
 
-		internal FunqOrderedMap<TKey, TValue> AddRange(IEnumerable<Kvp<TKey, TValue>> items, OverwriteBehavior behavior) {
+		internal FunqOrderedMap<TKey, TValue> AddRange(IEnumerable<KeyValuePair<TKey, TValue>> items, OverwriteBehavior behavior) {
 			if (items == null) throw Errors.Is_null;
 			var lineage = Lineage.Mutable();
 			var newRoot = Root;
@@ -121,18 +120,13 @@ namespace Funq.Collections
 			return newRoot.WrapMap(Comparer);
 		} 
 
-		public FunqOrderedMap<TKey, TValue> AddRange(IEnumerable<Kvp<TKey, TValue>> items) {
+		public FunqOrderedMap<TKey, TValue> AddRange(IEnumerable<KeyValuePair<TKey, TValue>> items) {
 			return AddRange(items, OverwriteBehavior.Overwrite);
 		}
 
 		public FunqOrderedMap<TKey, TValue> AddRange(IEnumerable<Tuple<TKey, TValue>> tuples)
 		{
-			return this.AddRange(tuples.Select(x => (Kvp<TKey, TValue>) x));
-		}
-
-		public FunqOrderedMap<TKey, TValue> AddRange(IEnumerable<KeyValuePair<TKey, TValue>> tuples)
-		{
-			return this.AddRange(tuples.Select(x => (Kvp<TKey, TValue>)x));
+			return this.AddRange(tuples.Select(x => Kvp.Of(x)));
 		}
 
 		public FunqOrderedMap<TKey, TValue> DropRange(IEnumerable<TKey> items)
@@ -151,7 +145,7 @@ namespace Funq.Collections
 			return wasModified ? map.WrapMap(Comparer) : this;
 		} 
 
-		public Kvp<TKey, TValue> MaxItem
+		public KeyValuePair<TKey, TValue> MaxItem
 		{
 			get
 			{
@@ -161,7 +155,7 @@ namespace Funq.Collections
 			}
 		}
 
-		public Kvp<TKey, TValue> MinItem
+		public KeyValuePair<TKey, TValue> MinItem
 		{
 			get
 			{
@@ -171,7 +165,7 @@ namespace Funq.Collections
 			}
 		}
 
-		public Kvp<TKey, TValue> ByOrder(int index) {
+		public KeyValuePair<TKey, TValue> ByOrder(int index) {
 			if (Root.IsNull) throw Errors.Is_empty;
 			var opt = Root.ByOrder(index);
 			if (opt.IsNone) {

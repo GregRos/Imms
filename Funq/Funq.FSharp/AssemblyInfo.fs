@@ -9,4 +9,7 @@ open System.Runtime.CompilerServices
 [<assembly: AssemblyDescription("Companion assembly with F# support")>]
 [<assembly: AssemblyVersion("0.4.*")>]
 [<assembly: AutoOpen("Funq.FSharp")>]
+[<assembly: InternalsVisibleTo("Funq.Tests.Performance")>]
+[<assembly: InternalsVisibleTo("Funq.Tests.Integrity")>]
+[<assembly: InternalsVisibleTo("Funq.Tests.Integrity2")>]
 do()

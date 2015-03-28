@@ -1,6 +1,6 @@
 ﻿///A module that contains helper functions and methods.
 [<AutoOpen>]
-module Funq.Tests.Performance.Helper
+module Funq.Tests.Caching
 
 open Microsoft.FSharp.Quotations
 open Microsoft.FSharp.Linq.QuotationEvaluation

@@ -18,7 +18,7 @@ namespace Funq.Collections
 				zIterableView = new IterableDebugView(map);
 			}
 
-			public Kvp<TKey, TValue> MaxItem
+			public KeyValuePair<TKey, TValue> MaxItem
 			{
 				get
 				{
@@ -26,7 +26,7 @@ namespace Funq.Collections
 				}
 			}
 
-			public Kvp<TKey, TValue> MinItem
+			public KeyValuePair<TKey, TValue> MinItem
 			{
 				get
 				{

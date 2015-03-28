@@ -4,15 +4,38 @@ using System.ComponentModel;
 
 namespace Funq
 {
-	[EditorBrowsable(EditorBrowsableState.Never)]
+	
 	internal static class Errors
 	{
+
+		public static void IsNotNull(this object o, string name) {
+			if (o == null) throw Errors.Argument_null(name);
+		}
+
+		public static void IsInRange<T>(this T value, string name,T lower, T upper) where T : IComparable<T> {
+			var inRange1 = value.CompareTo(lower) >= 0;
+			var inRange2 = value.CompareTo(upper) <= 0;
+			if (!inRange1 && !inRange2) {
+				throw Errors.Arg_out_of_range(name);
+			}
+		}
+
+		public static ArgumentException Eq_comparer_required(string argName)
+		{
+			return new ArgumentException("You must supply an equality comparer for this element to avoid inconsistencies.",
+				argName);
+		}
+
 		public class NoValueException : InvalidOperationException
 		{
 			public NoValueException()
 				: base("The Optional object had no value.")
 			{
 			}
+		}
+
+		public static ArgumentException Bad_argument(string argName, string message = "The argument value is invalid.") {
+			return new ArgumentException(message, argName);
 		}
 
 		public static InvalidCastException Invalid_type_conversion {

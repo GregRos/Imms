@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Funq;
 using Funq.Abstract;
 
-public partial class __OrderedSetLikeClass__<T> : Trait_SetLike<T, __OrderedSetLikeClass__<T>>
+public partial class __OrderedSetLikeClass__<T> : AbstractSet<T, __OrderedSetLikeClass__<T>>
 {
 	private __OrderedSetLikeClass__<TElem2> GetPrototype<TElem2>(__HandlerObject__<TElem2> ph)
 	{

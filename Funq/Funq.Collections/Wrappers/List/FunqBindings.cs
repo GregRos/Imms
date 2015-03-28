@@ -41,11 +41,6 @@ namespace Funq.Collections
 			{
 				inner = inner.AddLast(item, lineage);
 			}
-
-			public override void EnsureCapacity(int n)
-			{
-
-			}
 		}
 
 		protected internal override IterableBuilder<T> EmptyBuilder

@@ -33,13 +33,7 @@ namespace Funq.Collections
 			{
 				
 			}
-
-			public override void EnsureCapacity(int n)
-			{
-				
-			}
-
-			protected override void add(Kvp<TKey, TValue> item)
+			protected override void add(KeyValuePair<TKey, TValue> item)
 			{
 				_inner = _inner.AvlAdd(item.Key.GetHashCode(), item.Key, item.Value, _lineage, true);
 			}

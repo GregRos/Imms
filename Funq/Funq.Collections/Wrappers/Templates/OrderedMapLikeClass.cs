@@ -4,7 +4,7 @@ using System;
 using Funq.Abstract;
 using Linq = System.Linq;
 
-public partial class __OrderedMapLikeClass__<TKey,TValue> : Trait_MapLike<TKey,TValue,__OrderedMapLikeClass__<TKey,TValue>>
+public partial class __OrderedMapLikeClass__<TKey,TValue> : AbstractMap<TKey,TValue,__OrderedMapLikeClass__<TKey,TValue>>
 {
 	private __OrderedMapLikeClass__<TKey2,TValue2> GetPrototype<TKey2,TValue2>(__HandlerObject__<TKey2> ph)
 	{
@@ -19,7 +19,7 @@ public partial class __OrderedMapLikeClass__<TKey,TValue> : Trait_MapLike<TKey,T
 	/// <param name="selector">The selector.</param>
 	/// <param name="handler">A new equality or comparison handler for constructing the resulting map.</param>
 	/// <returns></returns>
-	public __OrderedMapLikeClass__<TRKey,TRValue> Select<TRKey,TRValue>(Func<Kvp<TKey,TValue>, Kvp<TRKey,TRValue>> selector, __HandlerObject__<TRKey> handler)
+	public __OrderedMapLikeClass__<TRKey,TRValue> Select<TRKey,TRValue>(Func<KeyValuePair<TKey,TValue>, KeyValuePair<TRKey,TRValue>> selector, __HandlerObject__<TRKey> handler)
 	{
 		if (selector == null) throw Errors.Is_null;
 		return base.Select(GetPrototype<TRKey,TRValue>(handler), selector);
@@ -33,7 +33,7 @@ public partial class __OrderedMapLikeClass__<TKey,TValue> : Trait_MapLike<TKey,T
 	/// <param name="selector">The selector.</param>
 	/// <param name="handler">A new equality or comparison handler for constructing the resulting map.</param>
 	/// <returns></returns>
-	public __OrderedMapLikeClass__<TRKey, TRValue> Select<TRKey, TRValue>(Func<Kvp<TKey, TValue>, Option<Kvp<TRKey, TRValue>>> selector, __HandlerObject__<TRKey> handler)
+	public __OrderedMapLikeClass__<TRKey, TRValue> Select<TRKey, TRValue>(Func<KeyValuePair<TKey, TValue>, Option<KeyValuePair<TRKey, TRValue>>> selector, __HandlerObject__<TRKey> handler)
 	{
 		if (selector == null) throw Errors.Is_null;
 		return base.Choose(this.GetPrototype<TRKey,TRValue>(handler), selector);
@@ -47,7 +47,7 @@ public partial class __OrderedMapLikeClass__<TKey,TValue> : Trait_MapLike<TKey,T
 	/// <param name="selector">The selector.</param>
 	/// <param name="handler">A new equality or comparison handler for constructing the resulting map.</param>
 	/// <returns></returns>
-	public __OrderedMapLikeClass__<TRKey,TRValue> Select<TRKey,TRValue>(Func<TKey, TValue, Kvp<TRKey,TRValue>> selector, __HandlerObject__<TRKey> handler)
+	public __OrderedMapLikeClass__<TRKey,TRValue> Select<TRKey,TRValue>(Func<TKey, TValue, KeyValuePair<TRKey,TRValue>> selector, __HandlerObject__<TRKey> handler)
 	{
 		if (selector == null) throw Errors.Is_null;
 		return base.Select(this.GetPrototype<TRKey, TRValue>(handler), kvp => selector(kvp.Key, kvp.Value));
@@ -78,7 +78,7 @@ public partial class __OrderedMapLikeClass__<TKey,TValue> : Trait_MapLike<TKey,T
 	/// <param name="other"></param>
 	/// <param name="collision"></param>
 	/// <returns></returns>
-	public __OrderedMapLikeClass__<TKey, TRValue> Join<TValue2, TRValue>(ITrait_MapLike<TKey, TValue2> other, Func<TKey, TValue, TValue2, TRValue> collision)
+	public __OrderedMapLikeClass__<TKey, TRValue> Join<TValue2, TRValue>(IAnyMapLike<TKey, TValue2> other, Func<TKey, TValue, TValue2, TRValue> collision)
 	{
 		if (other == null) throw Errors.Is_null;
 		if (collision == null) throw Errors.Is_null;
@@ -95,8 +95,8 @@ public partial class __OrderedMapLikeClass__<TKey,TValue> : Trait_MapLike<TKey,T
 	/// <param name="rSelector">The r selector.</param>
 	/// <param name="handler">A new equality or comparison handler for constructing the resulting map.</param>
 	/// <returns></returns>
-	public __OrderedMapLikeClass__<TRKey,TRValue> SelectMany<TRKey,TRValue,TProject>(Func<Kvp<TKey,TValue>, IEnumerable<TProject>> selector,
-																					Func<Kvp<TKey,TValue>, IEnumerable<TProject>, Kvp<TRKey,TRValue>> rSelector, __HandlerObject__<TRKey> handler)
+	public __OrderedMapLikeClass__<TRKey,TRValue> SelectMany<TRKey,TRValue,TProject>(Func<KeyValuePair<TKey,TValue>, IEnumerable<TProject>> selector,
+																					Func<KeyValuePair<TKey,TValue>, IEnumerable<TProject>, KeyValuePair<TRKey,TRValue>> rSelector, __HandlerObject__<TRKey> handler)
 	{
 		if (selector == null) throw Errors.Is_null;
 		if (rSelector == null) throw Errors.Is_null;

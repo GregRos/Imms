@@ -34,7 +34,7 @@ namespace Funq.Collections.Implementation
 			{
 				get
 				{
-#if DEBUG
+#if ASSERTS
 					_inner.IsNotNull();
 #endif
 					return _inner;
@@ -154,7 +154,7 @@ namespace Funq.Collections.Implementation
 
 		public override Leaf<TValue> Remove(int index, Lineage lineage)
 		{
-#if DEBUG
+#if ASSERTS
 			index.Is(0);
 #endif
 			return null;

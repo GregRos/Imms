@@ -42,7 +42,7 @@ namespace Funq.Collections.Implementation
 				}
 
 				[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-				public Kvp<TKey, TValue>[] zContents
+				public KeyValuePair<TKey, TValue>[] zContents
 				{
 					get;
 					set;
@@ -58,7 +58,7 @@ namespace Funq.Collections.Implementation
 			public int Count;
 			internal static readonly Bucket Null = new Bucket(true);
 
-			public static Bucket FromRange(IEnumerable<Kvp<TKey, TValue>> kvps, IEqualityComparer<TKey> eq, Lineage lin) {
+			public static Bucket FromRange(IEnumerable<KeyValuePair<TKey, TValue>> kvps, IEqualityComparer<TKey> eq, Lineage lin) {
 				Bucket bucket = Null;
 				foreach (var kvp in kvps) {
 					bucket = bucket.IsNull ? new Bucket(kvp.Key, kvp.Value, Null, eq, lin) : bucket.Add(kvp.Key, kvp.Value, lin, true);
@@ -78,7 +78,7 @@ namespace Funq.Collections.Implementation
 				
 			}
 
-			public Kvp<TKey, TValue> AsKvp
+			public KeyValuePair<TKey, TValue> AsKvp
 			{
 				get
 				{
@@ -211,7 +211,7 @@ namespace Funq.Collections.Implementation
 			/// <param name="kvps"></param>
 			/// <param name="lin"></param>
 			/// <returns></returns>
-			public Bucket TrySetRange(LinkedList<Kvp<TKey, TValue>> kvps, Lineage lin) {
+			public Bucket TrySetRange(LinkedList<KeyValuePair<TKey, TValue>> kvps, Lineage lin) {
 				if (kvps.Count == 0) return null;
 				var node = kvps.First;
 				while (node != null) {
@@ -234,7 +234,7 @@ namespace Funq.Collections.Implementation
 			/// <param name="kvps"></param>
 			/// <param name="lin"></param>
 			/// <returns></returns>
-			public Bucket AddRangeHashCollisions(LinkedList<Kvp<TKey, TValue>> kvps, Lineage lin) {
+			public Bucket AddRangeHashCollisions(LinkedList<KeyValuePair<TKey, TValue>> kvps, Lineage lin) {
 				var bucket = this;
 				var trySet = TrySetRange(kvps, lin);
 				var prev = trySet == null ? this : WithNext(trySet, lin);
@@ -339,7 +339,7 @@ namespace Funq.Collections.Implementation
 				return true;
 			}
 
-			public IEnumerable<Kvp<TKey,TValue>> Items
+			public IEnumerable<KeyValuePair<TKey,TValue>> Items
 			{
 				get
 				{

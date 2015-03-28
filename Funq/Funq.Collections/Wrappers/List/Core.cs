@@ -16,7 +16,7 @@ namespace Funq.Collections
 	///   A sequential data structure supporting many efficient operations.
 	/// </summary>
 	/// <typeparam name="T"> The type of value stored in the data structure. </typeparam>
-	public sealed partial class FunqList<T> : Trait_Sequential<T, FunqList<T>>
+	public sealed partial class FunqList<T> : AbstractSequential<T, FunqList<T>>
 	{
 		private static readonly FingerTree<T>.FTree<Leaf<T>> emptyFTree = FingerTree<T>.FTree<Leaf<T>>.Empty;
 		internal static readonly FunqList<T> empty = new FunqList<T>(emptyFTree);
@@ -113,7 +113,7 @@ namespace Funq.Collections
 		public FunqList<T> AddFirst(T item)
 		{
 			var ret =  _root.AddFirst(item, Lineage.Immutable).Wrap();
-#if DEBUG
+#if ASSERTS
 			ret.First.Is(item);
 			ret.Last.Is(Last);
 #endif
@@ -163,7 +163,7 @@ namespace Funq.Collections
 		public FunqList<T> AddLast(T item)
 		{
 			var ret =  new FunqList<T>(_root.AddLast(item, Lineage.Immutable));
-#if DEBUG
+#if ASSERTS
 			ret.Last.Is(item);
 			ret.Length.Is(Length + 1);
 #endif
@@ -215,7 +215,7 @@ namespace Funq.Collections
 		{
 			if (_root.Measure == 0) throw Funq.Errors.Is_empty;
 			var ret =  _root.DropFirst(Lineage.Immutable).Wrap();
-#if DEBUG
+#if ASSERTS
 			if (Length > 1) ret.First.Is(this[1]);
 			else ret.Length.Is(Length - 1);
 #endif
@@ -231,7 +231,7 @@ namespace Funq.Collections
 		{
 			if (_root.Measure == 0) throw Funq.Errors.Is_empty;
 			var ret =  _root.DropLast(Lineage.Immutable).Wrap();
-#if DEBUG
+#if ASSERTS
 			if (ret.Length > 0) ret.Last.Is(this[-2]);
 			ret.Length.Is(Length - 1);
 #endif
@@ -255,7 +255,7 @@ namespace Funq.Collections
 			if (index == 0) return AddFirst(item);
 			var new_root = _root.Insert(index, item, Lineage.Mutable());
 			var ret =  new_root.Wrap();
-#if DEBUG
+#if ASSERTS
 			ret[index].Is(item);
 			ret.Length.Is(Length + 1);
 #endif
@@ -333,7 +333,7 @@ namespace Funq.Collections
 			index = index < 0 ? index + _root.Measure : index;
 			if (index < 0 || index >= _root.Measure) throw Funq.Errors.Arg_out_of_range("index", index);
 			var ret =  _root.Remove(index, Lineage.Mutable()).Wrap();
-#if DEBUG
+#if ASSERTS
 			if (Length > index + 1)
 			{
 				ret[index].Is(this[index + 1]);
@@ -366,7 +366,7 @@ namespace Funq.Collections
 			if (index == 0) return DropFirst().AddFirst(item);
 			if (index == _root.Measure - 1) return DropLast().AddLast(item);
 			var ret = _root.Update(index, item, Lineage.Mutable()).Wrap();
-#if DEBUG
+#if ASSERTS
 			ret[index].Is(item);
 			ret.Length.Is(Length);
 #endif

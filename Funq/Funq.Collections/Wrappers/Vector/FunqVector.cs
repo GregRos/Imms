@@ -90,7 +90,7 @@ namespace Funq.Collections
 		public FunqVector<T> InsertRange(int index, IEnumerable<T> items) {
 			if (index == 0) return AddFirstRange(items);
 			if (index == Length) return AddLastRange(items);
-#if DEBUG
+#if ASSERTS
 			var oldLast = Last;
 			var oldFirst = First;
 #endif
@@ -110,7 +110,7 @@ namespace Funq.Collections
 			s = 0;
 			start = start.AddMany(arrAfter, lineage, 6, ref s, ref len);
 			FunqVector<T> ret = start;
-#if DEBUG
+#if ASSERTS
 			ret.Length.Is(oldLength + arrLength);
 			ret.RecursiveLength().Is(ret.Length);
 			ret.Last.Is(oldLast);
@@ -121,7 +121,7 @@ namespace Funq.Collections
 			return ret;
 		}
 
-		internal void CopyTo(T[] arr, int myStart, int arrStart, int count) {
+		public override void CopyTo(T[] arr, int myStart, int arrStart, int count) {
 			int ix = arrStart;
 			root.IterWhileFrom(myStart, item => {
 				if (ix >= arrStart + count) return false;
@@ -129,10 +129,6 @@ namespace Funq.Collections
 				ix++;
 				return true;
 			});
-		}
-
-		public override void CopyTo(T[] arr, int start, int count) {
-			CopyTo(arr, 0, start, count);
 		}
 
 		public override bool IsEmpty
@@ -160,13 +156,13 @@ namespace Funq.Collections
 		/// <exception cref="InvalidOperationException">Thrown if the data structure exceeds its maximum capacity.</exception>
 		public FunqVector<T> AddLast(T item)
 		{
-#if DEBUG
+#if ASSERTS
 			var expected = Length + 1;
 #endif
 			if (root.Length >= MaxCapacity) throw Funq.Errors.Capacity_exceeded();
 
 			FunqVector<T> ret = root.Add(item, Lineage.Immutable);
-#if DEBUG
+#if ASSERTS
 			ret.Last.Is(item);
 			ret.Length.Is(expected);
 #endif
@@ -207,7 +203,7 @@ namespace Funq.Collections
 		public FunqVector<T> AddLastRange(IEnumerable<T> items)
 		{
 			if (items == null) throw Funq.Errors.Argument_null("items");
-#if DEBUG
+#if ASSERTS
 			var expected = Length;
 			var old_last = TryLast;
 #endif
@@ -217,7 +213,7 @@ namespace Funq.Collections
 			var old_len = len;
 			if (root.Length + len >= MaxCapacity) throw Funq.Errors.Capacity_exceeded();
 			FunqVector<T> ret = root.AddMany(arr, Lineage.Mutable(), 6, ref s, ref len);
-#if DEBUG
+#if ASSERTS
 			ret.Length.Is(expected + old_len);
 			if (arr.Length > 0) ret.Last.Is(arr[old_len - 1]);
 			else if (old_last.IsSome) ret.Last.Is(old_last.Value);
@@ -270,12 +266,12 @@ namespace Funq.Collections
 		public FunqVector<T> DropLast()
 		{
 			if (root.Length == 0) throw Funq.Errors.Is_empty;
-#if DEBUG
+#if ASSERTS
 			var expected = Length - 1;
 #endif
 			var lineage = Lineage.Immutable;
 			FunqVector<T> ret =  root.Drop(lineage);
-#if DEBUG
+#if ASSERTS
 			ret.Length.Is(expected);
 			if (Length > 1) ret.Last.Is(this[-2]);
 #endif
@@ -302,14 +298,14 @@ namespace Funq.Collections
 		/// <exception cref="ArgumentOutOfRangeException">Thrown if the index doesn't exist in the data structure.</exception>
 		public FunqVector<T> Update(int index, T item)
 		{
-#if DEBUG
+#if ASSERTS
 			var expected_length = Length;
 #endif
 			index = index < 0 ? index + Length : index;
 			if (index < 0 || index >= Length) throw Funq.Errors.Arg_out_of_range("index", index);
 			var lineage = Lineage.Immutable;
 			var ret = root.Update(index, item, lineage);
-#if DEBUG
+#if ASSERTS
 			ret[index].Is(item);
 			ret.Length.Is(expected_length);
 #endif

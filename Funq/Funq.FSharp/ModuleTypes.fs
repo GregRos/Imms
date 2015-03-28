@@ -8,7 +8,7 @@ open System.ComponentModel
 open Funq.Abstract
 open Funq.FSharp.Operators
 
-type FunqModuleBase<'elem, 'seq, 'builder when 'seq :> Trait_Iterable<'elem, 'seq, 'builder> and 'builder :> IterableBuilder<'elem>> internal () =
+type FunqModuleBase<'elem, 'seq, 'builder when 'seq :> AbstractIterable<'elem, 'seq, 'builder> and 'builder :> IterableBuilder<'elem>> internal () =
     inherit ModuleType()
     member x.isEmpty (s : 'seq) = s.IsEmpty
     member x.length (s : 'seq) = s.Length
@@ -25,7 +25,7 @@ type FunqModuleBase<'elem, 'seq, 'builder when 'seq :> Trait_Iterable<'elem, 'se
     member x.forAll f (s : 'seq) = s.All(toFunc1 f)
     member x.count f (s: 'seq) = s.Count(toFunc1 f)
     
-type FunqMapBase<'k, 'v, 'map when 'map :> Trait_MapLike<'k, 'v, 'map>> internal () =
+type FunqMapBase<'k, 'v, 'map when 'map :> AbstractMap<'k, 'v, 'map>> internal () =
     inherit FunqModuleBase<Kvp<'k,'v>, 'map, MapBuilder<'k,'v>>()
     static let _instance = FunqMapBase<'k,'v, 'map>()
     static member internal instance = _instance
@@ -34,7 +34,7 @@ type FunqMapBase<'k, 'v, 'map when 'map :> Trait_MapLike<'k, 'v, 'map>> internal
     member x.containsKey k (map : 'map) = map.ContainsKey(k)
     member x.containsValue (v,Eq) (map : 'map) = map.ContainsValue(v, Eq)
 
-type FunqSetBase<'elem, 'set when 'set :> Trait_SetLike<'elem, 'set>> internal () =
+type FunqSetBase<'elem, 'set when 'set :> AbstractSet<'elem, 'set>> internal () =
     inherit FunqModuleBase<'elem, 'set, SetBuilder<'elem>>()
     static let _instance = FunqSetBase<'elem, 'set>()
     static member internal instance = _instance
@@ -45,7 +45,7 @@ type FunqSetBase<'elem, 'set when 'set :> Trait_SetLike<'elem, 'set>> internal (
     member x.difference (other : 'set) (set : 'set) = set.Difference(other)
     member x.relates (other : 'set) (set : 'set) = set.RelatesTo(other)
 
-type FunqSeqModule<'elem, 'list when 'list :> Trait_Sequential<'elem,'list>> internal () =
+type FunqSeqModule<'elem, 'list when 'list :> AbstractSequential<'elem,'list>> internal () =
     inherit FunqModuleBase<'elem, 'list, IterableBuilder<'elem>>()
     member x.first (s : 'list) = s.First
     member x.last (s : 'list) = s.Last

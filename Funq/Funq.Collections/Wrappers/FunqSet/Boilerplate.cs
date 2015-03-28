@@ -7,7 +7,7 @@ namespace Funq.Collections
 	using Funq;
 	using Funq.Abstract;
 	
-	public partial class FunqSet<T> : Trait_SetLike<T, FunqSet<T>>
+	public partial class FunqSet<T> : AbstractSet<T, FunqSet<T>>
 	{
 		private FunqSet<TElem2> GetPrototype<TElem2>(IEqualityComparer<TElem2> ph)
 		{

@@ -42,7 +42,7 @@ namespace Funq.Collections.Implementation
 				Height = 0;
 				Count = 0;
 				IsNull = isNull;
-				Comparer = FastComparer<TKey>.Value;
+				Comparer = FastComparer<TKey>.Default;
 			}
 
 			public Node(TKey key, TValue value, Node left, Node right, IComparer<TKey> comparer, Lineage lineage) {
@@ -230,7 +230,7 @@ namespace Funq.Collections.Implementation
 					default:
 						throw ImplErrors.Invalid_execution_path;
 				}
-#if DEBUG
+#if ASSERTS
 				if (newRoot.Factor > 1 || newRoot.Factor < -1)
 				{
 					throw ImplErrors.Invalid_execution_path;
@@ -315,7 +315,7 @@ namespace Funq.Collections.Implementation
 				return Right;
 			}
 
-			public IEnumerable<Kvp<TKey, TValue>> DebugItems
+			public IEnumerable<KeyValuePair<TKey, TValue>> DebugItems
 			{
 				get
 				{
@@ -328,7 +328,7 @@ namespace Funq.Collections.Implementation
 
 			}
 
-			public IEnumerable<Kvp<TKey, TValue>> Items
+			public IEnumerable<KeyValuePair<TKey, TValue>> Items
 			{
 				get
 				{
@@ -551,7 +551,7 @@ namespace Funq.Collections.Implementation
 					var newLeft = Concat(leftBranch, pivot, rightBranch.Left, lineage);
 					balanced = AvlBalance(rightBranch, newLeft, rightBranch.Right, lineage);
 				}
-#if DEBUG
+#if ASSERTS
 				AssertEx.IsTrue(balanced.Count == 1 + oldLeftCount + oldRightCount);
 				AssertEx.IsTrue(balanced.IsBalanced);
 #endif
@@ -594,7 +594,7 @@ namespace Funq.Collections.Implementation
 					rightBranch = this.Right;
 				}
 
-#if DEBUG
+#if ASSERTS
 				var totalCount = leftBranch.Count + rightBranch.Count + (central == null ? 0 : 1);
 				totalCount.Is(oldCount);
 #endif
@@ -671,7 +671,7 @@ namespace Funq.Collections.Implementation
 				if (this.IsNull || other.IsNull) return this;
 				Node this_lesser, this_greater;
 				Node central_node;
-#if DEBUG
+#if ASSERTS
 				var expected = this.Pairs.Select(x => x.Key).Except(other.Pairs.Select(x => x.Key)).ToHashSet();
 #endif
 				this.Split(other.Key, out this_lesser, out central_node, out this_greater, lin);
@@ -695,7 +695,7 @@ namespace Funq.Collections.Implementation
 						ret = Concat(except_lesser, central_node, except_greater, lin);
 					}
 				}
-#if DEBUG
+#if ASSERTS
 				AssertEx.IsTrue(exceptLesserCount <= thisLesserCount);
 				AssertEx.IsTrue(exceptGreaterCount <= thisGreaterCount);
 				AssertEx.IsTrue(exceptGreaterCount + exceptLesserCount <= thisLesserCount + thisGreaterCount);
@@ -708,12 +708,12 @@ namespace Funq.Collections.Implementation
 
 			public Node SymDifference(Node b, Lineage lin)
 			{
-#if DEBUG
+#if ASSERTS
 				var expected = this.Pairs.Select(x => x.Key).ToHashSet();
 				expected.SymmetricExceptWith(b.Pairs.Select(x => x.Key));
 #endif
 				var ret = this.Except(b, lin).Union(b.Except(this, lin), null, lin);
-#if DEBUG
+#if ASSERTS
 				var retSet = ret.Pairs.Select(x => x.Key).ToHashSet();
 				retSet.SetEquals(expected).IsTrue();
 #endif
@@ -729,7 +729,7 @@ namespace Funq.Collections.Implementation
 				return res;
 			}
 
-			public IEnumerable<Kvp<TKey, TValue>> Pairs {
+			public IEnumerable<KeyValuePair<TKey, TValue>> Pairs {
 				get {
 					return Items;
 				}
@@ -764,7 +764,7 @@ namespace Funq.Collections.Implementation
 			{
 				if (IsNull) return b;
 				if (b.IsNull) return this;
-#if DEBUG
+#if ASSERTS
 				var expected = this.Pairs.Select(x => x.Key).Union(b.Pairs.Select(x => x.Key)).ToHashSet();
 #endif
 				Node a_lesser, a_greater;
@@ -784,7 +784,7 @@ namespace Funq.Collections.Implementation
 					center_node = center_node.MutateOrCreate(newValue, unitedLeft, unitedRight, lin);
 				}
 				var concated = Concat(unitedLeft, center_node, unitedRight, lin);
-#if DEBUG
+#if ASSERTS
 				AssertEx.IsTrue(concated.Count <= oldThisCount + oldBCount);
 				AssertEx.IsTrue(concated.Count >= oldThisCount);
 				AssertEx.IsTrue(concated.Count >= oldBCount);
@@ -803,7 +803,7 @@ namespace Funq.Collections.Implementation
 			/// <param name="endIndex"></param>
 			/// <param name="lineage"></param>
 			/// <returns></returns>
-			public static Node FromSortedList(List<Kvp<TKey, TValue>> sorted, int startIndex, int endIndex, IComparer<TKey> comparer, Lineage lineage)
+			public static Node FromSortedList(List<KeyValuePair<TKey, TValue>> sorted, int startIndex, int endIndex, IComparer<TKey> comparer, Lineage lineage)
 			{
 				if (startIndex > endIndex)
 				{
@@ -894,13 +894,13 @@ namespace Funq.Collections.Implementation
 			public Node Intersect(Node other, Func<TKey, TValue, TValue, TValue> collision, Lineage lineage)
 			{
 				var intersection = this.IntersectElements(other);
-				var list = new List<Kvp<TKey, TValue>>();
+				var list = new List<KeyValuePair<TKey, TValue>>();
 				foreach (var pair in intersection)
 				{
 					var newValue = collision == null ? pair.First.Value : collision(pair.First.Key, pair.First.Value, pair.Second.Value);
 					list.Add(Kvp.Of(pair.First.Key, newValue));
 				}
-#if DEBUG
+#if ASSERTS
 				Debug_Intersect(list.Select(x=>x.Key).ToList(), other).IsTrue();
 #endif
 				return FromSortedList(list, 0, list.Count - 1, Comparer, lineage);

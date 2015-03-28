@@ -58,7 +58,7 @@ namespace Funq.Collections.Implementation
 				if (!tryNext) return false;
 				var cur = Current;
 				cmpResult = Comparer.Compare(cur.Key,key);
-#if DEBUG
+#if ASSERTS
 				AssertEx.IsTrue(cmpResult >= 0);
 #endif
 				return true;

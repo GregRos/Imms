@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Funq.Abstract
 {
-	abstract partial class Trait_Sequential<TElem,TList>
+	abstract partial class AbstractSequential<TElem,TList>
 	{
 		protected internal class SequentialDebugView
 		{

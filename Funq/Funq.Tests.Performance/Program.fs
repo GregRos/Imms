@@ -65,7 +65,8 @@ let runTests (tests : ErasedTest list) =
 
 open Scripts
 [<EntryPoint>]
-let  main argv =    
+let  main argv =  
+    
     let args = 
         Scripts.AdvancedArgs<_>(
            Simple_Iterations = 10000,

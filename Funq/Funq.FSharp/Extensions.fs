@@ -5,7 +5,7 @@ open System
 open System.Runtime.CompilerServices
 open Funq.FSharp.Implementation
 open Funq.Abstract
-type Trait_Iterable<'elem, 'seq, 'builder when 'builder :> IterableBuilder<'elem> and 'seq :> Trait_Iterable<'elem, 'seq, 'builder>> with
+type AbstractIterable<'elem, 'seq, 'builder when 'builder :> IterableBuilder<'elem> and 'seq :> AbstractIterable<'elem, 'seq, 'builder>> with
     member x.All f = x.All(toFunc1 f)
     member x.Any f = x.Any(toFunc1 f)
     member x.Find f = x.Find(toFunc1 f)
@@ -18,7 +18,7 @@ type Trait_Iterable<'elem, 'seq, 'builder when 'builder :> IterableBuilder<'elem
     member x.Pick f = x.Pick(f >> toOption |> toFunc1) |> fromOption
     member x.Count f = x.Count(toFunc1 f)
 
-type Trait_Sequential<'elem, 'seq when 'seq :> Trait_Sequential<'elem,'seq>> with
+type AbstractSequential<'elem, 'seq when 'seq :> AbstractSequential<'elem,'seq>> with
     member x.TryFirst = x.TryFirst |> fromOption
     member x.TryLast = x.TryLast |> fromOption
     member x.GetRange(i1, i2) = x.[i1,i2]
@@ -33,7 +33,7 @@ type Trait_Sequential<'elem, 'seq when 'seq :> Trait_Sequential<'elem,'seq>> wit
     member x.ReduceBack (initial, f) = x.ReduceBack(toFunc1 initial, toFunc2 f)
 
     
-let inline infer (x : 's when 's :> Trait_Sequential<'elem, 's>) = x
+let inline infer (x : 's when 's :> AbstractSequential<'elem, 's>) = x
 [<Extension>]
 type FunqExtensions private () =
     [<Extension>]

@@ -9,8 +9,7 @@ namespace Funq
 		ProperSubsetOf = 0x2,
 		ProperSupersetOf = 0x4,
 		Disjoint = 0x8,
-		None = 0x10
+		None = 0x10,
 	}
-
 	
 }

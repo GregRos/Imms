@@ -3,6 +3,8 @@
 module Funq.FSharp.Implementation.Helpers
 open System.CodeDom.Compiler
 open System
+open System.Collections.Generic
+open Funq.FSharp
 ///A module with some extra sequence processing functions.
 let inline (^*) (a : int) (b : int) = pown a b
 
@@ -33,9 +35,19 @@ module Fun =
 module String = 
     let contains what (where : string) = where.Contains(what)
     let contains_insensitive (what : string) (where : string) = where.ToUpperInvariant().Contains(what.ToUpperInvariant())
-
+    let join delim (items : _ seq) = String.Join(delim, items)
+   
 module Seq =
+    let getIter (a :_ seq) = a.GetEnumerator()
     
+    let equalsWith areEqual a b = 
+        let rec iter (it1 :_ Iter) (it2 : _ Iter) = 
+            match it1.MoveNext(), it2.MoveNext() with
+            | true, true -> areEqual(it1.Current)(it2.Current) && iter it1 it2
+            | false, false -> true
+            | _ -> false
+        iter (a |> getIter) (b |> getIter)
+    let equals a b = equalsWith (fun a b -> obj.Equals(a,b)) a b
     let lazyDistinct sq = 
         let mSet = System.Collections.Generic.HashSet<_>()
         seq { for item in sq do 
@@ -103,7 +115,7 @@ type 'a Microsoft.FSharp.Core.Option with
     member x.Cast<'t>() = x |> Option.map (fun x -> x :> obj :?> 't)
     member x.OfType<'t>() = x |> Option.bind (fun v -> if v :> obj :? 't then Some(v :> obj :?> 't) else None)
 
-type 'a List with
+type 'a Microsoft.FSharp.Collections.List with
     member x.OfType<'t>() = x |> List.filter (fun x -> x :> obj :? 't) |> List.map (fun x -> x :> obj :?> 't)
 
 module Array = 
@@ -117,11 +129,13 @@ module Array =
     let shuffle arr = shuffleRnd (Random()) arr
     let shuffleSeed seed arr = shuffleRnd (Random(seed)) arr
 module List = 
+    let cast<'a, 'b> (lst : 'a list) = lst |> List.map (fun x -> x :> obj :?> 'b)
+    let test = [0..5] |> cast<_, obj>
     ///Cross/cartesian product over lists.
     let cross (seq1 : #seq<_>) (seq2 : #seq<_>) = [for item1 in seq1 do for item2 in seq2 -> item1,item2]
     ///Maps a function taking 2 parameters over a list of tuples.
     let mapPairs f = List.map (fun (a,b) -> f a b)
-
+    let singleton x = [x]
     let shuffleSeed seed lst = 
         let arr = lst |> List.toArray
         Array.shuffle arr
@@ -133,7 +147,7 @@ module List =
         arr |> Array.toList 
 
     let addPairs (a,b) lst = (a,b)::lst
-    let apply1 arg fs = fs |> Seq.map (Fun.apply1 arg) |> Seq.toList
+    let apply1 arg fs = fs |> List.map (Fun.apply1 arg)
     let cross_apply1 (args : _ list) (fs : _ list) = fs |> Seq.cross_apply1 args |> Seq.toList
     let chain_iter f vs = 
         vs |> List.iter f
@@ -142,6 +156,12 @@ module List =
 module Option = 
     let orValue (v : 'v) = function Some u -> u | None -> v
     let cast (opt : 'a option) : 'b option = opt |> Option.map (fun a -> a :> obj :?> 'b)
+
+type Random with
+    member x.ExpDouble max = 
+        let scale = x.NextDouble() * 2. - 1.
+        let log = log max
+        exp (scale * log)
 
 ///A class with methods for generating number sequences of various kinds.
 [<RequireQualifiedAccessAttribute>]
@@ -190,19 +210,6 @@ module Rand =
                         cache.Clear()
                 if (cache.Count > 0) then yield cache.ToArray()
             }   
-
-///The parent type of fake modules used to implement generic modules/inheritance.
-type ModuleType() = 
-    inherit obj()
-    //Obsolete because we don't want them visible.
-    [<Obsolete("This is a module type.")>]
-    override x.Equals o = base.Equals o
-    [<Obsolete("This is a module type.")>]
-    override x.GetHashCode() = base.GetHashCode()
-    [<Obsolete("This is a module type.")>]
-    override x.ToString() = base.ToString()
-    [<Obsolete("This is a module type.")>]
-    member x.GetType() = base.GetType()
 
 [<AutoOpen>]
 module Type = 

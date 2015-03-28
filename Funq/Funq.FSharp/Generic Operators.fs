@@ -1,4 +1,5 @@
 ﻿module Funq.FSharp.Implementation.Ops
+
 open System
 #nowarn"77"
 let inline isEmpty o      = (^s : (member IsEmpty : bool) o )

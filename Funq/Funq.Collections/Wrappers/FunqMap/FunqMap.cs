@@ -17,14 +17,14 @@ namespace Funq.Collections
 		Ignore,
 		Throw
 	}
-	public sealed partial class FunqMap<TKey, TValue> : Trait_MapLike<TKey, TValue, FunqMap<TKey, TValue>>
+	public sealed partial class FunqMap<TKey, TValue> : AbstractMap<TKey, TValue, FunqMap<TKey, TValue>>
 	{
 
 		internal readonly HashedAvlTree<TKey, TValue>.Node Root;
 		internal readonly IEqualityComparer<TKey> Equality; 
 
 		public static FunqMap<TKey, TValue> Empty(IEqualityComparer<TKey> equality = null) {
-			return new FunqMap<TKey, TValue>(HashedAvlTree<TKey, TValue>.Node.Null, equality ?? FastEquality<TKey>.Value);
+			return new FunqMap<TKey, TValue>(HashedAvlTree<TKey, TValue>.Node.Null, equality ?? FastEquality<TKey>.Default);
 		}
 
 		internal FunqMap(HashedAvlTree<TKey, TValue>.Node root, IEqualityComparer<TKey> equality)
@@ -33,7 +33,7 @@ namespace Funq.Collections
 			Equality = equality;
 		}
 
-		protected override IEnumerator<Kvp<TKey, TValue>> GetEnumerator() {
+		protected override IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() {
 			var iterator = new HashedAvlTree<TKey, TValue>.TreeIterator(Root);
 			while (iterator.MoveNext()) {
 				var bucket = iterator.Current.Bucket;
@@ -71,7 +71,7 @@ namespace Funq.Collections
 		/// <param name="pair">The key-value pair.</param>
 		/// <returns></returns>
 		/// <exception cref="ArgumentException">Thrown if the specified key already exists in the map.</exception>
-		public FunqMap<TKey, TValue> Add(Kvp<TKey, TValue> pair)
+		public FunqMap<TKey, TValue> Add(KeyValuePair<TKey, TValue> pair)
 		{
 			return Add(pair.Key, pair.Value);
 		}
@@ -84,23 +84,14 @@ namespace Funq.Collections
 
 		public FunqMap<TKey, TValue> AddRange(IEnumerable<Tuple<TKey, TValue>> tuples)
 		{
-			return this.AddRange(tuples.Select(x => (Kvp<TKey, TValue>)x));
+			return this.AddRange(tuples.Select(x => Kvp.Of(x)));
 		}
 
-		internal FunqMap<TKey, TValue> AddRange(IEnumerable<KeyValuePair<TKey, TValue>> items) {
-			if (items == null) throw Errors.Is_null;
-			var lineage = Lineage.Mutable();
-			var newRoot = Root;
-
-			foreach (var item in items)
-			{
-				var newerRoot = newRoot.IsNull ? newRoot.InitializeFromNull(item.Key, item.Value, Equality, lineage) : newRoot.Root_Add(item.Key, item.Value, lineage, true);
-				newRoot = newerRoot;
-			}
-			return newRoot.WrapMap(Equality);
+		public FunqMap<TKey, TValue> AddRange(IEnumerable<KeyValuePair<TKey, TValue>> items) {
+			return AddRange(items, OverwriteBehavior.Overwrite);
 		}
 
-		internal FunqMap<TKey, TValue> AddRange(IEnumerable<TKey> items)
+		internal FunqMap<TKey, TValue> AddSetRange(IEnumerable<TKey> items)
 		{
 			if (items == null) throw Errors.Is_null;
 			var lineage = Lineage.Mutable();
@@ -185,7 +176,7 @@ namespace Funq.Collections
 			return Root.Apply(selector, Lineage.Mutable()).WrapMap(Equality);
 		}
 
-		internal FunqMap<TKey, TValue> AddRange(IEnumerable<Kvp<TKey, TValue>> items, OverwriteBehavior behavior)
+		internal FunqMap<TKey, TValue> AddRange(IEnumerable<KeyValuePair<TKey, TValue>> items, OverwriteBehavior behavior)
 		{
 			if (items == null) throw Errors.Is_null;
 			var lineage = Lineage.Mutable();
@@ -208,19 +199,10 @@ namespace Funq.Collections
 			return newRoot.WrapMap(Equality);
 		}
 
-		/// <summary>
-		/// Adds multiple key-value pairs to the map. May overwrite existing keys.
-		/// </summary>
-		/// <param name="items">The key-value pairs to add.</param>
-		/// <exception cref="ArgumentNullException">Thrown if the argument is null.</exception>
-		public FunqMap<TKey, TValue> AddRange(IEnumerable<Kvp<TKey, TValue>> items) {
-			return AddRange(items, OverwriteBehavior.Overwrite);
-		}
 
-
-		private FunqMap<TKey, TValue> AddRangeForHashCollisions(IEnumerable<Kvp<TKey, TValue>> items) {
+		private FunqMap<TKey, TValue> AddRangeForHashCollisions(IEnumerable<KeyValuePair<TKey, TValue>> items) {
 			//This is an implementaiton I wrote, expecting heavy hash collisions. Turned out there were very few. It just reduces performance.
-			var dictionary = new Dictionary<int, LinkedList<Kvp<TKey, TValue>>>();
+			var dictionary = new Dictionary<int, LinkedList<KeyValuePair<TKey, TValue>>>();
 			foreach (var item in items)
 			{
 				var hash = Equality.GetHashCode(item.Key);
@@ -230,7 +212,7 @@ namespace Funq.Collections
 				}
 				else
 				{
-					var list = new LinkedList<Kvp<TKey, TValue>>();
+					var list = new LinkedList<KeyValuePair<TKey, TValue>>();
 					list.AddLast(item);
 					dictionary[hash] = list;
 				}
@@ -262,9 +244,6 @@ namespace Funq.Collections
 			}
 			return removed ? root.WrapMap(Equality) : this;
 		}
-
-		
-
 
 		/// <summary>
 		/// Removes several keys from the map.
@@ -304,7 +283,7 @@ namespace Funq.Collections
 			return removedAny ? newRoot.WrapMap(Equality) : this;
 		}
 
-		public override bool ForEachWhile(Func<Kvp<TKey, TValue>, bool> iterator)
+		public override bool ForEachWhile(Func<KeyValuePair<TKey, TValue>, bool> iterator)
 		{
 			if (iterator == null) throw Errors.Is_null;
 			return Root.ForEachWhile((eqKey, v) => Kvp.Of(eqKey, v).Pipe(iterator));

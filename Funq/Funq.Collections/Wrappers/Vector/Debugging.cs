@@ -35,7 +35,7 @@ namespace Funq.Collections
 
 		public void CopyTo(T[] array, int arrayIndex)
 		{
-			this.CopyTo(array, arrayIndex, array.Length - arrayIndex);
+			this.CopyTo(array, 0, arrayIndex, array.Length - arrayIndex);
 		}
 
 		public IEnumerable<T> AsSeq

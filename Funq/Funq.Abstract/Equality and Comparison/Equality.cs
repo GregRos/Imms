@@ -1,76 +1,119 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 
 namespace Funq.Abstract
 {
 	internal static class Equality
 	{
-		public static int Map_HashCode<TKey, TValue>(ITrait_MapLike<TKey, TValue> map, IEqualityComparer<TKey> kEquality = null, IEqualityComparer<TValue> vEquality = null)
+		public static int Map_HashCode<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> map, IEqualityComparer<TKey> kEquality = null, IEqualityComparer<TValue> vEquality = null)
 		{
 			var hash = 0;
-			unchecked
-			{
-				map.ForEach(pair => { hash ^= (kEquality.GetHashCode(pair.Key) * 31) ^ vEquality.GetHashCode(pair.Value); });
+			vEquality = vEquality ?? FastEquality<TValue>.Default;
+			kEquality = kEquality ?? FastEquality<TKey>.Default;
+			unchecked {
+				map.ForEach(pair => { hash ^= (kEquality.GetHashCode(pair.Key)*31) ^ vEquality.GetHashCode(pair.Value); });
 			}
 			return hash;
 		}
 
-		public static bool Map_Equate<TKey, TValue>(ITrait_MapLike<TKey, TValue> x, ITrait_MapLike<TKey, TValue> y, IEqualityComparer<TValue> vEquality = null)
-		{
-			vEquality = vEquality ?? EqualityComparer<TValue>.Default;
-			var boiler = Boilerplate(x, y);
+		private static Func<TKey, Option<TValue>> GetValueSelectorFor<TKey, TValue>(
+			IEnumerable<KeyValuePair<TKey, TValue>> map) {
+			if (map is IDictionary<TKey, TValue>) {
+				var asDict = map as IDictionary<TKey, TValue>;
+				return k => asDict.ContainsKey(k) ? asDict[k].AsSome() : Option.None;
+			}
+			if (map is IReadOnlyDictionary<TKey, TValue>) {
+				var asDict = map as IReadOnlyDictionary<TKey, TValue>;
+				return k => asDict.ContainsKey(k) ? asDict[k].AsSome() : Option.None;
+			}
+			return null;
+		} 
+
+		public static bool Map_Equate<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> map1,
+			IEnumerable<KeyValuePair<TKey, TValue>> map2, IEqualityComparer<TValue> eq ) {
+			var boiler = Boilerplate(map1, map2);
 			if (boiler.IsSome) return boiler;
-			if (x.Length != y.Length) return false;
-			return x.ForEachWhile(xKvp =>
-			                      {
-				                      var yVal = y.TryGet(xKvp.Key);
-				                      if (!yVal.EqualsWith(xKvp.Value, vEquality)) return false;
-				                      return true;
-			                      });
+			eq = eq ?? FastEquality<TValue>.Default;
+			var len1 = map1.TryGuessLength();
+			var len2 = map2.TryGuessLength();
+			if (len1.IsSome && len2.IsSome && len1.Value != len2.Value) {
+				return false;
+			} 
+			Func<TKey, Option<TValue>> getValue2 = GetValueSelectorFor(map2);
+			if (getValue2 == null) {
+				var dict = map2.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+				getValue2 = GetValueSelectorFor(dict);
+			}
+			return map1.ForEachWhile(kvp => {
+				var v1 = kvp.Value;
+				var v2 = getValue2(kvp.Key);
+				if (v2.IsNone) {
+					return false;
+				}
+				var x = eq.Equals(v1, v2);
+				if (!x) {
+					Debugger.Break();
+				}
+				return x;
+			});
 		}
 
-		public static int List_HashCode<TElem>(ITrait_Iterable<TElem> obj, IEqualityComparer<TElem> equality = null)
+		public static int Seq_HashCode<TElem>(IEnumerable<TElem> obj, IEqualityComparer<TElem> equality = null)
 		{
-			const uint M = 0x5bd1e995;
-			const int R = 24;
-			const uint SEED = 0xc58f1a7b;
-			equality = equality ?? EqualityComparer<TElem>.Default;
-			var hash = (uint) (SEED ^ obj.Length);
+			equality = equality ?? FastEquality<TElem>.Default;
+			uint hash = 2166136261;
+			const uint prime = 16777619;
 			obj.ForEach(item =>
 			            {
 				            unchecked
 				            {
 					            var k = (uint) equality.GetHashCode(item);
-					            k = ((k * M) >> R) * M;
-					            hash = (hash * M) ^ k;
+					            hash ^=  k;
+					            hash *= prime;
 				            }
 			            });
-			unchecked
-			{
-				hash ^= ((hash >> 13) * M) >> 15;
-				return (int) hash;
+			return (int) hash;
+		}
+
+		public static bool Set_Equate<TElem>(IEnumerable<TElem> x, IEnumerable<TElem> y, IEqualityComparer<TElem> eq = null) {
+			var boiler = Boilerplate(x, y);
+			if (boiler.IsSome) return boiler;
+			eq = eq ?? FastEquality<TElem>.Default;
+			if (x is ISet<TElem>) {
+				var xAsSet = x as ISet<TElem>;
+				return xAsSet.SetEquals(y);
 			}
+			if (x is IAnySetLike<TElem>) {
+				var xAsAny = x as IAnySetLike<TElem>;
+				return xAsAny.SetEquals(y);
+			}
+			var hs = new HashSet<TElem>(x,eq);
+			return y.ForEachWhile(hs.Contains);
 		}
 
-		public static bool Set_Equate<TElem>(ITrait_SetLike<TElem> x, ITrait_SetLike<TElem> y)
+		public static int Set_HashCode<TElem>(IEnumerable<TElem> obj, IEqualityComparer<TElem> equality = null)
 		{
-			return x.RelatesTo(y) == SetRelation.Equal;
-		}
-
-		public static int Set_HashCode<TElem>(ITrait_SetLike<TElem> obj, IEqualityComparer<TElem> equality = null)
-		{
-			equality = equality ?? EqualityComparer<TElem>.Default;
+			equality = equality ?? FastEquality<TElem>.Default;
 			var hash = 0;
 			obj.ForEach(x => { hash ^= equality.GetHashCode(x); });
 			return hash;
 		}
 
-		public static bool List_Equate<TElem>(ITrait_Iterable<TElem> x, ITrait_Iterable<TElem> y, IEqualityComparer<TElem> equality = null)
+		public static bool List_Equate<TElem>(IEnumerable<TElem> x, IEnumerable<TElem> y, IEqualityComparer<TElem> equality = null)
 		{
-			equality = equality ?? EqualityComparer<TElem>.Default;
 			var boiler = Boilerplate(x, y);
 			if (boiler.IsSome) return boiler;
-			if (x.Length != y.Length) return false;
+			equality = equality ?? FastEquality<TElem>.Default;
+			
+
+			var xLen = x.TryGuessLength();
+			var yLen = y.TryGuessLength();
+			if (xLen.IsSome && yLen.IsSome && xLen.Value != yLen.Value) {
+				return false;
+			}
 			using (var yIter = y.GetEnumerator()) {
 				return x.ForEachWhile(v => {
 					if (!yIter.MoveNext()) return false;
@@ -98,7 +141,7 @@ namespace Funq.Abstract
 		/// <returns> </returns>
 		public static IEqualityComparer<T> ByKey<T, TKey>(Func<T, TKey> selector, IEqualityComparer<TKey> keyComparer = null)
 		{
-			keyComparer = keyComparer ?? EqualityComparer<TKey>.Default;
+			keyComparer = keyComparer ?? FastEquality<TKey>.Default;
 			return new LambdaEquality<T>((x, y) => keyComparer.Equals(selector(x), selector(y)), x => keyComparer.GetHashCode(selector(x)));
 		}
 
@@ -113,9 +156,15 @@ namespace Funq.Abstract
 		{
 			return new CachingEqualityComparer<T>(eq);
 		}
-		public static int List_CompareLex<TElem>(ITrait_Iterable<TElem> x, ITrait_Iterable<TElem> y, IComparer<TElem> comparer = null)
+		
+		public static int Seq_CompareLex<TElem>(IEnumerable<TElem> x, IEnumerable<TElem> y, IComparer<TElem> comparer = null)
 		{
-			comparer = comparer ?? Comparer<TElem>.Default;
+			var boiler = Boilerplate(x, y);
+			if (boiler.Equals(true)) return 0;
+			if (y.HasEfficientForEach() && !x.HasEfficientForEach()) {
+				return -1*Seq_CompareLex(y, x, comparer);
+			}
+			comparer = comparer ?? FastComparer<TElem>.Default;
 			using (var yIter = y.GetEnumerator())
 			{
 				int finalResult = 0;
@@ -131,13 +180,40 @@ namespace Funq.Abstract
 			}
 		}
 
-		public static int List_CompareNum<TElem>(ITrait_Sequential<TElem> x, ITrait_Sequential<TElem> y, IComparer<TElem> comparer = null) {
-			var difLen = x.Length - y.Length;
-			if (difLen != 0) return difLen;
-			return List_CompareLex(x, y, comparer);
+		public static int Seq_CompareNum<TElem>(IEnumerable<TElem> x, IEnumerable<TElem> y, IComparer<TElem> comparer = null) {
+			var boiler = Boilerplate(x, y);
+			if (boiler.Equals(true)) return 0;
+			comparer = comparer ?? FastComparer<TElem>.Default;
+			if (y.HasEfficientForEach() && !x.HasEfficientForEach())
+			{
+				return -1 * Seq_CompareNum(y, x, comparer);
+			}
+			comparer = comparer ?? FastComparer<TElem>.Default;
+			var xLen = x.TryGuessLength();
+			var yLen = y.TryGuessLength();
+			if (xLen.IsSome && yLen.IsSome) {
+				if (xLen.Value < yLen.Value) {
+					return -1;
+				}
+				if (xLen.Value > yLen.Value) {
+					return 1;
+				}
+			}
+
+			using (var yIter = y.GetEnumerator()) {
+				int nResult = 0;
+				x.ForEachWhile(xItem => {
+					if (!yIter.MoveNext()) {
+						nResult = 1;
+						return false;
+					}
+					var yItem = yIter.Current;
+					nResult = nResult == 0 ? comparer.Compare(xItem, yItem) : nResult;
+					return true;
+				});
+				return yIter.MoveNext() ? -1 : nResult;
+			}
 		}
-
-
 
 		/// <summary>
 		///   Inverts the specified comparison handler; changes the order from ascending to descending and vice versa.
