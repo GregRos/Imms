@@ -42,15 +42,17 @@ Here is an overview of the time complexity of the operations offered by the diff
 	|----------------------|--------------|---------------|---------|--------------|--------------|--------------|--------------|---------|-------------|--------------|---------|---------|---------|---------|---------|
 	| FSharpx.Deque        | O(1)         | O(m)          | X       | O(1)         | O(m)         | O(1)/O(n)    | O(1)/O(n)    | X       | X           | X            | X       | X       | X       | X       | X       |
 	| FSharpx.Vector       | X            | X             | X       | O(logn)      | O(m log s)   | X            | O(logn)      | X       | X           | X            | O(logn) | X       | X       | X       | O(logn) |
-	| FunqList             | O(1)/O(logn) | O(m)          | O(logn) | O(1)/O(logn) | O(m)         | O(1)/O(logn) | O(1)/O(logn) | O(logn) | O(m + logn) | O(logn)      | O(logn) | O(logn) | O(logn) | O(logn) | O(logn) |
-	| FunqVector           | X            | O(m + n)      | X       | O(logn)      | O(m + logn)  | X            | O(logn)      | X       | O(m + logn) | X            | O(logn) | X       | O(n)    | O(logn) | O(logn) |
+	| FunqList             | O(1)/O(logn) | O(m)/?        | O(logn) | O(1)/O(logn) | O(m)/?       | O(1)/O(logn) | O(1)/O(logn) | O(logn) | O(m + logn) | O(logn)      | O(logn) | O(logn) | O(logn) | O(logn) | O(logn) |
+	| FunqVector           | X            | O(m + n)      | X       | O(logn)      | O(m + logn)  | X            | O(logn)      | X       | O(m + n)    | X            | O(logn) | X       | O(n)    | O(logn) | O(logn) |
 	| System.ImmutableList | O(logn)      | O(m log s)    | X       | O(logn)      | O(m log s)   | O(logn)      | O(logn)      | O(logn) | O(m log s)  | X            | O(logn) | O(logn) | O(n)    | O(n)    | O(logn) |
 
 	X	Operation is unavailable
 	/	Means that the complexity to the left is amortized. Worst case is to the right.
-	m	length of the input
-	s    m + n
-
+	?	I have no idea what the complexity is here
+	n	length of the target collection
+	m	length of the input collection (where applicable)
+	s   m + n
+	
 #### Benchmarks
 These are the benchmark results for the sequential collections, compared with similar collections in different libraries. These benchmarks were performed with particular settings, and different settings yield different results. 
 
