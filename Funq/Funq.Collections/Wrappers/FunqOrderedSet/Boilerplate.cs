@@ -76,6 +76,7 @@ namespace Funq.Collections
 			if (accumulator == null) throw Errors.Is_null;
 			return Scan(GetPrototype<TRElem>(handler), initial, accumulator);
 		}
+	
 	}
 	
 		}

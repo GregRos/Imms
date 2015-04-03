@@ -6,8 +6,8 @@ namespace Funq.Abstract
 {
 	public static class Comparers
 	{
-		public static IComparer<T> CreateComparison<T>(Func<T, T, int> comparer) {
-			return Comparer<T>.Create(comparer.Invoke);
+		public static IComparer<T> CreateComparison<T>(Comparison<T> comparer) {
+			return new LambdaComparer<T>(comparer);
 		} 
 
 		public static IEqualityComparer<T> CreateEquality<T>(Func<T, T, bool> equals, Func<T, int> hash) {
@@ -31,7 +31,7 @@ namespace Funq.Abstract
 		/// <param name="comparer"></param>
 		/// <returns></returns>
 		public static IComparer<IEnumerable<T>> LexSequenceComparer<T>(IComparer<T> comparer) {
-			return Comparer<IEnumerable<T>>.Create((x, y) => EqualityHelper.Seq_CompareLex(x, y, comparer));
+			return CreateComparison<IEnumerable<T>>((x, y) => EqualityHelper.Seq_CompareLex(x, y, comparer));
 		}
 
 		/// <summary>
@@ -42,7 +42,7 @@ namespace Funq.Abstract
 		public static IComparer<IEnumerable<T>> LexSequenceComparer<T>()
 			where T : IComparable<T>
 		{
-			return Comparer<IEnumerable<T>>.Create((x, y) => EqualityHelper.Seq_CompareLex(x, y));
+			return CreateComparison<IEnumerable<T>>((x, y) => EqualityHelper.Seq_CompareLex(x, y));
 		}
 
 		/// <summary>
@@ -53,7 +53,7 @@ namespace Funq.Abstract
 		/// <returns></returns>
 		public static IComparer<IEnumerable<T>> NumSequenceComparer<T>(IComparer<T> comparer)
 		{
-			return Comparer<IEnumerable<T>>.Create((x, y) => EqualityHelper.Seq_CompareNum(x, y, comparer));
+			return CreateComparison<IEnumerable<T>>((x, y) => EqualityHelper.Seq_CompareNum(x, y, comparer));
 		}
 
 		/// <summary>
@@ -64,7 +64,7 @@ namespace Funq.Abstract
 		public static IComparer<IEnumerable<T>> NumSequenceComparer<T>()
 			where T : IComparable<T>
 		{
-			return Comparer<IEnumerable<T>>.Create((x, y) => EqualityHelper.Seq_CompareNum(x, y));
+			return CreateComparison<IEnumerable<T>>((x, y) => EqualityHelper.Seq_CompareNum(x, y));
 		} 
 
 		/// <summary>

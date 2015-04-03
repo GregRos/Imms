@@ -9,7 +9,6 @@ namespace Funq.Collections
 	
 	public partial class FunqSet<T> : AbstractSet<T, FunqSet<T>>
 	{
-
 		private FunqSet<TElem2> GetPrototype<TElem2>(IEqualityComparer<TElem2> ph)
 		{
 			return FunqSet<TElem2>.Empty(ph);

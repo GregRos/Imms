@@ -7,7 +7,7 @@ namespace Funq.Abstract
 	/// Used for generalizing over list-like collections when the concrete collection type is unknown.
 	/// </summary>
 	/// <typeparam name="TElem"></typeparam>
-	public interface IAnySequential<TElem> : IReadOnlyList<TElem> {
+	public interface IAnySequential<TElem> {
 		/// <summary>
 		/// Returns the first item in the collection, or Option.None if the collection is empty.
 		/// </summary>

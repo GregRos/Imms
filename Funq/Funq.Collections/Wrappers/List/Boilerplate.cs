@@ -173,7 +173,7 @@ namespace Funq.Collections
 		public FunqList<Tuple<TKey, IEnumerable<T>>> GroupBy<TKey>(Func<T, TKey> keySelector,  IEqualityComparer<TKey> eq = null)
 		{
 			if (keySelector == null) throw Errors.Is_null;
-			return this.GroupBy(keySelector, x => x, (key, vs) => Tuple.Create(key,vs), eq ?? EqualityComparer<TKey>.Default);
+			return this.GroupBy(keySelector, x => x, Tuple.Create, eq ?? EqualityComparer<TKey>.Default);
 		}
 	
 		public FunqList<TRElem> Cast<TRElem>()

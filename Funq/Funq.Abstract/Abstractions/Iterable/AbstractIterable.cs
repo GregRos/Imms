@@ -15,7 +15,7 @@ namespace Funq.Abstract
 	/// <typeparam name="TIterable">This is a self-reference to the class that implements this trait.</typeparam>
 	/// <typeparam name="TBuilder"> The type of collection builder used by the collection that implements this trait. </typeparam>
 	public abstract partial class AbstractIterable<TElem, TIterable, TBuilder> 
-		: IAnyBuilderFactory<TElem, TBuilder>, IReadOnlyCollection<TElem> where TBuilder : IterableBuilder<TElem>
+		:  IEnumerable<TElem>,IAnyBuilderFactory<TElem, TBuilder> where TBuilder : IterableBuilder<TElem>
 		where TIterable : AbstractIterable<TElem, TIterable, TBuilder>
 	{
 		/// <summary>
@@ -328,6 +328,10 @@ namespace Funq.Abstract
 			return true;
 		}
 
+		/// <summary>
+		/// The GetEnumerator method. Protected in case TList is not a sequence.
+		/// </summary>
+		/// <returns></returns>
 		protected abstract IEnumerator<TElem> GetEnumerator();
 
 		IEnumerator<TElem> IEnumerable<TElem>.GetEnumerator()
@@ -667,7 +671,7 @@ namespace Funq.Abstract
 		{
 		    if (first == null) throw Errors.Argument_null("first");
 		    if (fold == null) throw Errors.Argument_null("fold");
-			return Aggregate(Option.NoneOf<TResult>(), (r, v) => r.IsSome ? fold(r, v) : first(v)).ValueOrError(Errors.Not_enough_elements);
+			return Aggregate(Option.NoneOf<TResult>(), (r, v) => r.IsSome ? fold(r.Value, v) : first(v)).ValueOrError(Errors.Not_enough_elements);
 		}
 
 		/// <summary>
@@ -856,12 +860,6 @@ namespace Funq.Abstract
 			{
 				ForEach(v => { if (predicate(v)) builder.Add(v); });
 				return ProviderFrom(builder);
-			}
-		}
-
-		int IReadOnlyCollection<TElem>.Count {
-			get {
-				return this.Length;
 			}
 		}
 	}

@@ -362,8 +362,5 @@ namespace Funq.Collections
 			var ret = root.Take(count - 1, Lineage.Immutable);
 			return ret;
 		}
-
-
-
 	}
 }

@@ -4,6 +4,21 @@ using System.ComponentModel;
 
 namespace Funq
 {
+	/// <summary>
+	/// Indicates that an attempt was made to access the Value property of an Option with no value.
+	/// </summary>
+	public class NoValueException : InvalidOperationException
+	{
+		/// <summary>
+		/// Creates a new instance of NoValueException for the option type 't'.
+		/// </summary>
+		/// <param name="t"></param>
+		/// <param name="message">An optional extra message.</param>
+		public NoValueException(Type t, string message = "")
+			: base(string.Format("The Optional<{0}> object had no value. {1}", t.PrettyName(), message))
+		{
+		}
+	}
 	
 	internal static class Errors
 	{
@@ -26,13 +41,7 @@ namespace Funq
 				argName);
 		}
 
-		public class NoValueException : InvalidOperationException
-		{
-			public NoValueException()
-				: base("The Optional object had no value.")
-			{
-			}
-		}
+
 
 		public static ArgumentException Bad_argument(string argName, string message = "The argument value is invalid.") {
 			return new ArgumentException(message, argName);
@@ -146,12 +155,9 @@ namespace Funq
 			}
 		}
 
-		public static NoValueException NoValue
+		public static NoValueException NoValue<T>()
 		{
-			get
-			{
-				return new NoValueException();
-			}
+			return new NoValueException(typeof(T));
 		}
 
 		public static InvalidOperationException Not_enough_elements

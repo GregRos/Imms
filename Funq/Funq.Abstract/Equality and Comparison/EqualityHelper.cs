@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Funq.Abstract
@@ -31,17 +32,13 @@ namespace Funq.Abstract
 				var asDict = map as IDictionary<TKey, TValue>;
 				return k => asDict.ContainsKey(k) ? asDict[k].AsSome() : Option.None;
 			}
-			if (map is IReadOnlyDictionary<TKey, TValue>) {
-				var asDict = map as IReadOnlyDictionary<TKey, TValue>;
-				return k => asDict.ContainsKey(k) ? asDict[k].AsSome() : Option.None;
-			}
 			return null;
 		} 
 
 		public static bool Map_Equals<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> map1,
 			IEnumerable<KeyValuePair<TKey, TValue>> map2, IEqualityComparer<TValue> eq = null) {
 			var boiler = Boilerplate(map1, map2);
-			if (boiler.IsSome) return boiler;
+			if (boiler.IsSome) return boiler.Value;
 			eq = eq ?? FastEquality<TValue>.Default;
 			var len1 = map1.TryGuessLength();
 			var len2 = map2.TryGuessLength();
@@ -60,10 +57,7 @@ namespace Funq.Abstract
 				if (v2.IsNone) {
 					return false;
 				}
-				var x = eq.Equals(v1, v2);
-				if (!x) {
-					Debugger.Break();
-				}
+				var x = eq.Equals(v1, v2.Value);
 				return x;
 			});
 		}
@@ -87,7 +81,7 @@ namespace Funq.Abstract
 
 		public static bool Set_Equals<TElem>(IEnumerable<TElem> x, IEnumerable<TElem> y, IEqualityComparer<TElem> eq = null) {
 			var boiler = Boilerplate(x, y);
-			if (boiler.IsSome) return boiler;
+			if (boiler.IsSome) return boiler.Value;
 			eq = eq ?? FastEquality<TElem>.Default;
 			if (x is ISet<TElem>) {
 				var xAsSet = x as ISet<TElem>;
@@ -117,7 +111,7 @@ namespace Funq.Abstract
 		public static bool Seq_Equals<TElem>(IEnumerable<TElem> x, IEnumerable<TElem> y, IEqualityComparer<TElem> equality = null)
 		{
 			var boiler = Boilerplate(x, y);
-			if (boiler.IsSome) return boiler;
+			if (boiler.IsSome) return boiler.Value;
 			equality = equality ?? FastEquality<TElem>.Default;
 
 			var xLen = x.TryGuessLength();
@@ -132,7 +126,7 @@ namespace Funq.Abstract
 				});
 			}
 		}
-
+		[Pure]
 		internal static Option<bool> Boilerplate<T>(T left, T right)
 		{
 			if (left is ValueType) return Option.None;
@@ -208,7 +202,7 @@ namespace Funq.Abstract
 		/// <returns> </returns>
 		public static IComparer<T> Invert<T>(this IComparer<T> comparer)
 		{
-			return Comparer<T>.Create((a, b) =>
+			return Comparers.CreateComparison<T>((a, b) =>
 			                             {
 				                             var result = comparer.Compare(a, b);
 				                             if (result < 0) return 1;

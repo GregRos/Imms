@@ -50,6 +50,7 @@ namespace Funq.Abstract {
 			}
 		}
 
+
 		public static implicit operator TMap(AbstractMap<TKey, TValue, TMap> self) {
 			return self as object as TMap;
 		}
@@ -79,6 +80,11 @@ namespace Funq.Abstract {
 			return base.Select(bFactory, kvp => Kvp.Of(kvp.Key.ForceCast<TOutKey>(), kvp.Value.ForceCast<TOutValue>()));
 		}
 
+		/// <summary>
+		/// Makes sure the other map is compatible with this one.
+		/// </summary>
+		/// <param name="other"></param>
+		/// <returns></returns>
 		protected abstract bool IsCompatibleWith(TMap other);
 
 		public bool MapEquals(IEnumerable<KeyValuePair<TKey, TValue>> other, IEqualityComparer<TValue> valueEq = null) {
@@ -244,7 +250,9 @@ namespace Funq.Abstract {
 						var tryGet = builder.Lookup(item.Key);
 						if (tryGet.IsNone) return;
 						var newValue = subtraction(item.Key, tryGet.Value, item.Value);
-						builder[item.Key] = newValue;
+						if (newValue.IsSome) {
+							builder[item.Key] = newValue.Value;
+						}
 					}
 				});
 				return ProviderFrom(builder);
@@ -277,7 +285,7 @@ namespace Funq.Abstract {
 
 		public TMap AddRange(IEnumerable<Tuple<TKey, TValue>> other)
 		{
-			return Merge(other.Select(Kvp.FromTuple), (k, v1, v2) =>
+			return Merge(other.Select(t => Kvp.Of(t)), (k, v1, v2) =>
 			{
 				throw Errors.Key_exists;
 			});
@@ -285,7 +293,7 @@ namespace Funq.Abstract {
 
 		public TMap SetRange(IEnumerable<Tuple<TKey, TValue>> other)
 		{
-			return Merge(other.Select(Kvp.FromTuple), null);
+			return Merge(other.Select(t => Kvp.Of(t)), null);
 		}
 
 		private TMap Merge_Unchecked(IEnumerable<KeyValuePair<TKey, TValue>> other, Func<TKey, TValue, TValue, TValue> collision = null) {
@@ -296,7 +304,7 @@ namespace Funq.Abstract {
 					}
 					else {
 						var myElement = builder.Lookup(item.Key);
-						builder[item.Key] = myElement.IsSome ? collision(item.Key, myElement, item.Value) : item.Value;
+						builder[item.Key] = myElement.IsSome ? collision(item.Key, myElement.Value, item.Value) : item.Value;
 					}
 				});
 				return ProviderFrom(builder);
@@ -357,15 +365,15 @@ namespace Funq.Abstract {
 			if (map != null && IsCompatibleWith(map)) {
 				return Difference(map);
 			}
-			if (!(other is IDictionary<TKey, TValue2> || other is IReadOnlyDictionary<TKey, TValue2> || other is ICollection || other is ICollection<KeyValuePair<TKey, TValue2>> )) {
+			if (!(other is ICollection || other is ICollection<KeyValuePair<TKey, TValue2>> )) {
 				other = other.ToList();
 			}
-			return Except(other).Merge(ExceptInverse(other), null);
+			return Except(other).Merge(ExceptInverse(other));
 		}
 
 		public TMap ExceptInverse<TValue2>(IEnumerable<KeyValuePair<TKey, TValue2>> seq,
 			Func<TKey, TValue, TValue2, TValue> subtraction = null) {
-			if (seq is TMap) {
+			if (seq is TMap) { //this happens if TValue2 = TValue!
 				return ((TMap) seq).Except(this);
 			}
 			using (var builder = EmptyBuilder) {

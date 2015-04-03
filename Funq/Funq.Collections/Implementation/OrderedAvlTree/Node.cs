@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using Funq.Abstract;
 using Funq.Collections.Common;
 
@@ -698,7 +697,7 @@ namespace Funq.Collections.Implementation
 						ret = Concat(except_lesser, except_greater, lin);
 					}
 					else {
-						central_node = WithValue(central_node, subtracted, lin);
+						central_node = WithValue(central_node, subtracted.Value, lin);
 						ret = Concat(except_lesser, central_node, except_greater, lin);
 					}
 				}

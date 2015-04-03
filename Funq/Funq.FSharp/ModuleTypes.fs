@@ -242,12 +242,12 @@ type FunqOrderedMapModule<'key, 'value> internal () =
     inherit FunqMapBase<'key,'value, FunqOrderedMap<'key,'value>>()
     static let _instance = FunqOrderedMapModule<'key,'value>()
     static member internal instance = _instance
-    member x.emptyWith(cm : Cm<'key>) = FunqOrderedMap<'key,'value>.Empty(cm)
+    member x.emptyWith(cm : Cmp<'key>) = FunqOrderedMap<'key,'value>.Empty(cm)
 
 type FunqOrderedSetModule<'elem> internal () = 
     inherit FunqSetBase<'elem, FunqOrderedSet<'elem>>()
     static let _instance = FunqOrderedSetModule<'elem>()
     static member internal instance = _instance
-    member x.emptyWith(cm : Cm<'elem>) = FunqOrderedSet<'elem>.Empty(cm)
+    member x.emptyWith(cm : Cmp<'elem>) = FunqOrderedSet<'elem>.Empty(cm)
 
 

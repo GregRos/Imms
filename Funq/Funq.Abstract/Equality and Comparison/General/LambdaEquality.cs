@@ -24,7 +24,7 @@ namespace Funq.Abstract
 		public bool Equals(T x, T y)
 		{
 			var boiler = EqualityHelper.Boilerplate(x, y);
-			if (boiler.IsSome) return boiler;
+			if (boiler.IsSome) return boiler.Value;
 			return EqualityFunction(x, y);
 		}
 

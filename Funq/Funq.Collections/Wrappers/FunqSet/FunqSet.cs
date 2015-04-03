@@ -11,7 +11,7 @@ using Funq.Collections.Implementation;
 namespace Funq.Collections
 {
 	
-	public partial class FunqSet<T> : AbstractSet<T, FunqSet<T>> {
+	public sealed partial class FunqSet<T> : AbstractSet<T, FunqSet<T>> {
 		internal readonly HashedAvlTree<T, bool>.Node Root;
 		internal readonly IEqualityComparer<T> EqualityComparer; 
 		public static FunqSet<T> Empty(IEqualityComparer<T> eq = null) {

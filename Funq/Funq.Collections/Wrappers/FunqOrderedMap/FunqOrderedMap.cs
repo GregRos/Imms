@@ -182,7 +182,7 @@ namespace Funq.Collections
 
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public FunqOrderedMap<TKey, TValue> op_AddRange(IEnumerable<Tuple<TKey, TValue>> items) {
-			return AddRange(items.Select(Kvp.FromTuple));
+			return AddRange(items.Select(t => Kvp.Of(t)));
 		}
 	}
 }

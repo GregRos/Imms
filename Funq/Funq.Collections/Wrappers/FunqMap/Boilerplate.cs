@@ -82,7 +82,7 @@ namespace Funq.Collections
 		/// <param name="other"></param>
 		/// <param name="collision"></param>
 		/// <returns></returns>
-		public FunqMap<TKey, TRValue> Join<TValue2, TRValue>(IAnyMapLike<TKey, TValue2> other, Func<TKey, TValue, TValue2, TRValue> collision)
+		public FunqMap<TKey, TRValue> Join<TValue2, TRValue>(IEnumerable<KeyValuePair<TKey, TValue2>> other, Func<TKey, TValue, TValue2, TRValue> collision)
 		{
 			if (other == null) throw Errors.Is_null;
 			if (collision == null) throw Errors.Is_null;
@@ -130,9 +130,9 @@ namespace Funq.Collections
 		{
 			return base.OfType<FunqMap<TRKey,TRValue>,TRKey,TRValue>(GetPrototype<TRKey,TRValue>(handler));
 		}
-
-
-
+	
+	
+	
 	}
 	
 		}

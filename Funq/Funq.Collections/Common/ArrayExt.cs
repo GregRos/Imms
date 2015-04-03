@@ -37,7 +37,7 @@ namespace Funq.Collections.Common {
 		/// <param name="type"></param>
 		/// <returns></returns>
 		private static PropertyInfo GetLengthProperty(this Type type) {
-			var bindings = BindingFlags.Public | BindingFlags.Instance | BindingFlags.ExactBinding | BindingFlags.IgnoreCase;
+			const BindingFlags bindings = BindingFlags.Public | BindingFlags.Instance | BindingFlags.ExactBinding | BindingFlags.IgnoreCase;
 			var members = type.FindMembers(MemberTypes.Property, bindings, (m, x) => m.Name == "Length" || m.Name == "Length",
 				null);
 			return members.FirstOrDefault() as PropertyInfo;

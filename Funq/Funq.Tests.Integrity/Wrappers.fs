@@ -213,7 +213,7 @@ type FunqMapWrapper<'k when 'k : equality>(Inner : FunqMap<'k,'k>) =
         Inner.Merge(typed.Inner, f |> toFunc3) |> wrap
     override x.Intersect(other, f) = 
         let typed = other :?> FunqMapWrapper<'k>
-        Inner.Join(typed.Inner, f |> toFunc3) |> wrap
+        Inner.Join<'k>(typed.Inner, f |> toFunc3) |> wrap
     override x.Except other = 
         let typed = other :?> FunqMapWrapper<'k>
         Inner.Except(typed.Inner) |> wrap
@@ -236,7 +236,7 @@ type FunqOrderedMapWrapper<'k when 'k : equality>(Inner : FunqOrderedMap<'k, 'k>
     override x.Contains k = Inner.ContainsKey(k)
     override x.AddRange vs = Inner.SetRange vs |> wrap
     override x.IsOrdered = true
-    override x.Empty = FunqOrderedMap<'k,'k>.Empty(Cm.Default) |> wrap
+    override x.Empty = FunqOrderedMap<'k,'k>.Empty(Cmp.Default) |> wrap
     override x.Get k = Inner.[k]
     override x.SelfTest() = 
         let mutable i = 0
@@ -270,7 +270,7 @@ type FunqOrderedMapWrapper<'k when 'k : equality>(Inner : FunqOrderedMap<'k, 'k>
     override x.MaxItem = Inner.MaxItem.Key, Inner.MaxItem.Value
     override x.ByOrder i = Inner.ByOrder(i)
     static member FromSeq s = 
-        FunqOrderedMapWrapper(FunqOrderedMap.ToFunqOrderedMap(s, Cm.Default)) :> MapWrapper<_>
+        FunqOrderedMapWrapper(FunqOrderedMap.ToFunqOrderedMap(s, Cmp.Default)) :> MapWrapper<_>
 
 type MapReferenceWrapper<'k when 'k : comparison>(Inner : Map<'k, 'k>) = 
     inherit MapWrapper<'k>("ImmutableSortedDictionary")
@@ -508,4 +508,4 @@ type FunqOrderedSetWrapper<'v when 'v : comparison and 'v :> IComparable<'v>>(In
     override x.MinItem = Inner.MinItem
     override x.MaxItem = Inner.MaxItem
     override x.ByOrder i= Inner.ByOrder i
-    static member FromSeq s = FunqOrderedSet.ToFunqOrderedSet(s, Cm.Default) |> wrap
+    static member FromSeq s = FunqOrderedSet.ToFunqOrderedSet(s, Cmp.Default) |> wrap

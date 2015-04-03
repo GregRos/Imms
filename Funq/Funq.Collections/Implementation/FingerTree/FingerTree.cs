@@ -1,42 +1,23 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using Funq.Collections.Common;
 
 namespace Funq.Collections.Implementation {
+
+
+	internal enum MethodImplOptions {
+		AggressiveInlining,
+	}
+	/// <summary>
+	/// Faked because the assembly previously targeted 4.5 which has AggressiveInlining. <br/>
+	/// </summary>
+	internal class MethodImpl : Attribute {
+		public MethodImpl(MethodImplOptions op) {
+			
+		}
+	}
 	static partial class FingerTree<TValue>
 	{
-		static class Measured
-		{
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			public static int Sum<T2>(T2 a, T2 b)
-				where T2 : Measured<T2>
-			{
-				return a.Measure + b.Measure;
-			}
-
-
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			public static int Sum<T2>(T2 a, T2 b, T2 c)
-				where T2 : Measured<T2>
-			{
-				return a.Measure + b.Measure + c.Measure;
-			}
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			public static int SumTree<T2, T3>(T2 a, T3 b, T2 c)
-				where T2 : Measured<T2>
-				where T3 : FTree<T2>
-			{
-				return a.Measure + b.Measure + c.Measure;
-			}
-
-			public static int Sum<T2>(T2 a, T2 b, T2 c, T2 d)
-				where T2 : Measured<T2>
-			{
-				return a.Measure + b.Measure + c.Measure + d.Measure;
-			}
-		}
-
 		internal abstract class Measured<TObject> : FingerTreeElement
 			where TObject : Measured<TObject>
 		{

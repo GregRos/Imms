@@ -1,19 +1,24 @@
 # Funq
 ---
 
-Funq is, at least primarily, a library of [persistent](http://en.wikipedia.org/wiki/Persistent_data_structure), and [immutable](http://en.wikipedia.org/wiki/Immutable_object) collections for the .NET platform.
+Funq is, at least primarily, a library of [persistent](http://en.wikipedia.org/wiki/Persistent_data_structure), and [immutable](http://en.wikipedia.org/wiki/Immutable_object) collections for the .NET platform. It is available on [NuGet](https://www.nuget.org/packages/FunqCollections/) in a pre-release version.
 
 Funq isn't the only such library out there. In fact, Microsoft have themselves written such classes, and although they haven't incorporated them into the base class library, they are available of NuGet.
 
 However, Funq has several distinguishing and important features that make it different from pretty much any other library of this sort that has been released for .NET so far.
 
-  1. *Performance:* Funq collections perform very well, usually far better than other collections of the same kind.
+  1. *Performance:* Funq collections perform very well, usually far better than other collections of the same kind. 
   2. *Functionality:* Funq collections provide more inherent functionality than any collection of a similar kind.
   3. *LINQ interface:* Funq collections support true collection-based operations through LINQ syntax. For example, they implement a `Select` statement that returns a collection of the same kind.
   5. *F# Integration*: Funq collections are integrated with F# in the assembly `Funq.FSharp`, which provides extension methods, module bindings, collection builders (computation expressions), and active patterns for working with the collections. 
   6. *Permissive License:* Available under the [MIT license](https://github.com/GregRos/Funq/blob/master/license.md).
+  7. *Zero dependencies*: Funq assemblies have zero dependencies.
 
 **Note:** Funq collections can't be called *purely functional* because they involve mutations behind the scenes. This is for performance reasons, as object allocation is expensive in .NET. However, all the mutations Funq performs are invisible, in the sense that they do not change the state of any object visible to the user.
+
+Currently, all library assemblies require .NET Framework 4.0 Client Profile, and all test assemblies require .NET Framework 4.5.1. The F# libraries require F# 3.0.
+
+
 
 ## Current Status
 The collections are in an early version right now, and not fit for production use. They're definitely usable and the core functionality is stable, though some things like edge cases and error messages probably need to be worked out.

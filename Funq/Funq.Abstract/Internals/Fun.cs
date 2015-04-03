@@ -100,10 +100,6 @@ namespace Funq
 			{
 				return KnownType.IAnyIterable;
 			}
-			if (items is IReadOnlyCollection<T>)
-			{
-				return KnownType.IReadOnlyCollection;
-			}
 			return KnownType.Unknown;
 		}
 
@@ -193,7 +189,7 @@ namespace Funq
 		{
 			return new HashSet<T>(seq);
 		}
-
+		[Pure]
 		internal static Option<int> TryGuessLength<T>(this IEnumerable<T> items) {
 			if (items == null) throw Errors.Argument_null("items");
 			int len;
@@ -204,12 +200,11 @@ namespace Funq
 				case KnownType.GenericList:
 				case KnownType.ICollection:
 					return ((ICollection<T>) items).Count;
-				case KnownType.IReadOnlyCollection:
 				case KnownType.IAnyIterable:
 				case KnownType.IAnyMapLike:
 				case KnownType.IAnySetLike:
 				case KnownType.IAnySequential:
-					return ((IReadOnlyCollection<T>) items).Count;
+					return ((IAnyIterable<T>) items).Length;
 				default:
 					return Option.None;
 			}
@@ -259,15 +254,15 @@ namespace Funq
 					legacy.CopyTo(arr, 0);
 					length = arr.Length;
 					break;
-				case KnownType.IReadOnlyCollection:
-					var roc = items as IReadOnlyCollection<T>;
-					arr = new T[roc.Count];
+				case KnownType.IAnyIterable:
+					var roc = items as IAnyIterable<T>;
+					arr = new T[roc.Length];
 					int i = 0;
 					roc.ForEach(x => {
 						arr[i] = x;
 						i++;
 					});
-					length = roc.Count;
+					length = roc.Length;
 					break;
 				case KnownType.Unknown:
 					length = 4;

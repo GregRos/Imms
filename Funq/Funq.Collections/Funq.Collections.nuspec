@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>FunqCollections</id>
+    <version>$version$-beta</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>https://github.com/GregRos/Funq/blob/master/license.md</licenseUrl>
+    <projectUrl>https://github.com/GregRos/Funq</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes>Second release. Currently still not fully tested.</releaseNotes>
+    <copyright>Copyright Gregory Rosenbaum 2015</copyright>
+	<summary>High performance immutable and persistent collections for .NET.</summary>
+    <tags>collection persistent immutable performance functional list vector set dictionary map queue stack deque funq data-structure confluent tree concat concatenate split join catenable</tags>
+  </metadata>
+</package>

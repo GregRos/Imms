@@ -101,9 +101,8 @@ namespace Funq.Abstract
 			throw Errors.Collection_readonly;
 		}
 
-		int IList.IndexOf(object value)
-		{
-			return FindIndex(x => value.Equals(x));
+		int IList.IndexOf(object value) {
+			return FindIndex(x => value.Equals(x)) | -1;
 		}
 
 		void IList.Insert(int index, object value)
@@ -121,9 +120,8 @@ namespace Funq.Abstract
 			throw Funq.Errors.Collection_readonly;
 		}
 
-		int IList<TElem>.IndexOf(TElem item)
-		{
-			return FindIndex(item);
+		int IList<TElem>.IndexOf(TElem item) {
+			return FindIndex(item) | -1;
 		}
 
 		bool ICollection<TElem>.Contains(TElem item)
@@ -155,14 +153,6 @@ namespace Funq.Abstract
 		void IList<TElem>.RemoveAt(int index)
 		{
 			throw Funq.Errors.Collection_readonly;
-		}
-
-		int IReadOnlyCollection<TElem>.Count
-		{
-			get
-			{
-				return Length;
-			}
 		}
 	}
 }

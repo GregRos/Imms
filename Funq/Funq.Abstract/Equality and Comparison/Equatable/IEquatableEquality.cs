@@ -10,7 +10,7 @@ namespace Funq.Abstract
 	/// Guarantees that the IEqualityComparer implements functional equality to some degree.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public interface IEquatableEquality<T> : IEqualityComparer<T>, IEquatable<IEqualityComparer<T>>, ISafeToEquateInExpression
+	internal interface IEquatableEquality<T> : IEqualityComparer<T>, IEquatable<IEqualityComparer<T>>, ISafeToEquateInExpression
 	{
 	}
 }

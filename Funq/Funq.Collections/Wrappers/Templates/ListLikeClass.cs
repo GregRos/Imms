@@ -130,7 +130,7 @@ public partial class __ListLikeClass__<T> : AbstractSequential<T, __ListLikeClas
 		if (inner == null) throw Errors.Is_null;
 		if (oKeySelector == null) throw Errors.Is_null;
 		if (iKeySelector == null) throw Errors.Is_null;
-		Func<T,TInner, Tuple<T, TInner>> tuple = (a, b) => Tuple.Create(a, b);
+		Func<T,TInner, Tuple<T, TInner>> tuple = Tuple.Create;
 
 		return this.Join(inner, oKeySelector, iKeySelector, tuple, eq);
 	}

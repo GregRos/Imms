@@ -6,7 +6,7 @@ namespace Funq.Abstract {
 	/// Guarantees that this comparer implements functional equality.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public interface IEquatableComparer<T> : IComparer<T>, IEquatable<IComparer<T>>
+	internal interface IEquatableComparer<T> : IComparer<T>, IEquatable<IComparer<T>>
 	{
 		
 	}

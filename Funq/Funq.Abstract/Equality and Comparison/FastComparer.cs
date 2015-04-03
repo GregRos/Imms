@@ -28,7 +28,7 @@ namespace Funq.Abstract
 			var t = typeof(TKey);
 			IComparer<TKey> comparer;
 			if (t == typeof (string)) {
-				comparer = (IComparer<TKey>) Comparer<string>.Create(String.CompareOrdinal);
+				comparer = (IComparer<TKey>) Comparers.CreateComparison<string>(String.CompareOrdinal);
 			}
 			else {
 				comparer = Comparer<TKey>.Default;

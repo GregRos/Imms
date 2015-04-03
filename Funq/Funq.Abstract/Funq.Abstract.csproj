@@ -9,11 +9,11 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Funq.Abstract</RootNamespace>
     <AssemblyName>Funq.Abstract</AssemblyName>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
-    <TargetFrameworkProfile />
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -33,6 +33,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\Funq.Abstract.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
@@ -80,6 +81,7 @@
     <Compile Include="Equality and Comparison\FastEquality.cs" />
     <Compile Include="Equality and Comparison\Equatable\IEquatableComparer.cs" />
     <Compile Include="Equality and Comparison\Equatable\IEquatableEquality.cs" />
+    <Compile Include="Equality and Comparison\General\LambdaComparer.cs" />
     <Compile Include="Equality and Comparison\General\LambdaEquality.cs" />
     <Compile Include="Internals\Box.cs" />
     <Compile Include="Internals\Errors.cs" />

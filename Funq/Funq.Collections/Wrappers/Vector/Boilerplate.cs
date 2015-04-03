@@ -134,7 +134,7 @@ namespace Funq.Collections
 			if (inner == null) throw Errors.Is_null;
 			if (oKeySelector == null) throw Errors.Is_null;
 			if (iKeySelector == null) throw Errors.Is_null;
-			Func<T,TInner, Tuple<T, TInner>> tuple = (a, b) => Tuple.Create(a, b);
+			Func<T,TInner, Tuple<T, TInner>> tuple = Tuple.Create;
 	
 			return this.Join(inner, oKeySelector, iKeySelector, tuple, eq);
 		}
@@ -173,7 +173,7 @@ namespace Funq.Collections
 		public FunqVector<Tuple<TKey, IEnumerable<T>>> GroupBy<TKey>(Func<T, TKey> keySelector,  IEqualityComparer<TKey> eq = null)
 		{
 			if (keySelector == null) throw Errors.Is_null;
-			return this.GroupBy(keySelector, x => x, (key, vs) => Tuple.Create(key,vs), eq ?? EqualityComparer<TKey>.Default);
+			return this.GroupBy(keySelector, x => x, Tuple.Create, eq ?? EqualityComparer<TKey>.Default);
 		}
 	
 		public FunqVector<TRElem> Cast<TRElem>()
@@ -222,8 +222,6 @@ namespace Funq.Collections
 		{
 			return this.Zip(other, Tuple.Create);
 		}
-
-		
 	}
 	
 		}

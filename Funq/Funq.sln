@@ -13,9 +13,16 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Funq.FSharp", "Funq.FSharp\
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Funq.Tests.Performance", "Funq.Tests.Performance\Funq.Tests.Performance.fsproj", "{7EC95555-CA5B-4E87-A8DA-525FA4E01FAC}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Funq.Tests.Integrity", "Funq.Tests.Integrity2\Funq.Tests.Integrity.fsproj", "{E7D95FA6-DFC0-45F8-A549-4B917F1B5D49}"
-EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Funq.Tests.Unit", "Funq.Tests.Unit\Funq.Tests.Unit.fsproj", "{C67469A7-0963-4F60-9D34-671BB0A7B735}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Funq.Tests.Integrity", "Funq.Tests.Integrity\Funq.Tests.Integrity.fsproj", "{E7D95FA6-DFC0-45F8-A549-4B917F1B5D49}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{F3CDA611-1B82-4F30-9146-9CA1AF69CC90}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,14 +46,14 @@ Global
 		{7EC95555-CA5B-4E87-A8DA-525FA4E01FAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7EC95555-CA5B-4E87-A8DA-525FA4E01FAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7EC95555-CA5B-4E87-A8DA-525FA4E01FAC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E7D95FA6-DFC0-45F8-A549-4B917F1B5D49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E7D95FA6-DFC0-45F8-A549-4B917F1B5D49}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E7D95FA6-DFC0-45F8-A549-4B917F1B5D49}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E7D95FA6-DFC0-45F8-A549-4B917F1B5D49}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C67469A7-0963-4F60-9D34-671BB0A7B735}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C67469A7-0963-4F60-9D34-671BB0A7B735}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C67469A7-0963-4F60-9D34-671BB0A7B735}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C67469A7-0963-4F60-9D34-671BB0A7B735}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7D95FA6-DFC0-45F8-A549-4B917F1B5D49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7D95FA6-DFC0-45F8-A549-4B917F1B5D49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7D95FA6-DFC0-45F8-A549-4B917F1B5D49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7D95FA6-DFC0-45F8-A549-4B917F1B5D49}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

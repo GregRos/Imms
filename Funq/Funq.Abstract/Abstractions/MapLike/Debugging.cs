@@ -7,12 +7,23 @@ using System.Threading.Tasks;
 
 namespace Funq.Abstract
 {
+	/// <summary>
+	/// The base class of all key-value maps.
+	/// </summary>
+	/// <typeparam name="TKey"></typeparam>
+	/// <typeparam name="TValue"></typeparam>
+	/// <typeparam name="TMap"></typeparam>
 	partial class AbstractMap<TKey, TValue, TMap>
 	{
+		/// <summary>
+		/// The base DebugView for AbstractMaps.
+		/// </summary>
 		protected internal abstract class DebugView
 		{
 			[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 			private readonly TMap _map;
+			
+			/// <param name="map"></param>
 			protected DebugView(TMap map)
 			{
 				_map = map;
@@ -27,15 +38,5 @@ namespace Funq.Abstract
 			}
 		}
 
-
-		bool IReadOnlyDictionary<TKey, TValue>.TryGetValue(TKey key, out TValue value) {
-			var r = TryGet(key);
-			if (r.IsNone) {
-				value = default(TValue);
-				return false;
-			}
-			value = r.Value;
-			return true;
-		}
 	}
 }

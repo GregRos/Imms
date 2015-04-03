@@ -18,7 +18,7 @@ namespace Funq.Collections
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public FunqMap<TKey, TValue> op_AddRange(IEnumerable<Tuple<TKey, TValue>> items)
 		{
-			return base.Merge(items.Select(Kvp.FromTuple), null);
+			return base.Merge(items.Select(t => Kvp.Of(t)), null);
 		}
 
 	}

@@ -4,14 +4,12 @@ using System.Collections.Generic;
 namespace Funq.Abstract
 {
 
-	public static class AnyIterableExt {}
-
 	/// <summary>
 	/// Used for abstracting over any Iterable collection type when the concrete type is unknown.
 	/// Should not be implemented in user code.
 	/// </summary>
 	/// <typeparam name="TElem"></typeparam>
-	public interface IAnyIterable<out TElem> : IReadOnlyCollection<TElem> {
+	public interface IAnyIterable<out TElem> : IEnumerable<TElem> {
 
 		/// <summary>
 		///   Returns the number of elements in the collection.

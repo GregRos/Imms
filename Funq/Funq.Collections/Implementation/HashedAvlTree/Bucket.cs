@@ -26,7 +26,7 @@ namespace Funq.Collections.Implementation
 		{
 			private class BucketDebugView
 			{
-				private Bucket _inner;
+				private readonly Bucket _inner;
 				public BucketDebugView(Bucket bucket)
 				{
 					_inner = bucket;
@@ -54,7 +54,7 @@ namespace Funq.Collections.Implementation
 			public TValue Value;
 			public Bucket Next = Empty;
 			public readonly bool IsEmpty = false;
-			private  Lineage Lineage;
+			private readonly Lineage Lineage;
 			public int Count;
 			internal static readonly Bucket Empty = new Bucket(true);
 

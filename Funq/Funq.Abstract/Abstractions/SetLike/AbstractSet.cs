@@ -98,6 +98,11 @@ namespace Funq.Abstract {
 			}
 		}
 
+		/// <summary>
+		/// Checks if this set is compatible with (e.g. same equality semantics) with another set.
+		/// </summary>
+		/// <param name="other"></param>
+		/// <returns></returns>
 		protected abstract bool IsCompatibleWith(TSet other);
 
 		

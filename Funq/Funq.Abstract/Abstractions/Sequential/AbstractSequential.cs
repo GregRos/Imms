@@ -360,7 +360,7 @@ namespace Funq.Abstract
 			if (first == null) throw Errors.Argument_null("first");
 			if (fold == null) throw Errors.Argument_null("fold");
 			return
-				AggregateBack(Option.NoneOf<TResult>(), (r, v) => r.IsSome ? fold(r, v) : first(v)).ValueOrError(Errors.Not_enough_elements);
+				AggregateBack(Option.NoneOf<TResult>(), (r, v) => r.IsSome ? fold(r.Value, v) : first(v)).ValueOrError(Errors.Not_enough_elements);
 		}
 
 		/// <summary>
@@ -434,6 +434,12 @@ namespace Funq.Abstract
 			}
 		}
 
+		internal TList Empty {
+			get {
+				return ProviderFrom(EmptyBuilder);
+			}
+		}
+
 		/// <summary>
 		///   Discards the initial elements in the collection until a predicate returns false.
 		/// </summary>
@@ -444,7 +450,10 @@ namespace Funq.Abstract
 		{
 		    if (predicate == null) throw Errors.Argument_null("predicate");
 			var index = FindIndex(predicate);
-			return Skip(index + 1);
+			if (index.IsNone) {
+				return Empty;
+			}
+			return Skip(index.Value + 1);
 		}
 
 		public sealed override void CopyTo(TElem[] arr, int arrStart, int count) {
@@ -485,7 +494,10 @@ namespace Funq.Abstract
 		{
 		    if (predicate == null) throw Errors.Argument_null("predicate");
 			var index = FindIndex(x => !predicate(x));
-			return Take(index + 1);
+			if (index.IsNone) {
+				return this;
+			}
+			return Take(index.Value + 1);
 		}
 
 

@@ -16,6 +16,12 @@ type IDict<'k,'v> = IDictionary<'k,'v>
     This file contains metadata classes. 
 *)
 
+type MemberInfo with
+    member x.GetAttr<'t>(inheritance : bool) = 
+        match x.GetCustomAttributes(typeof<'t>,inheritance) with
+        | [| |] -> None
+        | [| attr |] -> Some attr
+        | _ -> failwith "Found more than one!"
 
 ///Specifies that this property or field is part of the object's meta data, which should be printed in a report.
 [<AttributeUsage(AttributeTargets.Property ||| AttributeTargets.Field)>]
@@ -43,8 +49,8 @@ type ReflectionMeta(property : PropertyInfo, instance : obj) =
     inherit AbstractMeta(property.Name)
     override x.ValueType = property.PropertyType
     override x.Value 
-        with get() = property.GetValue(instance)
-        and  set v = property.SetValue(instance, v)
+        with get() = property.GetValue(instance, null)
+        and  set v = property.SetValue(instance, v, null)
 
 module Dict = 
     let(|Kvp|) (kvp : KeyValuePair<_,_>) = Kvp(kvp.Key,kvp.Value)
@@ -61,15 +67,6 @@ module Dict =
     let clone (dict : IDict<_,_>) = 
         Dictionary(dict) :> IDict<_,_>
     let toSeq dict = dict |> Seq.map (fun (Kvp(k,v)) -> k,v)
-
-(*
-
-        x.GetType()
-            .GetProperties()
-            |> Seq.filter (fun x -> x.GetCustomAttribute<IsMetaAttribute>(true) <> Unchecked.defaultof<IsMetaAttribute>)
-            |> Seq.map (fun prop -> ReflectionMeta(prop, x))
-            |> Seq.iter (x.AddMeta)
-*)
 
 type MetadataException(message : string) = inherit Exception(message)
 and InvalidMetadataNameException private (message) = 
@@ -104,7 +101,7 @@ and[<StructuredFormatDisplay("{AsString}")>]
         if not <| propCache.ContainsKey myType then
             let props = 
                 myType.GetProperties(BindingFlags.Public ||| BindingFlags.Instance)
-                |> Seq.filter (fun p -> p.GetCustomAttribute<IsMetaAttribute>(true) <> Unchecked.defaultof<IsMetaAttribute>)
+                |> Seq.filter (fun p -> p.GetAttr<IsMetaAttribute>(true).IsSome)
                 |> Seq.toList
             propCache.[myType] <- props
             

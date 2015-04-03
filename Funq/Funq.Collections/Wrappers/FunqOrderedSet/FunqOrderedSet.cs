@@ -10,7 +10,7 @@ using Funq.Collections.Implementation;
 
 namespace Funq.Collections
 {
-	public partial class FunqOrderedSet<T> : AbstractSet<T, FunqOrderedSet<T>> {
+	public sealed partial class FunqOrderedSet<T> : AbstractSet<T, FunqOrderedSet<T>> {
 		internal readonly OrderedAvlTree<T, bool>.Node Root;
 		internal readonly IComparer<T> Comparer; 
 		public static FunqOrderedSet<T> Empty(IComparer<T> cm) {

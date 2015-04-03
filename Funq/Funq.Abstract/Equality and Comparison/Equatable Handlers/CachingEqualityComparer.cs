@@ -23,7 +23,7 @@ namespace Funq.Abstract
 		public override bool Equals(T x, T y)
 		{
 			var boiler = EqualityHelper.Boilerplate(x, y);
-			if (boiler.IsSome) return boiler;
+			if (boiler.IsSome) return boiler.Value;
 			Box<bool> result;
 			var tuple = Tuple.Create(x, y);
 			var success = eqCache.TryGetValue(tuple, out result);
