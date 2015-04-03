@@ -122,6 +122,7 @@ These collections support basic operations in `O(logn)`, including `ContainsKey`
 In addition to these standard operations, Funq maps extend set-theoretic operations to maps. This comes in two forms. Firstly, `AddRange` and `RemoveRange` use the specialized `Union` and `Except` algorithms if the input collection is of the same type and with the same comparison handler as the target. There is also a `RemoveRange` overload that checks if the other collection is a *set* of the same kind (e.g. `FunqMap` checks if the other collection is `FunqSet` for example).
 
 Other than this, there are specialized methods:
+
 1. `Merge`, which merges two maps of the same type by key. The user provides a collision resolution function to determine the value in case the maps share identical keys. It is equivalent to `Union` on sets.
 2. `Join`, which joins the two maps based on their keys. The user provides a collision resolution function to determine the resulting value (similar to a Join LINQ statement).
 3. `Except`, which is identical to the set-theoretic operation. The user can optionally provide a subtraction function that determines the resulting value if the maps share a key (the function returns an `Option` value). Can be used with maps of a different value type, and also with sets that have the same key and equality/comparison semantics.
@@ -129,7 +130,7 @@ Other than this, there are specialized methods:
 
 These operations perform similarly to the set-theoretic operations on which they are based.
 
-### Benchmarks
+#### Benchmarks
 I should note that `System.Collections.Immutable` dictionaries have a mechanism that checks whether values are equal (using the default equality comparer), and if they are, it doesn't update them. I forced this mechanism off for the purpose of this benchmark because of the way I generate data (as identical key-value pairs).
 
 	| Collection/Test            | Add     | AddRange | DropKey | DropRange | IEnumerator | Iterate | Lookup |
