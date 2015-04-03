@@ -84,7 +84,6 @@ namespace Funq.Collections
 		/// <returns></returns>
 		public FunqMap<TKey, TValue> Remove(TKey k)
 		{
-
 			if (Root.IsEmpty) throw Errors.Is_empty;
 			var removed = Root.Root_Remove(k, Lineage.Mutable());
 			if (removed == null) return this;
