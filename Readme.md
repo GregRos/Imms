@@ -1,5 +1,6 @@
 # Funq
 ---
+
 Funq is, at least primarily, a library of [persistent](http://en.wikipedia.org/wiki/Persistent_data_structure), and [immutable](http://en.wikipedia.org/wiki/Immutable_object) collections for the .NET platform.
 
 Funq isn't the only such library out there. In fact, Microsoft have themselves written such classes, and although they haven't incorporated them into the base class library, they are available of NuGet.
@@ -10,6 +11,7 @@ However, Funq has several distinguishing and important features that make it dif
   2. *Functionality:* Funq collections provide more inherent functionality than any collection of a similar kind.
   3. *LINQ interface:* Funq collections support true collection-based operations through LINQ syntax. For example, they implement a `Select` statement that returns a collection of the same kind.
   5. *F# Integration*: Funq collections are integrated with F# in the assembly `Funq.FSharp`, which provides extension methods, module bindings, collection builders (computation expressions), and active patterns for working with the collections. 
+  6. *Permissive License:* Available under the [MIT license](https://github.com/GregRos/Funq/blob/master/license.md).
 
 **Note:** Funq collections can't be called *purely functional* because they involve mutations behind the scenes. This is for performance reasons, as object allocation is expensive in .NET. However, all the mutations Funq performs are invisible, in the sense that they do not change the state of any object visible to the user.
 
