@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using Funq.Abstract;
 
 namespace Funq
@@ -35,7 +39,14 @@ namespace Funq
 
 	internal static class ReflectExt
 	{
-		public static bool DoesImplementMethod<T>(string name, params Type[] paramTypes) {
+		/// <summary>
+		/// Checks if the type declares the specified non-abstract method.
+		/// </summary>
+		/// <typeparam name="T">The type.</typeparam>
+		/// <param name="name">The name of the method.</param>
+		/// <param name="paramTypes">The types of the method's parameters.</param>
+		/// <returns></returns>
+		public static bool DoesDeclareMethod<T>(string name, params Type[] paramTypes) {
 			var method = typeof (T).GetMethod(name, paramTypes);
 			return method != null && method.DeclaringType == typeof(T) && !method.IsAbstract;
 		}
@@ -104,6 +115,15 @@ namespace Funq
 	}
 	internal static class Fun
 	{
+		static class Cache<TDelegate>
+			where TDelegate : class {
+			internal static readonly ConcurrentDictionary<Expression<TDelegate>, TDelegate> Table;
+
+			static Cache() {
+				Table = new ConcurrentDictionary<Expression<TDelegate>, TDelegate>(ExpressionEquality.CachingInstance);
+			}
+		}
+
 		private class LambdaEnumerable<T> : IEnumerable<T> {
 
 			private readonly Func<IEnumerator<T>> getIterator;
@@ -121,6 +141,24 @@ namespace Funq
 			}
 		}
 
+		public static TDelegate MemoizeCompile<TDelegate>(Expression<TDelegate> expr) where TDelegate : class {
+			TDelegate result;
+			var success = Cache<TDelegate>.Table.TryGetValue(expr, out result);
+			if (success) {
+				return result;
+			}
+			var compiled = expr.Compile();
+			Cache<TDelegate>.Table[expr] = compiled;
+			return compiled;
+		}
+
+		public static bool FunctionalEquals<TDelegate>(this Expression<TDelegate> self, Expression<TDelegate> other) {
+			return ExpressionEquality.CachingInstance.Equals(self, other);
+		}
+
+		public static int FunctionalHashCode<TDelegate>(this Expression<TDelegate> self) {
+			return ExpressionEquality.CachingInstance.GetHashCode(self);
+		}
 
 		public static Option<TOut> AsSome<TOut>(this TOut x)
 		{
@@ -137,9 +175,23 @@ namespace Funq
 			return (x => f(x, i++));
 		}
 
-		public static TOut Cast<TOut>(this object x)
+		public static TOut ForceCast<TOut>(this object x)
 		{
 			return (TOut) x;
+		}
+
+		public static bool SequenceEquals<T>(this IEnumerable<T> seq1, IEnumerable<T> seq2, Func<T, T, bool> equality) {
+			using (var iterator = seq2.GetEnumerator()) {
+				return seq1.ForEachWhile(x => {
+					if (!iterator.MoveNext()) return false;
+					return equality(x, iterator.Current);
+				});
+			}
+		}
+
+		public static HashSet<T> ToHashSet<T>(this IEnumerable<T> seq)
+		{
+			return new HashSet<T>(seq);
 		}
 
 		internal static Option<int> TryGuessLength<T>(this IEnumerable<T> items) {
@@ -174,7 +226,7 @@ namespace Funq
 		/// <returns> </returns>
 		internal static T[] ToArrayFast<T>(this IEnumerable<T> items, out int length)
 		{
-			if (items == null) throw Funq.Errors.Argument_null("items");
+			if (items == null) throw Errors.Argument_null("items");
 			
 			T[] arr;
 
@@ -216,14 +268,6 @@ namespace Funq
 						i++;
 					});
 					length = roc.Count;
-					break;
-				case KnownType.IAnySetLike:
-				case KnownType.IAnyIterable:
-				case KnownType.IAnySequential:
-					var lst = items as IAnyIterable<T>;
-					arr = new T[lst.Length];
-					lst.CopyTo(arr, 0, arr.Length);
-					length = lst.Length;
 					break;
 				case KnownType.Unknown:
 					length = 4;
@@ -276,13 +320,25 @@ namespace Funq
 		{
 			if (seq is IAnyIterable<TElem>)
 			{
-				((IAnyIterable<TElem>)seq).ForEach(act);
+				((IAnyIterable<TElem>)seq).ForEachWhile(item => {
+					act(item);
+					return true;
+				});
 			}
-			ForEachWhile(seq, x =>
-			                  {
-				                  act(x);
-				                  return true;
-			                  });
+			else if (seq is TElem[]) {
+				Array.ForEach((TElem[]) seq, act);
+			}
+			else if (seq is List<TElem>) {
+				((List<TElem>) seq).ForEach(act);
+			}
+			else {
+				ForEachWhile(seq, x =>
+				{
+					act(x);
+					return true;
+				});
+			}
+			
 		}
 
 		internal static bool HasEfficientForEach<T>(this IEnumerable<T> seq) {
@@ -293,6 +349,12 @@ namespace Funq
 		{
 			if (seq is IAnyIterable<TElem>) {
 				return ((IAnyIterable<TElem>) seq).ForEachWhile(act);
+			}
+			if (seq is TElem[]) {
+				var asArr = (TElem[]) seq;
+				for (int i = 0; i < asArr.Length; i++) {
+					act(asArr[i]);
+				}
 			}
 			return seq.All(act);
 		}
@@ -306,6 +368,5 @@ namespace Funq
 		{
 			return (TOut) x;
 		}
-
 	}
 }

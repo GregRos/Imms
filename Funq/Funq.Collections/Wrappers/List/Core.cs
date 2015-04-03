@@ -44,20 +44,6 @@ namespace Funq.Collections
 		}
 
 		/// <summary>
-		///  Returns a slice of the collection.
-		/// </summary>
-		/// <param name="from"> The first index of the slice. </param>
-		/// <param name="to"> The last index of the slice. </param>
-		/// <returns> </returns>
-		public override FunqList<T> this[int from, int to]
-		{
-			get
-			{
-				return Slice(from, to);
-			}
-		}
-
-		/// <summary>
 		///   Gets the number of items in the list.
 		/// </summary>
 		public override int Length
@@ -125,7 +111,7 @@ namespace Funq.Collections
 		/// </summary>
 		/// <param name="list"> The list to join. </param>
 		/// <returns> </returns>
-		public FunqList<T> AddFirstList(FunqList<T> list)
+		private FunqList<T> AddFirstList(FunqList<T> list)
 		{
 			if (list == null) throw Funq.Errors.Argument_null("list");
 			return list.AddLastList(this);
@@ -175,7 +161,7 @@ namespace Funq.Collections
 		/// </summary>
 		/// <param name="list"> The list. </param>
 		/// <returns> </returns>
-		public FunqList<T> AddLastList(FunqList<T> list)
+		private FunqList<T> AddLastList(FunqList<T> list)
 		{
 			if (list == null) throw Funq.Errors.Argument_null("list");
 			if (list.IsEmpty) return this;
@@ -211,10 +197,10 @@ namespace Funq.Collections
 		/// </summary>
 		/// <returns> </returns>
 		/// <exception cref="InvalidOperationException">Thrown if the list is empty.</exception>
-		public FunqList<T> DropFirst()
+		public FunqList<T> RemoveFirst()
 		{
 			if (_root.Measure == 0) throw Funq.Errors.Is_empty;
-			var ret =  _root.DropFirst(Lineage.Immutable).Wrap();
+			var ret =  _root.RemoveFirst(Lineage.Immutable).Wrap();
 #if ASSERTS
 			if (Length > 1) ret.First.Is(this[1]);
 			else ret.Length.Is(Length - 1);
@@ -227,10 +213,10 @@ namespace Funq.Collections
 		/// </summary>
 		/// <returns> </returns>
 		/// <exception cref="InvalidOperationException">Thrown if the list is empty.</exception>
-		public FunqList<T> DropLast()
+		public FunqList<T> RemoveLast()
 		{
 			if (_root.Measure == 0) throw Funq.Errors.Is_empty;
-			var ret =  _root.DropLast(Lineage.Immutable).Wrap();
+			var ret =  _root.RemoveLast(Lineage.Immutable).Wrap();
 #if ASSERTS
 			if (ret.Length > 0) ret.Last.Is(this[-2]);
 			ret.Length.Is(Length - 1);
@@ -266,9 +252,9 @@ namespace Funq.Collections
 		/// </summary>
 		/// <param name="count"></param>
 		/// <returns></returns>
-		public override FunqList<T> Take(int count)
-		{
-			return count == 0 ? empty : Slice(0, count -1);
+		public override FunqList<T> Take(int count) {
+			count.IsInRange("count", 0, Length);
+			return count == 0 ? empty : GetRange(0, count);
 		}
 
 		/// <summary>
@@ -279,7 +265,7 @@ namespace Funq.Collections
 		/// <returns> </returns>
 		/// <exception cref="ArgumentNullException">Thrown if the argument is null.</exception>
 		/// <exception cref="ArgumentOutOfRangeException">Thrown if the index does not exist in the list.</exception>
-		public FunqList<T> InsertList(int index, FunqList<T> list)
+		private FunqList<T> InsertList(int index, FunqList<T> list)
 		{
 			index = index < 0 ? _root.Measure + index + 1 : index;
 			if (index > _root.Measure || index < 0) throw Funq.Errors.Arg_out_of_range("index", index);
@@ -369,8 +355,8 @@ namespace Funq.Collections
 		{
 			index = index < 0 ? index + _root.Measure : index;
 			if (index >= _root.Measure || index < 0) throw Funq.Errors.Arg_out_of_range("index", index);
-			if (index == 0) return DropFirst().AddFirst(item);
-			if (index == _root.Measure - 1) return DropLast().AddLast(item);
+			if (index == 0) return RemoveFirst().AddFirst(item);
+			if (index == _root.Measure - 1) return RemoveLast().AddLast(item);
 			var ret = _root.Update(index, item, Lineage.Mutable()).Wrap();
 #if ASSERTS
 			ret[index].Is(item);
@@ -379,28 +365,20 @@ namespace Funq.Collections
 			return ret;
 		}
 
-		/// <summary>
-		///   Returns slice beginning at the start index and ending at the end index. --
-		/// </summary>
-		/// <param name="start"> The first index of the subsequence, inclusive. </param>
-		/// <param name="end"> The last index of the subsequence, inclusive. Defaults to the last index. </param>
-		/// <returns> </returns>
-		/// <exception cref="ArgumentOutOfRangeException">Thrown if one of the indices does not exist in the data structure.</exception>
-		public FunqList<T> Slice(int start, int end = -1)
+		
+		protected override FunqList<T> GetRange(int start, int count)
 		{
-			start = start < 0 ? start + _root.Measure : start;
-			end = end < 0 ? end + _root.Measure : end;
 			if (start < 0 || start >= _root.Measure) throw Funq.Errors.Arg_out_of_range("start", start);
-			if (end < 0 || end >= _root.Measure) throw Funq.Errors.Arg_out_of_range("end", end);
-			if (end < start) throw Funq.Errors.Arg_out_of_range("start", start);
-			if (start == end)
+			if (count < 0 || start + count > _root.Measure) throw Funq.Errors.Arg_out_of_range("count", count);
+			if (count == 0) return empty;
+			if (count == 1)
 			{
 				var res = _root[start];
 				return emptyFTree.AddLast(res, Lineage.Immutable).Wrap();
 			}
 			FingerTree<T>.FTree<Leaf<T>> first, last;
 			_root.Split(start, out first, out last, Lineage.Immutable);
-			last.Split(end - start + 1, out first, out last, Lineage.Immutable);
+			last.Split(count, out first, out last, Lineage.Immutable);
 			return first.Wrap();
 		}
 

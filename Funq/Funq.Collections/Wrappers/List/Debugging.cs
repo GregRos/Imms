@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -24,7 +25,7 @@ namespace Funq.Collections
 				set;
 			}
 		}
-
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public IEnumerable<T> AsSeq
 		{
 			get

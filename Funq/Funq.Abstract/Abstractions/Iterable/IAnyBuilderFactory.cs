@@ -1,4 +1,6 @@
-﻿namespace Funq.Abstract
+﻿using System.Collections.Generic;
+
+namespace Funq.Abstract
 {
 	/// <summary>
 	/// Used for abstracting over collection builder factories when the concrete type is unknown. Should not be implemented in user code.
@@ -30,4 +32,5 @@
 		/// <returns></returns>
 		IAnyBuilderFactory<TElem, TBuilder> IterableFrom(IterableBuilder<TElem> builder);
 	}
+
 }

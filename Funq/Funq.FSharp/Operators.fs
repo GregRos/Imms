@@ -1,24 +1,21 @@
 ﻿namespace Funq.FSharp
 open Funq
 
-
 module Operators = 
     open Funq.FSharp.Implementation
     ///Alias of AddFirst. Adds an item to the beginning of the collection.
-    let inline (^+>) item col =  col |> Ops.addFirst item
+    let inline (^+>) item col = col |> Ops.addFirst item
     ///Alias of AddLast. Adds an item to the end of the collection.
     let inline (<+) col item =  col |> Ops.addLast item
     ///Alias of AddFirstRange. Adds a sequence to the beginning of the collection.
     let inline (^++>) items col = col |> Ops.addFirstRange items
     ///Alias of AddLastRange. Adds a sequence to the end of the collection.
     let inline (<++) col items = col |> Ops.addLastRange items
-    ///Alias of AddLastList. Explicitly concatenates two collections. 
-    let inline (<+>) col1 col2 = (^s : (member AddLastList : 's -> 's) col1, col2)
 
     ///Adds a sequence of elements to the specified key-based collection.
-    let inline ( /++ ) set items= set |> Ops.addSetMany items
+    let inline ( /++ ) set items= set |> Ops.op_AddRange items
     ///Adds an element to the specified key-based collection.
-    let inline ( /+ ) set item = set |> Ops.addSet item
+    let inline ( /+ ) set item = set |> Ops.op_Add item
 
     module Extra = 
         ///Computes the set-theoretic intersection.

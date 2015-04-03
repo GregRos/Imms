@@ -3,7 +3,7 @@ open Funq.FSharp.Implementation
 open Funq.Tests.Performance
 open Funq.Tests
 ///An object that binds typed tests to concrete targets and collects fully bound tests ready for execution.
-type Builder<'s>(bound : ErasedTest list, targets : DataStructure<'s> list, tests : Test<'s> list) = 
+type internal Builder<'s>(bound : ErasedTest list, targets : DataStructure<'s> list, tests : Test<'s> list) = 
     
     ///All the tests bound by this builder.
     member val Bound = bound
@@ -50,7 +50,7 @@ type Builder<'s>(bound : ErasedTest list, targets : DataStructure<'s> list, test
 
 ///A companion module for the Builder object. 
 [<CompilationRepresentationAttribute(CompilationRepresentationFlags.ModuleSuffix)>]
-module Builder = 
+module internal Builder = 
     ///Adds an unbound test.
     let inline addTest test (builder : Builder<_>) = builder.AddTest test
     
@@ -93,7 +93,7 @@ module Builder =
         Seq.cross partials args |> Seq.map (fun (test, args) -> test args) |> Seq.toList
 
 [<AutoOpen>]
-module BuilderOperators = 
+module internal BuilderOperators = 
     let inline (<<+) builder test = builder |> Builder.addTest test
     let (<<++) builder testGroup =
         builder |> Builder.addTests testGroup

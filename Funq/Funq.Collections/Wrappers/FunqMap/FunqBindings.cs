@@ -11,11 +11,11 @@ namespace Funq.Collections
 		{
 			private HashedAvlTree<TKey, TValue>.Node _inner;
 			private readonly IEqualityComparer<TKey> _equality; 
-			private readonly Lineage _lineage;
+			private Lineage _lineage;
 			public override object Result
 			{
-				get
-				{
+				get {
+					_lineage = Lineage.Mutable();
 					return _inner.WrapMap(_equality);
 				}
 			}
@@ -33,9 +33,12 @@ namespace Funq.Collections
 			{
 				
 			}
-			protected override void add(KeyValuePair<TKey, TValue> item)
-			{
-				_inner = _inner.AvlAdd(item.Key.GetHashCode(), item.Key, item.Value, _lineage, true);
+			protected override void add(KeyValuePair<TKey, TValue> item) {
+				_inner = _inner.Root_Add(item.Key, item.Value, _lineage, _equality, true) ?? _inner;
+			}
+
+			public override void Remove(TKey key) {
+				_inner = _inner.Root_Remove(key, _lineage) ?? _inner;
 			}
 
 			public override Option<TValue> Lookup(TKey k)
@@ -60,6 +63,11 @@ namespace Funq.Collections
 		protected internal override MapBuilder<TKey, TValue> BuilderFrom(FunqMap<TKey, TValue> provider)
 		{
 			return new Builder(provider);
+		}
+
+		protected override bool IsCompatibleWith(FunqMap<TKey, TValue> other)
+		{
+			return this.Equality.Equals(other.Equality);
 		}
 	}
 }

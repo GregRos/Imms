@@ -22,10 +22,10 @@ type SetTests<'e>(items : 'e array, ?seed : int) =
             assert_eq(set.Length, oldCount + 1)
         set
 
-    member private x.drop_check v (set :_ SetWrapper) =
+    member private x.remove_check v (set :_ SetWrapper) =
         let oldCount = set.Length
         let alreadyExists = set.Contains v
-        let set = set.Drop v
+        let set = set.Remove v
         assert_false(set.Contains v)
         if alreadyExists then
             assert_eq(set.Length, oldCount - 1)
@@ -42,9 +42,9 @@ type SetTests<'e>(items : 'e array, ?seed : int) =
             assert_true(newSet.Contains item)
         newSet
 
-    member private x.drop_range_check (st,en) (set :_ SetWrapper) = 
+    member private x.remove_range_check (st,en) (set :_ SetWrapper) = 
         let slice = items.[st..en]
-        let newSet = set.DropRange slice
+        let newSet = set.RemoveRange slice
         let mutable decrease = slice |> Seq.countWhere (fun x -> set.Contains x)
         assert_eq(newSet.Length, -decrease + set.Length)
         for item in slice do
@@ -52,25 +52,25 @@ type SetTests<'e>(items : 'e array, ?seed : int) =
         newSet
 
 
-    member private x.inner_add_drop (addBias : float) (n : int) (s: SetWrapper<_>) =
+    member private x.inner_add_remove (addBias : float) (n : int) (s: SetWrapper<_>) =
         let mutable s = s
         let r = Random(seed)
         let rnd() = r.Next(items.Length)
         let mutable expectedCount = s.Length
         let reduced_n = n |> float |> sqrt |> int
         let addCeil = float reduced_n * addBias |> int
-        let dropCeil = reduced_n |> int
+        let removeCeil = reduced_n |> int
         for i = 0 to reduced_n do
             let iters = r.Next(0, addCeil)
             for j = 0 to iters do
                 let ix = rnd()
                 s <- s |> x.add_check (items.[ix])
             
-            let iters = r.Next(0, dropCeil)
+            let iters = r.Next(0, removeCeil)
 
             for j = 0 to iters do
                 let ix = rnd()
-                s <- s |> x.drop_check (items.[ix])
+                s <- s |> x.remove_check (items.[ix])
         s
 
     member private x.generate_sets num iters (s : SetWrapper<_>) seed =
@@ -81,7 +81,7 @@ type SetTests<'e>(items : 'e array, ?seed : int) =
             | n -> 
                 let seed = r.Next()
                 let bias = r.ExpDouble(30.)
-                let set = SetTests(items, seed).inner_add_drop bias iters s 
+                let set = SetTests(items, seed).inner_add_remove bias iters s 
                 set::genList(n-1)
         genList num
 
@@ -132,7 +132,7 @@ type SetTests<'e>(items : 'e array, ?seed : int) =
             results <- dif1::results
         results
 
-    member private x.inner_add_drop_range (n : int) (s : SetWrapper<_>) =
+    member private x.inner_add_remove_range (n : int) (s : SetWrapper<_>) =
         let mutable results = []
         let r = Random(seed)
         let rnd x = r.Next((items.Length |> float) * x |> int)
@@ -144,24 +144,26 @@ type SetTests<'e>(items : 'e array, ?seed : int) =
             let en1,en2 = r.Next(st1, st1 + reduced_n), r.Next(st2, st2 + reduced_n)
             let en1,en2 = min en1 mx, min en2 mx
             let added = s |> x.add_range_check (st1,en1) 
-            let dropped = added |> x.drop_range_check (st2,en2)
-            s <- dropped
+            let removeped = added |> x.remove_range_check (st2,en2)
+            s <- removeped
         s
 
     member private x.inner_many_operations (n : int) (s : SetWrapper<_>) =
         let mutable results = []
         let r = Random(seed)
         let rnd() = r.Next(items.Length)
-        let reduced_n = n |> float |> sqrt |> sqrt |> int
+        let reduced_n = n |> float |> fun f -> Math.Pow(f, 0.3) |> int
         for i = 0 to reduced_n do
-            let interSets = x.inner_intersection reduced_n s
+            let seed = r.Next()
+            let newObj = SetTests(items, seed)
+            let interSets = newObj.inner_intersection reduced_n s
             let mutable cur = s
             for item in interSets do
                 cur <- cur.Union(item)
             let bias = r.ExpDouble(10.)
             let mutable copy = cur
-            copy <- cur |> x.inner_add_drop bias reduced_n
-            let difSets = x.inner_difference reduced_n s
+            copy <- cur |> newObj.inner_add_remove bias reduced_n
+            let difSets = newObj.inner_difference reduced_n s
             for item in difSets do
                 copy <- copy.Except(item)
             cur <- cur.Union(copy)
@@ -169,7 +171,9 @@ type SetTests<'e>(items : 'e array, ?seed : int) =
             let mutable group1, group2, group3 = copy, s, cur
             let copies = Array.create (3 * reduced_n) copy
             for i = 0 to copies.Length - 1 do
-                let copy = copies.[i] |> x.inner_add_drop bias reduced_n
+                let newSeed = r.Next()
+                let newObj = SetTests(items, newSeed)
+                let copy = copies.[i] |> newObj.inner_add_remove bias (reduced_n * 10)
                 match i % 5 with
                 | 0 -> group1 <- group1.Union(copy)
                 | 1 -> group2 <- group2.Intersect(copy)
@@ -181,10 +185,10 @@ type SetTests<'e>(items : 'e array, ?seed : int) =
             results <- cur::group1::group2::group3::results
         results
 
-    member x.add_drop iters  = create_test iters "AddDrop" (x.inner_add_drop 1.3 iters >> toList1)
+    member x.add_remove iters  = create_test iters "AddRemove" (x.inner_add_remove 1.3 iters >> toList1)
     member x.intersection iters = create_test iters "Intersection" (x.inner_intersection iters)
     member x.union iters = create_test iters "Union" (x.inner_union iters)
     member x.except iters = create_test iters "Except" (x.inner_except iters)
-    member x.difference iters = create_test iters "Intersection" (x.inner_difference iters)
+    member x.difference iters = create_test iters "Difference" (x.inner_difference iters)
     member x.many_operations iters = create_test iters "Many Operations" (x.inner_many_operations iters)
-    member x.add_drop_range iters = create_test iters "Add drop range" (x.inner_add_drop_range iters >> toList1)
+    member x.add_remove_range iters = create_test iters "Add remove range" (x.inner_add_remove_range iters >> toList1)

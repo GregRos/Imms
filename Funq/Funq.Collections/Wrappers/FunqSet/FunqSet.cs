@@ -1,46 +1,50 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Funq.Abstract;
+using Funq.Collections.Common;
+using Funq.Collections.Implementation;
+
 namespace Funq.Collections
 {
-	internal static class FunqSet2Ext {
-		public static FunqSet<T> Wrap<T>(this FunqMap<T, bool> inner) {
-			return new FunqSet<T>(inner);
-		}
-	}
-
-
-
+	
 	public partial class FunqSet<T> : AbstractSet<T, FunqSet<T>> {
-		private readonly FunqMap<T, bool> _inner;
-
-		public static FunqSet<T> Empty(IEqualityComparer<T> eq) {
-			return new FunqSet<T>(FunqMap<T, bool>.Empty(eq));
+		internal readonly HashedAvlTree<T, bool>.Node Root;
+		internal readonly IEqualityComparer<T> EqualityComparer; 
+		public static FunqSet<T> Empty(IEqualityComparer<T> eq = null) {
+			return new FunqSet<T>(HashedAvlTree<T, bool>.Node.Empty, eq ?? FastEquality<T>.Default);
 		}
 
-		internal FunqSet(FunqMap<T, bool> inner) {
-			_inner = inner;
+		internal FunqSet(HashedAvlTree<T, bool>.Node inner, IEqualityComparer<T> eq) {
+			EqualityComparer = eq;
+			Root = inner;
 		}
 
 		public FunqSet<T> Add(T item) {
-			var res = _inner.Set(item, true, OverwriteBehavior.Ignore);
+			var res = Root.Root_Add(item, true, Lineage.Mutable(), EqualityComparer, false);
 			if (res == null) return this;
-			return res.Wrap();
+			return res.Wrap(EqualityComparer);
 		}
 
-		public FunqSet<T> Drop(T item) {
-			return _inner.Drop(item).Wrap();
+		internal double CollisionMetric
+		{
+			get
+			{
+				return Root.CollisionMetric;
+			}
 		}
 
-		public FunqSet<T> AddRange(IEnumerable<T> items) {
-			return _inner.AddSetRange(items).Wrap();
+		public FunqSet<T> Remove(T item) {
+			var ret = Root.Root_Remove(item, Lineage.Mutable());
+			if (ret == null) return this;
+			return ret.Wrap(EqualityComparer);
 		}
 
 		public override bool Contains(T item) {
-			return _inner.ContainsKey(item);
+			return Root.Root_Contains(item);
 		}
 
 
@@ -48,56 +52,69 @@ namespace Funq.Collections
 		{
 			get
 			{
-				return _inner.Length;
+				return Root.Count;
 			}
 		}
 
-		public FunqSet<T> DropRange(IEnumerable<T> items) {
-			return _inner.DropRange(items).Wrap();
+		protected override bool IsDisjointWith(FunqSet<T> other)
+		{
+			return Root.IsDisjoint(other.Root);
 		}
 
-		public override bool IsDisjointWith(FunqSet<T> other) {
-			return _inner.Root.IsDisjoint(other._inner.Root);
+		protected override SetRelation RelatesTo(FunqSet<T> other)
+		{
+			return Root.RelatesTo(other.Root);
 		}
 
-		public override SetRelation RelatesTo(FunqSet<T> other) {
-			return _inner.Root.RelatesTo(other._inner.Root);
+		protected override FunqSet<T> Difference(FunqSet<T> other)
+		{
+			return Root.SymDifference(other.Root, Lineage.Mutable()).Wrap(EqualityComparer);
 		}
 
-		public override FunqSet<T> Difference(FunqSet<T> other) {
-			return _inner.Difference(other._inner).Wrap();
+		protected override FunqSet<T> Except(FunqSet<T> other) {
+			return Root.Except(other.Root, Lineage.Mutable()).Wrap(EqualityComparer);
 		}
 
-		public override FunqSet<T> Except(FunqSet<T> other) {
-			return _inner.Except(other._inner).Wrap();
+		protected override FunqSet<T> Union(FunqSet<T> other) {
+			return Root.Union(other.Root, Lineage.Mutable()).Wrap(EqualityComparer);
 		}
 
-		public override FunqSet<T> Union(FunqSet<T> other) {
-			return _inner.Merge(other._inner, null).Wrap();
+		protected override FunqSet<T> Intersect(FunqSet<T> other) {
+			return Root.Intersect(other.Root, null, Lineage.Mutable()).Wrap(EqualityComparer);
 		}
 
-		public override FunqSet<T> Intersect(FunqSet<T> other) {
-			return _inner.Join(other._inner, null).Wrap();
-		}
-
-		public override bool IsSupersetOf(FunqSet<T> other) {
-			return _inner.Root.IsSupersetOf(other._inner.Root);
+		protected override bool IsSupersetOf(FunqSet<T> other)
+		{
+			return Root.IsSupersetOf(other.Root);
 		}
 
 		public override bool ForEachWhile(Func<T, bool> iterator) {
-			return _inner.ForEachWhile(kvp => iterator(kvp.Key));
+			return Root.ForEachWhile((k, v) => iterator(k));
 		}
 
 		public override bool IsEmpty
 		{
 			get
 			{
-				return _inner.IsEmpty;
+				return Root.IsEmpty;
 			}
 		}
 
 		protected override IEnumerator<T> GetEnumerator() {
-			return _inner.Select(x => x.Key).GetEnumerator();
+			foreach (var item in Root) {
+				yield return item.Key;
+			}
+		}
+
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public FunqSet<T> op_Add(T item) {
+			return Add(item);
+		}
+
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public FunqSet<T> op_AddRange(IEnumerable<T> item)
+		{
+			return Union(item);
 		}
 	}
 }

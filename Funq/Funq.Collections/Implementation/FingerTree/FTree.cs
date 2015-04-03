@@ -7,7 +7,7 @@ namespace Funq.Collections.Implementation
 
 	static partial class FingerTree<TValue>
 	{
-		internal abstract partial class FTree<TChild> : WeaklyTypedElement
+		internal abstract partial class FTree<TChild> : FingerTreeElement
 			where TChild : Measured<TChild>
 		{
 			public static readonly FTree<TChild> Empty = EmptyTree.Instance;
@@ -149,12 +149,9 @@ namespace Funq.Collections.Implementation
 
 			public abstract FTree<TChild> AddLast(TChild item, Lineage lineage);
 
-			public abstract FTree<TChild> DropFirst(Lineage lineage);
+			public abstract FTree<TChild> RemoveFirst(Lineage lineage);
 
-			public abstract FTree<TChild> DropLast(Lineage lineage);
-
-
-			public abstract IEnumerator<Leaf<TValue>> GetEnumerator(bool forward);
+			public abstract FTree<TChild> RemoveLast(Lineage lineage);
 
 			public abstract FTree<TChild> Insert(int index, Leaf<TValue> leaf, Lineage lineage);
 

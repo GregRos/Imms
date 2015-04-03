@@ -106,7 +106,7 @@ type SeqTests(?seed : int) =
             assert_eq(s.Length, initCount + (i + 1)*4)
         s    
 
-    member private x.inner_add_drop_last  n (s : SeqWrapper<int>) = 
+    member private x.inner_add_remove_last  n (s : SeqWrapper<int>) = 
         let mutable s = s
         let initCount = s.Length
         let r = Random(seed)
@@ -119,23 +119,23 @@ type SeqTests(?seed : int) =
             s <- s.AddLast last1
             assert_eq(s.Last, last1)
             s <- s.AddLast (last2)
-            s <- s.DropLast() 
+            s <- s.RemoveLast() 
             s <- s.AddLastRange [|0 .. count1|]
-            s <- s.DropLast()
+            s <- s.RemoveLast()
             s <- s.AddLast last3
             s <- s.AddLastRange [0]
             s <- s.AddLastRange []
             s <- s.AddLast last4
             while s.Length > initCount do
-                s <- s.DropLast()
+                s <- s.RemoveLast()
             assert_eq(s.Length, initCount)
             s <- s.AddLastRange [|0 ..count2|]
             s <- s.AddLast i
-            s <- s.DropLast()
+            s <- s.RemoveLast()
             s <- s.AddLastRange [|0 .. count3|]
         s
 
-    member private x.inner_add_drop_first  n (s : SeqWrapper<int>) = 
+    member private x.inner_add_remove_first  n (s : SeqWrapper<int>) = 
         let initCount = s.Length
         let initFirst = s.TryFirst |> Option.orValue 0
         let r = Random(seed)
@@ -147,9 +147,9 @@ type SeqTests(?seed : int) =
             s <- s.AddFirst first1
             assert_eq(s.First, first1)
             s <- s.AddFirst first2
-            s <- s.DropFirst() 
+            s <- s.RemoveFirst() 
             s <- s.AddFirstRange [| -first3 .. 0 |]
-            s <- s.DropFirst()
+            s <- s.RemoveFirst()
             s <- s.AddFirst first4
             assert_eq(s.First, first4)
             s <- s.AddFirstRange [-first1]
@@ -159,18 +159,18 @@ type SeqTests(?seed : int) =
             s <- s.AddFirst first2
             assert_eq(s.First, first2)
             while s.Length > initCount do
-                s <- s.DropFirst()
+                s <- s.RemoveFirst()
             assert_eq(s.Length, initCount)
             s <- s.AddFirstRange [| 0 .. first1 |]
             assert_eq(s.First, 0)
             s <- s.AddFirst first2
             assert_eq(s.First, first2)
-            s <- s.DropFirst()
+            s <- s.RemoveFirst()
             assert_eq(s.First, 0)
             s <- s.AddFirstRange [| 0 .. 2 * first3|]
         s
 
-    member private x.inner_add_drop_first_last  n (s : SeqWrapper<int>) = 
+    member private x.inner_add_remove_first_last  n (s : SeqWrapper<int>) = 
         let mutable s = s
         let initCount = s.Length
         let initFirst = s.TryFirst |> Option.orValue 0
@@ -183,32 +183,32 @@ type SeqTests(?seed : int) =
             let last1, last2, last3, last4 = Fun.call_4 rnd ()
             s <- s.AddFirst first1
             s <- s.AddFirst first2
-            s <- s.DropFirst() 
+            s <- s.RemoveFirst() 
             s <- s.AddFirstRange [|-first3 .. 0|]
             s <- s.AddLastRange [|0 .. last1|]
             s <- s.AddLast last2
-            s <- s.DropFirst()
+            s <- s.RemoveFirst()
             s <- s.AddFirst first4
             s <- s.AddFirstRange [first1]
             s <- s.AddFirstRange []
             s <- s.AddLastRange []
             s <- s.AddFirstRange [first2]
-            s <- s.DropLast()
-            s <- s.DropFirst()
+            s <- s.RemoveLast()
+            s <- s.RemoveFirst()
             s <- s.AddFirst last3
             let mutable t = s
             while s.Length > initCount do
-                s <- s.DropFirst()
+                s <- s.RemoveFirst()
 
             while t.Length > initCount do
-                t <- t.DropLast()
+                t <- t.RemoveLast()
             s <- t.AddFirstRange(s)
 
             assert_eq(s.Length, 2*initCount)
             s <- s.AddFirstRange [|-first3 .. 0|]
             s <- s.AddFirst -first4
-            s <- s.DropLast()
-            s <- s.DropFirst()
+            s <- s.RemoveLast()
+            s <- s.RemoveFirst()
             s <- s.AddFirst -first1
             s <- s.AddLastRange [|0 .. 2*last4|]
             s <- s.AddFirstRange [|-2*first2 .. 0|]
@@ -233,7 +233,7 @@ type SeqTests(?seed : int) =
             s <- s.Update(ix, rnd.Next(0, n))
             s <- s.AddLastRange ((fun t -> rnd.Next(0, t)) |> Seq.init n |> Seq.cache)
             s <- s.AddLast i
-            s <- s.DropLast().DropLast()
+            s <- s.RemoveLast().RemoveLast()
         s
 
     member private x.inner_insert  n (s : SeqWrapper<int>) = 
@@ -370,25 +370,25 @@ type SeqTests(?seed : int) =
                 assert_eq(s.[ix], old_v)
         s
 
-    member private x.inner_complex_add_drop_last n (s : SeqWrapper<int>) = 
+    member private x.inner_complex_add_remove_last n (s : SeqWrapper<int>) = 
         let mutable s = s
         let lower_n = n |> float |> sqrt |> int
         let r = Random(seed)
         let rnd() = r.Next(0,lower_n)
         for i = 0 to rnd() do
             let new_test_obj() = SeqTests(r.Next())
-            s <-  s |> new_test_obj().inner_add_drop_last (rnd()) |> new_test_obj().inner_add_last_range(rnd()) |> new_test_obj().inner_add_last (rnd())
-            s <- s |> new_test_obj().inner_add_drop_last (rnd()) |> new_test_obj().inner_add_last_range (rnd()) |> new_test_obj().inner_add_drop_last (rnd())
+            s <-  s |> new_test_obj().inner_add_remove_last (rnd()) |> new_test_obj().inner_add_last_range(rnd()) |> new_test_obj().inner_add_last (rnd())
+            s <- s |> new_test_obj().inner_add_remove_last (rnd()) |> new_test_obj().inner_add_last_range (rnd()) |> new_test_obj().inner_add_remove_last (rnd())
         s
 
-    member private x.inner_complex_add_drop_first_last n (s : _ SeqWrapper)=
+    member private x.inner_complex_add_remove_first_last n (s : _ SeqWrapper)=
         let mutable s = s
         let lower_n = (n |> float |> sqrt |> int) / 2
         let r = Random(seed)
         let rnd() = r.Next(0,lower_n)
         for i = 0 to rnd() do
             let new_test_obj() = SeqTests(r.Next())
-            s <- s |> new_test_obj().inner_add_drop_last (rnd()) |> new_test_obj().inner_add_drop_first(rnd()) |> new_test_obj().inner_add_drop_first_last (rnd())
+            s <- s |> new_test_obj().inner_add_remove_last (rnd()) |> new_test_obj().inner_add_remove_first(rnd()) |> new_test_obj().inner_add_remove_first_last (rnd())
             s <- s |> new_test_obj().inner_add_first_range (rnd()) |> new_test_obj().inner_add_last_range (rnd()) |> new_test_obj().inner_add_last (rnd())
             s <- s |> new_test_obj().inner_add_first_last (rnd())
         s
@@ -400,7 +400,7 @@ type SeqTests(?seed : int) =
         let mutable mSeq = []
         for i = 0 to rnd() do
             let new_test_obj() = SeqTests(r.Next())
-            s <- s |> new_test_obj().inner_complex_add_drop_last (rnd()) |> new_test_obj().inner_update (rnd()) |> new_test_obj().inner_add_drop_last (rnd())
+            s <- s |> new_test_obj().inner_complex_add_remove_last (rnd()) |> new_test_obj().inner_update (rnd()) |> new_test_obj().inner_add_remove_last (rnd())
             s <- s |> new_test_obj().inner_update (rnd()) |> new_test_obj().inner_add_last_range (rnd())
             let q = s |> new_test_obj().inner_get_index (rnd())
             let take = s |> new_test_obj().inner_take (rnd())
@@ -415,7 +415,7 @@ type SeqTests(?seed : int) =
         let mutable mSeq = []
         for i = 0 to rnd() do
             let new_test_obj() = SeqTests(r.Next())
-            s <- s |> new_test_obj().inner_complex_add_drop_first_last (rnd()) |> new_test_obj().inner_update (rnd()) |> new_test_obj().inner_add_drop_last (rnd())
+            s <- s |> new_test_obj().inner_complex_add_remove_first_last (rnd()) |> new_test_obj().inner_update (rnd()) |> new_test_obj().inner_add_remove_last (rnd())
             s <- s |> new_test_obj().inner_update (rnd()) |> new_test_obj().inner_add_first_range (rnd())
             s <- s |> new_test_obj().inner_insert_remove_update (rnd()) |> new_test_obj().inner_insert_range (rnd())
  
@@ -427,9 +427,9 @@ type SeqTests(?seed : int) =
     member x.add_last iters = create_test iters "AddLast" (x.inner_add_last iters >> toList1) 
     member x.add_first n = create_test n "AddFirst" (x.inner_add_first n >> toList1 )
     member x.add_first_last n = test_of n "Add first last" (x.inner_add_first_last n >> toList1 )
-    member x.add_drop_last n = test_of n "Add drop last" (x.inner_add_drop_last n >> toList1 )
-    member x.add_drop_first n = test_of n "Add drop first" (x.inner_add_drop_first n >> toList1 )
-    member x.add_drop_first_last n = test_of n "Add drop first last" (x.inner_add_drop_first_last n >> toList1 )
+    member x.add_remove_last n = test_of n "Add remove last" (x.inner_add_remove_last n >> toList1 )
+    member x.add_remove_first n = test_of n "Add remove first" (x.inner_add_remove_first n >> toList1 )
+    member x.add_remove_first_last n = test_of n "Add remove first last" (x.inner_add_remove_first_last n >> toList1 )
     member x.add_last_range n = test_of n "Add last range" (x.inner_add_last_range n >> toList1 )
     member x.add_first_range n = test_of n "Add first range" (x.inner_add_first_range n >> toList1 )
     member x.get_index n = test_of n  "Lookup by index" (x.inner_get_index n >> toList1)
@@ -442,8 +442,8 @@ type SeqTests(?seed : int) =
     member x.insert_remove_update n = test_of n "Insert, remove, update" (x.inner_insert_remove_update n >> toList1)
     member x.insert_range n = test_of n "Insert range" (x.inner_insert_range n >> toList1)
     member x.insert_range_concat n = test_of n "Insert range concat" (x.inner_insert_concat n >> toList1)
-    member x.complex_add_drop_last n = test_of n "Complex add/drop last sequence" (x.inner_complex_add_drop_last n >> toList1)
-    member x.complex_add_drop_first_last n = test_of n "Complex add/drop first/last sequence" (x.inner_complex_add_drop_first_last n >> toList1) 
-    member x.complex_add_last_take_and_indexing n = test_of n "Complex add/drop last + update/indexing" (x.inner_complex_add_last_take_and_indexing n)
-    member x.complex_add_and_take_and_indexing n = test_of n "Complex add/drop first/last + update/indexing" (x.inner_complex_all_operations n)
+    member x.complex_add_remove_last n = test_of n "Complex add/remove last sequence" (x.inner_complex_add_remove_last n >> toList1)
+    member x.complex_add_remove_first_last n = test_of n "Complex add/remove first/last sequence" (x.inner_complex_add_remove_first_last n >> toList1) 
+    member x.complex_add_last_take_and_indexing n = test_of n "Complex add/remove last + update/indexing" (x.inner_complex_add_last_take_and_indexing n)
+    member x.complex_add_and_take_and_indexing n = test_of n "Complex add/remove first/last + update/indexing" (x.inner_complex_all_operations n)
     member x.remove_add n = test_of n "Remove add" (x.inner_remove n >> toList1)

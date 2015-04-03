@@ -399,7 +399,7 @@ namespace Funq.Abstract
 		/// <returns></returns>
 		protected virtual TROuterMap GroupBy<TROuterMap, TRInnerSeq, TElem2, TKey>(
 			TROuterMap mapFactory, TRInnerSeq seqFactory, Func<TElem, TKey> keySelector, Func<TElem, TElem2> valueSelector, IEqualityComparer<TKey> eq)
-			where TROuterMap : IAnyMapLike<TKey, TRInnerSeq>
+			where TROuterMap : IAnyMapLikeWithBuilder<TKey, TRInnerSeq> 
 			where TRInnerSeq : IAnyBuilderFactory<TElem2, IterableBuilder<TElem2>>
 		{
 			return GroupBy(mapFactory, keySelector, valueSelector, (k, vs) =>
@@ -452,8 +452,6 @@ namespace Funq.Abstract
 				return (TOutIter)bFactory.IterableFrom(builder);
 			}
 		}
-
-
 
 		/// <summary>
 		/// (Implementation) implementation of the Join operator that returns a concrete collection type.
@@ -567,14 +565,14 @@ namespace Funq.Abstract
 		/// <param name="comparer"></param>
 		/// <returns></returns>
 		protected internal virtual TRList OrderBy<TRList>(TRList bFactory, IComparer<TElem> comparer)
-			where TRList : IAnySequential<TElem> {
+			where TRList : IAnySeqLikeWithBuilder<TElem> {
 			bFactory.IsNotNull("bFactory");
 			comparer.IsNotNull("comparer");
 			var arr = ToArray();
 			Array.Sort(arr, comparer);
 			using (var builder = bFactory.EmptyBuilder)
 			{
-				Array.ForEach(arr, x => builder.Add(x));
+				Array.ForEach(arr, builder.Add);
 				return (TRList) bFactory.IterableFrom(builder);
 			}
 		}
@@ -588,7 +586,8 @@ namespace Funq.Abstract
 		/// <returns></returns>
 
 		protected internal virtual TRList OrderByDescending<TRList>(TRList bFactory, IComparer<TElem> comparer)
-			where TRList : IAnySequential<TElem> {
+			where TRList : IAnySeqLikeWithBuilder<TElem>
+		{
 			bFactory.IsNotNull("bFactory");
 			comparer.IsNotNull("comparer");
 			return OrderBy(bFactory, comparer.Invert());
@@ -800,7 +799,8 @@ namespace Funq.Abstract
 		/// <returns> </returns>
 		protected virtual TRMap ToMapLike<TKey, TValue, TRMap>(
 			TRMap bFactory, Func<TElem, KeyValuePair<TKey, TValue>> selector)
-			where TRMap : IAnyMapLike<TKey, TValue> {
+			where TRMap : IAnyMapLike<TKey, TValue>, IAnyBuilderFactory<KeyValuePair<TKey, TValue>, MapBuilder<TKey, TValue>>
+		{
 			bFactory.IsNotNull("bFactory");
 			selector.IsNotNull("selector");
 			using (var builder = bFactory.EmptyBuilder)
@@ -833,7 +833,7 @@ namespace Funq.Abstract
 		/// <param name="bFactory"></param>
 		/// <returns></returns>
 		protected virtual TRSet ToSetLike<TRSet>(TRSet bFactory)
-			where TRSet : IAnySetLike<TElem>
+			where TRSet : IAnySetLikeWithBuilder<TElem>
 		{
 			bFactory.IsNotNull("bFactory");
 			using (var builder = bFactory.EmptyBuilder)

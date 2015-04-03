@@ -263,7 +263,7 @@ namespace Funq.Collections.Implementation
 				return new TrieVector<TOut>.Parent(Height, Length, newArr, lineage, ArrSize);
 			}
 
-			public override Node Drop(Lineage lineage)
+			public override Node RemoveLast(Lineage lineage)
 			{
 				Node ret;
 #if ASSERTS
@@ -282,7 +282,7 @@ namespace Funq.Collections.Implementation
 				}
 				else
 				{
-					var newLast = Arr[ArrSize-1].Drop(lineage);
+					var newLast = Arr[ArrSize-1].RemoveLast(lineage);
 					var newArr = UpdateStore(ArrSize - 1, newLast, lineage);
 					ret =  MutateOrCreate(Length - 1, ArrSize, newArr, lineage);
 				}

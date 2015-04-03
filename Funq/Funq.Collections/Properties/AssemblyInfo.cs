@@ -8,11 +8,11 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 
 
-[assembly: AssemblyTitle("Solid")]
+[assembly: AssemblyTitle("Funq")]
 [assembly: AssemblyDescription("A library of fully persistent data structures.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Solid")]
+[assembly: AssemblyProduct("Funq")]
 [assembly: InternalsVisibleTo("Funq.FSharp")]
 
 [assembly: InternalsVisibleTo("Funq.Tests.Performance")]

@@ -10,6 +10,7 @@ open System.Diagnostics
 let inline (^*) (a : int) (b : int) = pown a b
 
 
+
 type IndentedTextWriter with
     member x.Push() = x.Indent <- x.Indent + 1
     member x.Pop() = x.Indent <- x.Indent - 1    
@@ -37,7 +38,16 @@ module String =
     let contains what (where : string) = where.Contains(what)
     let contains_insensitive (what : string) (where : string) = where.ToUpperInvariant().Contains(what.ToUpperInvariant())
     let join delim (items : _ seq) = String.Join(delim, items)
+    let split (delim : string seq) (str : string) = str.Split(delim |> Seq.toArray, StringSplitOptions.RemoveEmptyEntries)
    
+type String with
+    member x.AnyWord str =
+        let words = str |> String.split [" "]
+        words |> Seq.exists (fun word -> x |> String.contains_insensitive word)
+    member x.AllWords str =
+        let words = str |> String.split [" "]
+        words |> Seq.forall (fun word -> x |> String.contains_insensitive word)
+
 module Seq =
     let getIter (a :_ seq) = a.GetEnumerator()
     

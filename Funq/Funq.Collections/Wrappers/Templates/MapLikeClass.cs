@@ -78,7 +78,7 @@ public partial class __MapLikeClass__<TKey,TValue> : AbstractMap<TKey,TValue,__M
 	/// <param name="other"></param>
 	/// <param name="collision"></param>
 	/// <returns></returns>
-	public __MapLikeClass__<TKey, TRValue> Join<TValue2, TRValue>(IAnyMapLike<TKey, TValue2> other, Func<TKey, TValue, TValue2, TRValue> collision)
+	public __MapLikeClass__<TKey, TRValue> Join<TValue2, TRValue>(IEnumerable<KeyValuePair<TKey, TValue2>> other, Func<TKey, TValue, TValue2, TRValue> collision)
 	{
 		if (other == null) throw Errors.Is_null;
 		if (collision == null) throw Errors.Is_null;
@@ -126,6 +126,7 @@ public partial class __MapLikeClass__<TKey,TValue> : AbstractMap<TKey,TValue,__M
 	{
 		return base.OfType<__MapLikeClass__<TRKey,TRValue>,TRKey,TRValue>(GetPrototype<TRKey,TRValue>(handler));
 	}
- 
+
+
 
 }

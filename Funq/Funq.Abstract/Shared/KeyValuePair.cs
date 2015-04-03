@@ -20,5 +20,9 @@ namespace Funq
 		public static Tuple<TKey, TValue> ToTuple<TKey, TValue>(KeyValuePair<TKey, TValue> pair) {
 			return Tuple.Create(pair.Key, pair.Value);
 		}
+
+		public static KeyValuePair<TKey, TValue> FromTuple<TKey, TValue>(Tuple<TKey, TValue> pair) {
+			return Kvp.Of(pair.Item1, pair.Item2);
+		}
 	}
 }

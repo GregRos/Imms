@@ -9,22 +9,27 @@ namespace Funq.Collections
 	{
 		internal sealed class Builder : SetBuilder<T>
 		{
-			private FunqOrderedSet<T> _inner;
+			readonly IComparer<T> _comparer;
+			private OrderedAvlTree<T, bool>.Node _inner;
+			Lineage _lineage;
 			public override object Result
 			{
 				get {
-					return _inner;
+					_lineage = Lineage.Mutable();
+					return _inner.Wrap(_comparer);
 				}
 			}
 
-			public Builder(FunqOrderedSet<T> inner)
+			public Builder(IComparer<T> comparer, OrderedAvlTree<T, bool>.Node inner)
 			{
+				_comparer = comparer;
 				_inner = inner;
+				_lineage = Lineage.Mutable();
 			}
 
 
 			protected override void add(T item) {
-				_inner = _inner;
+				_inner = _inner.Root_Add(item, true, _comparer, false, _lineage) ?? _inner;
 			}
 
 			public override bool Contains(T item) {
@@ -33,7 +38,7 @@ namespace Funq.Collections
 
 			public override void Remove(T item) {
 				bool dummy;
-				_inner = _inner.Drop(item);
+				_inner = _inner.AvlRemove(item, _lineage) ?? _inner;
 			}
 		}
 
@@ -41,18 +46,22 @@ namespace Funq.Collections
 		{
 			get
 			{
-				return new Builder(Empty(_inner.Comparer));
+				return new Builder(Comparer, Root);
 			}
 		}
 
-		protected internal override FunqOrderedSet<T> ProviderFrom(SetBuilder<T> builder)
-		{
-			return (FunqOrderedSet<T>)builder.Result;
+		protected internal override FunqOrderedSet<T> ProviderFrom(SetBuilder<T> builder) {
+			return (FunqOrderedSet<T>) builder.Result;
 		}
 
 		protected internal override SetBuilder<T> BuilderFrom(FunqOrderedSet<T> provider)
 		{
-			return new Builder(provider);
+			return new Builder(Comparer, Root);
+		}
+
+		protected override bool IsCompatibleWith(FunqOrderedSet<T> other)
+		{
+			return this.Comparer.Equals(other.Comparer);
 		}
 	}
 }

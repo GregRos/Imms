@@ -42,14 +42,22 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Abstractions\Common\InterfaceExtensions.cs" />
     <Compile Include="Abstractions\Iterable\Debugging.cs" />
     <Compile Include="Abstractions\MapLike\Debugging.cs" />
     <Compile Include="Abstractions\MapLike\IAnyMapLike.cs" />
+    <Compile Include="Abstractions\MapLike\Interfaces.cs" />
     <Compile Include="Abstractions\Sequential\Debugging.cs" />
-    <Compile Include="Equality and Comparison\Equality Handlers\CachingEqualityComparer.cs" />
+    <Compile Include="Abstractions\Sequential\Interfaces.cs" />
+    <Compile Include="Abstractions\SetLike\Interfaces.cs" />
+    <Compile Include="Equality and Comparison\Equatable Handlers\CachingEqualityComparer.cs" />
     <Compile Include="Equality and Comparison\Comparers.cs" />
-    <Compile Include="Equality and Comparison\Equality.cs" />
-    <Compile Include="Equality and Comparison\Equality Handlers\LambdaEquality.cs" />
+    <Compile Include="Equality and Comparison\Equatable Handlers\ExpressionEquality.cs" />
+    <Compile Include="Equality and Comparison\Equatable Handlers\KeyComparer.cs" />
+    <Compile Include="Equality and Comparison\Equatable Handlers\KeyEquality.cs" />
+    <Compile Include="Equality and Comparison\Equatable Handlers\ExprLambdaComparer.cs" />
+    <Compile Include="Equality and Comparison\EqualityHelper.cs" />
+    <Compile Include="Equality and Comparison\Equatable Handlers\ExprLambdaEquality.cs" />
     <Compile Include="Abstractions\Iterable\IAnyIterable.cs" />
     <Compile Include="Abstractions\MapLike\MapBuilder.cs" />
     <Compile Include="Abstractions\MapLike\AbstractMap.cs" />
@@ -63,10 +71,19 @@
     <Compile Include="Abstractions\SetLike\IAnySetLike.cs" />
     <Compile Include="Abstractions\SetLike\SetBuilder.cs" />
     <Compile Include="Abstractions\SetLike\AbstractSet.cs" />
+    <Compile Include="Equality and Comparison\EquatableComparers.cs" />
+    <Compile Include="Equality and Comparison\Equatable\EquatableComparerBase.cs" />
+    <Compile Include="Equality and Comparison\Equatable\EquatableEqualityBase.cs" />
+    <Compile Include="Equality and Comparison\Equatable\ISafeToEquateInExpression.cs" />
+    <Compile Include="Equality and Comparison\Extensions.cs" />
     <Compile Include="Equality and Comparison\FastComparer.cs" />
     <Compile Include="Equality and Comparison\FastEquality.cs" />
+    <Compile Include="Equality and Comparison\Equatable\IEquatableComparer.cs" />
+    <Compile Include="Equality and Comparison\Equatable\IEquatableEquality.cs" />
+    <Compile Include="Equality and Comparison\General\LambdaEquality.cs" />
     <Compile Include="Internals\Box.cs" />
     <Compile Include="Internals\Errors.cs" />
+    <Compile Include="Internals\FakeCollection.cs" />
     <Compile Include="Internals\Fun.cs" />
     <Compile Include="Internals\StructTuple.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -82,6 +99,7 @@
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

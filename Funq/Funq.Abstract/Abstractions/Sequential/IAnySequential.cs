@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Funq.Abstract
@@ -6,33 +7,7 @@ namespace Funq.Abstract
 	/// Used for generalizing over list-like collections when the concrete collection type is unknown.
 	/// </summary>
 	/// <typeparam name="TElem"></typeparam>
-	public interface IAnySequential<TElem> : IAnyBuilderFactory<TElem, IterableBuilder<TElem>>, IReadOnlyList<TElem> {
-		/// <summary>
-		/// Returns the element at the specified index.
-		/// </summary>
-		/// <param name="index"></param>
-		/// <returns></returns>
-		TElem this[int index]
-		{
-			get;
-		}
-
-		/// <summary>
-		/// Returns the first item in the collection.
-		/// </summary>
-		TElem First
-		{
-			get;
-		}
-
-		/// <summary>
-		/// Returns the last item in the collection.
-		/// </summary>
-		TElem Last
-		{
-			get;
-		}
-
+	public interface IAnySequential<TElem> : IReadOnlyList<TElem> {
 		/// <summary>
 		/// Returns the first item in the collection, or Option.None if the collection is empty.
 		/// </summary>
@@ -57,5 +32,9 @@ namespace Funq.Abstract
 		/// <param name="arrStart">The index of the array at which to start copying.</param>
 		/// <param name="count">The number of elements to copy.</param>
 		void CopyTo(TElem[] arr, int myStart, int arrStart, int count);
+	}
+
+	public interface IAnySeqLikeWithBuilder<T> : IAnyBuilderFactory<T, IterableBuilder<T>>, IAnySequential<T> {
+		
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -13,10 +14,6 @@ namespace Funq.Collections
 	[DebuggerTypeProxy(typeof(FunqVector<>.ArrayDebugView))]
 	public partial class FunqVector<T>
 	{
-		public bool Contains(T item)
-		{
-			return !this.ForEachWhile(x => item.Equals(x));
-		}
 
 		private class ArrayDebugView
 		{
@@ -38,6 +35,7 @@ namespace Funq.Collections
 			this.CopyTo(array, 0, arrayIndex, array.Length - arrayIndex);
 		}
 
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public IEnumerable<T> AsSeq
 		{
 			get

@@ -1,0 +1,11 @@
+Test,Target,Time,Target_InitialSize,Iterations,DataSource_Size,DataSource_Type,Target_InitialGenerator,DataGenerator,Description,Class,Ratio
+AddRange,System.ImmutableSet,12.969,10000,5,10000,Array,"[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 15)]","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 15)]","",SetRange,
+DropRange,System.ImmutableSet,18.999,10000,5,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 15)]","","",SetRange,Some(0.3)
+AddRange,FSharp.Set,93.126,10000,5,10000,Array,"[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 15)]","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 15)]","",SetRange,
+DropRange,FSharp.Set,27.173,10000,5,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 15)]","","",SetRange,Some(0.3)
+AddRange,FunqSet,12.337,10000,5,10000,Array,"[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 15)]","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 15)]","",SetRange,
+DropRange,FunqSet,11.464,10000,5,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 15)]","","",SetRange,Some(0.3)
+AddRange,FunqOrderedSet,17.099,10000,5,10000,Array,"[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 15)]","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 15)]","",SetRange,
+DropRange,FunqOrderedSet,11.966,10000,5,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 15)]","","",SetRange,Some(0.3)
+AddRange,System.ImmutableSortedSet,85.019,10000,5,10000,Array,"[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 15)]","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 15)]","",SetRange,
+DropRange,System.ImmutableSortedSet,32.694,10000,5,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 15)]","","",SetRange,Some(0.3)

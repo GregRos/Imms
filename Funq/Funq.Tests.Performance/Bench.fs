@@ -14,7 +14,7 @@ module Bench =
     let Results = MutableList<MetaContainer>()
     let mutable Watch = Stopwatch()
     let mutable Timer : Timer = null
-    let mutable Drops = 5
+    let mutable Removes = 5
     let mutable Runs = 20
     let mutable Timeout = 20000
     let mutable RunningThread : Thread = null
@@ -33,7 +33,7 @@ module Bench =
         fprintfn writer "Target: '%s' with metadata:" tag.Target.Name
         fprintfn writer "%O" tag.Target
         let runner() = 
-            for i = 0 to Drops do
+            for i = 0 to Removes do
                 run()
             Watch.Reset()
             OnRun()

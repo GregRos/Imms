@@ -22,7 +22,7 @@ namespace Funq.Collections.Implementation
 				: this(root.MaxPossibleHeight)
 			{
 				Comparer = root.Comparer;
-				if (!root.IsNull)_future.Add(Marked.Create(root, false));
+				if (!root.IsEmpty)_future.Add(Marked.Create(root, false));
 			}
 
 			public bool MoveNext()
@@ -32,11 +32,11 @@ namespace Funq.Collections.Implementation
 					var cur = _future.PopLast();
 					if (cur.Mark) return SetCurrent(cur);
 					var node = cur.Object;
-					if (node.IsNull) continue;
-					if (!node.Right.IsNull) _future.Add(node.Right.Mark(false));		
+					if (node.IsEmpty) continue;
+					if (!node.Right.IsEmpty) _future.Add(node.Right.Mark(false));		
 					cur.SetMark(true);
 					_future.Add(cur);
-					if (!node.Left.IsNull) _future.Add(node.Left.Mark(false));
+					if (!node.Left.IsEmpty) _future.Add(node.Left.Mark(false));
 				}
 				return false;
 			}
@@ -50,9 +50,8 @@ namespace Funq.Collections.Implementation
 			/// <returns></returns>
 			public bool SeekGreaterThan(TKey key, out int cmpResult)
 			{
-
-				var isEnded = SeekForwardCloseTo(key, out cmpResult);
-				if (!isEnded) return false;
+				var isNotEnded = SeekForwardCloseTo(key, out cmpResult);
+				if (!isNotEnded) return false;
 				if (cmpResult >= 0) return true;
 				var tryNext = this.MoveNext();
 				if (!tryNext) return false;
@@ -89,13 +88,16 @@ namespace Funq.Collections.Implementation
 			/// <summary>
 			/// Moves the iterator to a node with a key that is "close" to the specified key
 			/// </summary>
-			/// <param name="hash"></param>
+			/// <param name="key"></param>
+			/// <param name="cmpResult"></param>
 			/// <returns></returns>
-			private bool SeekForwardCloseTo(TKey key, out int cmpResult)
-			{
-				cmpResult = -1;
+			private bool SeekForwardCloseTo(TKey key, out int cmpResult) {
+				cmpResult = _current == null ? -1 : Comparer.Compare(_current.Key, key);
 				//If we're already at the desired node, return true.
-				if (_current != null && Comparer.Compare(_current.Key, key) > 0) return true;
+				if (cmpResult >= 0) {
+					return true;
+				}
+				Marked<Node, bool> old = null;
 				//Climb up until the current node is larger than the hash or until the root is reached.
 				while (_future.Count > 1)
 				{
@@ -105,35 +107,36 @@ namespace Funq.Collections.Implementation
 					int compare = Comparer.Compare(cur.Object.Key,key);
 					if (compare >= 0) {
 						_future.Add(cur);
-						goto end_climb_up;
+						if (!cur.Object.Left.IsEmpty) _future.Add(cur.Object.Left.Mark(false));
+						break;
 					}
 				}
-	end_climb_up:
+	
 				//Now we climb down again, in order to find the node in question.
 				while (_future.Count > 0)
 				{
 					var cur = _future.PopLast();
 					var node = cur.Object;
 					var compareResult = Comparer.Compare(node.Key, key); 
-					//if (cur.Mark && compareResult != Cmp.Equal) continue;
+					if (cur.Mark && compareResult != 0) continue;
 					if (compareResult < 0) {
-						if (node.Right.IsNull) {
+						if (node.Right.IsEmpty) {
 							cmpResult = -1;
 							return SetCurrent(node);
 						}
 						_future.Add(node.Right.Mark(false));
 					}
 					else if (compareResult > 0) {
-						if (!node.Right.IsNull) _future.Add(node.Right.Mark(false));
-						if (node.Left.IsNull) {
+						if (!node.Right.IsEmpty) _future.Add(node.Right.Mark(false));
+						if (node.Left.IsEmpty) {
 							cmpResult = 1;
 							return SetCurrent(node);
 						}
 						_future.Add(node.Mark(true));
 						_future.Add(node.Left.Mark(false));
 					}
-					else if (compareResult == 0) {
-						if (!cur.Mark && !node.Right.IsNull) _future.Add(node.Right.Mark(false));
+					else{
+						if (!cur.Mark && !node.Right.IsEmpty) _future.Add(node.Right.Mark(false));
 						cmpResult = 0;
 						return SetCurrent(node);
 					}

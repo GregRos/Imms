@@ -3,13 +3,14 @@
 open System
 #nowarn"77"
 let inline isEmpty o      = (^s : (member IsEmpty : bool) o )
-let inline dropLast o     = (^s : (member DropLast : unit -> 's) o)
-let inline dropFirst o    = (^s : (member DropFirst : unit -> 's) o )
+let inline removeLast o     = (^s : (member RemoveLast : unit -> 's) o)
+let inline removeFirst o    = (^s : (member RemoveFirst : unit -> 's) o )
 let inline first o        = (^s : (member First : 'a) o)
 let inline last o         = (^s : (member Last : 'a) o)
 let inline length o       = (^s : (member Length : int) o )
 let inline getEmpty()     = (^s : (static member Empty : 's) ())
-
+let inline op_Add item col = (^s : (member op_Add : 't -> 's) col, item)
+let inline op_AddRange items col = (^s : (member op_AddRange : 't seq -> 's) col, items)
 let inline getEmptyWith c = (^s : (static member Empty : 'c -> 's) c)
 ///Calls an instance AddLast method.
 let inline addLast item col        = (^s : (member AddLast : 'a -> 's) col, item)
@@ -19,7 +20,7 @@ let inline addFirst item col       = (^s : (member AddFirst : 'a -> 's) col, ite
 ///Calls an instance Insert method.
 let inline insert index item col   = (^s : (member Insert : int * 'a -> 's) col, index, item)
 ///Calls an instance Remove method.
-let inline remove index col        = (^s : (member Remove : int -> 's) col, index)
+let inline remove index col        = (^s : (member Remove : 'k -> 's) col, index)
 ///Calls an instance AddLastRange method.
 let inline addLastRange items col  = (^s : (member AddLastRange : 'v seq -> 's) col, items)
 ///Calls an instance AddFirstRange method.
@@ -39,7 +40,7 @@ let inline setContains k col       = (^s : (member Contains : 'k -> bool) col, k
 let inline add k v col             = (^s : (member Add : 'k * 'v -> 's) col,k,v)
 let inline addSet k col            = (^s : (member Add : 'k -> 's) col, k)
 let inline addSetMany ks col       = (^s : (member AddRange : 'k seq -> 's) col, ks)
-let inline dropSet k col           = (^s : (member Drop : 'k -> 's) col, k)
+let inline removeSet k col           = (^s : (member Remove : 'k -> 's) col, k)
 let inline union o col             = (^s : (member Union : 't -> 's) col, o)
 let inline intersect o col         = (^s : (member Intersect : 't -> 's) col, o)
 let inline except o col            = (^s : (member Except : 't -> 's) col, o)
@@ -53,7 +54,6 @@ let inline asSeq q                 = (^s : (member AsSeq : 't seq) q)
 let inline skip n col              = (^s : (member Skip : int -> 's) col, n)
 
 let inline iter col                = (^s : (member ForEach : Action<'a> -> unit) col, Action<'a>(ignore))
-let inline drop k s                    = (^s : (member Drop : 'k -> 's) s, k)
 
 let inline filter f s                       = (^s : (member Where : Func<'a, bool> -> 's) s, toFunc1 f)
 let inline collect f c s                    = (^s : (member SelectMany : Func<'a, 'b seq> * 'o -> 't) s, toFunc1 f, c)
@@ -68,13 +68,13 @@ let inline count f s                        = (^s : (member Count : Func<'a, boo
 let inline scan r f c s                     = (^s : (member Scan : 'r * Func<'r, 'a, 'r> * 'o -> 't) s, r, toFunc2 f,c)
 let inline maxItem s                        = (^s : (member MaxItem : 'v) s)
 let inline minItem s                        = (^s : (member MinItem : 'v) s)
-let inline dropMin s                        = (^s : (member DropMin : unit -> 's) s)
-let inline dropMax s                        = (^s : (member DropMax : unit -> 's) s)
+let inline removeMin s                        = (^s : (member RemoveMin : unit -> 's) s)
+let inline removeMax s                        = (^s : (member RemoveMax : unit -> 's) s)
 let inline merge f m2 m1                    = (^s : (member Merge : 's * Func<'k, 'v, 'v, 'v> -> 's) m1, m2, toFunc3 f)
 let inline join f m2 m1                     = (^s : (member Join : 's * Func<'k, 'v, 'v, 'v> -> 's) m1, m2, toFunc3 f)
 let inline difference m2 m1                 = (^s : (member Difference : 's -> 's) m1, m2)
 let inline addMany vs s                   = (^s : (member AddRange : seq<'v> -> 's) s, vs)
-let inline dropMany vs s                    = (^s : (member DropRange : seq<'v> -> 's) s, vs)
+let inline removeMany vs s                    = (^s : (member RemoveRange : seq<'v> -> 's) s, vs)
 let inline update(i,v) o                  = (^s : (member Update : int * 'a -> 's) o, i, v)
 let inline slice(i1, i2) o                = (^s : (member get_Item : int * int -> 's) o, i1, i2)
 let inline map f o                        = (^s : (member Select : Func<'a,'b> -> 't) o ,toFunc1 f)

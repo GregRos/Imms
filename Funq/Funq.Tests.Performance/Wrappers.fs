@@ -16,9 +16,9 @@ module Funq =
         new (innerp) = {inner = innerp}
         member inline x.Add(k,v) = FunqMap(x.inner.Set(k,v))
         member inline x.get_Item k = x.inner.TryGet(k).Value
-        member inline x.AddRange (sq : KeyValuePair<_,_> seq) = FunqMap(x.inner.AddRange sq)
-        member inline x.DropRange sq = FunqMap(x.inner.DropRange sq)
-        member inline x.Drop item = FunqMap(x.inner.Drop item)
+        member inline x.AddRange (sq : KeyValuePair<_,_> seq) = FunqMap(x.inner.SetRange sq)
+        member inline x.RemoveRange sq = FunqMap(x.inner.RemoveRange sq)
+        member inline x.Remove item = FunqMap(x.inner.Remove item)
         member inline x.Length = x.inner.Length
         member inline x.AsSeq = x.inner :> _ seq
         member inline x.ForEach (a : Action<_>) = x.inner.ForEach (a)
@@ -37,9 +37,9 @@ module Funq =
         member inline x.Add(k,v) = OrderedMap<_>(x.inner.Set(k,v))
         member inline x.ForEach (a : Action<_>) = x.inner.ForEach(a)
         member inline x.Length = x.inner.Length
-        member inline x.AddRange (sq : KeyValuePair<_,_> seq) = OrderedMap<_>(x.inner.AddRange sq)
-        member inline x.DropRange sq = OrderedMap<_>(x.inner.DropRange sq)
-        member inline x.Drop item = OrderedMap(x.inner.Drop item)
+        member inline x.AddRange (sq : KeyValuePair<_,_> seq) = OrderedMap<_>(x.inner.SetRange sq)
+        member inline x.RemoveRange sq = OrderedMap<_>(x.inner.RemoveRange sq)
+        member inline x.Remove item = OrderedMap(x.inner.Remove item)
         member inline x.AsSeq = x.inner :> _ seq
         member inline x.get_Item k = x.inner.TryGet(k).Value
         member inline x.Keys = x.keys
@@ -55,12 +55,12 @@ module Funq =
         new (innerp) = {inner = innerp}
         member inline x.Add(k) = Set(x.inner.Add(k))
         member inline x.Contains(k) = x.inner.Contains k
-        member inline x.Drop(k) = Set(x.inner.Drop k)
+        member inline x.Remove(k) = Set(x.inner.Remove k)
         member inline x.ForEach a = x.inner.ForEach a
         member inline x.AsSeq = x.inner :> _ seq
-        member inline x.AddRange sq = Set(x.inner.AddRange sq)
+        member inline x.AddRange sq = Set(x.inner.Union sq)
         member inline x.Length = x.inner.Length
-        member inline x.DropRange sq = Set(x.inner.DropRange sq)
+        member inline x.RemoveRange sq = Set(x.inner.Except sq)
         member inline x.Union (o : Set<'t>) = Set(o.inner.Union x.inner)
         member inline x.Intersect (s : Set<'t>) = Set(s.inner.Intersect x.inner)
         member inline x.Except (s : Set<'t>) = Set(s.inner.Except x.inner)
@@ -68,7 +68,6 @@ module Funq =
         member inline x.IsSetEqual (s : Set<'t>) = x.inner.SetEquals(s.inner)
         member inline x.IsProperSuperset (s : Set<'t>) = x.inner.IsProperSupersetOf(s.inner)
         member inline x.IsProperSubset (s : Set<'t>) = x.inner.IsProperSubsetOf(s.inner)
-        member inline x.AddMany (s : 't seq) = Set(x.inner.AddRange s)
         member inline x.Keys = x.keys
         static member inline FromSeq(s : 't seq) = 
             let mutable set = Set(s.ToFunqSet())
@@ -82,18 +81,17 @@ module Funq =
         new (innerp) = {inner = innerp}
         member inline x.Add(k) = OrderedSet(x.inner.Add(k))
         member inline x.Contains(k) = x.inner.Contains k
-        member inline x.Drop(k) = OrderedSet(x.inner.Drop k)
+        member inline x.Remove(k) = OrderedSet(x.inner.Remove k)
         member inline x.ForEach (a : Action<'t>) = x.inner.ForEach a
         member inline x.AsSeq = x.inner :> _ seq
-        member inline x.AddRange sq = OrderedSet(x.inner.AddRange sq)
+        member inline x.AddRange sq = OrderedSet(x.inner.Union sq)
         member inline x.Length = x.inner.Length
-        member inline x.DropRange sq = OrderedSet(x.inner.DropRange sq)
+        member inline x.RemoveRange sq = OrderedSet(x.inner.Except sq)
         member inline x.Union (o : OrderedSet<'t>) = OrderedSet(x.inner.Union o.inner)
         member inline x.Intersect (s : OrderedSet<'t>) = OrderedSet(x.inner.Intersect s.inner)
         member inline x.Except (s : OrderedSet<'t>) = OrderedSet(x.inner.Except s.inner)
         member inline x.SymmetricDifference (s : OrderedSet<'t>) = OrderedSet(x.inner.Difference s.inner)
         member inline x.IsSetEqual (s : OrderedSet<'t>) = x.inner.SetEquals(s.inner)
-        member inline x.AddMany (s : 't seq) = OrderedSet(x.inner.AddRange s)
         member inline x.IsProperSuperset (s : OrderedSet<'t>) = x.inner.IsProperSupersetOf(s.inner)
         member inline x.IsProperSubset (s : OrderedSet<'t>) = x.inner.IsProperSubsetOf(s.inner)
         member inline x.Keys = x.keys
@@ -118,8 +116,8 @@ module Sys =
         member inline x.AddFirst v          = List(x.inner.Insert(0, v)) 
         member inline x.AddLastRange vs     = List(x.inner.AddRange(vs)) 
         member inline x.AddFirstRange vs    = List(x.inner.InsertRange(0, vs)) 
-        member inline x.DropLast()          = List(x.inner.RemoveAt(x.inner.Count - 1)) 
-        member inline x.DropFirst()         = List(x.inner.RemoveAt(0))
+        member inline x.RemoveLast()          = List(x.inner.RemoveAt(x.inner.Count - 1)) 
+        member inline x.RemoveFirst()         = List(x.inner.RemoveAt(0))
         member inline x.Slice(a,b)           = List(x.inner.GetRange(a, a+b))
         member inline x.Take a = List(x.inner.GetRange(0, a))
         member inline x.Skip a = List(x.inner.GetRange(a, x.inner.Count - a))
@@ -140,7 +138,7 @@ module Sys =
         val public inner : ImmutableQueue<'t>
         new (innerp) = {inner = innerp}
         member inline x.AddLast v = Queue(x.inner.Enqueue v)
-        member inline x.DropFirst() = Queue(x.inner.Dequeue())
+        member inline x.RemoveFirst() = Queue(x.inner.Dequeue())
         member inline x.GetEnumerator() = x.inner.GetEnumerator()
         member inline x.First = x.inner.Peek
         member inline x.IsEmpty = x.inner.IsEmpty
@@ -153,7 +151,7 @@ module Sys =
         val public inner : ImmutableStack<'t>
         new (innerp) = {inner = innerp}
         member inline x.AddFirst v=  Stack(x.inner.Push v)
-        member inline x.DropFirst() = Stack(x.inner.Pop())
+        member inline x.RemoveFirst() = Stack(x.inner.Pop())
         member inline x.GetEnumerator() = x.inner.GetEnumerator()
         member inline x.First = x.inner.Peek()
         member inline x.IsEmpty = x.inner.IsEmpty
@@ -171,9 +169,9 @@ module Sys =
             for item in x.inner do a.Invoke(item)
         member inline x.Add(k,v) = Dict(x.inner.SetItem(k,v))
         member inline x.Length = x.inner.Count
-        member inline x.Drop item = Dict(x.inner.Remove item)
+        member inline x.Remove item = Dict(x.inner.Remove item)
         member inline x.AddRange (vs : KeyValuePair<_,_> seq) = Dict(x.inner.SetItems vs)
-        member inline x.DropRange vs = Dict(x.inner.RemoveRange vs)
+        member inline x.RemoveRange vs = Dict(x.inner.RemoveRange vs)
         member inline x.get_Item k =x.inner.[k]
         member inline x.Keys = x.keys
         static member inline FromSeq (s : 't seq) = 
@@ -194,9 +192,9 @@ module Sys =
         new (innerp) = {inner = innerp}
         member inline x.Add(k,v) = SortedDict(x.inner.SetItem(k,v))
         member inline x.AddRange (sq : KeyValuePair<_,_> seq) = SortedDict(x.inner.SetItems sq)
-        member inline x.Drop item = SortedDict(x.inner.Remove item)
+        member inline x.Remove item = SortedDict(x.inner.Remove item)
         member inline x.Length = x.inner.Count
-        member inline x.DropRange sq = 
+        member inline x.RemoveRange sq = 
             SortedDict(sq |> x.inner.RemoveRange)
         member inline x.AsSeq = x.inner :> _ seq
         member inline x.ForEach (a : Action<_>) = 
@@ -221,14 +219,14 @@ module Sys =
         new (innerp) = {inner = innerp}
         member inline x.Add(k) = Set(x.inner.Add(k))
         member inline x.Keys = x.keys;
-        member inline x.Drop k = Set(x.inner.Remove k)
+        member inline x.Remove k = Set(x.inner.Remove k)
         member inline x.Contains(k) = x.inner.Contains k
         member inline x.AsSeq = x.inner :> _ seq
         member inline x.ForEach (a : Action<_>) = 
             for item in x.inner do a.Invoke(item)
         member inline x.Length = x.inner.Count
         member inline x.AddRange (s : 't seq) = Set(x.inner.Union s)
-        member inline x.DropRange (s : 't seq) = Set(x.inner.Except s)
+        member inline x.RemoveRange (s : 't seq) = Set(x.inner.Except s)
         member inline x.Union (o : Set<'t>) = Set(x.inner.Union o.inner)
         member inline x.Intersect (s : Set<'t>) = Set(x.inner.Intersect s.inner)
         member inline x.Except (s : Set<'t>) = Set(x.inner.Except s.inner)
@@ -248,11 +246,11 @@ module Sys =
         val mutable public keys : 't array
         new (innerp) = {inner = innerp}
         member inline x.Add(k) = SortedSet(x.inner.Add(k))
-        member inline x.Drop k = SortedSet(x.inner.Remove k)
+        member inline x.Remove k = SortedSet(x.inner.Remove k)
         member inline x.Keys = x.keys;
         member inline x.Contains(k) = x.inner.Contains k
         member inline x.AddRange sq = SortedSet(x.inner.Union sq)
-        member inline x.DropRange sq = SortedSet(x.inner.Except sq)
+        member inline x.RemoveRange sq = SortedSet(x.inner.Except sq)
         member inline x.Length = x.inner.Count
         member inline x.AsSeq = x.inner :> _ seq
         member inline x.ForEach (a : Action<_>) = 
@@ -286,7 +284,7 @@ module FSharpx =
         member inline x.AddLast v = Vector(x.inner.Conj v)
         member inline x.get_Item i = x.inner.[i]
         member inline x.Update(i,v) = Vector(x.inner.Update(i,v))
-        member inline x.DropLast() = Vector(x.inner |> Vector'.initial)
+        member inline x.RemoveLast() = Vector(x.inner |> Vector'.initial)
         member inline x.GetEnumerator() = (x.inner :> seq<_>).GetEnumerator()
         member inline x.AddLastList vs = Vector(Vector'.append x.inner vs)
         member inline x.Length = x.inner.Length
@@ -310,9 +308,9 @@ module FSharpx =
         new (innerp) = {inner = innerp}
         member inline x.AddLast v = Deque(x.inner.Conj v)
         member inline x.AddFirst v = Deque(x.inner.Cons v)
-        member inline x.DropLast() = Deque(x.inner.Unconj |> fst)
+        member inline x.RemoveLast() = Deque(x.inner.Unconj |> fst)
         member inline x.IsEmpty = x.inner.IsEmpty
-        member inline x.DropFirst() = Deque(x.inner.Uncons |> snd)
+        member inline x.RemoveFirst() = Deque(x.inner.Uncons |> snd)
         member inline x.AsSeq = x.inner |> seq
         member inline x.ForEach (f : Action<_>) =
             for item in x.inner do
@@ -335,7 +333,7 @@ module FSharpx =
         member inline x.AddLast v = RanAccList(x.inner.Cons v)
         member inline x.get_Item i = x.inner.[i]
         member inline x.Update(i,v) = RanAccList(x.inner.Update(i,v))
-        member inline x.DropLast() = RanAccList(x.inner |> RanAccList'.tail)
+        member inline x.RemoveLast() = RanAccList(x.inner |> RanAccList'.tail)
         member inline x.AsSeq = x.inner |> seq
         member inline x.Length = x.inner.Length
         member inline x.IsEmpty = x.inner.IsEmpty
@@ -353,8 +351,8 @@ module Sasa =
         new(innerp, lenp) = {inner = innerp; len = lenp}
         member inline x.AddLast v = FingerTree<_>(x.inner.Add(v), x.len + 1)
         member inline x.AddFirst v = FingerTree<_>(x.inner.Push v, x.len + 1)
-        member inline x.DropLast() = FingerTree<_>(x.inner.Remove().First, x.len - 1)
-        member inline x.DropFirst() = FingerTree<_>(x.inner.Pop().First, x.len - 1)
+        member inline x.RemoveLast() = FingerTree<_>(x.inner.Remove().First, x.len - 1)
+        member inline x.RemoveFirst() = FingerTree<_>(x.inner.Pop().First, x.len - 1)
         member inline x.AsSeq = x.inner |> seq
         member inline x.IsEmpty = x.inner.IsEmpty
         member inline x.AddLastRange (sq : 'k seq) =
@@ -402,12 +400,12 @@ module FSharp =
         val mutable public keys : 'k array
         new (innerp) = {inner = innerp}  
         member inline x.Add(k,v)= Map<_>(x.inner.Add(k,v))
-        member inline x.Drop k = Map<_>(x.inner.Remove(k))
+        member inline x.Remove k = Map<_>(x.inner.Remove(k))
         member inline x.Contains k = x.inner.ContainsKey k
         member inline x.Length = x.inner.Count
         member inline x.get_Item k = x.inner.[k]
         member inline x.Keys = x.keys
-        member inline x.DropRange sq = 
+        member inline x.RemoveRange sq = 
             let mutable map = x.inner
             for item in sq do
                 map <- map.Remove item
@@ -436,7 +434,7 @@ module FSharp =
         val mutable public keys : 't array
         new(innerp) = {inner=innerp}
         member inline x.Add(k) = Set(x.inner.Add(k))
-        member inline x.Drop k = Set(x.inner.Remove k)
+        member inline x.Remove k = Set(x.inner.Remove k)
         member inline x.Keys = x.keys
         member inline x.Contains(k) = x.inner.Contains k
         member inline x.Length = x.inner.Count
@@ -455,7 +453,7 @@ module FSharp =
             for item in vs do
                 col <- col.Add item
             Set(col)
-        member inline x.DropRange vs = 
+        member inline x.RemoveRange vs = 
             let mutable col = x.inner
             for item in vs do
                 col <- col.Remove item

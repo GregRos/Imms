@@ -1,0 +1,36 @@
+Test,Target,Time,Target_InitialSize,Iterations,DataSource_Size,DataSource_Type,Target_InitialGenerator,DataGenerator,Description,Class,Ratio
+Lookup,FunqMap,14.949,10010,10000,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","","",MapSingle,
+IEnumerator,FunqMap,3.635,10010,10000,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","","",Iteration,
+RemoveKey,FunqMap,34.117,10010,10000,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","","",MapSingle,
+Add,FunqMap,265.107,10010,5,10100,Array,"[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","",MapSingle,
+Iterate,FunqMap,0.389,10010,1,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","","",Iteration,
+AddRange,FunqMap,116.415,10010,5,10100,Array,"[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","[Name = ""Unique Strings of Letters by Length""; ElementType = System.Collections.Generic.KeyValuePair`2[System.String,System.String]]","",MapRange,
+RemoveRange,FunqMap,18.279,10010,5,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","","",MapRange,Some(0.3)
+Lookup,System.ImmutableDict,5.493,10010,10000,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","","",MapSingle,
+IEnumerator,System.ImmutableDict,5.457,10010,10000,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","","",Iteration,
+RemoveKey,System.ImmutableDict,26.117,10010,10000,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","","",MapSingle,
+Add,System.ImmutableDict,221.760,10010,5,10100,Array,"[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","",MapSingle,
+Iterate,System.ImmutableDict,5.868,10010,1,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","","",Iteration,
+AddRange,System.ImmutableDict,92.300,10010,5,10100,Array,"[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","[Name = ""Unique Strings of Letters by Length""; ElementType = System.Collections.Generic.KeyValuePair`2[System.String,System.String]]","",MapRange,
+RemoveRange,System.ImmutableDict,20.468,10010,5,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","","",MapRange,Some(0.3)
+Lookup,FSharp.Map,4.697,10010,10000,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","","",MapSingle,
+IEnumerator,FSharp.Map,0.964,10010,10000,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","","",Iteration,
+RemoveKey,FSharp.Map,19.117,10010,10000,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","","",MapSingle,
+Add,FSharp.Map,164.746,10010,5,10100,Array,"[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","",MapSingle,
+Iterate,FSharp.Map,1.494,10010,1,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","","",Iteration,
+AddRange,FSharp.Map,168.224,10010,5,10100,Array,"[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","[Name = ""Unique Strings of Letters by Length""; ElementType = System.Collections.Generic.KeyValuePair`2[System.String,System.String]]","",MapRange,
+RemoveRange,FSharp.Map,36.955,10010,5,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","","",MapRange,Some(0.3)
+Lookup,System.ImmutableSortedDict,25.429,10010,10000,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","","",MapSingle,
+IEnumerator,System.ImmutableSortedDict,3.392,10010,10000,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","","",Iteration,
+RemoveKey,System.ImmutableSortedDict,39.839,10010,10000,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","","",MapSingle,
+Add,System.ImmutableSortedDict,239.063,10010,5,10100,Array,"[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","",MapSingle,
+Iterate,System.ImmutableSortedDict,3.336,10010,1,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","","",Iteration,
+AddRange,System.ImmutableSortedDict,185.945,10010,5,10100,Array,"[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","[Name = ""Unique Strings of Letters by Length""; ElementType = System.Collections.Generic.KeyValuePair`2[System.String,System.String]]","",MapRange,
+RemoveRange,System.ImmutableSortedDict,50.134,10010,5,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","","",MapRange,Some(0.3)
+Lookup,FunqOrderedMap,4.080,10010,10000,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","","",MapSingle,
+IEnumerator,FunqOrderedMap,1.037,10010,10000,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","","",Iteration,
+RemoveKey,FunqOrderedMap,39.586,10010,10000,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","","",MapSingle,
+Add,FunqOrderedMap,283.729,10010,5,10100,Array,"[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","",MapSingle,
+Iterate,FunqOrderedMap,0.337,10010,1,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","","",Iteration,
+AddRange,FunqOrderedMap,80.332,10010,5,10100,Array,"[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","[Name = ""Unique Strings of Letters by Length""; ElementType = System.Collections.Generic.KeyValuePair`2[System.String,System.String]]","",MapRange,
+RemoveRange,FunqOrderedMap,16.758,10010,5,0,"","[Name = ""Unique Strings of Letters by Length""; ElementType = System.String; Range = (1, 10)]","","",MapRange,Some(0.3)

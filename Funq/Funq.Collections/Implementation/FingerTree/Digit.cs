@@ -11,80 +11,6 @@ namespace Funq.Collections.Implementation
 		{
 			internal sealed class Digit : Measured<Digit>
 			{
-				internal class Enumerator : IReusableEnumerator<Digit>
-				{
-					private int _childNumber = -1;
-					private Digit _digit;
-					private readonly bool _forward;
-					private readonly IReusableEnumerator<TChild> _inner;
-
-					public Enumerator(bool forward, Digit target)
-					{
-						_forward = forward;
-						_digit = target;
-						_inner = _digit.First.GetEnumerator(_forward);
-					}
-
-					public Leaf<TValue> Current
-					{
-						get
-						{
-#if ASSERTS
-							_inner.IsNotNull();
-#endif
-							return _inner.Current;
-						}
-					}
-
-					object IEnumerator.Current
-					{
-						get
-						{
-							return Current;
-						}
-					}
-
-					public void Dispose()
-					{
-					}
-
-					public bool MoveNext()
-					{
-						if (_childNumber != -1 && _inner.MoveNext())
-							return true;
-						_childNumber++;
-						if (_childNumber >= _digit.Size)
-							return false;
-						var fixedNum = _forward ? _childNumber : _digit.Size - 1 - _childNumber;
-						switch (fixedNum)
-						{
-							case 0:
-								_inner.Retarget(_digit.First);
-								return MoveNext();
-							case 1:
-								_inner.Retarget(_digit.Second);
-								return MoveNext();
-							case 2:
-								_inner.Retarget(_digit.Third);
-								return MoveNext();
-							case 3:
-								_inner.Retarget(_digit.Fourth);
-								return MoveNext();
-						}
-						throw ImplErrors.Invalid_execution_path;
-					}
-
-					public void Reset()
-					{
-						_childNumber = -1;
-					}
-
-					public void Retarget(Digit next)
-					{
-						_digit = next;
-						Reset();
-					}
-				}
 
 				private const int
 					IN_END = 8;
@@ -171,7 +97,7 @@ namespace Funq.Collections.Implementation
 					Size = 4;
 				}
 
-				public override WeaklyTypedElement GetGrouping(int index) {
+				public override FingerTreeElement GetChild(int index) {
 					switch (index) {
 						case 0:
 							return First;
@@ -403,7 +329,7 @@ namespace Funq.Collections.Implementation
 					Fourth = d;
 					Measure = measure;
 					Size = size;
-					NumberOfGroupings = size;
+					ChildCount = size;
 					return this;
 				}
 
@@ -464,11 +390,6 @@ namespace Funq.Collections.Implementation
 				{
 					Digit skip;
 					ReformDigitsForConcat(lineage, this, other, out first, out last, out skip);
-				}
-
-				public override IReusableEnumerator<Digit> GetEnumerator(bool x)
-				{
-					return new Enumerator(x, this);
 				}
 
 				public override void Insert(int index, Leaf<TValue> leaf, out Digit leftmost, out Digit rightmost, Lineage lineage)
@@ -637,7 +558,7 @@ namespace Funq.Collections.Implementation
 					return Fourth.IterWhile(action);
 				}
 
-				public Digit DropFirst(Lineage lineage)
+				public Digit RemoveFirst(Lineage lineage)
 				{
 					var new_measure = Measure - First.Measure;
 					switch (Size)
@@ -654,7 +575,7 @@ namespace Funq.Collections.Implementation
 					throw ImplErrors.Invalid_digit_size;
 				}
 
-				public Digit DropLast(Lineage lineage)
+				public Digit RemoveLast(Lineage lineage)
 				{
 					switch (Size)
 					{
@@ -741,12 +662,12 @@ namespace Funq.Collections.Implementation
 				}
 
 
-				public override void Split(int index, out Digit leftmost, out Digit rightmost, Lineage lineage)
+				public override void Split(int count, out Digit leftmost, out Digit rightmost, Lineage lineage)
 				{
 #if ASSERTS
-					index.Is(i => i <= Measure);
+					count.Is(i => i <= Measure);
 #endif
-					var whereIsThisIndex = WhereIsThisIndex(index);
+					var whereIsThisIndex = WhereIsThisIndex(count);
 
 					TChild split1, split2;
 					switch (whereIsThisIndex)
@@ -754,7 +675,7 @@ namespace Funq.Collections.Implementation
 						case IN_START:
 							throw ImplErrors.Invalid_execution_path; //The finger tree is supposed to take care of this.
 						case IN_MIDDLE_OF_1:
-							First.Split(index, out split1, out split2, lineage);
+							First.Split(count, out split1, out split2, lineage);
 							leftmost = new Digit(split1, lineage);
 							rightmost = CreateCheckNull(lineage, split2, Second, Third, Fourth);
 							return;
@@ -763,7 +684,7 @@ namespace Funq.Collections.Implementation
 							rightmost = CreateCheckNull(lineage, Second, Third, Fourth);
 							return;
 						case IN_MIDDLE_OF_2:
-							Second.Split(index - First.Measure, out split1, out split2, lineage);
+							Second.Split(count - First.Measure, out split1, out split2, lineage);
 							leftmost = new Digit(First, split1, lineage);
 							rightmost = CreateCheckNull(lineage, split2, Third, Fourth);
 							return;
@@ -772,7 +693,7 @@ namespace Funq.Collections.Implementation
 							rightmost = CreateCheckNull(lineage, Third, Fourth);
 							return;
 						case IN_MIDDLE_OF_3:
-							Third.Split(index - First.Measure - Second.Measure, out split1, out split2, lineage);
+							Third.Split(count - First.Measure - Second.Measure, out split1, out split2, lineage);
 							leftmost = new Digit(First, Second, split1, lineage);
 							rightmost = CreateCheckNull(lineage, split2, Fourth);
 							return;
@@ -781,7 +702,7 @@ namespace Funq.Collections.Implementation
 							rightmost = CreateCheckNull(lineage, Fourth);
 							return;
 						case IN_MIDDLE_OF_4:
-							Fourth.Split(index - Measure + Fourth.Measure, out split1, out split2, lineage);
+							Fourth.Split(count - Measure + Fourth.Measure, out split1, out split2, lineage);
 							leftmost = new Digit(First, Second, Third, split1, lineage);
 							rightmost = CreateCheckNull(lineage, split2);
 							return;

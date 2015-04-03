@@ -77,23 +77,23 @@ module Test =
                 col <- col |> Ops.addLastRange data
         dataSourceTest("AddFirstRange", "DequeRange", iters, data, test) <+ Desc("Adds a collection of items to the beginning {iters} times.")
     
-    let inline DropLast iters = 
+    let inline RemoveLast iters = 
         let inline test t col' = 
             let iters = itersOf t
             let mutable col = col'
             for i = 1 to iters do
                 if col |> Ops.isEmpty then col <- col'
-                col <- col |> Ops.dropLast
-        simpleTest("DropLast","DequeSingle", iters, test) <+ Class "DequeSingle"
+                col <- col |> Ops.removeLast
+        simpleTest("RemoveLast","DequeSingle", iters, test) <+ Class "DequeSingle"
     
-    let inline DropFirst iters = 
+    let inline RemoveFirst iters = 
         let inline test t col' = 
             let iters = itersOf t
             let mutable col = col'
             for i = 1 to iters do
                 if col |> Ops.isEmpty then col <- col'
-                col <- col |> Ops.dropFirst
-        simpleTest("DropFirst","DequeSingle", iters, test) <+ Class "DequeSingle"
+                col <- col |> Ops.removeFirst
+        simpleTest("RemoveFirst","DequeSingle", iters, test) <+ Class "DequeSingle"
     
     let inline GetRandom iters = 
         let inline test t col = 
@@ -258,7 +258,7 @@ module Test =
                     colx <- colx |> Ops.add item item
         dataSourceTest("Add", "MapSingle", iters, data, test)
     
-    let inline DropKey(iters) = 
+    let inline RemoveKey(iters) = 
         let inline test t col = 
             let iters = itersOf t
             let keys = getAllKeys col
@@ -268,8 +268,8 @@ module Test =
             for i = 1 to iters do
                 let mult = pdata.[i]
                 let index = (float len) * mult |> int
-                col |> Ops.drop (keys.[index])
-        simpleTest("DropKey", "MapSingle", iters, test)
+                col |> Ops.remove (keys.[index])
+        simpleTest("RemoveKey", "MapSingle", iters, test)
 
     let inline AddKeys(iters, data : DataStructure<_>) = 
         let inline test t col = 
@@ -281,14 +281,14 @@ module Test =
                 colx <- colx |> Ops.addMany data
         dataSourceTest("AddRange", "MapRange", iters, data, test)
 
-    let inline DropKeys(iters, ratio) = 
+    let inline RemoveKeys(iters, ratio) = 
         let inline test t col = 
             let iters = itersOf t
             let len = Ops.length col
             let keys = (getAllKeys col).Take (ratio * (float len) |> int)
             for i = 1 to iters do
-                col |> Ops.dropMany keys
-        simpleTest("DropRange", "MapRange", iters, test) <+ Meta("Ratio", ratio)
+                col |> Ops.removeMany keys
+        simpleTest("RemoveRange", "MapRange", iters, test) <+ Meta("Ratio", ratio)
 
     let inline GetKeyRandom iters = 
         let inline test t col = 
@@ -397,7 +397,7 @@ module Test =
                 colx <- colx |> Ops.addSetMany data
         dataSourceTest("AddRange", "SetRange", iters, data, test)
 
-    let inline DropSetItems(iters, ratio) = 
+    let inline RemoveSetItems(iters, ratio) = 
         let inline test t col = 
             let iters = itersOf t
             let keys = getAllKeys col
@@ -406,10 +406,10 @@ module Test =
             let mutable colx = col
             for i = 1 to iters do
                 colx <- col
-                colx <- colx |> Ops.dropMany data
-        simpleTest("DropRange", "SetRange", iters, test) <+ Meta("Ratio", ratio)
+                colx <- colx |> Ops.removeMany data
+        simpleTest("RemoveRange", "SetRange", iters, test) <+ Meta("Ratio", ratio)
 
-    let inline DropSetItem(iters) = 
+    let inline RemoveSetItem(iters) = 
         let inline test t col = 
             let iters = itersOf t
             let keys = getAllKeys col
@@ -419,5 +419,5 @@ module Test =
             for i = 1 to iters do
                 let mult = per.[iters]
                 let index = (mult * (float len)) |> int
-                col |> Ops.dropSet (keys.[index])
-        simpleTest("Drop", "SetSingle", iters, test)
+                col |> Ops.removeSet (keys.[index])
+        simpleTest("Remove", "SetSingle", iters, test)

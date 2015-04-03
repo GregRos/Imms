@@ -52,7 +52,6 @@
     <Compile Include="Helpers.fs" />
     <Compile Include="Compatibility.fs" />
     <Compile Include="Metadata.fs" />
-    <Compile Include="Table.fs" />
     <Compile Include="PublicImplementation.fs" />
     <Compile Include="Generic Operators.fs" />
     <Compile Include="Operators.fs" />

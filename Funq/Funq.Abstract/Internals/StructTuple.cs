@@ -15,6 +15,10 @@
 		public readonly T1 First;
 		public readonly T2 Second;
 
+		public override string ToString() {
+			return string.Format("({0}, {1})", First, Second);
+		}
+
 		public StructTuple(T1 first, T2 second) : this()
 		{
 			First = first;

@@ -1,0 +1,24 @@
+Tests For:,Sequential
+Collection/Test,AddFirst,AddFirstRange,AddFirstRange (concat),AddLast,AddLastRange,AddLastRange (concat),IEnumerator,Insert,Insert Range,Insert Range (concat),Iterate,Lookup,Remove,RemoveFirst,RemoveLast,Skip,Take,Update
+FSharpx.Deque,0.298,0.945,1.089,0.275,0.966,1.103,0.129,X,X,X,0.127,X,X,0.379,0.712,X,X,X
+FSharpx.Vector,X,X,3.821,0.888,3.759,3.539,0.095,X,X,X,0.181,0.147,X,X,2.348,X,X,2.817
+FunqList,1.591,2.019,0.006,1.494,1.841,0.007,0.203,9.616,1.988,0.017,0.067,0.773,5.740,0.941,0.968,0.010,0.007,4.223
+FunqVector,X,0.093,0.215,1.426,0.116,0.294,0.081,X,0.351,0.511,0.025,0.083,X,X,1.694,0.060,0.001,1.938
+System.ImmutableList,3.648,6.595,9.972,3.718,6.925,9.861,0.931,5.008,7.549,10.694,1.399,0.699,3.261,1.899,1.893,0.999,1.075,3.104
+
+Tests For:,SetLike
+Collection/Test,Add,AddRange,Contains,Difference,Except,IEnumerator,Intersection,IsProperSubset,IsProperSuperset,Iterate,Remove,RemoveRange,SetEquals,Union
+FSharp.Set,23.045,22.860,1.658,70.169,25.506,0.664,5.956,0.002,0.003,0.501,6.523,18.496,0.007,12.130
+FunqSet,3.900,3.173,0.972,17.529,4.232,0.995,4.692,0.006,0.006,0.154,3.210,5.601,0.006,6.048
+FunqOrderedSet,5.339,4.827,1.423,13.262,4.910,0.524,6.891,0.005,0.011,0.155,3.438,7.439,0.010,6.752
+System.ImmutableSet,4.882,4.889,1.572,56.090,16.688,2.183,9.289,8.253,0.015,2.685,6.380,9.736,8.981,32.325
+System.ImmutableSortedSet,29.790,31.057,9.018,205.380,42.484,1.358,38.901,64.637,0.027,2.165,11.539,20.449,31.249,47.810
+
+Tests For:,MapLike
+Collection/Test,Add,AddRange,IEnumerator,Iterate,Lookup,RemoveKey,RemoveRange
+FSharp.Map,34.458,41.542,0.551,0.577,1.899,7.970,14.887
+FunqMap,47.416,14.074,0.674,0.246,1.266,10.604,5.999
+FunqOrderedMap,54.938,14.870,0.642,0.171,1.412,14.092,6.188
+System.ImmutableDict,40.843,23.109,1.901,2.507,1.386,11.212,9.246
+System.ImmutableSortedDict,53.783,42.167,1.148,1.630,10.501,13.800,20.638
+

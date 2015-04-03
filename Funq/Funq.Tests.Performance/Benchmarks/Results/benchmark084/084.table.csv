@@ -1,0 +1,16 @@
+Tests For:,SetLike
+Collection/Test,Add,AddRange,Remove,RemoveRange
+FSharp.Set,30.605,24.879,6.519,24.738
+FunqSet,5.700,4.603,6.722,14.656
+FunqOrderedSet,8.935,6.701,27.962,12.697
+System.ImmutableSet,13.428,6.858,31.904,30.006
+System.ImmutableSortedSet,55.764,114.997,38.118,42.304
+
+Tests For:,MapLike
+Collection/Test,Add,AddRange,IEnumerator,Iterate,Lookup,RemoveKey,RemoveRange
+FSharp.Map,46.117,46.242,0.691,0.781,4.299,9.537,17.996
+FunqMap,88.276,37.535,5.728,0.881,2.218,16.786,31.466
+FunqOrderedMap,75.769,31.618,1.490,0.566,2.293,20.878,13.141
+System.ImmutableDict,113.262,68.299,4.499,8.758,5.092,40.311,32.372
+System.ImmutableSortedDict,97.545,77.032,1.945,3.698,17.249,30.423,40.165
+

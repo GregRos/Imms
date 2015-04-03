@@ -3,7 +3,6 @@ open Funq.Collections
 open Funq.FSharp
 open System
 open Funq.FSharp.Implementation
-open Funq.FSharp.Operators.Extra
 open Funq.FSharp.Operators
 type internal collection_ops<'elem, 'many, 'col> = 
     {
@@ -55,7 +54,7 @@ let inline internal seq_build (final : 's -> 'r) : collection_ops<'elem, 's, 'r>
         empty = Ops.getEmpty
         of_seq = fun sq -> Ops.getEmpty() <++ sq
         right_combine = fun elem many -> many <+ elem
-        concat = fun (many1, many2) -> many1 <+> many2
+        concat = fun (many1, many2) -> many1 <++ many2
         final = final
     }
 
@@ -63,9 +62,9 @@ let inline internal set_build c : collection_ops<'elem, 's, 's> =
     {
         left_combine = fun elem many -> many /+ elem
         empty = fun () -> Ops.getEmptyWith c
-        of_seq = fun sq -> Ops.getEmptyWith c /++ sq
+        of_seq = fun sq -> Ops.union sq (Ops.getEmptyWith c)
         right_combine = fun elem many -> many /+ elem
-        concat = fun (many1,many2) -> many1 .|. many2
+        concat = fun (many1,many2) -> many1 /++ many2
         final = id
     }
 
@@ -73,12 +72,10 @@ let inline internal map_build c : collection_ops<'k * 'v, 's, 's> =
     {
         left_combine = fun elem many -> many /+ elem
         empty = fun () -> Ops.getEmptyWith c
-        of_seq = fun sq -> Ops.getEmptyWith c /++ sq
+        of_seq = fun sq -> (Ops.getEmptyWith c : 's) /++ sq
         right_combine = fun elem many -> many /+ elem
         concat = fun (many1,many2) -> 
-            let throw_ex _ _ _ =
-                raise Funq.Errors.Key_exists
-            (^s : (member Merge : 's * Func<'k, 'v, 'v, 'v> -> 's) many1, many2, toFunc3 throw_ex)
+            (^s : (member AddRange : 's -> 's) many1, many2)
         final = id
     }
 

@@ -44,12 +44,6 @@ namespace Funq.Collections.Common {
 		}
 
 
-		public static bool IsNull(this object o) {
-			return Object.ReferenceEquals(o, null);
-		}
-
-
-
 		internal static T[] ToArrayFastExact<T>(this IEnumerable<T> items) {
 			var len = 0;
 			var fast = items.ToArrayFast(out len);
@@ -176,7 +170,7 @@ namespace Funq.Collections.Common {
 			/// <typeparam name="T"></typeparam>
 			/// <param name="self"></param>
 			/// <returns></returns>
-			public static T[] Drop<T>(this T[] self) {
+			public static T[] Remove<T>(this T[] self) {
 				var myCopy = new T[self.Length - 1];
 				for (var i = 0; i < self.Length - 1; i++) {
 					myCopy[i] = self[i];

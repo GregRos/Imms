@@ -76,7 +76,7 @@ namespace Funq.Collections.Implementation
 					else
 					{
 						var leftmost = new Digit(item, CenterDigit.First, lineage);
-						var rightmost = CenterDigit.DropFirst(lineage);
+						var rightmost = CenterDigit.RemoveFirst(lineage);
 						ret = new Compound(leftmost, FTree<Digit>.Empty, rightmost, lineage);
 					}
 #if ASSERTS
@@ -100,7 +100,7 @@ namespace Funq.Collections.Implementation
 					else
 					{
 						var rightmost = new Digit(CenterDigit.Fourth, item, lineage);
-						var leftmost = CenterDigit.DropLast(lineage);
+						var leftmost = CenterDigit.RemoveLast(lineage);
 
 						ret = new Compound(leftmost, FTree<Digit>.Empty, rightmost, lineage);
 					}
@@ -112,7 +112,7 @@ namespace Funq.Collections.Implementation
 
 				}
 
-				public override FTree<TChild> DropFirst(Lineage lineage)
+				public override FTree<TChild> RemoveFirst(Lineage lineage)
 				{
 					FTree<TChild> ret;
 #if ASSERTS
@@ -121,7 +121,7 @@ namespace Funq.Collections.Implementation
 #endif
 					if (CenterDigit.Size > 1)
 					{
-						var newDigit = CenterDigit.DropFirst(lineage);
+						var newDigit = CenterDigit.RemoveFirst(lineage);
 						ret =  MutateOrCreate(newDigit, lineage);
 					}
 					else
@@ -135,19 +135,14 @@ namespace Funq.Collections.Implementation
 					return ret;
 				}
 
-				public override FTree<TChild> DropLast(Lineage lineage)
+				public override FTree<TChild> RemoveLast(Lineage lineage)
 				{
 					if (CenterDigit.Size > 1)
 					{
-						var newDigit = CenterDigit.DropLast(lineage);
+						var newDigit = CenterDigit.RemoveLast(lineage);
 						return MutateOrCreate(newDigit, lineage);
 					}
 					return Empty;
-				}
-
-				public override IEnumerator<Leaf<TValue>> GetEnumerator(bool forward)
-				{
-					return CenterDigit.GetEnumerator(forward);
 				}
 
 				public override FTree<TChild> Insert(int index, Leaf<TValue> leaf, Lineage lineage)
@@ -208,6 +203,14 @@ namespace Funq.Collections.Implementation
 				{
 					Digit left_digit;
 					Digit right_digit;
+					if (count == 0) {
+						leftmost = Empty;
+						rightmost = this;
+					}
+					if (count == Measure) {
+						leftmost = this;
+						rightmost = Empty;
+					}
 					CenterDigit.Split(count, out left_digit, out right_digit, lineage);
 					leftmost = left_digit != null ? new Single(left_digit, lineage) : Empty;
 					rightmost = right_digit != null ? new Single(right_digit, lineage) : Empty;
@@ -218,7 +221,7 @@ namespace Funq.Collections.Implementation
 					return new Single(CenterDigit.Update(index, leaf, lineage), lineage);
 				}
 
-				public override WeaklyTypedElement GetGrouping(int index) {
+				public override FingerTreeElement GetChild(int index) {
 					if (index != 0) throw Errors.Arg_out_of_range("index");
 					return CenterDigit;
 				}

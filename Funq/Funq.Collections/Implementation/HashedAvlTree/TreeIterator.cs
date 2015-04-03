@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Security.Policy;
 using Funq.Collections.Common;
 
 namespace Funq.Collections.Implementation
@@ -20,18 +22,35 @@ namespace Funq.Collections.Implementation
 				_future.Add(Marked.Create(root, false));
 			}
 
+			private Option<Node> oldNode = Option.None;
 			public bool MoveNext()
 			{
+				if (_future.Count == 0 || _future[0].Object.IsEmpty) {
+					return false;
+				}
 				while (_future.Count > 0)
 				{
 					var cur =  _future.PopLast();
-					if (cur.Mark) return SetCurrent(cur);
+					if (cur.Mark) {
+#if ASSERTS
+						if (oldNode.Map(x => x.Hash) == cur.Object.Hash) {
+							Debugger.Break();
+						}
+
+						oldNode = cur.Object;
+#endif
+						return SetCurrent(cur);
+					}
 					var node = cur.Object;
-					if (node.IsNull) continue;
-					if (!node.Right.IsNull) _future.Add(node.Right.Mark(false));
+#if ASSERTS
+					if (node.IsEmpty) {
+						_future.Count.Is(1);
+					}
+#endif
+					if (!node.Right.IsEmpty) _future.Add(node.Right.Mark(false));
 					cur.SetMark(true);
 					_future.Add(cur);
-					if (!node.Left.IsNull) _future.Add(node.Left.Mark(false));
+					if (!node.Left.IsEmpty) _future.Add(node.Left.Mark(false));
 				}
 				return false;
 			}
@@ -84,7 +103,7 @@ namespace Funq.Collections.Implementation
 				{
 					var cur = _future.PopLast();
 #if ASSERTS
-					cur.Object.IsNull.IsFalse();
+					cur.Object.IsEmpty.IsFalse();
 #endif
 					//We ignore all nodes other than parents we've already passed.
 					if (!cur.Mark) continue;
@@ -92,6 +111,7 @@ namespace Funq.Collections.Implementation
 					if (cur.Object.Hash >= hash)
 					{
 						_future.Add(cur);
+						if (!cur.Object.Left.IsEmpty) _future.Add(cur.Object.Left.Mark(false));
 						break;
 					}
 				}
@@ -102,23 +122,23 @@ namespace Funq.Collections.Implementation
 					var cur = _future.PopLast();
 					var node = cur.Object;
 #if ASSERTS
-					node.IsNull.IsFalse();
+					node.IsEmpty.IsFalse();
 #endif
-					//if (node.IsNull && _future.Count > 0) return SetCurrent(_future.LastItem());
-					//if (node.IsNull) return false;
-					//if (cur.Mark && node.Hash != hash) continue;
+					//if (node.IsEmpty && _future.Count > 0) return SetCurrent(_future.LastItem());
+					//if (node.IsEmpty) return false;
+					if (cur.Mark && node.Hash != hash) continue;
 					if (hash > node.Hash) {
-						if (node.Right.IsNull) return SetCurrent(node);
+						if (node.Right.IsEmpty) return SetCurrent(node);
 						_future.Add(node.Right.Mark(false));
 					}
 					else if (hash < node.Hash) {
-						if (!node.Right.IsNull) _future.Add(node.Right.Mark(false));
-						if (node.Left.IsNull) return SetCurrent(node);
+						if (!node.Right.IsEmpty) _future.Add(node.Right.Mark(false));
+						if (node.Left.IsEmpty) return SetCurrent(node);
 						_future.Add(node.Mark(true));
 						_future.Add(node.Left.Mark(false));
 					}
 					else {
-						if (!cur.Mark && !node.Right.IsNull) _future.Add(node.Right.Mark(false));
+						if (!cur.Mark && !node.Right.IsEmpty) _future.Add(node.Right.Mark(false));
 						return SetCurrent(node);
 					}
 				}

@@ -5,6 +5,7 @@ open System
 open System.Runtime.CompilerServices
 open Funq.FSharp.Implementation
 open Funq.Abstract
+open Funq.Collections
 type AbstractIterable<'elem, 'seq, 'builder when 'builder :> IterableBuilder<'elem> and 'seq :> AbstractIterable<'elem, 'seq, 'builder>> with
     member x.All f = x.All(toFunc1 f)
     member x.Any f = x.Any(toFunc1 f)

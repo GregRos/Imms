@@ -28,6 +28,9 @@ namespace Funq.Abstract
 			return Lookup(k).IsSome;
 		}
 
+		public abstract void Remove(TKey key);
+
+
 		public void Add(TKey k, TValue v)
 		{
 			if (IsDisposed) throw Errors.Is_disposed("MapBuilder");

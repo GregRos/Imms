@@ -222,6 +222,8 @@ namespace Funq.Collections
 		{
 			return this.Zip(other, Tuple.Create);
 		}
+
+		
 	}
 	
 		}

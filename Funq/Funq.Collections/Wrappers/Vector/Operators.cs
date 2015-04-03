@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using Funq.Collections.Common;
@@ -8,22 +9,22 @@ namespace Funq.Collections
 {
 	public partial class FunqVector<T>
 	{
-		public static FunqVector<T> operator +(FunqVector<T> list, T item)
+
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public FunqVector<T> op_AddLast(T b)
 		{
-			if (ReferenceEquals(list, null)) throw Funq.Errors.Argument_null("list");
-			return list.AddLast(item);
+			return AddLast(b);
 		}
 
-		public static FunqVector<T> operator +(FunqVector<T> list, IEnumerable<T> items)
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public FunqVector<T> op_AddLastRange(IEnumerable<T> b)
 		{
-			if (ReferenceEquals(list, null)) throw Funq.Errors.Argument_null("list");
-			return list.AddLastRange(items);
+			return AddLastRange(b);
 		}
 
-		public static FunqVector<T> operator +(IEnumerable<T> items, FunqVector<T> list)
-		{
-			if (ReferenceEquals(list, null)) throw Funq.Errors.Argument_null("list");
-			return list.AddFirstRange(items);
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public FunqVector<T> op_AddFirstRange(IEnumerable<T> a) {
+			return AddFirstRange(a);
 		}
 	}
 }

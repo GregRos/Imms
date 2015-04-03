@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -50,6 +51,11 @@ partial class __OrderedSetLikeClass__<T>
 
 	}
 
+	protected override bool IsCompatibleWith(__OrderedSetLikeClass__<T> other)
+	{
+		throw new NotImplementedException();
+	}
+
 	public override bool Contains(T item)
 	{
 		throw new NotImplementedException();
@@ -62,8 +68,7 @@ partial class __OrderedSetLikeClass__<T>
 		}
 	}
 
-	private static __OrderedSetLikeClass__<T> Empty(__HandlerObject__<T> ph)
-	{
+	private static __OrderedSetLikeClass__<T> Empty(__HandlerObject__<T> ph) {
 		return new __OrderedSetLikeClass__<T>(ph ?? Default);
 	}
 
@@ -75,7 +80,6 @@ partial class __OrderedSetLikeClass__<T>
 			throw new NotImplementedException();
 		}
 	}
-
 
 	protected internal override SetBuilder<T> BuilderFrom(__OrderedSetLikeClass__<T> provider)
 	{
@@ -101,6 +105,10 @@ partial class __SetLikeClass__<T>
 
 	}
 
+	protected override bool IsCompatibleWith(__SetLikeClass__<T> other)
+	{
+		throw new NotImplementedException();
+	}
 	public override bool Contains(T item)
 	{
 		throw new NotImplementedException();
@@ -151,6 +159,10 @@ partial class __MapLikeClass__<TKey, TValue>
 	{
 	}
 
+	protected override bool IsCompatibleWith(__MapLikeClass__<TKey, TValue> other)
+	{
+		throw new NotImplementedException();
+	}
 
 	private static __MapLikeClass__<TKey, TValue> Empty(__HandlerObject__<TKey> ph)
 	{
@@ -208,6 +220,11 @@ partial class __OrderedMapLikeClass__<TKey, TValue>
 
 	private __OrderedMapLikeClass__(__HandlerObject__<TKey> ph)
 	{
+	}
+
+	protected override bool IsCompatibleWith(__OrderedMapLikeClass__<TKey, TValue> other)
+	{
+		throw new NotImplementedException();
 	}
 
 

@@ -40,7 +40,7 @@ namespace Funq.Collections.Implementation
 
 			public abstract TrieVector<TOut>.Node Apply<TOut>(Func<TValue, TOut> transform, Lineage lineage);
 
-			public abstract Node Drop(Lineage lineage);
+			public abstract Node RemoveLast(Lineage lineage);
 
 			public abstract IEnumerator<TValue> GetEnumerator(bool forward);
 
@@ -70,38 +70,18 @@ namespace Funq.Collections.Implementation
 			/// <returns></returns>
 			public abstract Node Take(int index, Lineage lineage);
 
+			/// <summary>
+			/// Begins iterating over the trie at the specified index.
+			/// </summary>
+			/// <param name="index"></param>
+			/// <param name="conditional"></param>
+			/// <returns></returns>
 			public abstract bool IterWhileFrom(int index, Func<TValue, bool> conditional); 
 
 			public abstract Node Update(int index, TValue value, Lineage lineage);
 
 			public abstract Node Reverse(Lineage lineage);
 
-			public IEnumerable<TValue> Iterate()
-			{
-				var stack = new List<Node>(32 * this.Height );
-				stack.Add(this);
-				while (stack.Count > 0)
-				{
-					var curNode = stack[stack.Count - 1];
-					stack.RemoveAt(stack.Count - 1);
-					var asLeaf = curNode as Leaf;
-					if (asLeaf != null)
-					{
-						for (int i = 0; i < asLeaf.ArrSize; i++)
-						{
-							yield return asLeaf.Arr[i];
-						}
-					}
-					else
-					{
-						var asParent = (Parent) curNode;
-						for (int i = asParent.ArrSize - 1; i >= 0; i--)
-						{
-							stack.Add(asParent.Arr[i]);
-						}
-					}
-				}
-			}
 		}
 	}
 }

@@ -9,7 +9,7 @@ let inline (|Last|_|) o =
         None
     else
         let last = o |> Ops.last
-        let rest = o |> Ops.dropLast
+        let rest = o |> Ops.removeLast
         Some(rest,last)
 
 
@@ -19,9 +19,9 @@ let inline (|Last2|_|) o =
         None
     else
         let last1 = o |> Ops.last
-        let rest1 = o |>Ops.dropLast
+        let rest1 = o |>Ops.removeLast
         let last2 = rest1 |> Ops.last
-        let rest2 = rest1 |>Ops.dropLast
+        let rest2 = rest1 |>Ops.removeLast
         Some(rest2, last2, last1)
 ///Decomposes a collection by 3 elements, from the end.
 let inline (|Last3|_|) o = 
@@ -39,7 +39,7 @@ let inline (|First|_|) o =
         None
     else
         let first = o |> Ops.first
-        let rest = o |>Ops.dropFirst
+        let rest = o |>Ops.removeFirst
         Some(first,rest)
 ///Decomposes a collection by 2 elements, from the start.
 let inline (|First2|_|) o = 
@@ -47,9 +47,9 @@ let inline (|First2|_|) o =
         None
     else
         let first1 = o |> Ops.first
-        let rest1 = o |>Ops.dropFirst
+        let rest1 = o |>Ops.removeFirst
         let first2 = rest1 |> Ops.first
-        let rest2 = rest1 |>Ops.dropFirst
+        let rest2 = rest1 |>Ops.removeFirst
         Some(first1, first2, rest2)
 
 ///Decomposes a collection by 3 elements, from the start.

@@ -2,8 +2,7 @@ using System.Collections.Generic;
 
 namespace Funq.Abstract
 {
-	public interface IAnySetLike<TElem> : IAnyBuilderFactory<TElem, SetBuilder<TElem>>
-	{
+	public interface IAnySetLike<TElem> : IAnyIterable<TElem> {
 		/// <summary>
 		///   Determines whether the collection contains the specified element.
 		/// </summary>
@@ -19,5 +18,9 @@ namespace Funq.Abstract
 		SetRelation RelatesTo(IEnumerable<TElem> other);
 
 		bool SetEquals(IEnumerable<TElem> other);
+	}
+
+	public interface IAnySetLikeWithBuilder<T> : IAnySetLike<T>, IAnyBuilderFactory<T, SetBuilder<T>> {
+		
 	}
 }

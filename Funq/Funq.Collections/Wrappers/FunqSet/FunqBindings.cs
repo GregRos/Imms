@@ -9,29 +9,34 @@ namespace Funq.Collections
 	{
 		internal sealed class Builder : SetBuilder<T>
 		{
-			private FunqSet<T> _inner;
+			readonly IEqualityComparer<T> _eq;
+			private HashedAvlTree<T, bool>.Node _inner;
+			Lineage _lineage;
 			public override object Result
 			{
 				get {
-					return _inner;
+					//we need to change the lineage to avoid mutating user-visible data
+					_lineage = Lineage.Mutable();
+					return _inner.Wrap(_eq);
 				}
 			}
 
-			public Builder(FunqSet<T> inner)
-			{
+			public Builder(IEqualityComparer<T> eq, HashedAvlTree<T, bool>.Node inner) {
+				_eq = eq;
 				_inner = inner;
+				_lineage = Lineage.Mutable();
 			}
+
 			protected override void add(T item) {
-				_inner = _inner;
+				_inner = _inner.Root_Add(item, true, _lineage, _eq, false) ?? _inner;
 			}
 
 			public override bool Contains(T item) {
-				return _inner.Contains(item);
+				return _inner.Root_Contains(item);
 			}
 
 			public override void Remove(T item) {
-				bool dummy;
-				_inner = _inner.Drop(item);
+				_inner = _inner.Root_Remove(item, _lineage) ?? _inner;
 			}
 		}
 
@@ -39,7 +44,7 @@ namespace Funq.Collections
 		{
 			get
 			{
-				return new Builder(Empty(_inner.Equality));
+				return new Builder(EqualityComparer, Root);
 			}
 		}
 
@@ -50,7 +55,12 @@ namespace Funq.Collections
 
 		protected internal override SetBuilder<T> BuilderFrom(FunqSet<T> provider)
 		{
-			return new Builder(provider);
+			return new Builder(EqualityComparer, provider.Root);
+		}
+
+		protected override bool IsCompatibleWith(FunqSet<T> other)
+		{
+			return EqualityComparer.Equals(other.EqualityComparer);
 		}
 	}
 }

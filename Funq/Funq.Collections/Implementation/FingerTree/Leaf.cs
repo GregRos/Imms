@@ -12,64 +12,12 @@ namespace Funq.Collections.Implementation
 			return Value.GetHashCode();
 		}
 
-		public override WeaklyTypedElement GetGrouping(int index) {
+		public override FingerTreeElement GetChild(int index) {
 			throw ImplErrors.Invalid_null_invocation;
 		}
 
 		public override bool HasValue {
 			get { return true; }
-		}
-
-		private class LeafEnumerator : FingerTree<TValue>.IReusableEnumerator<Leaf<TValue>>
-		{
-			private Leaf<TValue> _inner;
-			private bool done = false;
-
-			public LeafEnumerator(Leaf<TValue> inner)
-			{
-				_inner = inner;
-			}
-
-			public Leaf<TValue> Current
-			{
-				get
-				{
-#if ASSERTS
-					_inner.IsNotNull();
-#endif
-					return _inner;
-				}
-			}
-
-			object IEnumerator.Current
-			{
-				get
-				{
-					return Current;
-				}
-			}
-
-			public void Dispose()
-			{
-			}
-
-			public bool MoveNext()
-			{
-				if (done) return false;
-				done = true;
-				return true;
-			}
-
-			public void Reset()
-			{
-				throw new NotSupportedException();
-			}
-
-			public void Retarget(Leaf<TValue> next)
-			{
-				_inner = next;
-				done = false;
-			}
 		}
 
 		public readonly TValue Value;
@@ -121,11 +69,6 @@ namespace Funq.Collections.Implementation
 			throw new NotImplementedException();
 		}
 
-		public override FingerTree<TValue>.IReusableEnumerator<Leaf<TValue>> GetEnumerator(bool x)
-		{
-			return new LeafEnumerator(this);
-		}
-
 		public override void Insert(int index, Leaf<TValue> leaf, out Leaf<TValue> leftmost, out Leaf<TValue> rightmost, Lineage lineage)
 		{
 			leftmost = leaf;
@@ -165,7 +108,7 @@ namespace Funq.Collections.Implementation
 			return this;
 		}
 
-		public override void Split(int index, out Leaf<TValue> leftmost, out Leaf<TValue> rightmost, Lineage lineage)
+		public override void Split(int count, out Leaf<TValue> leftmost, out Leaf<TValue> rightmost, Lineage lineage)
 		{
 			leftmost = null;
 			rightmost = null;

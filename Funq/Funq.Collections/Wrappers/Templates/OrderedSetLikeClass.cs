@@ -72,4 +72,5 @@ public partial class __OrderedSetLikeClass__<T> : AbstractSet<T, __OrderedSetLik
 		if (accumulator == null) throw Errors.Is_null;
 		return Scan(GetPrototype<TRElem>(handler), initial, accumulator);
 	}
+
 }

@@ -14,8 +14,8 @@ namespace Funq.Collections
 	{
 		internal class Builder : IterableBuilder<T>
 		{
-			private FingerTree<T>.FTree<Leaf<T>> inner;
-			private readonly Lineage lineage;
+			private FingerTree<T>.FTree<Leaf<T>> _inner;
+			private Lineage _lineage;
 
 			public Builder()
 				: this(FunqList<T>.Empty)
@@ -24,8 +24,8 @@ namespace Funq.Collections
 
 			public Builder(FunqList<T> inner)
 			{
-				this.inner = inner._root;
-				lineage = Lineage.Mutable();
+				this._inner = inner._root;
+				_lineage = Lineage.Mutable();
 			}
 
 
@@ -33,13 +33,14 @@ namespace Funq.Collections
 			{
 				get
 				{
-					return inner.Wrap();
+					_lineage = Lineage.Mutable();
+					return _inner.Wrap();
 				}
 			}
 
 			protected override void add(T item)
 			{
-				inner = inner.AddLast(item, lineage);
+				_inner = _inner.AddLast(item, _lineage);
 			}
 		}
 

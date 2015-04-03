@@ -1,4 +1,4 @@
-﻿module Funq.Tests.Performance.Scripts
+﻿module internal Funq.Tests.Performance.Scripts
 open Funq.Tests.Performance
 open Funq.Tests
 do()
@@ -32,12 +32,12 @@ type
                     DataSource_Iterations : int,
                     Generator1 : DataGenerator<'t>,
                     Generator2 : DataGenerator<'t>,
-                    DropRatio : float
+                    RemoveRatio : float
                     ) = 
      inherit BaseArgs(Simple_Iterations, Target_Size, DataSource_Size, Full_Iterations, DataSource_Iterations)
      member val Generator1 = Generator1 with get, set
      member val Generator2 = Generator2 with get, set
-     member val DropRatio = DropRatio with get, set
+     member val RemoveRatio = RemoveRatio with get, set
 
 
 
@@ -64,7 +64,7 @@ let sequential(args : BaseArgs) =
     let builder = builder.AddTarget (Data.Funq.List targetInit)
     // [[Test list for Funq.FunqList]]
     let builder = 
-        [AddFirst;AddLast;DropLast;DropFirst;InsertRandom;RemoveRandom; SetRandom; Iter; GetRandom] 
+        [AddFirst;AddLast;RemoveLast;RemoveFirst;InsertRandom;RemoveRandom; SetRandom; Iter; GetRandom] 
          |> List.apply1 iters
          |> builder.AddTests
 
@@ -76,7 +76,7 @@ let sequential(args : BaseArgs) =
     let builder = 
         [AddLastRange; AddFirstRange; InsertRangeRandom] 
         |> List.cross_apply1 [bulkIters,Data.Funq.List dataSourceInit] 
-        |> List.chain_iter (fun test -> test.Name <- test.Name + " (concat operation)")
+        |> List.chain_iter (fun test -> test.Name <- test.Name + " (concat)")
         |> builder.AddTests
 
     let builder = [Take; Skip] |> List.cross_apply1 [bulkIters] |> builder.AddTests
@@ -88,12 +88,12 @@ let sequential(args : BaseArgs) =
 
     // [[end list]]
 
-    // [[test list for Funq.FunqArray]]
+    // [[test list for Funq.FunqVector]]
     let builder = builder.Next().AddTarget (Data.Funq.Vector targetInit)
     //note that after calling Next(), a builder with an unbound generic type 'a is returned (the parameter changes)
     //calling AddTarget on a collection of the specific type allows type inference to be resolved.
     let builder = 
-         [AddLast; DropLast; Iter; GetRandom; SetRandom]
+         [AddLast; RemoveLast; Iter; GetRandom; SetRandom]
          |> List.cross_apply1 simple_iters
          |> builder.AddTests
 
@@ -105,7 +105,7 @@ let sequential(args : BaseArgs) =
     let builder = 
         [AddLastRange;AddFirstRange;InsertRangeRandom]
         |> List.cross_apply1 [bulkIters,Data.Funq.Vector dataSourceInit]
-        |> List.chain_iter (fun test -> test.Name <- test.Name + " (concat operation)")
+        |> List.chain_iter (fun test -> test.Name <- test.Name + " (concat)")
         |> builder.AddTests
 
     let builder = 
@@ -122,15 +122,15 @@ let sequential(args : BaseArgs) =
     // [[test list for System.ImmutableList]]
     let builder = builder.Next().AddTarget (Data.Sys.List targetInit)
     let builder = 
-        [AddFirst; AddLast; Iter; DropFirst; 
-         DropLast; InsertRandom; RemoveRandom; 
+        [AddFirst; AddLast; Iter; RemoveFirst; 
+         RemoveLast; InsertRandom; RemoveRandom; 
          SetRandom; GetRandom]
          |> List.cross_apply1 simple_iters
          |> builder.AddTests    
     let builder = 
         [AddLastRange; AddFirstRange; InsertRangeRandom]
         |> List.cross_apply1 [bulkIters,Data.Sys.List dataSourceInit]
-        |> List.chain_iter (fun test -> test.Name <- test.Name + " (concat operation)")
+        |> List.chain_iter (fun test -> test.Name <- test.Name + " (concat)")
         |> builder.AddTests
     let builder = 
         [AddLastRange; AddFirstRange; InsertRangeRandom]
@@ -146,26 +146,26 @@ let sequential(args : BaseArgs) =
     //[[end list]]
     //[[test list for FSharpx.Deque]]
     let builder = builder.Next().AddTarget (Data.FSharpx.Deque targetInit)
-    let builder = [AddFirst; AddLast; Iter; DropLast; DropFirst] |> List.cross_apply1 simple_iters |> builder.AddTests
+    let builder = [AddFirst; AddLast; Iter; RemoveLast; RemoveFirst] |> List.cross_apply1 simple_iters |> builder.AddTests
     let builder = [AddLastRange; AddFirstRange] |> List.cross_apply1 data_iters |> builder.AddTests
     let builder = 
         [AddLastRange; AddFirstRange] 
         |> List.cross_apply1 [bulkIters, Data.FSharpx.Deque dataSourceInit] 
-        |> List.chain_iter (fun test -> test.Name <- test.Name + " (concat operation)") 
+        |> List.chain_iter (fun test -> test.Name <- test.Name + " (concat)") 
         |> builder.AddTests
     let builder = [IterDirect] |> List.cross_apply1 [fullIters] |> builder.AddTests
     //[[end list]]
     //[[test list for FSharpx.Vector]]
     let builder = builder.Next().AddTarget (Data.FSharpx.Vector targetInit)
     let builder = 
-        [AddLast; DropLast;Iter; GetRandom; SetRandom] 
+        [AddLast; RemoveLast;Iter; GetRandom; SetRandom] 
         |> List.cross_apply1 simple_iters |> builder.AddTests
     let builder = 
          [AddLastRange] |> List.cross_apply1 data_iters |> builder.AddTests
     let builder = 
         [AddLastRange; AddFirstRange] 
         |> List.cross_apply1 [bulkIters, Data.FSharpx.Vector dataSourceInit] 
-        |> List.chain_iter (fun test -> test.Name <- test.Name + " (concat operation)")
+        |> List.chain_iter (fun test -> test.Name <- test.Name + " (concat)")
         |> builder.AddTests
     let builder = 
         [IterDirect] |> List.cross_apply1 [fullIters] |> builder.AddTests
@@ -183,15 +183,15 @@ let mapLike(args : AdvancedArgs<_>) =
     let data = Data.Basic.Array dataSourceInit
     let dataKvp = src2.Map (fun x -> System.Collections.Generic.KeyValuePair(x, x)) |> fun x -> Data.Basic.Array(dSize, x)
     let bulkIters = args.DataSource_Iterations
-    let dropRatio = args.DropRatio
+    let removeRatio = args.RemoveRatio
     let simple_args = [iters]
     let data_args = [bulkIters, data]
     let inline standard_tests() =
-        let a = [GetKeyRandom; Iter; DropKey] |> List.cross_apply1 simple_args
+        let a = [GetKeyRandom; Iter; RemoveKey] |> List.cross_apply1 simple_args
         let b = [AddKeyRandom] |> List.cross_apply1 data_args
         let c = [IterDirect] |> List.cross_apply1 [full_iters]
         let d = [AddKeys]   |> List.cross_apply1 [bulkIters, dataKvp]
-        let e = [DropKeys] |> List.cross_apply1 [bulkIters, dropRatio]
+        let e = [RemoveKeys] |> List.cross_apply1 [bulkIters, removeRatio]
         a @ b @ c @ d @ e
     
     let builder = 
@@ -229,7 +229,7 @@ let setLike(args : AdvancedArgs<_>) = //(set1, set2, iters, src1, src2) =
     let set2 = args.DataSource_Size
     let dataSourceInit = (set2,src2)
     let targetInit = (set1,src1)
-    let dropRatio = args.DropRatio
+    let removeRatio = args.RemoveRatio
     let arr = Data.Basic.Array targetInit
     let inline standard_tests makeSet= 
         let a = 
@@ -239,9 +239,9 @@ let setLike(args : AdvancedArgs<_>) = //(set1, set2, iters, src1, src2) =
              |> List.cross_apply1 [bulkIters, makeSet dataSourceInit]
         let b = 
             [AddSetItem] |> List.cross_apply1 [bulkIters, arr] 
-        let c = [Contains; DropSetItem; Iter] |> List.cross_apply1 [iters]
+        let c = [Contains; RemoveSetItem; Iter] |> List.cross_apply1 [iters]
         let d = [AddSetItems] |> List.cross_apply1 [bulkIters, arr]
-        let e = [DropSetItems] |> List.cross_apply1 [bulkIters, dropRatio]
+        let e = [RemoveSetItems] |> List.cross_apply1 [bulkIters, removeRatio]
         let f = [IterDirect] |> List.cross_apply1 [full_iters]
 
         a @ b @ c @ d @ e @ f

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using Funq.Abstract;
 using Funq.Collections.Common;
@@ -18,21 +19,13 @@ namespace Funq.Collections
 		
 		public static FunqOrderedMap<TKey, TValue> Empty(IComparer<TKey> comparer)
 		{
-			return new FunqOrderedMap<TKey, TValue>(OrderedAvlTree<TKey, TValue>.Node.Null, comparer ?? FastComparer<TKey>.Default);
+			return new FunqOrderedMap<TKey, TValue>(OrderedAvlTree<TKey, TValue>.Node.Empty, comparer ?? FastComparer<TKey>.Default);
 		}
 
 		internal FunqOrderedMap(OrderedAvlTree<TKey, TValue>.Node root, IComparer<TKey> comparer )
 		{
 			Root = root;
 			Comparer = comparer;
-		}
-
-		public FunqOrderedMap<TKey, TValue> Add(Tuple<TKey, TValue> pair) {
-			return Add(pair.Item1, pair.Item2);
-		}
-
-		public FunqOrderedMap<TKey, TValue> Add(KeyValuePair<TKey, TValue> pair) {
-			return Add(pair.Key, pair.Value);
 		}
 
 		protected override IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
@@ -49,7 +42,7 @@ namespace Funq.Collections
 		{
 			get
 			{
-				return Root.IsNull;
+				return Root.IsEmpty;
 			}
 		}
 
@@ -67,12 +60,12 @@ namespace Funq.Collections
 			}
 		}
 
-		public override FunqOrderedMap<TKey, TValue> Merge(FunqOrderedMap<TKey, TValue> other, System.Func<TKey, TValue, TValue, TValue> collision) {
+		protected override FunqOrderedMap<TKey, TValue> Merge(FunqOrderedMap<TKey, TValue> other, System.Func<TKey, TValue, TValue, TValue> collision = null) {
 			if (other == null) throw Errors.Is_null;
 			return Root.Union(other.Root, collision, Lineage.Mutable()).WrapMap(Comparer);
 		}
 
-		public override FunqOrderedMap<TKey, TValue> Join(FunqOrderedMap<TKey, TValue> other, System.Func<TKey, TValue, TValue, TValue> collision)
+		protected override FunqOrderedMap<TKey, TValue> Join(FunqOrderedMap<TKey, TValue> other, System.Func<TKey, TValue, TValue, TValue> collision)
 		{
 			if (other == null) throw Errors.Is_null;
 			return Root.Intersect(other.Root, collision, Lineage.Mutable()).WrapMap(Comparer);
@@ -83,73 +76,42 @@ namespace Funq.Collections
 			return Root.Apply(selector, Lineage.Mutable()).WrapMap(Comparer);
 		}
 
-		public override FunqOrderedMap<TKey, TValue> Difference(FunqOrderedMap<TKey, TValue> other)
+		protected override FunqOrderedMap<TKey, TValue> Difference(FunqOrderedMap<TKey, TValue> other)
 		{
 			if (other == null) throw Errors.Is_null;
 			return Root.SymDifference(other.Root, Lineage.Mutable()).WrapMap(Comparer);
 		}
 
-		public override FunqOrderedMap<TKey, TValue> Except(FunqOrderedMap<TKey, TValue> other, Func<TKey, TValue, TValue, Option<TValue>> subtraction = null)
+		public override FunqOrderedMap<TKey, TValue> RemoveRange(IEnumerable<TKey> keys)
 		{
-			if (other == null) throw Errors.Is_null;
-			return Root.Except(other.Root, Lineage.Mutable(), subtraction).WrapMap(Comparer);
-		}
-
-		internal FunqOrderedMap<TKey, TValue> AddRange(IEnumerable<KeyValuePair<TKey, TValue>> items, OverwriteBehavior behavior) {
-			if (items == null) throw Errors.Is_null;
-			var lineage = Lineage.Mutable();
-			var newRoot = Root;
-
-			foreach (var item in items) {
-				var newerRoot = newRoot.IsNull
-					? newRoot.InitializeFromNull(item.Key, item.Value, Comparer, lineage)
-					: newRoot.AvlAdd(item.Key, item.Value, lineage, behavior == OverwriteBehavior.Overwrite);
-
-				if (newerRoot == null)
-				{
-					if (behavior == OverwriteBehavior.Throw)
-					{
-						throw Errors.Key_exists;
-					}
-				}
-				else
-				{
-					newRoot = newerRoot;
-				}
+			var set = keys as FunqOrderedSet<TKey>;
+			if (set != null && Comparer.Equals(set.Comparer))
+			{
+				return Root.Except(set.Root, Lineage.Mutable()).WrapMap(Comparer);
 			}
-			return newRoot.WrapMap(Comparer);
-		} 
-
-		public FunqOrderedMap<TKey, TValue> AddRange(IEnumerable<KeyValuePair<TKey, TValue>> items) {
-			return AddRange(items, OverwriteBehavior.Overwrite);
+			return base.RemoveRange(keys);
 		}
 
-		public FunqOrderedMap<TKey, TValue> AddRange(IEnumerable<Tuple<TKey, TValue>> tuples)
+		public override FunqOrderedMap<TKey, TValue> Except<TValue2>(IEnumerable<KeyValuePair<TKey, TValue2>> other, Func<TKey, TValue, TValue2, Option<TValue>> subtraction = null)
 		{
-			return this.AddRange(tuples.Select(x => Kvp.Of(x)));
-		}
-
-		public FunqOrderedMap<TKey, TValue> DropRange(IEnumerable<TKey> items)
-		{
-			if (items == null) throw Errors.Is_null;
-			var lineage = Lineage.Mutable();
-			var map = Root;
-			var wasModified = false;
-			foreach (var item in items) {
-				var newMap = map.AvlRemove(item, lineage);
-				if (newMap != null) {
-					map = newMap;
-					wasModified = true;
-				}
+			var map = other as FunqOrderedMap<TKey, TValue2>;
+			if (map != null && Comparer.Equals(map.Comparer))
+			{
+				return Root.Except(map.Root, Lineage.Mutable(), subtraction).WrapMap(Comparer);
 			}
-			return wasModified ? map.WrapMap(Comparer) : this;
-		} 
+			return base.Except(other, subtraction);
+		}
+
+		protected override FunqOrderedMap<TKey, TValue> Except(FunqOrderedMap<TKey, TValue> other, Func<TKey, TValue, TValue, Option<TValue>> subtraction = null)
+		{
+			throw new Exception("Should never be called.");
+		}
 
 		public KeyValuePair<TKey, TValue> MaxItem
 		{
 			get
 			{
-				if (Root.IsNull) throw Errors.Is_empty;
+				if (Root.IsEmpty) throw Errors.Is_empty;
 				var maxNode = Root.Max;
 				return Kvp.Of(maxNode.Key, maxNode.Value);
 			}
@@ -159,14 +121,15 @@ namespace Funq.Collections
 		{
 			get
 			{
-				if (Root.IsNull) throw Errors.Is_empty;
+				if (Root.IsEmpty) throw Errors.Is_empty;
 				var minNode = Root.Min;
 				return Kvp.Of(minNode.Key, minNode.Value);
 			}
 		}
 
 		public KeyValuePair<TKey, TValue> ByOrder(int index) {
-			if (Root.IsNull) throw Errors.Is_empty;
+			index = index < 0 ? index + Length : index;
+			index.IsInRange("index", 0, Length - 1);			
 			var opt = Root.ByOrder(index);
 			if (opt.IsNone) {
 				throw Errors.Arg_out_of_range("index", index);
@@ -176,23 +139,22 @@ namespace Funq.Collections
 			}
 		}
 
-		public FunqOrderedMap<TKey, TValue> Drop(TKey key)
+		public FunqOrderedMap<TKey, TValue> Remove(TKey key)
 		{
-			var removed = Root.AvlRemove(key, Lineage.Immutable);
+			var removed = Root.AvlRemove(key, Lineage.Mutable());
 			if (removed == null) return this;
 			return removed.WrapMap(Comparer);
 		}
 
-
-		public FunqOrderedMap<TKey, TValue> DropMax()
+		public FunqOrderedMap<TKey, TValue> RemoveMax()
 		{
-			if (Root.IsNull) throw Errors.Is_empty;
+			if (Root.IsEmpty) throw Errors.Is_empty;
 			return Root.RemoveMax(Lineage.Mutable()).WrapMap(Comparer);
 		}
 
-		public FunqOrderedMap<TKey, TValue> DropMin()
+		public FunqOrderedMap<TKey, TValue> RemoveMin()
 		{
-			if (Root.IsNull) throw Errors.Is_empty;
+			if (Root.IsEmpty) throw Errors.Is_empty;
 			return Root.RemoveMin(Lineage.Mutable()).WrapMap(Comparer);
 		}
 
@@ -206,12 +168,21 @@ namespace Funq.Collections
 		}
 
 		internal FunqOrderedMap<TKey, TValue> Set(TKey key, TValue value, OverwriteBehavior behavior) {
-			var ret = Root.IsNull
-				? Root.InitializeFromNull(key, value, Comparer, Lineage.Mutable())
-				: Root.AvlAdd(key, value, Lineage.Mutable(), behavior == OverwriteBehavior.Overwrite);
+			var ret = Root.Root_Add(key, value, Comparer, behavior == OverwriteBehavior.Overwrite, Lineage.Mutable());
 			if (ret == null && behavior == OverwriteBehavior.Throw) throw Errors.Key_exists;
 			if (ret == null) return null;
 			return ret.WrapMap(Comparer);
+		}
+
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public FunqOrderedMap<TKey, TValue> op_Add(Tuple<TKey, TValue> item)
+		{
+			return Add(item.Item1, item.Item2);
+		}
+
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public FunqOrderedMap<TKey, TValue> op_AddRange(IEnumerable<Tuple<TKey, TValue>> items) {
+			return AddRange(items.Select(Kvp.FromTuple));
 		}
 	}
 }

@@ -177,7 +177,11 @@ namespace Funq.Collections
 				item.IsNotNull();
 			}
 		}
-
+		[Conditional("ASSERTS")]
+		public static void IsBetween<T>(this T actual, T lower, T upper, string message = "")
+		where T : IComparable<T> {
+			Assert.IsTrue(actual.CompareTo(lower) >= 0 && actual.CompareTo(upper) <= 0, message);
+		}
 
 		/// <summary>
 		///   Assert.AreEqual, if T is IEnumerable then CollectionAssert.AreEqual
@@ -260,7 +264,7 @@ namespace Funq.Collections
 		{
 			if (typeof (T) != typeof (string) && typeof (IEnumerable).IsAssignableFrom(typeof (T)))
 			{
-				Fun.Cast<object>(((IEnumerable) actual)).IsNot(Fun.Cast<object>(((IEnumerable) notExpected)), message);
+				Fun.ForceCast<object>(((IEnumerable) actual)).IsNot(Fun.ForceCast<object>(((IEnumerable) notExpected)), message);
 				return;
 			}
 

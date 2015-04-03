@@ -37,7 +37,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;ASSERTS NO_MUTATION</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -72,6 +72,8 @@
     <Compile Include="ChainingAssertion.NUnit.cs" Condition="$(DefineConstants.Contains('ASSERTS'))" />
     <Compile Include="Common\ChangeMarker.cs" />
     <Compile Include="Common\Marked.cs" />
+    <Compile Include="Implementation\FingerTree\FingerTree.cs" />
+    <Compile Include="Implementation\FingerTree\FingerTreeElement.cs" />
     <Compile Include="Implementation\OrderedAvlTree\TreeIterator.cs" />
     <Compile Include="Implementation\HashedAvlTree\TreeIterator.cs" />
     <Compile Include="Implementation\HashedAvlTree\Node.cs" />
@@ -83,6 +85,12 @@
     <Compile Include="Implementation\TrieVector\VectorLeaf.cs" />
     <Compile Include="Implementation\TrieVector\VectorNode.cs" />
     <Compile Include="Implementation\TrieVector\VectorParent.cs" />
+    <Compile Include="Wrappers\Common\FunqList.cs" />
+    <Compile Include="Wrappers\Common\FunqMap.cs" />
+    <Compile Include="Wrappers\Common\FunqOrderedMap.cs" />
+    <Compile Include="Wrappers\Common\FunqOrderedSet.cs" />
+    <Compile Include="Wrappers\Common\FunqSet.cs" />
+    <Compile Include="Wrappers\Common\FunqVector.cs" />
     <Compile Include="Wrappers\FunqOrderedSet\Debugging.cs" />
     <Compile Include="Wrappers\FunqOrderedSet\FunqBindings.cs" />
     <Compile Include="Wrappers\FunqOrderedSet\FunqOrderedSet.cs" />
@@ -97,7 +105,7 @@
     <Compile Include="Implementation\FingerTree\Digit.cs" />
     <Compile Include="Implementation\FingerTree\Empty.cs" />
     <Compile Include="Implementation\FingerTree\FTree.cs" />
-    <Compile Include="Implementation\FingerTree\Measured.cs" />
+    <Compile Include="Implementation\FingerTree\FingerTreeIterator.cs" />
     <Compile Include="Implementation\FingerTree\Single.cs" />
     <Compile Include="Implementation\FingerTree\TreeType.cs" />
     <Compile Include="Implementation\FingerTree\Leaf.cs" />
@@ -109,7 +117,6 @@
     </Compile>
     <Compile Include="Wrappers\FunqMap\Debugging.cs" />
     <Compile Include="Wrappers\FunqMap\FunqBindings.cs" />
-    <Compile Include="Wrappers\FunqMap\Interfaces.cs" />
     <Compile Include="Wrappers\FunqMap\Operators.cs" />
     <Compile Include="Wrappers\FunqSet\Boilerplate.cs">
       <DependentUpon>Boilerplate.tt</DependentUpon>
@@ -126,7 +133,6 @@
     </Compile>
     <Compile Include="Wrappers\List\Core.cs" />
     <Compile Include="Wrappers\List\Debugging.cs" />
-    <Compile Include="Wrappers\List\EqualityComparison.cs" />
     <Compile Include="Wrappers\List\FunqBindings.cs" />
     <Compile Include="Wrappers\FunqMap\FunqMap.cs" />
     <Compile Include="Wrappers\FunqOrderedMap\Boilerplate.cs">
@@ -144,11 +150,9 @@
     </Compile>
     <Compile Include="Wrappers\Vector\FunqBindings.cs" />
     <Compile Include="Implementation\TrieVector\ImplementationHooks.cs" />
-    <Compile Include="Wrappers\List\Interfaces.cs" />
     <Compile Include="Wrappers\List\Iteration.cs" />
     <Compile Include="Wrappers\List\Operators.cs" />
     <Compile Include="Wrappers\Vector\Debugging.cs" />
-    <Compile Include="Wrappers\Vector\Interfaces.cs" />
     <Compile Include="Wrappers\Vector\Operators.cs" />
     <Compile Include="Wrappers\Vector\FunqVector.cs" />
     <Compile Include="Wrappers\Templates\ConvertionMethods.cs" />

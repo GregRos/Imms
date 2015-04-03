@@ -201,7 +201,7 @@ namespace Funq.Collections
 		internal FunqVector<T> Remove(int index)
 		{
 			if (index == 0) return Skip(1);
-			if (index == Length - 1) return DropLast();
+			if (index == Length - 1) return RemoveLast();
 			var lineage = Lineage.Mutable();
 			var take = root.Take(index - 1, lineage);
 			var arr = new T[Length - index - 1];
@@ -305,14 +305,14 @@ namespace Funq.Collections
 		/// Removes the last item from the collection.
 		/// </summary>
 		/// <exception cref="InvalidOperationException">Thrown if the data structure is empty.</exception>
-		public FunqVector<T> DropLast()
+		public FunqVector<T> RemoveLast()
 		{
 			if (root.Length == 0) throw Funq.Errors.Is_empty;
 #if ASSERTS
 			var expected = Length - 1;
 #endif
 			var lineage = Lineage.Immutable;
-			FunqVector<T> ret =  root.Drop(lineage);
+			FunqVector<T> ret =  root.RemoveLast(lineage);
 #if ASSERTS
 			ret.Length.Is(expected);
 			if (Length > 1) ret.Last.Is(this[-2]);
@@ -326,7 +326,7 @@ namespace Funq.Collections
 		/// <param name="count">The number of items to remove.</param>
 		/// <returns>FunqVector{`0}.</returns>
 		/// <exception cref="ArgumentOutOfRangeException">Thrown if there aren't enough elements.</exception>
-		public FunqVector<T> DropLast(int count)
+		public FunqVector<T> RemoveLast(int count)
 		{
 			if (root.Length < count) throw Errors.Arg_out_of_range("count");
 			return this.Take(Length - count);

@@ -135,6 +135,7 @@ and[<StructuredFormatDisplay("{AsString}")>]
         let strs = dict |> Dict.values |> Seq.toList |> List.map (fun m -> m.ToString())
         String.Join("; ", strs) |> sprintf "[%s]" 
     member x.AsString = x.ToString()
+    static member (<+) (container : MetaContainer, meta : Meta) = container.AddMeta(meta)
 
 
 [<AutoOpen>]
@@ -157,8 +158,7 @@ module Meta =
     let ofList (l : Meta list) = MetaContainer(l |> Seq.map (fun x -> x :> _))
     let ofSeq (l : Meta seq) = MetaContainer(l |> Seq.map (fun x -> x :> _))
     let ofSeqPairs (l : (_ * _) seq) = l |> Seq.map (fun (a,b) -> Meta(a, b)) |> ofSeq
-    let ( <++ ) (a : _ list) (b : _ seq) = a @ (b |> List.ofSeq)
-    let ( ++> ) (b : _ seq) (a : _ list) = (b |> List.ofSeq) @ a
+
     let toMap (container : MetaContainer) = 
         container |> toPairs |> Map.ofSeq
 

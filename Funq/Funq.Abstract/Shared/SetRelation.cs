@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Funq
 {
@@ -11,5 +12,4 @@ namespace Funq
 		Disjoint = 0x8,
 		None = 0x10,
 	}
-	
 }

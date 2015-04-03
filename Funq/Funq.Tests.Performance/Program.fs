@@ -41,7 +41,7 @@ let runTests (tests : ErasedTest list) =
     let results = tests |> List.map (Bench.invoke writer)
     let charts = present results
     let mutable i = 0;
-    let basePath = "..\..\Benchmarks"
+    let basePath = "..\..\Benchmarks\Results"
     let resultFolder, n = getFreeDir basePath "benchmark"
     let logsFolder = resultFolder
     let chartsFolder = sprintf "%s\Charts" resultFolder
@@ -70,20 +70,21 @@ let  main argv =
     let args = 
         Scripts.AdvancedArgs<_>(
            Simple_Iterations = 10000,
-           Target_Size = 10000,
-           DataSource_Size = 1000,
+           Target_Size = 100,
+           DataSource_Size = 10000,
            Full_Iterations = 1,
-           DataSource_Iterations = 5,
+           DataSource_Iterations = 3,
            Generator1 = Seqs.Strings.distinctLetters(1, 10),
            Generator2 = Seqs.Strings.distinctLetters(1, 10),
-           DropRatio = 0.3
+           RemoveRatio = 0.6
         )
+
     let a = Scripts.sequential args
     let b = Scripts.setLike args
     let c = Scripts.mapLike args
     let tests = a @ b @ c
     
-    let tests = tests |> List.filter (fun x -> x.Target.Kind = Sequential)
+    let tests = tests// |> List.filter (fun x -> x.Target.Kind = MapLike || x.Target.Kind = SetLike)
     runTests tests
     0
         

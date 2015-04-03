@@ -13,66 +13,6 @@ namespace Funq.Collections.Implementation
 		{
 			internal sealed class Compound : FTree<TChild>
 			{
-				internal class Enumerator : IEnumerator<Leaf<TValue>>
-				{
-					private readonly bool _forward;
-					private int index = -1;
-					private IEnumerator<Leaf<TValue>> inner;
-					private readonly Compound tree;
-
-					public Enumerator(Compound tree, bool forward)
-					{
-						this.tree = tree;
-						_forward = forward;
-					}
-
-					public Leaf<TValue> Current
-					{
-						get
-						{
-							return inner.Current;
-						}
-					}
-
-					object IEnumerator.Current
-					{
-						get
-						{
-							return Current;
-						}
-					}
-
-					public void Dispose()
-					{
-					}
-
-					public bool MoveNext()
-					{
-						if (index != -1 && inner.MoveNext())
-							return true;
-						index++;
-						var fixedNum = _forward ? index : 2 - index;
-						switch (fixedNum)
-						{
-							case 0:
-								inner = tree.LeftDigit.GetEnumerator(_forward);
-								return MoveNext();
-							case 1:
-								inner = tree.DeepTree.GetEnumerator(_forward);
-								return MoveNext();
-							case 2:
-								inner = tree.RightDigit.GetEnumerator(_forward);
-								return MoveNext();
-							default:
-								return false;
-						}
-					}
-
-					public void Reset()
-					{
-						throw new NotSupportedException();
-					}
-				}
 
 				private const int
 					IN_END = 6;
@@ -126,22 +66,22 @@ namespace Funq.Collections.Implementation
 						case 1 << 0:
 							return new Single(left, lineage);
 						case 1 << 0 | 1 << 1:
-							var deep_1 = deep.DropLast(lineage);
+							var deep_1 = deep.RemoveLast(lineage);
 							var r_2 = deep.Right;
-							return MutateOrCreate(left, deep.DropLast(lineage), deep.Right, lineage);
+							return MutateOrCreate(left, deep.RemoveLast(lineage), deep.Right, lineage);
 						case 1 << 0 | 1 << 1 | 1 << 2:
 							return MutateOrCreate(left, deep, right, lineage);
 						case 1 << 1 | 1 << 2:
-							return MutateOrCreate(deep.Left, deep.DropFirst(lineage), right, lineage);
+							return MutateOrCreate(deep.Left, deep.RemoveFirst(lineage), right, lineage);
 						case 1 << 0 | 1 << 2:
 							return MutateOrCreate(left, deep, right, lineage);
 						case 1 << 1:
 							left = deep.Left;
-							deep = deep.DropFirst(lineage);
+							deep = deep.RemoveFirst(lineage);
 							if (deep.Measure != 0)
 							{
 								right = deep.Right;
-								deep = deep.DropLast(lineage);
+								deep = deep.RemoveLast(lineage);
 								return MutateOrCreate(left, deep, right, lineage);
 							}
 							return new Single(left, lineage);
@@ -243,7 +183,7 @@ namespace Funq.Collections.Implementation
 					else
 					{
 						var leftmost = new Digit(item, LeftDigit.First, lineage);
-						var rightmost = LeftDigit.DropFirst(lineage);
+						var rightmost = LeftDigit.RemoveFirst(lineage);
 						var newDeep = DeepTree.AddFirst(rightmost, lineage);
 						ret =  MutateOrCreate(leftmost, newDeep, RightDigit, lineage);
 					}
@@ -269,7 +209,7 @@ namespace Funq.Collections.Implementation
 					else
 					{
 						var rightmost = new Digit(RightDigit.Fourth, item, lineage);
-						var leftmost = RightDigit.DropLast(lineage);
+						var leftmost = RightDigit.RemoveLast(lineage);
 						var newDeep = DeepTree.AddLast(leftmost, lineage);
 						ret =  MutateOrCreate(LeftDigit, newDeep, rightmost, lineage);
 					}
@@ -282,7 +222,7 @@ namespace Funq.Collections.Implementation
 				}
 
 
-				public override FTree<TChild> DropFirst(Lineage lineage)
+				public override FTree<TChild> RemoveFirst(Lineage lineage)
 				{
 					FTree<TChild> ret;
 #if ASSERTS
@@ -291,13 +231,13 @@ namespace Funq.Collections.Implementation
 
 					if (LeftDigit.Size > 1)
 					{
-						var new_left = LeftDigit.DropFirst(lineage);
+						var new_left = LeftDigit.RemoveFirst(lineage);
 						ret =  MutateOrCreate(new_left, DeepTree, RightDigit, lineage);
 					}
 					else if (DeepTree.Measure > 0)
 					{
 						var new_left = DeepTree.Left;
-						var new_deep = DeepTree.DropFirst(lineage);
+						var new_deep = DeepTree.RemoveFirst(lineage);
 						ret =  MutateOrCreate(new_left, new_deep, RightDigit, lineage);
 					}
 					else ret =  new Single(RightDigit, lineage);
@@ -308,7 +248,7 @@ namespace Funq.Collections.Implementation
 				}
 
 
-				public override FTree<TChild> DropLast(Lineage lineage)
+				public override FTree<TChild> RemoveLast(Lineage lineage)
 				{
 					FTree<TChild> ret;
 #if ASSERTS
@@ -316,13 +256,13 @@ namespace Funq.Collections.Implementation
 #endif
 					if (RightDigit.Size > 1)
 					{
-						var new_right = RightDigit.DropLast(lineage);
+						var new_right = RightDigit.RemoveLast(lineage);
 						ret= MutateOrCreate(LeftDigit, DeepTree, new_right, lineage);
 					}
 					else if (DeepTree.Measure > 0)
 					{
 						var new_right = DeepTree.Right;
-						var new_deep = DeepTree.DropLast(lineage);
+						var new_deep = DeepTree.RemoveLast(lineage);
 						ret = MutateOrCreate(LeftDigit, new_deep, new_right, lineage);
 					}
 					else
@@ -350,7 +290,7 @@ namespace Funq.Collections.Implementation
 					else
 					{
 						var fromDeep = DeepTree.Left;
-						var newDeep = DeepTree.DropFirst(lineage);
+						var newDeep = DeepTree.RemoveFirst(lineage);
 						Digit first, last;
 						LeftDigit.Fuse(fromDeep, out first, out last, lineage);
 						if (last == null)
@@ -378,7 +318,7 @@ namespace Funq.Collections.Implementation
 					else
 					{
 						var fromDeep = DeepTree.Right;
-						var newDeep = DeepTree.DropLast(lineage);
+						var newDeep = DeepTree.RemoveLast(lineage);
 						Digit first, last;
 						fromDeep.Fuse(RightDigit, out first, out last, lineage);
 						if (last == null) {
@@ -393,11 +333,6 @@ namespace Funq.Collections.Implementation
 					ret.Measure.Is(this.Measure);
 #endif
 					return ret;
-				}
-
-				public override IEnumerator<Leaf<TValue>> GetEnumerator(bool forward)
-				{
-					return new Enumerator(this, forward);
 				}
 
 				public override FTree<TChild> Insert(int index, Leaf<TValue> leaf, Lineage lineage)
@@ -512,7 +447,7 @@ namespace Funq.Collections.Implementation
 								newDeep = deep.AddFirst(LeftDigit, lineage);
 								newDeep = newDeep.Remove(index, lineage);
 								newLeft = newDeep.Left;
-								newDeep = newDeep.DropFirst(lineage);
+								newDeep = newDeep.RemoveFirst(lineage);
 								ret = MutateOrCreate(newLeft, newDeep, RightDigit, lineage);
 							}
 							else {
@@ -672,7 +607,7 @@ namespace Funq.Collections.Implementation
 				}
 
 
-				public override WeaklyTypedElement GetGrouping(int index) {
+				public override FingerTreeElement GetChild(int index) {
 					switch (index) {
 						case 0:
 							return LeftDigit;

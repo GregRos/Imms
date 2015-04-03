@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using Funq.Collections.Common;
@@ -8,16 +9,16 @@ namespace Funq.Collections
 {
 	public partial class FunqMap<TKey, TValue>
 	{
-		public static FunqMap<TKey, TValue> operator +(FunqMap<TKey, TValue> list, KeyValuePair<TKey,TValue> item)
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public FunqMap<TKey, TValue> op_Add(Tuple<TKey, TValue> item)
 		{
-			if (ReferenceEquals(list, null)) throw Funq.Errors.Argument_null("list");
-			return list.Add(item);
+			return Add(item.Item1, item.Item2);
 		}
 
-		public static FunqMap<TKey, TValue> operator +(FunqMap<TKey, TValue> list, IEnumerable<KeyValuePair<TKey, TValue>> items)
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public FunqMap<TKey, TValue> op_AddRange(IEnumerable<Tuple<TKey, TValue>> items)
 		{
-			if (ReferenceEquals(list, null)) throw Funq.Errors.Argument_null("list");
-			return list.AddRange(items);
+			return base.Merge(items.Select(Kvp.FromTuple), null);
 		}
 
 	}

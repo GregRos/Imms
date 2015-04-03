@@ -6,20 +6,40 @@ using System.Reflection;
 #pragma warning disable 279 //"doesn't implement collection pattern..." yes, I know.
 namespace Funq.Abstract
 {
-
+ 
 	/// <summary>
 	///   Parent class of all list-like collections, where elements appear in a certain order and may be indexed.
 	/// </summary>
 	/// <typeparam name="TList"> The type of the underlying collection. </typeparam>
 	/// <typeparam name="TElem"> The type of element stored in the collection. </typeparam>
 	public abstract partial class AbstractSequential<TElem, TList>
-		: AbstractIterable<TElem, TList, IterableBuilder<TElem>>, IAnySequential<TElem> 
-		where TList : AbstractSequential<TElem, TList>
+		: AbstractIterable<TElem, TList, IterableBuilder<TElem>>, IAnySeqLikeWithBuilder<TElem>, IEquatable<AbstractSequential<TElem, TList>> where TList : AbstractSequential<TElem, TList>
 	{
 
-		public override int GetHashCode()
+		static readonly IEqualityComparer<TElem> DefaultEquality = FastEquality<TElem>.Default;
+
+
+		public static bool operator ==(AbstractSequential<TElem, TList> a, AbstractSequential<TElem, TList> b) {
+			var boiler = EqualityHelper.Boilerplate(a, b);
+			if (boiler.IsSome) return boiler.Value;
+			return a.Equals(b);
+		}
+
+		public static bool operator !=(AbstractSequential<TElem, TList> a, AbstractSequential<TElem, TList> b) {
+			return !(a == b);
+		}
+
+		public virtual bool Equals(AbstractSequential<TElem, TList> other)
 		{
-			return Equality.Seq_HashCode(this);
+			return this.SequenceEquals(other, DefaultEquality);
+		}
+
+		public override bool Equals(object obj) {
+			return obj is AbstractSequential<TElem, TList> && ((AbstractSequential<TElem, TList>)obj).Equals(this);
+		}
+
+		public override int GetHashCode() {
+			return this.CompuateSeqHashCode(DefaultEquality);
 		}
 
 		/// <summary>
@@ -28,7 +48,7 @@ namespace Funq.Abstract
 		/// <param name="from"> The initial index. </param>
 		/// <param name="to"> The end index. </param>
 		/// <returns> </returns>
-		public virtual TList this[int from, int to]
+		public TList this[int from, int to]
 		{
 			get
 			{
@@ -36,7 +56,6 @@ namespace Funq.Abstract
 				to = to < 0 ? to + Length : to;
 				@from = @from < 0 ? @from + len : @from;
 				return GetRange(from, to - from + 1);
-
 			}
 		}
 
@@ -148,52 +167,6 @@ namespace Funq.Abstract
 		}
 
 		/// <summary>
-		/// Concatenates another sequential collection to the end of the current collection.
-		/// </summary>
-		/// <param name="other"></param>
-		/// <exception cref="ArgumentNullException">Thrown if the argument is null.</exception>
-		/// <returns></returns>
-		public virtual TList Concat(TList other)
-		{
-			if (other == null) throw Errors.Argument_null("other");
-			using (var builder = BuilderFrom(this))
-			{
-				other.ForEach(x => builder.Add(x));
-				return ProviderFrom(builder);
-			}
-		}
-		
-		/// <summary>
-		/// Concatenates another sequential collection to the end of the current collection.
-		/// </summary>
-		/// <param name="other"></param>
-		/// <exception cref="ArgumentNullException">Thrown if the argument is null.</exception>
-		/// <returns></returns>
-		public TList Concat(IAnyIterable<TElem> other)
-		{
-			if (other == null) throw Errors.Argument_null("other");
-			using (var builder = BuilderFrom(this))
-			{
-				other.ForEach(x => builder.Add(x));
-				return ProviderFrom(builder);
-			}
-		}
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="items">The items to concatenate.</param>
-		/// <returns></returns>
-		public TList Concat(IEnumerable<TElem> items)
-		{
-			if (items == null) throw Errors.Argument_null("items");
-			using (var builder = BuilderFrom(this))
-			{
-				foreach (var item in items) builder.Add(item);
-				return ProviderFrom(builder);
-			}
-		}
-
-		/// <summary>
 		///   Copies a range of elements from the collection to the specified array.
 		/// </summary>
 		/// <param name="arr"> The array. </param>
@@ -240,6 +213,29 @@ namespace Funq.Abstract
 		}
 
 		/// <summary>
+		/// Returns true if this sequence is equal to the other sequence, using an optional value equality comparer.
+		/// </summary>
+		/// <param name="other"></param>
+		/// <param name="eq"></param>
+		/// <returns></returns>
+		public bool SequenceEquals(IEnumerable<TElem> other, IEqualityComparer<TElem> eq = null) {
+			if (other is TList) {
+				return SequenceEquals((TList) other, eq);
+			}
+			return EqualityHelper.Seq_Equals(this, other, eq);
+		}
+
+		/// <summary>
+		/// Override this to provide an efficient implementation for the operation.
+		/// </summary>
+		/// <param name="other"></param>
+		/// <param name="eq"></param>
+		/// <returns></returns>
+		protected virtual bool SequenceEquals(TList other, IEqualityComparer<TElem> eq = null) {
+			return EqualityHelper.Seq_Equals(this, other, eq);
+		}
+
+		/// <summary>
 		///   Finds the last item that matches the specified predicate.
 		/// </summary>
 		/// <param name="predicate"> The predicate. </param>
@@ -248,14 +244,13 @@ namespace Funq.Abstract
 		public Option<TElem> FindLast(Func<TElem, bool> predicate)
 		{
 			if (predicate == null) throw Errors.Argument_null("predicate");
-			var item = Option.NoneOf<TElem>();
 			Option<TElem> found = Option.None;
 			ForEach(x => {
 				if (predicate(x)) {
 					found = x;
 				}
 			});
-			return item;
+			return found;
 		}
 
 		/// <summary>
@@ -284,7 +279,7 @@ namespace Funq.Abstract
 		{
 			if (iterator == null) throw Errors.Argument_null("iterator");
 			var list = new List<TElem>(Length);
-			ForEach(list.Add);
+			list.AddRange(this);
 			for (int i = list.Count - 1; i >= 0; i--) {
 				if (!iterator(list[i])) return false;
 			}
@@ -322,7 +317,7 @@ namespace Funq.Abstract
 		/// <exception cref="ArgumentNullException">Thrown if the argument null.</exception>
 		/// <returns></returns>
 		public TList OrderBy<TKey>(Func<TElem, TKey> keySelector)
-			where TKey : IComparable
+			where TKey : IComparable<TKey>
 		{
 			if (keySelector == null) throw Errors.Argument_null("keySelector");
 			return OrderBy(Comparers.KeyComparer(keySelector));
@@ -335,7 +330,7 @@ namespace Funq.Abstract
 		/// <returns></returns>
 		/// <exception cref="ArgumentNullException">Thrown if the argument null.</exception>
 		public TList OrderByDescending<TKey>(Func<TElem, TKey> keySelector)
-			where TKey : IComparable
+			where TKey : IComparable<TKey>
 		{
 			if (keySelector == null) throw Errors.Argument_null("keySelector");
 			return OrderByDescending(Comparers.KeyComparer(keySelector));
@@ -403,7 +398,8 @@ namespace Funq.Abstract
         /// <exception cref="ArgumentNullException">Thrown if the argument null.</exception>
 		/// <returns> </returns>
 		protected virtual TRSeq ScanBack<TElem2, TRSeq>(TRSeq bFactory, TElem2 initial, Func<TElem2, TElem, TElem2> accumulator)
-			where TRSeq : IAnySequential<TElem2> {
+			where TRSeq : IAnySeqLikeWithBuilder<TElem2>
+		{
 			bFactory.IsNotNull("bFactory");
 			if (accumulator == null) throw Errors.Argument_null("accumulator");
 			using (var builder = bFactory.EmptyBuilder)
@@ -504,7 +500,7 @@ namespace Funq.Abstract
 		/// <param name="selector"> The selector. </param>
 		/// <returns> </returns>
 		protected virtual TRSeq Zip<TRElem, TRSeq, TInner>(TRSeq bFactory, IEnumerable<TInner> o, Func<TElem, TInner, TRElem> selector)
-			where TRSeq : IAnySequential<TRElem>
+			where TRSeq : IAnySeqLikeWithBuilder<TRElem>
 		{
 			using (var builder = bFactory.EmptyBuilder)
 			using (var iterator = o.GetEnumerator())

@@ -69,19 +69,14 @@ namespace Funq.Collections.Implementation
 					return new Single(new Digit(item, lineage), lineage);
 				}
 
-				public override FTree<TChild> DropFirst(Lineage lineage)
+				public override FTree<TChild> RemoveFirst(Lineage lineage)
 				{
 					throw Funq.Errors.Is_empty;
 				}
 
-				public override FTree<TChild> DropLast(Lineage lineage)
+				public override FTree<TChild> RemoveLast(Lineage lineage)
 				{
 					throw Funq.Errors.Is_empty;
-				}
-
-				public override IEnumerator<Leaf<TValue>> GetEnumerator(bool forward)
-				{
-					return Enumerable.Empty<Leaf<TValue>>().GetEnumerator();
 				}
 
 				public override FTree<TChild> Insert(int index, Leaf<TValue> leaf, Lineage lineage)
@@ -127,7 +122,7 @@ namespace Funq.Collections.Implementation
 					throw Funq.Errors.Is_empty;
 				}
 
-				public override WeaklyTypedElement GetGrouping(int index) {
+				public override FingerTreeElement GetChild(int index) {
 					throw ImplErrors.Invalid_null_invocation;
 				}
 			}

@@ -130,8 +130,9 @@ namespace Funq.Collections
 		{
 			return base.OfType<FunqMap<TRKey,TRValue>,TRKey,TRValue>(GetPrototype<TRKey,TRValue>(handler));
 		}
-	 
-	
+
+
+
 	}
 	
 		}

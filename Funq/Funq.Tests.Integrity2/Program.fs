@@ -25,7 +25,7 @@ let seqTests initial parameter =
     let targets = [Target.Funq.List initial; Target.Funq.Vector initial]
     let reference = Target.Sys.List initial
     let tests = 
-        [x.add_drop_first;
+        [x.add_remove_first;
          x.insert_range; 
          x.insert; 
          x.update;
@@ -36,6 +36,9 @@ let seqTests initial parameter =
          x.insert_remove_update;
          x.insert_range_concat;
          x.concat;
+         x.slices;
+         x.add_first_last;
+         x.complex_add_remove_last;
          x.update;
          x.get_index;
          x.insert_range]
@@ -50,7 +53,7 @@ let setTests initial parameter dataSet=
     let targets = [Target.Funq.Set generator; Target.Funq.OrderedSet generator]
     let reference = Target.Sys.OrderedSet generator
     let tests = 
-        [x.add_drop; x.difference; x.except; x.intersection; x.union; x.many_operations; x.add_drop_range]
+        [x.add_remove; x.difference; x.except; x.intersection; x.union; x.many_operations; x.add_remove_range]
         |> List.apply1 parameter
         |> Test.bindAll reference targets
     tests
@@ -62,7 +65,7 @@ let mapTests initial parameter dataSet =
     let targets = [Target.Funq.Map generator; Target.Funq.OrderedMap generator]
     let reference = Target.Sys.OrderedMap generator
     let tests = 
-        [x.add_drop;x.add_drop_range; x.add_range; x.drop_range]
+        [x.add_remove;x.add_remove_range; x.add_range; x.remove_range]
         |> List.apply1 parameter
         |> Test.bindAll reference targets
     tests
@@ -72,19 +75,16 @@ let main argv =
     let x = SeqTests()
     let fs = File.OpenWrite("log.txt")
     let writer = Console.Out
-    
-    let initial = 10000
-    let param = 3000
-    let ds = 10000
+   
     let allTests initial param ds = 
         seqTests initial param  @ setTests initial param ds @ mapTests initial param ds
     let r = Random()
     let mutable tests = []
-    for i = 0 to 5 do
-        let initial, param, ds = r.Next(0, 3000), r.Next(100, 1000), r.Next( 5000, 10000)
+    for i = 0 to 0 do
+        let initial, param, ds = r.Next(0, 3000), r.Next(500, 2000), r.Next( 5000, 10000)
         printfn "Initial: %d, Param: %d, ds: %d" initial param ds
         tests <- allTests initial param ds @ tests
-    let tests = tests |> List.filter (fun t -> t.Test.Kind = ListLike)
+    let tests = tests |> List.filter (fun t -> (t.Test.Kind = SetLike || t.Test.Kind = MapLike))
     tests |> Test.runAll writer |> Report.byTest writer 
     Console.Read() |> ignore
     fs.Flush()

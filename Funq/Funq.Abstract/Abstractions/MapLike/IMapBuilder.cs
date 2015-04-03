@@ -26,5 +26,11 @@ namespace Funq.Abstract
 		/// <param name="key"></param>
 		/// <returns></returns>
 		bool ContainsKey(TKey key);
+
+		/// <summary>
+		/// Removes a key from the builder.
+		/// </summary>
+		/// <param name="key"></param>
+		void Remove(TKey key);
 	}
 }

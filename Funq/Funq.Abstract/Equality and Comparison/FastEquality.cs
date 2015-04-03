@@ -7,7 +7,6 @@ namespace Funq.Abstract
 		public static readonly IEqualityComparer<T> Default;
 
 		static FastEquality() {
-			var t = typeof (T);
 			Default = EqualityComparer<T>.Default;
 		} 
 	}

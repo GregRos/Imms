@@ -196,7 +196,12 @@ namespace Funq.Collections.Implementation
 				return new TrieVector<TOut>.Leaf(newArr, lineage, ArrSize);
 			}
 
-			public override Node Drop(Lineage lineage)
+			/// <summary>
+			/// Removes the last element.
+			/// </summary>
+			/// <param name="lineage"></param>
+			/// <returns></returns>
+			public override Node RemoveLast(Lineage lineage)
 			{
 #if ASSERTS
 				var old_length = Length;
@@ -206,7 +211,7 @@ namespace Funq.Collections.Implementation
 				Node ret;
 				if (Lineage.AllowMutation(lineage))
 				{
-					ret =  Drop_MUTATES();
+					ret =  Remove_MUTATES();
 				}
 				else
 				{
@@ -221,7 +226,7 @@ namespace Funq.Collections.Implementation
 				return ret;
 			}
 
-			private Node Drop_MUTATES()
+			private Node Remove_MUTATES()
 			{
 				ArrSize--;
 				Length--;

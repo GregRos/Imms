@@ -1,0 +1,16 @@
+Tests For:,SetLike
+Collection/Test,Add,AddRange,Contains,Difference,Except,IEnumerator,Intersection,IsProperSubset,IsProperSuperset,Iterate,Remove,RemoveRange,SetEquals,Union
+FSharp.Set,54.620,61.606,1.897,148.196,57.144,0.465,12.847,0.003,0.003,1.294,7.152,37.392,0.012,27.933
+FunqSet,9.853,7.498,1.148,32.713,11.223,0.596,14.404,0.012,0.006,0.407,9.590,14.282,0.008,14.955
+FunqOrderedSet,20.030,16.679,2.520,50.703,14.829,1.163,24.314,0.005,0.009,0.359,25.820,20.860,0.009,26.508
+System.ImmutableSet,10.460,8.388,1.674,109.238,22.728,1.982,22.918,19.815,0.014,4.831,6.343,20.684,19.266,55.149
+System.ImmutableSortedSet,64.888,64.746,9.819,356.472,85.097,1.414,78.933,65.521,0.015,3.643,12.983,46.790,62.160,109.584
+
+Tests For:,MapLike
+Collection/Test,Add,AddRange,IEnumerator,Iterate,Lookup,RemoveKey,RemoveRange
+FSharp.Map,86.157,95.934,0.572,1.407,2.198,8.651,35.315
+FunqMap,109.814,39.904,0.602,0.383,1.467,12.688,14.581
+FunqOrderedMap,132.466,39.408,0.495,0.290,1.784,16.638,16.371
+System.ImmutableDict,95.394,50.825,2.034,5.373,2.039,10.881,23.448
+System.ImmutableSortedDict,127.763,97.602,1.204,3.403,10.910,17.723,51.534
+

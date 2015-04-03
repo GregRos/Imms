@@ -14,8 +14,8 @@ namespace Funq.Collections
 	{
 		internal class Builder : IterableBuilder<T>
 		{
-			private TrieVector<T>.Node inner;
-			private readonly Lineage lineage;
+			private TrieVector<T>.Node _inner;
+			private Lineage _lineage;
 
 			public Builder()
 				: this(FunqVector<T>.Empty)
@@ -24,23 +24,23 @@ namespace Funq.Collections
 
 			public Builder(FunqVector<T> inner)
 			{
-				this.inner = inner.root;
-				lineage = Lineage.Mutable();
+				this._inner = inner.root;
+				_lineage = Lineage.Mutable();
 			}
 
 		
 
 			public override object Result
 			{
-				get
-				{
-					return new FunqVector<T>(inner);
+				get {
+					_lineage = Lineage.Mutable();
+					return new FunqVector<T>(_inner);
 				}
 			}
 
 			protected override void add(T item)
 			{
-				inner = inner.Add(item, lineage);
+				_inner = _inner.Add(item, _lineage);
 			}
 
 		}
@@ -75,6 +75,11 @@ namespace Funq.Collections
 			if (index >= Length || index < 0) throw Funq.Errors.Arg_out_of_range("index", index);
 			return root[index];
 			
+		}
+
+		protected override IEnumerator<T> GetEnumerator()
+		{
+			return root.GetEnumerator(true);
 		}
 	}
 }

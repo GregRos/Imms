@@ -2,15 +2,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Funq.Abstract;
 using Funq.Collections.Common;
 using System.Linq;
 namespace Funq.Collections.Implementation
 {
-	public static class Ext2 {
-		public static HashSet<T> ToHashSet<T>(this IEnumerable<T> seq) {
-			return new HashSet<T>(seq);
-		}
-	}
+	
 	/// <summary>
 	/// Container class for an hashed avl tree, which stores key-value pairs ordered by a hash value. Keys with identical hashes are placed in buckets.
 	/// </summary>
@@ -26,7 +23,7 @@ namespace Funq.Collections.Implementation
 			/// <summary>
 			/// The singleton that represents an empty node.
 			/// </summary>
-			internal static readonly Node Null = new Node(true);
+			internal static readonly Node Empty = new Node(true);
 			/// <summary>
 			/// A bucket containing key-value pairs with identical hashes.
 			/// </summary>
@@ -38,25 +35,57 @@ namespace Funq.Collections.Implementation
 
 			public IEqualityComparer<TKey> Eq; 
 			public int Height;
-			public Node Left = Null;
-			public Node Right = Null;
+			public Node Left = Empty;
+			public Node Right = Empty;
 			public int NodeCount;
-			public readonly bool IsNull;
+			public readonly bool IsEmpty;
 			public Lineage Lineage;
 			public int Count;
 
-			internal Node(bool isNull = false)
+			internal Node(bool isEmpty = false)
 			{
 				Height = 0;
 				Count = 0;
-				IsNull = isNull;
+				IsEmpty = isEmpty;
+				Eq = FastEquality<TKey>.Default;
 			}
-			
+
+			public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() {
+				var iterator = new TreeIterator(this);
+				while (iterator.MoveNext())
+				{
+					var bucket = iterator.Current.Bucket;
+					while (!bucket.IsEmpty)
+					{
+						yield return Kvp.Of(bucket.Key, bucket.Value);
+						bucket = bucket.Next;
+					}
+				}
+			}  
 			public int Factor
 			{
 				get
 				{
-					return IsNull ? 0 : Left.Height - Right.Height;
+					return IsEmpty ? 0 : Left.Height - Right.Height;
+				}
+			}
+
+			public double CollisionMetric {
+				get {
+					if (IsEmpty) return 0;
+					var total = 0.0;
+					var div = 0;
+					if (!Left.IsEmpty) {
+						total += Left.CollisionMetric;
+						div++;
+					}
+					total += Bucket.Count;
+					div++;
+					if (!Right.IsEmpty) {
+						total += Right.CollisionMetric;
+						div++;
+					}
+					return total/((double)div);
 				}
 			}
 			
@@ -71,12 +100,12 @@ namespace Funq.Collections.Implementation
 				this.Count = left.Count + right.Count + bucket.Count;
 				NodeCount = left.Count + right.Count;
 			}
-
+		
 			public Node NewForKvp(int hash, TKey k, TValue v,  Lineage lineage)
 			{
-				return new Node(hash, Bucket.FromKvp(k, v, Eq, lineage), Null, Null, Eq, lineage);
+				return new Node(hash, Bucket.FromKvp(k, v, Eq, lineage), Empty, Empty, Eq, lineage);
 			}
-
+	
 			public static Node WithChildren(Node node, Node left, Node right, Lineage lineage)
 			{
 				if (node.Lineage.AllowMutation(lineage))
@@ -95,50 +124,24 @@ namespace Funq.Collections.Implementation
 				return node;
 			}
 			
-			public Node InitializeFromNull(TKey k, TValue v, IEqualityComparer<TKey> eq, Lineage lin) {
-				int hash = k.GetHashCode();
-				return new Node(hash, Bucket.FromKvp(k, v, eq, lin), Null, Null, eq, lin);
-			}
-
-			public Node InitializeFromNullRange(int hash, IEnumerable<KeyValuePair<TKey, TValue>> seq, IEqualityComparer<TKey> eq,
-				Lineage lin) {
-				var bucket = Bucket.FromRange(seq, eq, lin);
-				return new Node(hash, bucket, Null, Null, eq, lin);
-			}
-
-			public Node DropRange(int hash, LinkedList<TKey> keys, Lineage lin) {
-				if (IsNull) return null;
-				if (hash == Hash) {
-					var newBucket = Bucket.DropRange(keys, lin);
-					if (newBucket == null) return null;
-					if (newBucket.IsNull) return AvlErase(lin);
-					return WithBucket(this, newBucket, lin);
-				}
-				else if (hash < Hash) {
-					var newLeft = Left.DropRange(hash, keys, lin);
-					if (newLeft == null) return null;
-					return WithChildren(this, newLeft, Right, lin);
+			
+			public Node Root_Add(TKey k, TValue v, Lineage lin, IEqualityComparer<TKey> eq, bool overwrite) {
+				if (this.IsEmpty) {
+					int hash = eq.GetHashCode(k);
+					return new Node(hash, Bucket.FromKvp(k, v, eq, lin), Empty, Empty, eq,lin);
 				}
 				else {
-					var newRight = Right.DropRange(hash, keys, lin);
-					if (newRight == null) return null;
-					return WithChildren(this, Left, newRight, lin);
+					int hash = Eq.GetHashCode(k);
+					return AvlAdd(hash, k, v, lin, overwrite);
 				}
 			}
-			
-			public Node Root_Add(TKey k, TValue v, Lineage lin, bool overwrite) {
-				int hash = k.GetHashCode();
-				if (this.IsNull) {
-					throw ImplErrors.Invalid_null_invocation;
-				}
-				return AvlAdd(hash, k, v, lin, overwrite);
-			}
-			
+	
 			public Node Root_Remove(TKey k, Lineage lin) {
-				int hash = k.GetHashCode();
+				if (IsEmpty) return this;
+				int hash = Eq.GetHashCode(k);
 				return AvlRemove(hash, k, lin);
 			}
-			//[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		
 			public static Node WithBucket(Node basedOn, Bucket newBucket, Lineage lineage)
 			{
 				if (basedOn.Lineage.AllowMutation(lineage))
@@ -158,55 +161,51 @@ namespace Funq.Collections.Implementation
 			/// <param name="right"></param>
 			/// <param name="lineage"></param>
 			/// <returns></returns>
-			public static Node AvlBalance(Node root, Node left, Node right, Lineage lineage)
+			public Node AvlBalance(Node left, Node right, Lineage lineage)
 			{
 				var factor = left.Height - right.Height;
 				Node newRoot = null;
-				var rFactor = right.IsNull ? 0 : right.Left.Height - right.Right.Height;
-				var lFactor = left.IsNull ? 0 : left.Left.Height - left.Right.Height;
-				switch (factor)
-				{
-					case -2:
-						if (rFactor == 0 || rFactor == -1)
-						{
-							var newLeft = WithChildren(root, left, right.Left, lineage);
-							newRoot = WithChildren(right, newLeft, right.Right, lineage);
-						}
-						else if (rFactor == 1)
-						{
-							var newLeft = WithChildren(root, left, right.Left.Left, lineage);
-							var rootFrom = right.Left;
-							var newRight = WithChildren(right, right.Left.Right, right.Right, lineage);
-							newRoot = WithChildren(rootFrom, newLeft, newRight, lineage);
-						}
-						else throw ImplErrors.Invalid_execution_path;
-						break;
-					case 2:
-						if (lFactor == 1 || lFactor == 0)
-						{
-							var newRight = WithChildren(root, left.Right, right, lineage);
-							newRoot = WithChildren(left, left.Left, newRight, lineage);
-						}
-						else if (lFactor == -1)
-						{
-							var newRight = WithChildren(root, left.Right.Right, right, lineage);
-							var rootFrom = left.Right;
-							var newLeft = WithChildren(left, left.Left, left.Right.Left, lineage);
-							newRoot = WithChildren(rootFrom, newLeft, newRight, lineage);
-						}
-						else throw ImplErrors.Invalid_execution_path;
-						break;
-
-					case 0:
-					case 1:
-					case -1:
-						newRoot = WithChildren(root, left, right, lineage);
-						break;
-					default:
-						throw ImplErrors.Invalid_execution_path;
+#if ASSERTS
+				factor.IsBetween(-2, 2);
+				int oldCount = Bucket.Count + left.Count + right.Count;
+#endif
+				
+				if (factor == -2) {
+					var rFactor = right.Factor;
+#if ASSERTS
+					rFactor.IsBetween(-1, 1);
+#endif
+					if (rFactor == 1) {
+						var newLeft = WithChildren(this, left, right.Left.Left, lineage);
+						var rootFrom = right.Left;
+						var newRight = WithChildren(right, right.Left.Right, right.Right, lineage);
+						newRoot = WithChildren(rootFrom, newLeft, newRight, lineage);
+					}
+					else {
+						var newLeft = WithChildren(this, left, right.Left, lineage);
+						newRoot = WithChildren(right, newLeft, right.Right, lineage);
+					}
 				}
+				else if (factor == 2) {
+					var lFactor = left.Factor;
+#if ASSERTS
+					lFactor.IsBetween(-1, 1);
+#endif
+					if (lFactor == -1) {
+						var newRight = WithChildren(this, left.Right.Right, right, lineage);
+						var rootFrom = left.Right;
+						var newLeft = WithChildren(left, left.Left, left.Right.Left, lineage);
+						newRoot = WithChildren(rootFrom, newLeft, newRight, lineage);
+					}
+					else {
+						var newRight = WithChildren(this, left.Right, right, lineage);
+						newRoot = WithChildren(left, left.Left, newRight, lineage);
+					}
+				}
+				else newRoot = WithChildren(this, left, right, lineage);
 #if ASSERTS
 				newRoot.IsBalanced.IsTrue();
+				newRoot.Count.Is(oldCount);
 #endif
 
 				return newRoot;
@@ -221,92 +220,56 @@ namespace Funq.Collections.Implementation
 			{
 				get
 				{
-					return this.IsNull ? 0 : (int) Math.Ceiling(2 * Math.Log(Count, 2f));
+					return this.IsEmpty ? 0 : (int) Math.Ceiling(2 * Math.Log(Count, 2f));
 				}
 			}
 			public Node AvlAdd(int hash, TKey key, TValue value, Lineage lineage, bool overwrite)
 			{
-				var initialCount = this.Count;
-				if (this.IsNull) {
+#if ASSERTS
+				var initialCount = Count;
+#endif
+				if (this.IsEmpty) {
 					throw ImplErrors.Invalid_execution_path;
 				}
 				Node ret;
 				if (hash < Hash) {
-					var newLeft = Left.IsNull
+					var newLeft = Left.IsEmpty
 						? NewForKvp(hash, key, value, lineage)
 						: Left.AvlAdd(hash, key, value, lineage, overwrite);
 					if (newLeft == null) return null;
-					ret = AvlBalance(this, newLeft, Right, lineage);
+					ret = AvlBalance(newLeft, Right, lineage);
 				}
-				else if (hash == Hash) {
+				else if (hash > Hash) {
+					var newRight = Right.IsEmpty
+						? NewForKvp(hash, key, value, lineage)
+						: Right.AvlAdd(hash, key, value, lineage, overwrite);
+					if (newRight == null) return null;
+					ret = AvlBalance(Left, newRight, lineage);
+				}
+				else {
 					var newBucket = Bucket.Add(key, value, lineage, overwrite);
 					if (newBucket == null) return null;
 					ret = WithBucket(this, newBucket, lineage);
 				}
-				else {
-					var newRight = Right.IsNull
-						? NewForKvp(hash, key, value, lineage)
-						: Right.AvlAdd(hash, key, value, lineage, overwrite);
-					if (newRight == null) return null;
-					ret = AvlBalance(this, Left, newRight, lineage);
-				}
+
+				
 #if ASSERTS
 				ret.Count.Is(x => x <= initialCount + 1 && x >= initialCount);
 				ret.IsBalanced.IsTrue();
 				ret.Root_Contains(key).IsTrue();
+				ret.AllBuckets.Count(b => b.Find(key).IsSome).Is(1);
 #endif
 				return ret;
 			}
-
-			/// <summary>
-			/// Use to add lots of kvps with the same hash.
-			/// </summary>
-			/// <param name="hash"></param>
-			/// <param name="kvps"></param>
-			/// <returns></returns>
-			public Node AddRange(int hash, LinkedList<KeyValuePair<TKey, TValue>> kvps, Lineage lin) {
-				if (IsNull) throw ImplErrors.Invalid_null_invocation;
-				Node ret;
-				switch (hash.CompareTo(Hash)) {
-					case -1:
-						Node newLeft;
-						if (Left.IsNull) {
-							var newBucket = Bucket.FromRange(kvps, Eq, lin);
-							newLeft = new Node(hash, newBucket, Null, Null, Eq, lin);
-						}
-						else {
-							newLeft = Left.AddRange(hash, kvps, lin);
-						}
-						ret =  AvlBalance(this, newLeft, Right, lin);
-						break;
-					case 0:
-						ret = WithBucket(this, Bucket.AddRangeHashCollisions(kvps, lin), lin);
-						break;
-					case 1:
-						Node newRight;
-						if (Right.IsNull) {
-							var newBucket = Bucket.FromRange(kvps, Eq, lin);
-							newRight = new Node(hash, newBucket, Null, Null, Eq, lin);
-						}
-						else {
-							newRight = Right.AddRange(hash, kvps, lin);
-						}
-						ret = AvlBalance(this, Left, newRight, lin);
-						break;
-					default:
-						throw ImplErrors.Invalid_execution_path;
-				}
-				return ret;
-			}
-
+		
 			public Node ExtractMin(out Node min, Lineage lineage)
 			{
-				if (this.IsNull) throw Errors.Is_empty;
+				if (this.IsEmpty) throw Errors.Is_empty;
 				var initialCount = this.Count;
 				Node ret;
-				if (!Left.IsNull)
+				if (!Left.IsEmpty)
 				{
-					 ret = AvlBalance(this, Left.ExtractMin(out min, lineage), Right, lineage);
+					 ret = AvlBalance(Left.ExtractMin(out min, lineage), Right, lineage);
 				}
 				else
 				{
@@ -344,49 +307,46 @@ namespace Funq.Collections.Implementation
 
 			}
 
-			public override string ToString()
-			{
-				return string.Join(", ", Pairs);
+			public override string ToString() {
+				return string.Format("({0}, {1}): {2}", Hash, Bucket, string.Join(", ", Pairs));
+				
 			}
 
 			public Node UnionNode(Node other, Lineage lineage, Func<TKey, TValue, TValue, TValue> collision) {
-				if (this.IsNull && other.IsNull) return Null;
-				else if (this.IsNull) {
+				if (this.IsEmpty && other.IsEmpty) return Empty;
+				else if (this.IsEmpty) {
 					return other;
 				}
 
 				if (other.Hash < Hash) {
 					var newLeft = Left.UnionNode(other, lineage, collision);
-					return AvlBalance(this, newLeft, Right, lineage);
+					return AvlBalance(newLeft, Right, lineage);
 				}
-				else if (other.Hash == Hash) {
-					var newBucket = Bucket.Union(other.Bucket, collision);
-					return WithBucket(this, newBucket, lineage);
-				}
-				else {
+				if (other.Hash > Hash) {
 					var newRight = Right.UnionNode(other, lineage, collision);
-					return AvlBalance(this, Left, newRight, lineage);
+					return AvlBalance(Left, newRight, lineage);
 				}
+				var newBucket = Bucket.Union(other.Bucket, collision, lineage);
+				return WithBucket(this, newBucket, lineage);
 			}
 
 			public static Node Concat(Node leftBranch, Node pivot, Node rightBranch, Lineage lin)
 			{
 				var newFactor = leftBranch.Height - rightBranch.Height;
 				Node balanced;
+#if ASSERTS
 				var leftCount = leftBranch.Count;
 				var rightCount = rightBranch.Count;
-				if (newFactor >= -1 && newFactor <= 1) {
-					balanced = WithChildren(pivot, leftBranch, rightBranch, lin);
-				}
-				else if (newFactor >= 2)
-				{
+#endif
+				if (newFactor >= 2) {
 					var newRight = Concat(leftBranch.Right, pivot, rightBranch, lin);
-					balanced =  AvlBalance(leftBranch, leftBranch.Left, newRight, lin);
+					balanced = leftBranch.AvlBalance(leftBranch.Left, newRight, lin);
 				}
-				else
-				{
+				else if (newFactor <= -2) {
 					var newLeft = Concat(leftBranch, pivot, rightBranch.Left, lin);
-					balanced =  AvlBalance(rightBranch, newLeft, rightBranch.Right, lin);
+					balanced = rightBranch.AvlBalance(newLeft, rightBranch.Right, lin);
+				} else {
+					balanced = WithChildren(pivot, leftBranch, rightBranch, lin);
 				}
 #if ASSERTS
 				AssertEx.IsTrue(balanced.Count == 1 + leftCount + rightCount);
@@ -397,7 +357,7 @@ namespace Funq.Collections.Implementation
 
 			public void Split(int pivot, out Node leftBranch, out Node central, out Node rightBranch, Lineage lin) {
 				var myCount = Count;
-				if (this.IsNull)
+				if (this.IsEmpty)
 				{
 					leftBranch = this;
 					rightBranch = this;
@@ -410,18 +370,17 @@ namespace Funq.Collections.Implementation
 					leftBranch = Concat(this.Left, this, right_l, lin);
 					rightBranch = right_r;
 				}
-				else if (pivot == this.Hash)
-				{
-					leftBranch = this.Left;
-					central = this;
-					rightBranch = this.Right;
-				}
-				else
-				{
+				else if (pivot < Hash) {
 					Node left_l, left_r;
 					this.Left.Split(pivot, out left_l, out central, out left_r, lin);
 					leftBranch = left_l;
 					rightBranch = Concat(left_r, this, this.Right, lin);
+				}
+				else
+				{
+					leftBranch = this.Left;
+					central = this;
+					rightBranch = this.Right;
 				}
 #if ASSERTS
 				var totalCount = leftBranch.Count + rightBranch.Count + (central == null ? 0 : 1);
@@ -433,14 +392,14 @@ namespace Funq.Collections.Implementation
 			{
 				get
 				{
-					return (this.IsNull ? 0 : this.Left.Height - this.Right.Height) >= -1 && (this.IsNull ? 0 : this.Left.Height - this.Right.Height) <= 1;
+					return (this.IsEmpty ? 0 : this.Left.Height - this.Right.Height) >= -1 && (this.IsEmpty ? 0 : this.Left.Height - this.Right.Height) <= 1;
 				}
 			}
 
 			public static Node Concat(Node left, Node right, Lineage lin)
 			{
-				if (left.IsNull) return right;
-				if (right.IsNull) return left;
+				if (left.IsEmpty) return right;
+				if (right.IsEmpty) return left;
 				Node central;
 				left = left.ExtractMax(out central, lin);
 				return Concat(left, central, right, lin);
@@ -469,9 +428,12 @@ namespace Funq.Collections.Implementation
 				else relation |= SetRelation.None;
 				return relation;
 			}
-			public Node Except(Node other, Lineage lin, Func<TKey, TValue, TValue, Option<TValue>> subtraction = null )
+
+		
+
+			public Node Except<TValue2>(HashedAvlTree<TKey, TValue2>.Node other, Lineage lin, Func<TKey, TValue, TValue2, Option<TValue>> subtraction = null)
 			{
-				if (this.IsNull || other.IsNull) return this;
+				if (this.IsEmpty || other.IsEmpty) return this;
 				Node this_lesser, this_greater;
 				Node central;
 #if ASSERTS
@@ -492,11 +454,11 @@ namespace Funq.Collections.Implementation
 				}
 				else
 				{
-					var exceptBucket = central.Bucket.Except(other.Bucket);
-					central = WithBucket(central, exceptBucket, lin);
-					ret = exceptBucket.IsNull
+					var exceptBucket = central.Bucket.Except(other.Bucket, lin, subtraction);
+					
+					ret = exceptBucket.IsEmpty
 						? Concat(except_lesser, except_greater, lin)
-						: Concat(except_lesser, central, except_greater, lin);
+						: Concat(except_lesser, WithBucket(central, exceptBucket, lin), except_greater, lin);
 				}
 #if ASSERTS
 				AssertEx.IsTrue(exceptLesserCount <= thisLesserCount);
@@ -543,7 +505,7 @@ namespace Funq.Collections.Implementation
 
 			
 			public bool ForEachWhileNode(Func<Node, bool> iter) {
-				if (IsNull) return true;
+				if (IsEmpty) return true;
 				return Left.ForEachWhileNode(iter) && iter(this) && Right.ForEachWhileNode(iter);
 			}
 
@@ -560,8 +522,8 @@ namespace Funq.Collections.Implementation
 			}
 			public Node Union(Node b, Lineage lin, Func<TKey, TValue, TValue, TValue> collision = null)
 			{
-				if (IsNull) return b;
-				if (b.IsNull) return this;
+				if (IsEmpty) return b;
+				if (b.IsEmpty) return this;
 				var myCount = Count;
 				var bCount = b.Count;
 #if ASSERTS
@@ -576,7 +538,7 @@ namespace Funq.Collections.Implementation
 					center_node = b;
 				}
 				else {
-					var newBucket = b.Bucket.Union(center_node.Bucket, collision);
+					var newBucket = b.Bucket.Union(center_node.Bucket, collision, lin);
 					center_node = WithBucket(center_node, newBucket, lin);
 				}
 				var unitedLeft = a_lesser.Union(b.Left, lin, collision);
@@ -598,7 +560,7 @@ namespace Funq.Collections.Implementation
 			{
 				if (startIndex > endIndex)
 				{
-					return Null;
+					return Empty;
 				}
 				int pivotIndex = startIndex + (endIndex - startIndex) / 2;
 				Node left = FromSortedList(sorted, startIndex, pivotIndex - 1, lineage);
@@ -610,21 +572,19 @@ namespace Funq.Collections.Implementation
 			public IEnumerable<StructTuple<Node, Node>> IntersectElements(Node other)
 			{
 
-				if (IsNull || other.IsNull) yield break;
+				if (IsEmpty || other.IsEmpty) yield break;
 				var a_iterator = new TreeIterator(this);
 				var b_iterator = new TreeIterator(other);
 				var success = a_iterator.MoveNext();
 				var pivotInA = true;
 				Node pivot = a_iterator.Current;
-				while (!a_iterator.IsEnded || !b_iterator.IsEnded)
-				{
+				while (!a_iterator.IsEnded || !b_iterator.IsEnded) {
 					var trySeekIn = pivotInA ? b_iterator : a_iterator;
 					success = trySeekIn.SeekGreaterThan(pivot.Hash);
 					if (!success) break;
 					var maybePivot = trySeekIn.Current;
-					if (maybePivot.Hash == pivot.Hash)
-					{
-						yield return StructTuple.Create(pivot, maybePivot);
+					if (maybePivot.Hash == pivot.Hash) {
+						yield return pivotInA ? StructTuple.Create(pivot, maybePivot) : StructTuple.Create(maybePivot, pivot);						
 						pivotInA = !pivotInA;
 						trySeekIn = pivotInA ? a_iterator : b_iterator;
 						success = trySeekIn.MoveNext();
@@ -639,23 +599,58 @@ namespace Funq.Collections.Implementation
 				}
 			}
 
-			public Node Intersect(Node other, Func<TKey, TValue, TValue, TValue> collision, Lineage lineage)
+			public IEnumerable<Node> DebugNodes {
+				get {
+					var iter = new TreeIterator(this);
+					while (iter.MoveNext()) {
+						yield return iter.Current;
+					}
+				}
+			}
+
+			public bool Debug_Intersect(List<TKey> result, Node other)
 			{
+				var kvps = new HashSet<TKey>(result);
+				var list = new HashSet<TKey>();
+				foreach (var item in this.Pairs)
+				{
+					if (other.Root_Contains(item.Key))
+					{
+						list.Add(item.Key);
+					}
+				}
+				var ret = kvps.SetEquals(list);
+				if (!ret)
+				{
+					Debugger.Break();
+				}
+				return ret;
+			}
+
+
+			public Node Intersect(Node other, Func<TKey, TValue, TValue, TValue> collision, Lineage lineage) {
+
 				var intersection = this.IntersectElements(other);
 				var list = new List<StructTuple<int, Bucket>>();
 				foreach (var pair in intersection) {
 					var newBucket = pair.First.Bucket.Intersect(pair.Second.Bucket, lineage, collision);
-					if (!newBucket.IsNull) list.Add(StructTuple.Create(pair.First.Hash, newBucket));
+					if (!newBucket.IsEmpty) list.Add(StructTuple.Create(pair.First.Hash, newBucket));
 				}
+#if ASSERTS
+				
+				var duplicates = list.Select(x => new {x, count = list.Count(y => y.First.Equals(x.First))}).OrderByDescending(x => x.count);
+				list.Count.Is(x => x <= Count && x <= other.Count);
+				Debug_Intersect(list.SelectMany(x => x.Second.Buckets.Select(X => X.Key)).ToList(), other);
+#endif
 				return FromSortedList(list, 0, list.Count - 1, lineage);
 			}
 
 			public Node ExtractMax(out Node max, Lineage lineage)
 			{
-				if (this.IsNull) throw ImplErrors.Invalid_execution_path;
-				if (!Right.IsNull)
+				if (this.IsEmpty) throw ImplErrors.Invalid_execution_path;
+				if (!Right.IsEmpty)
 				{
-					return AvlBalance(this, Left, Right.ExtractMax(out max, lineage), lineage);
+					return AvlBalance(Left, Right.ExtractMax(out max, lineage), lineage);
 				}
 				max = this;
 				return Left;
@@ -669,17 +664,16 @@ namespace Funq.Collections.Implementation
 			public Option<TValue> Find(int hash, TKey key)
 			{
 				var cur = this;
-				while (!cur.IsNull) {
+				while (!cur.IsEmpty) {
 					if (hash < cur.Hash) {
-						//if (cur.Left.IsNull) Debugger.Break();
+						//if (cur.Left.IsEmpty) Debugger.Break();
 						cur = cur.Left;
 					}
-					else if (hash == cur.Hash) {
-						return cur.Bucket.Find(key);
-					}
-					else {
-						//if (cur.Right.IsNull) Debugger.Break();
+					else if (hash > cur.Hash) {
 						cur = cur.Right;
+					}
+					else{
+						return cur.Bucket.Find(key);
 					}
 				}
 				return Option.None;
@@ -687,72 +681,72 @@ namespace Funq.Collections.Implementation
 
 			public HashedAvlTree<TKey, TValue2>.Node Apply<TValue2>(Func<TKey, TValue, TValue2> selector, Lineage lineage)
 			{
-				if (this.IsNull)
+				if (this.IsEmpty)
 				{
-					return HashedAvlTree<TKey, TValue2>.Node.Null;
+					return HashedAvlTree<TKey, TValue2>.Node.Empty;
 				}
-				var defaultNull = HashedAvlTree<TKey, TValue2>.Node.Null;
-				var children = (Left.IsNull ? 0 : 1) << 1 | (Right.IsNull ? 0 : 1);
-				var appliedLeft = Left.IsNull ? defaultNull : Left.Apply(selector, lineage);
+				var defaultNull = HashedAvlTree<TKey, TValue2>.Node.Empty;
+				var children = (Left.IsEmpty ? 0 : 1) << 1 | (Right.IsEmpty ? 0 : 1);
+				var appliedLeft = Left.IsEmpty ? defaultNull : Left.Apply(selector, lineage);
 				var appliedBucket = Bucket.Apply(selector, lineage);
-				var appliedRight = Right.IsNull ? defaultNull :  Right.Apply(selector, lineage);
+				var appliedRight = Right.IsEmpty ? defaultNull :  Right.Apply(selector, lineage);
 				return new HashedAvlTree<TKey, TValue2>.Node(Hash, appliedBucket, appliedLeft, appliedRight, Eq, lineage);
 			}
 
 
 			public bool ForEachWhile(Func<TKey, TValue, bool> act)
 			{
-				if (this.IsNull) return true;
+				if (this.IsEmpty) return true;
 				return Left.ForEachWhile(act) && Bucket.ForEachWhile(act) && Right.ForEachWhile(act);
 			}
 
 			public Node AvlErase(Lineage lineage)
 			{
-				var children = (Left.IsNull ? 0 : 1) << 1 | (Right.IsNull ? 0 : 1);
-				switch (children)
-				{
-					case 0 << 1 | 0:
-						return Null;
-					case 1 << 1 | 0:
-						return Left;
-					case 0 << 1 | 1:
-						return Right;
-					case 1 << 1 | 1:
-						Node rep;
-						Node newRight = Right;
-						Node newLeft = Left;
-						if (Left.Height > Right.Height)
-						{
-							newRight = Right.ExtractMin(out rep, lineage);
-						}
-						else
-						{
-							newLeft = Left.ExtractMax(out rep, lineage);
-						}
-						return AvlBalance(rep, newLeft, newRight, lineage);
-					default:
-						throw ImplErrors.Invalid_execution_path;
+				var leftEmpty = Left.IsEmpty;
+				var rightEmpty = Right.IsEmpty;
+				if (leftEmpty) {
+					return Right;
 				}
+				if (rightEmpty) {
+					return Left;
+				}
+				Node rep;
+				Node newRight = Right;
+				Node newLeft = Left;
+				if (Left.Height > Right.Height)
+				{
+					newRight = Right.ExtractMin(out rep, lineage);
+				}
+				else
+				{
+					newLeft = Left.ExtractMax(out rep, lineage);
+				}
+				return rep.AvlBalance(newLeft, newRight, lineage);
 			}
 
-			public Node AvlRemove(int hash, TKey key, Lineage lineage)
-			{
-				if (this.IsNull) return null;
+			public Node AvlRemove(int hash, TKey key, Lineage lineage) {
+				Node ret;
+				int oldCount = Count;
+				if (this.IsEmpty) return null;
 				if (hash < Hash) {
 					Node newLeft = Left.AvlRemove(hash, key, lineage);
 					if (newLeft == null) return null;
-					return AvlBalance(this, newLeft, Right, lineage);
+					ret= AvlBalance(newLeft, Right, lineage);
 				}
 				else if (hash > Hash) {
 					Node newRight = Right.AvlRemove(hash, key, lineage);
 					if (newRight == null) return null;
-					return AvlBalance(this, Left, newRight, lineage);
+					ret= AvlBalance(Left, newRight, lineage);
 				}
 				else {
 					var newBucket = Bucket.Remove(key, lineage);
 					if (newBucket == null) return null;
-					return !newBucket.IsNull ? WithBucket(this, newBucket, lineage) : this.AvlErase(lineage);
+					ret= !newBucket.IsEmpty ? WithBucket(this, newBucket, lineage) : this.AvlErase(lineage);
 				}
+#if ASSERTS
+				ret.Count.Is(oldCount - 1);
+#endif
+				return ret;
 			}
 		}
 	}
