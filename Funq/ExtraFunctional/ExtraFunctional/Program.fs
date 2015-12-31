@@ -17,12 +17,6 @@ let getResult n =
 
 [<EntryPoint>]
 let main argv = 
-    let s = 
-        (1, 2, 3, 4)
-        |> Tuple.mapAll (fun x -> x + 1)
-        |> Tuple.reduce (+)
-
-
     let rnd = Random()
     let get = getResult 10
     let list = [for n in 1000 .. 1000 do
