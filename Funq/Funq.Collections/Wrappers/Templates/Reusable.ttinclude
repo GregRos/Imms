@@ -1,4 +1,4 @@
-﻿<#@ assembly name="Microsoft.VisualStudio.TextTemplating.Interfaces.11.0" #>
+﻿ <#@ assembly name="Microsoft.VisualStudio.TextTemplating.Interfaces.11.0" #>
 <#@ import namespace="System.Collections.Generic"#>
 <#@ import namespace="Microsoft.VisualStudio.TextTemplating"#>
 <#@ import namespace="Microsoft.VisualStudio.TextTemplating.VSHost"#>
@@ -20,7 +20,7 @@ class ParameterizedTemplate
 	}
     
     public string Process(ITextTemplatingEngineHost host, params Expression<Func<string, string>>[] parameters)
-	{
+	{         
 		var provider = host as IServiceProvider;
 		var t4 = provider.GetService(typeof(STextTemplating)) as ITextTemplating;
 		var prototypePath = host.ResolvePath(_prototypeFile);
@@ -41,16 +41,6 @@ class ParameterizedTemplate
 
    public static readonly ParameterizedTemplate ListLikeClass =
 	new ParameterizedTemplate(@"..\Templates\ListLikeClass.cs");
-      public static readonly ParameterizedTemplate SetLikeClass =
-	new ParameterizedTemplate(@"..\Templates\SetLikeClass.cs");
-      public static readonly ParameterizedTemplate MapLikeClass =
-	new ParameterizedTemplate(@"..\Templates\MapLikeClass.cs");
-
-   public static readonly ParameterizedTemplate OrderedSetLikeClass = 
-	new ParameterizedTemplate(@"..\Templates\OrderedSetLikeClass.cs");	
-
-   public static readonly ParameterizedTemplate OrderedMapLikeClass = 
-	new ParameterizedTemplate(@"..\Templates\OrderedMapLikeClass.cs");	
 
 }
 	

@@ -3,7 +3,7 @@
 module Funq.Tests.Caching
 
 open Microsoft.FSharp.Quotations
-open Microsoft.FSharp.Linq.QuotationEvaluation
+open FSharpx.Linq.QuotationEvaluation
 open System.Collections.Concurrent
 let delay f arg = fun () -> f arg
 type private Cache<'q>() = 

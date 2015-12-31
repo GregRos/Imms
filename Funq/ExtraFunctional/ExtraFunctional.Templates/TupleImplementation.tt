@@ -1,0 +1,205 @@
+﻿<#@ template debug="true" hostspecific="true" language="C#"  #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ assembly name="EnvDTE"#>
+<#@ assembly name="$(TargetPath)"#>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="Microsoft.VisualStudio.TextTemplating" #>
+<#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="ExtraFunctional.CSharp"#>
+<#@ output extension=".fs" #>
+<#
+	var template = new MyTemplate();
+	return template.TransformText();
+#>
+<#+
+
+	private static int MaxArity = 10;
+
+	private static IEnumerable<int> Rng(int min, int max) {
+		return max <= min ? Enumerable.Empty<int>() : Enumerable.Range(min, max - min);
+	}
+
+	private static string StatInt(int i) {
+		return "S" + i;
+	}
+
+	private static string ParamName(string name, int i) {
+		return name + i;
+	}
+
+	private static IEnumerable<string> ParamNames(string name, int min, int max) {
+		return Rng(min, max).Select(x => ParamName(name, x));
+	}
+
+	private class MyTemplate : TextTransformation {
+		public override string TransformText() {
+#>
+namespace ExtraFunctional
+#nowarn"0044" //Hide obsolete warning.
+open System
+open System.Runtime.CompilerServices
+[<AutoOpen>]
+module TypeLiterals = 
+	type IStaticInt =
+		abstract Value : int
+
+
+<#+
+			var main = "a";
+			var second = "b";
+			var func = "f";
+			var input = "inp";
+			var output = "outp";
+			var warning = "This object is not meant to be visible or used in user code.";
+			for (int i = 0; i <= MaxArity; i++) {
+#>
+	
+
+	type <#=StatInt(i)#> = <#=StatInt(i)#> with interface IStaticInt with member x.Value = <#= i#>
+<#+
+			}//end literals for loop
+#>
+	[<AutoOpen>]
+	module Ext = 
+		type IStaticInt with
+			member x.Value = x.Value
+
+[<Obsolete("<#=warning#>")>]
+module TupleImplementation =
+	[<Literal>]
+	let ImplementationWarning = "<#=warning#>"
+<#+
+			var mainNames = Fun.Of((int st, int en) => ParamNames(main, st, en));
+			var secondNames = Fun.Of((int st, int en) => ParamNames(main, st, en));
+			var outNames = Fun.Of((int st, int en) => ParamNames(output, st, en));
+			var inNames = Fun.Of((int st, int en) => ParamNames(input, st, en));
+			var funcNames = Fun.Of((int st, int en) => ParamNames(func, st, en));
+			var generalTupleTypeName =
+				Fun.Of((int i) => "Tuple{0}<{1}>".FormatWith(i, mainNames(0, i).SelectFormat("'{0}").Join(", ")));
+			var sameTypeTupleName =
+				Fun.Of((int i) => "Tuple{0}<'{1}>".FormatWith(i, main));
+			for (int i = 2; i <= MaxArity; i++) {
+#>
+	[<Obsolete(ImplementationWarning)>]
+	[<Struct>]
+	type <#=generalTupleTypeName(i)#>(<#=mainNames(0,i).SelectFormat("{0} : '{0}").Join(", ")#>) =
+		member x.Invoke <#=func#> = <#=func#> <#=mainNames(0, i).Join(" ")#>
+		member x.StaticLength() = <#=StatInt(i)#>
+		member x.Last() = <#=ParamName(main,i-1)#>
+
+		member x.Rev() = (<#=mainNames(0, i).Reverse().Join(", ")#>)
+
+		member x.Zip(<#=secondNames(0, i).Join(", ")#>) = 
+			<#= mainNames(0, i).ZipFormat(secondNames(0, i), "({0}, {1})").Join(", ")#>
+
+		member x.Cast<'t>() = <#= mainNames(0, i).SelectFormat("{0} :> obj :?> 't").Join(", ") #>
+
+		member x.Map(<#=funcNames(0, i).Join(", ")#>) =
+			<#=funcNames(0, i).ZipFormat(mainNames(0, i), "{0} {1}").Join(", ")#>
+
+		member x.Fold(initial, <#=funcNames(0, i).Join(", ")#>) =
+			<#=ParamName(func, 0)#> <#=ParamName(main, 0)#> initial |> <#=funcNames(1, i).ZipFormat(mainNames(1, i), "{0} {1}").Join(" |> ")#>
+
+		member x.Reduce(<#=funcNames(0, i-1).Join(", ")#>) =
+			<#=ParamName(func, 0)#> <#=mainNames(0, 2).Join(" ")#> <#=funcNames(1, i-1).ZipFormat(mainNames(2, i), "{0} {1}").JoinStart(" |> ")#>
+<#+
+				for (int j = 0; j < i; j++) {
+					var arr = mainNames(0, i).ToArray();
+					arr[j] = ParamName(second, j);
+					var res = arr.Join(", ");
+#>
+		member x.Item <#=StatInt(j)#> = <#=ParamName(main, j)#>
+
+		member x.SetItem(<#=StatInt(j)#>, <#=ParamName(second, j)#>) = <#=res#>
+<#+
+				} // j loop
+				if (i != MaxArity) {
+#>
+		member x.SetItem(<#=StatInt(i)#>, <#=ParamName(second, i)#>) = <#=mainNames(0,i).Join(", ")#>, <#=ParamName(second, i)#> 
+
+		member x.Cons <#=ParamName(second, 0)#> = <#=ParamName(second, 0)#>, <#=mainNames(0, i).Join(", ")#>
+
+		member x.Conj <#=ParamName(second, i)#> = <#=mainNames(0, i).Join(", ")#>, <#=ParamName(second, i)#>
+<#+
+				} //end i != MaxArity
+				if (i != 2) {
+#>
+		member x.Initial() = <#=mainNames(0, i-1).Join(", ")#>
+
+		member x.Tail() = <#=mainNames(1, i).Join(", ")#>
+
+<#+
+				} //end i != 2
+#>
+	
+	type FuncTuple<'<#=input#>, <#=outNames(0, i).SelectFormat("'{0}").Join(", ")#>>(<#=Rng(0,i).SelectFormat("{1} : '{2} -> '{3}", x => new [] {func + x,input, output + x}).Join(", ")#>) = 
+		member x.Apply arg = <#=funcNames(0, i).SelectFormat("{0} arg").Join(", ") #>
+
+	[<Obsolete(ImplementationWarning)>]
+	[<Struct>]
+	type <#=sameTypeTupleName(i)#>(<#=mainNames(0, i).SelectFormat("{0} : '{1}", main).Join(", ")#>) =
+		member x.Set(index, v) = 
+			match index with
+<#+
+				for (int j = 0; j < i; j++) {
+#>
+				| <#=j#> -> <#=mainNames(0, i).ReplaceAt(j, "v").Join(", ")#>
+<#+
+				} //end match loop
+#>
+				| _ -> invalidArg "index" (sprintf "The index '%d' is out of bounds of the tuple, which has '%d' elements" index <#=i#> )
+		member x.ToList() = <#="[{0}]".FormatWith(mainNames(0, i).Join("; "))#>
+		member x.ToArray() = <#="[|{0}|]".FormatWith(mainNames(0, i).Join("; "))#>
+		member x.Map <#=func#> = <#=mainNames(0, i).SelectFormat("{1} {0}", func).Join(", ")#>
+		member x.Fold initial <#=func#> = <#=func#> <#=ParamName(main, 0)#> initial |> <#=mainNames(1, i).SelectFormat("{1} {0}", func).Join(" |> ")#>
+		member x.Reduce <#=func#> = <#=func#> <#=ParamName(main, 1)#> <#=ParamName(main, 0)#> <#=mainNames(1, i).SelectFormat("{1} {0}", func).JoinStart(" |> ")#>
+		member x.Nth index = 
+			match index with
+<#+
+				for (int j = 0; j < i; j++) {
+#>
+			| <#=j#> -> <#=ParamName(main, j)#>
+<#+
+				} //end nth loop
+#>			| _ -> invalidArg "index" (sprintf "The index value '%d' was out of bounds, as this tuple contains '%d' elements" index <#=i#>)
+			
+<#+
+			} //end main tuple loop
+#>	
+	type Helper internal() = 
+<#+
+			for (int i = 2; i <= MaxArity; i++) {
+				var argsTuple = mainNames(0, i).Join(", ");
+#>
+		static member IsTuple((<#=argsTuple#>)) = <#=generalTupleTypeName(i)#>(<#=argsTuple#>)
+
+		static member IsTupleSameType((<#=argsTuple#>)) = <#=sameTypeTupleName(i)#>(<#=argsTuple#>)
+
+		static member Init(<#=StatInt(i)#>, f : int -> 'out) = <#=Rng(0, i).SelectFormat("f {0}").Join(", ")#>
+
+		
+
+		static member InitElement(<#=StatInt(i)#>, element) = <#=Enumerable.Repeat("element", i).Join(", ")#>
+<#+
+			} //end helper loop
+#>
+	let helper = Helper()
+
+	let inline internal asTuple' (helper : 'helper, tuple : 'tuple) = 
+        ((^helper or ^tuple) : (static member IsTuple : 'tuple -> 'wrappedTuple) tuple) 
+
+    let inline internal asTupleSameType'(helper : 'helper, tuple : 'tuple) =
+        ((^helper or ^tuple) : (static member IsTupleSameType : 'tuple -> 'wrappedTuple) tuple)
+
+    let inline internal isTuple(tuple : 'tuple) = 
+        asTuple'(helper, tuple)
+
+    let inline internal isTupleSameType(tuple : 'tuple) = 
+        asTupleSameType'(helper, tuple)
+<#+
+			return this.GenerationEnvironment.ToString().Replace("\t", "    ");
+		}
+	}
+#>

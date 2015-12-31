@@ -12,21 +12,43 @@ Secondly, the structure of the finger tree is somewhat different.
 
 As is the case with many implementations, this one is specialized for sequences, rather than using arbitrary measures. You could transform the code so the measure is a `max` measure instead, for a priority queue, but you'd have to do it rather carefully, as the data structure wasn't written for this directly in mind.
 
-
-
-
 This is a massive class, no doubt about it, and very complicated. I'm using the same class structure as for the other data structures.
 
 `FingerTree<TValue>` is a static partial container class that contains most of the classes involved in the implementation of a finger tree containing leaf values of type `TValue`. In this structure, all finger tree classes are aware of the leaf value, even though the deeper trees don't store values of that type directly. This gets rid of some of the overhead involved in the finger tree.
 
  `FingerTree` shares the common `TValue` parameter among multiple classes, so I don't have to parameterize every class unnecessarily.
 
-The container class contains `FTree<TChild>`, itself an abstract container class. It contains two kinds of things:
-
 1. The finger tree case classes.
 2. The digit class.
 
-It also shares the `TChild` parameter, which specifies the immediate children of the data structure. For a level 1 tree, this would be `Leaf<TValue>`, giving the type `FingerTree<TValue>.FTree<Leaf<TValue>>`. For a level 2 tree, it would be `FingerTree<TValue>.FTree<Leaf<TValue>>.Digit`, or just `Digit` when I refer to it inside a level 1 tree, giving the type (again, in the level 1 tree) `FTree<Digit>`. 
+It also shares the `TChild` parameter, which specifies the immediate children of the data structure. For a level 1 tree, this would be `Leaf<TValue>`, giving the type `FingerTree<TValue>.FTree<Leaf<TValue>>`. For a level 2 tree, it would be `FingerTree<TValue>.FTree<Leaf<TValue>>.Digit`, or just `Digit` when I refer to it inside a level 1 tree, giving the type (again, in the level 1 tree) `FTree<Digit>`.
 
-In this structure, I don't use Node2/Node3, but instead just have a Digit, which can have between 1 and 4 elements. The standard finger tree rule is still obeyed: only the topmost digit can have 1 and 4 elements, while the deeper digits (those pushed inside the deep tree as elements) can have either 2 or 3. This rule is actually relaxed a little in the Insert implementation, which allows deeper digits to have 4 elements, since for Insert it really doesn't matter.
+### Iteration
+A big problem of my earlier FingerTree implementations and FingerTree implementations in general is iteration using an `IEnumerator`. Naively, we might iterate over an FTree recursively:
 
+    let rec iterateDigit digit = seq {
+        | One a -> yield! iterateDigit a
+        | Two a b ->
+            yield! iterateDigit a
+            yield! iterateDigit b
+        | Three a b c ->
+            // ... 
+    }
+
+    let rec iterateTree ftree = seq  {
+        match ftree with
+        | Empty -> ()
+        | Single digit -> yield! iterateDigit digit
+        | Compound left deep right -> 
+            yield! iterateDigit left
+            yield! iterateTree deep
+            yield! iterateDigit right
+    }
+
+Now, this obviously works, but the problem is that each `yield!` call involves allocating a new object! And there is no benefit to this additional cost, as the process is still mutable.
+
+The problem with iterating over the FTree using any other way, is that as we go deeper into the tree, type information becomes very complicated and impossible to abstract over. 
+
+So basically, we hide all of that type information behind `FingerTreeElement`. We simply treat every finger tree node (which includes an FTree) as a node in a tree with some number of children.
+For example, a Compound FTree has 3 children (some of which may be empty), a Single has 1 child and a Digit has 1-4 children.
+ We iterate over the tree using a stack (an array list, not a linked list) by iterating over every child of every node, ignoring the node's actual type. The HasValue property tells if a given node has a value (i.e. is a leaf) or not. We only try to get the values of nodes that have them.

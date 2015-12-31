@@ -429,7 +429,7 @@ namespace Funq.Abstract {
 			return index.IsNone ? Empty : Skip(index.Value);
 		}
 
-		public override sealed void CopyTo(TElem[] arr, int arrStart, int count) {
+		public sealed override void CopyTo(TElem[] arr, int arrStart, int count) {
 			CopyTo(arr, 0, arrStart, count);
 		}
 

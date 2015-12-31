@@ -169,6 +169,7 @@
     <None Include="Wrappers\Templates\Reusable.ttinclude" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Optimizations and Tests.txt" />
     <Content Include="Wrappers\Funq.FSharp\Modules.fs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

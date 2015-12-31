@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtraFunctional.CSharp", "ExtraFunctional.CSharp\ExtraFunctional.CSharp.csproj", "{8E19E64B-EB5C-4042-B419-C1A9E9A05997}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ExtraFunctional", "ExtraFunctional\ExtraFunctional.fsproj", "{D0648CE4-2886-4E09-964C-C4E675DDA3C3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8E19E64B-EB5C-4042-B419-C1A9E9A05997}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E19E64B-EB5C-4042-B419-C1A9E9A05997}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E19E64B-EB5C-4042-B419-C1A9E9A05997}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E19E64B-EB5C-4042-B419-C1A9E9A05997}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0648CE4-2886-4E09-964C-C4E675DDA3C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0648CE4-2886-4E09-964C-C4E675DDA3C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0648CE4-2886-4E09-964C-C4E675DDA3C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0648CE4-2886-4E09-964C-C4E675DDA3C3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

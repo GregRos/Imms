@@ -87,9 +87,6 @@
       <HintPath>..\packages\FSharp.Core.3.1.2.1\lib\net40\FSharp.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FSharp.PowerPack, Version=4.0.0.1, Culture=neutral, PublicKeyToken=null" />
-    <Reference Include="FSharp.PowerPack.Compatibility, Version=4.0.0.1, Culture=neutral, PublicKeyToken=null" />
-    <Reference Include="FSharp.PowerPack.Linq, Version=4.0.0.1, Culture=neutral, PublicKeyToken=null" />
     <Reference Include="FSharpx.Collections">
       <HintPath>..\packages\FSharpx.Collections.1.10.1\lib\net40\FSharpx.Collections.dll</HintPath>
       <Private>True</Private>
@@ -120,7 +117,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\ExtraFunctional\ExtraFunctional\ExtraFunctional.fsproj">
+    <ProjectReference Include="..\ExtraFunctional\ExtraFunctional\ExtraFunctional.fsproj">
       <Name>ExtraFunctional</Name>
       <Project>{d0648ce4-2886-4e09-964c-c4e675dda3c3}</Project>
       <Private>True</Private>
