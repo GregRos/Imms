@@ -103,7 +103,7 @@ module TupleImplementation =
 			<#=ParamName(func, 0)#> <#=ParamName(main, 0)#> initial |> <#=funcNames(1, i).ZipFormat(mainNames(1, i), "{0} {1}").Join(" |> ")#>
 
 		member x.Reduce(<#=funcNames(0, i-1).Join(", ")#>) =
-			<#=ParamName(func, 0)#> <#=mainNames(0, 2).Join(" ")#> <#=funcNames(1, i-1).ZipFormat(mainNames(2, i), "{0} {1}").JoinStart(" |> ")#>
+			<#=ParamName(func, 0)#> <#=mainNames(0, 2).Join(" ")#> <#=funcNames(2, i-1).ZipFormat(mainNames(2, i), "{0} {1}").JoinStart(" |> ")#>
 <#+
 				for (int j = 0; j < i; j++) {
 					var arr = mainNames(0, i).ToArray();
@@ -154,7 +154,7 @@ module TupleImplementation =
 		member x.ToArray() = <#="[|{0}|]".FormatWith(mainNames(0, i).Join("; "))#>
 		member x.Map <#=func#> = <#=mainNames(0, i).SelectFormat("{1} {0}", func).Join(", ")#>
 		member x.Fold initial <#=func#> = <#=func#> <#=ParamName(main, 0)#> initial |> <#=mainNames(1, i).SelectFormat("{1} {0}", func).Join(" |> ")#>
-		member x.Reduce <#=func#> = <#=func#> <#=ParamName(main, 1)#> <#=ParamName(main, 0)#> <#=mainNames(1, i).SelectFormat("{1} {0}", func).JoinStart(" |> ")#>
+		member x.Reduce <#=func#> = <#=func#> <#=ParamName(main, 1)#> <#=ParamName(main, 0)#> <#=mainNames(2, i).SelectFormat("{1} {0}", func).JoinStart(" |> ")#>
 		member x.Nth index = 
 			match index with
 <#+

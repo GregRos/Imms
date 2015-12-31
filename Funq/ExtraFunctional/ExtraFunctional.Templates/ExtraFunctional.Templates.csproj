@@ -42,10 +42,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="FlexibleMathImplementation.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>FlexibleMathImplementation.fs</LastGenOutput>
-    </None>
     <None Include="TupleImplementation.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>TupleImplementation.fs</LastGenOutput>
@@ -55,11 +51,6 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="FlexibleMathImplementation.fs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>FlexibleMathImplementation.tt</DependentUpon>
-    </Content>
     <Content Include="TupleImplementation.fs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

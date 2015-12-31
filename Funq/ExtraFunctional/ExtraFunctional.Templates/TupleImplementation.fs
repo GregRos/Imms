@@ -99,7 +99,7 @@ module TupleImplementation =
         member x.ToArray() = [|a0; a1|]
         member x.Map f = f a0, f a1
         member x.Fold initial f = f a0 initial |> f a1
-        member x.Reduce f = f a1 a0  |> f a1
+        member x.Reduce f = f a1 a0 
         member x.Nth index = 
             match index with
             | 0 -> a0
@@ -127,7 +127,7 @@ module TupleImplementation =
             f0 a0 initial |> f1 a1 |> f2 a2
 
         member x.Reduce(f0, f1) =
-            f0 a0 a1  |> f1 a2
+            f0 a0 a1 
         member x.Item S0 = a0
 
         member x.SetItem(S0, b0) = b0, a1, a2
@@ -163,7 +163,7 @@ module TupleImplementation =
         member x.ToArray() = [|a0; a1; a2|]
         member x.Map f = f a0, f a1, f a2
         member x.Fold initial f = f a0 initial |> f a1 |> f a2
-        member x.Reduce f = f a1 a0  |> f a1 |> f a2
+        member x.Reduce f = f a1 a0  |> f a2
         member x.Nth index = 
             match index with
             | 0 -> a0
@@ -192,7 +192,7 @@ module TupleImplementation =
             f0 a0 initial |> f1 a1 |> f2 a2 |> f3 a3
 
         member x.Reduce(f0, f1, f2) =
-            f0 a0 a1  |> f1 a2 |> f2 a3
+            f0 a0 a1  |> f2 a2
         member x.Item S0 = a0
 
         member x.SetItem(S0, b0) = b0, a1, a2, a3
@@ -232,7 +232,7 @@ module TupleImplementation =
         member x.ToArray() = [|a0; a1; a2; a3|]
         member x.Map f = f a0, f a1, f a2, f a3
         member x.Fold initial f = f a0 initial |> f a1 |> f a2 |> f a3
-        member x.Reduce f = f a1 a0  |> f a1 |> f a2 |> f a3
+        member x.Reduce f = f a1 a0  |> f a2 |> f a3
         member x.Nth index = 
             match index with
             | 0 -> a0
@@ -262,7 +262,7 @@ module TupleImplementation =
             f0 a0 initial |> f1 a1 |> f2 a2 |> f3 a3 |> f4 a4
 
         member x.Reduce(f0, f1, f2, f3) =
-            f0 a0 a1  |> f1 a2 |> f2 a3 |> f3 a4
+            f0 a0 a1  |> f2 a2 |> f3 a3
         member x.Item S0 = a0
 
         member x.SetItem(S0, b0) = b0, a1, a2, a3, a4
@@ -306,7 +306,7 @@ module TupleImplementation =
         member x.ToArray() = [|a0; a1; a2; a3; a4|]
         member x.Map f = f a0, f a1, f a2, f a3, f a4
         member x.Fold initial f = f a0 initial |> f a1 |> f a2 |> f a3 |> f a4
-        member x.Reduce f = f a1 a0  |> f a1 |> f a2 |> f a3 |> f a4
+        member x.Reduce f = f a1 a0  |> f a2 |> f a3 |> f a4
         member x.Nth index = 
             match index with
             | 0 -> a0
@@ -337,7 +337,7 @@ module TupleImplementation =
             f0 a0 initial |> f1 a1 |> f2 a2 |> f3 a3 |> f4 a4 |> f5 a5
 
         member x.Reduce(f0, f1, f2, f3, f4) =
-            f0 a0 a1  |> f1 a2 |> f2 a3 |> f3 a4 |> f4 a5
+            f0 a0 a1  |> f2 a2 |> f3 a3 |> f4 a4
         member x.Item S0 = a0
 
         member x.SetItem(S0, b0) = b0, a1, a2, a3, a4, a5
@@ -385,7 +385,7 @@ module TupleImplementation =
         member x.ToArray() = [|a0; a1; a2; a3; a4; a5|]
         member x.Map f = f a0, f a1, f a2, f a3, f a4, f a5
         member x.Fold initial f = f a0 initial |> f a1 |> f a2 |> f a3 |> f a4 |> f a5
-        member x.Reduce f = f a1 a0  |> f a1 |> f a2 |> f a3 |> f a4 |> f a5
+        member x.Reduce f = f a1 a0  |> f a2 |> f a3 |> f a4 |> f a5
         member x.Nth index = 
             match index with
             | 0 -> a0
@@ -417,7 +417,7 @@ module TupleImplementation =
             f0 a0 initial |> f1 a1 |> f2 a2 |> f3 a3 |> f4 a4 |> f5 a5 |> f6 a6
 
         member x.Reduce(f0, f1, f2, f3, f4, f5) =
-            f0 a0 a1  |> f1 a2 |> f2 a3 |> f3 a4 |> f4 a5 |> f5 a6
+            f0 a0 a1  |> f2 a2 |> f3 a3 |> f4 a4 |> f5 a5
         member x.Item S0 = a0
 
         member x.SetItem(S0, b0) = b0, a1, a2, a3, a4, a5, a6
@@ -469,7 +469,7 @@ module TupleImplementation =
         member x.ToArray() = [|a0; a1; a2; a3; a4; a5; a6|]
         member x.Map f = f a0, f a1, f a2, f a3, f a4, f a5, f a6
         member x.Fold initial f = f a0 initial |> f a1 |> f a2 |> f a3 |> f a4 |> f a5 |> f a6
-        member x.Reduce f = f a1 a0  |> f a1 |> f a2 |> f a3 |> f a4 |> f a5 |> f a6
+        member x.Reduce f = f a1 a0  |> f a2 |> f a3 |> f a4 |> f a5 |> f a6
         member x.Nth index = 
             match index with
             | 0 -> a0
@@ -502,7 +502,7 @@ module TupleImplementation =
             f0 a0 initial |> f1 a1 |> f2 a2 |> f3 a3 |> f4 a4 |> f5 a5 |> f6 a6 |> f7 a7
 
         member x.Reduce(f0, f1, f2, f3, f4, f5, f6) =
-            f0 a0 a1  |> f1 a2 |> f2 a3 |> f3 a4 |> f4 a5 |> f5 a6 |> f6 a7
+            f0 a0 a1  |> f2 a2 |> f3 a3 |> f4 a4 |> f5 a5 |> f6 a6
         member x.Item S0 = a0
 
         member x.SetItem(S0, b0) = b0, a1, a2, a3, a4, a5, a6, a7
@@ -558,7 +558,7 @@ module TupleImplementation =
         member x.ToArray() = [|a0; a1; a2; a3; a4; a5; a6; a7|]
         member x.Map f = f a0, f a1, f a2, f a3, f a4, f a5, f a6, f a7
         member x.Fold initial f = f a0 initial |> f a1 |> f a2 |> f a3 |> f a4 |> f a5 |> f a6 |> f a7
-        member x.Reduce f = f a1 a0  |> f a1 |> f a2 |> f a3 |> f a4 |> f a5 |> f a6 |> f a7
+        member x.Reduce f = f a1 a0  |> f a2 |> f a3 |> f a4 |> f a5 |> f a6 |> f a7
         member x.Nth index = 
             match index with
             | 0 -> a0
@@ -592,7 +592,7 @@ module TupleImplementation =
             f0 a0 initial |> f1 a1 |> f2 a2 |> f3 a3 |> f4 a4 |> f5 a5 |> f6 a6 |> f7 a7 |> f8 a8
 
         member x.Reduce(f0, f1, f2, f3, f4, f5, f6, f7) =
-            f0 a0 a1  |> f1 a2 |> f2 a3 |> f3 a4 |> f4 a5 |> f5 a6 |> f6 a7 |> f7 a8
+            f0 a0 a1  |> f2 a2 |> f3 a3 |> f4 a4 |> f5 a5 |> f6 a6 |> f7 a7
         member x.Item S0 = a0
 
         member x.SetItem(S0, b0) = b0, a1, a2, a3, a4, a5, a6, a7, a8
@@ -652,7 +652,7 @@ module TupleImplementation =
         member x.ToArray() = [|a0; a1; a2; a3; a4; a5; a6; a7; a8|]
         member x.Map f = f a0, f a1, f a2, f a3, f a4, f a5, f a6, f a7, f a8
         member x.Fold initial f = f a0 initial |> f a1 |> f a2 |> f a3 |> f a4 |> f a5 |> f a6 |> f a7 |> f a8
-        member x.Reduce f = f a1 a0  |> f a1 |> f a2 |> f a3 |> f a4 |> f a5 |> f a6 |> f a7 |> f a8
+        member x.Reduce f = f a1 a0  |> f a2 |> f a3 |> f a4 |> f a5 |> f a6 |> f a7 |> f a8
         member x.Nth index = 
             match index with
             | 0 -> a0
@@ -687,7 +687,7 @@ module TupleImplementation =
             f0 a0 initial |> f1 a1 |> f2 a2 |> f3 a3 |> f4 a4 |> f5 a5 |> f6 a6 |> f7 a7 |> f8 a8 |> f9 a9
 
         member x.Reduce(f0, f1, f2, f3, f4, f5, f6, f7, f8) =
-            f0 a0 a1  |> f1 a2 |> f2 a3 |> f3 a4 |> f4 a5 |> f5 a6 |> f6 a7 |> f7 a8 |> f8 a9
+            f0 a0 a1  |> f2 a2 |> f3 a3 |> f4 a4 |> f5 a5 |> f6 a6 |> f7 a7 |> f8 a8
         member x.Item S0 = a0
 
         member x.SetItem(S0, b0) = b0, a1, a2, a3, a4, a5, a6, a7, a8, a9
@@ -746,7 +746,7 @@ module TupleImplementation =
         member x.ToArray() = [|a0; a1; a2; a3; a4; a5; a6; a7; a8; a9|]
         member x.Map f = f a0, f a1, f a2, f a3, f a4, f a5, f a6, f a7, f a8, f a9
         member x.Fold initial f = f a0 initial |> f a1 |> f a2 |> f a3 |> f a4 |> f a5 |> f a6 |> f a7 |> f a8 |> f a9
-        member x.Reduce f = f a1 a0  |> f a1 |> f a2 |> f a3 |> f a4 |> f a5 |> f a6 |> f a7 |> f a8 |> f a9
+        member x.Reduce f = f a1 a0  |> f a2 |> f a3 |> f a4 |> f a5 |> f a6 |> f a7 |> f a8 |> f a9
         member x.Nth index = 
             match index with
             | 0 -> a0
