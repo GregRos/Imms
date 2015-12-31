@@ -1,0 +1,82 @@
+<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+namespace Imm {
+	using System;
+	using System.Linq;
+	using System.Collections.Generic;
+	///<summary>
+	/// Static class containing utility and extension methods for working with function objects.
+	///</summary>
+	internal static partial class Fun {
+	///<summary>
+	///Applies all the functions in the specified sequence to the specified value, and returns a sequence of the return values.
+	///</summary>
+	public static IEnumerable<TOut> Apply<<#=GetGenericParams(1, 1) #>, TOut>(this IEnumerable<<#=GetFuncName(1, 1) #>> funcs, <#=GetTypeParam(1) #> value) {
+		return funcs.Select(f => f(value));
+	}
+
+	///<summary>
+	///Applies all the functions in the specified sequence to all the specified values, returning the results, ordered first by function and then by value.
+	///</summary>
+	public static IEnumerable<TOut> CrossApply<<#=GetGenericParams(1, 1) #>, TOut>(this IEnumerable<<#=GetFuncName(1, 1) #>> funcs, IEnumerable<<#=GetTypeParam(1) #>> values) {
+		return funcs.Cross(values, (f,v) => f(v));
+	}
+<#
+	for (var i = 2; i <= 6; i++) {
+#>	
+	///<summary>
+	///Partially invokes the function, specifying the first argument and returning a function accepting the remaining arguments.
+	///</summary>
+	public static <#=GetFuncName(2, i)#> Invoke<<#=GetGenericParams(1, i)#>, <#=OutParam#>>(this <#=GetFuncName(1, i)#> func, <#=GetTypeParam(1)#> value) {
+		return (<#=GetFuncName(2, i)#>)((<#=GetLambdaParams(2, i)#>) => func(value,<#=GetLambdaParams(2,i)#>));
+	}
+	///<summary>
+	///Partially applies all the functions in the sequence to the specified value, as the first argument, and returns a sequence of partial functions with the remaining parameters.
+	///</summary>
+	public static IEnumerable<<#=GetFuncName(2, i) #>> Apply<<#=GetGenericParams(1, i) #>, <#=OutParam #>>(this IEnumerable<<#=GetFuncName(1, i) #>> funcs, <#=GetTypeParam(1) #> value) {
+		return funcs.Select(f => f.Invoke(value));//end of Select call
+	}//end of method
+	
+	///<summary>
+	///Partially applies all the functions in the sequence to the specified value, as the first argument, and returns a sequence of partial functions with the remaining arguments, ordered first by function and then by value.
+	///</summary>
+	public static IEnumerable<<#=GetFuncName(2, i) #>> CrossApply<<#=GetGenericParams(1, i) #>, <#=OutParam #>>(this IEnumerable<<#=GetFuncName(1, i) #>> funcs, IEnumerable<<#=GetTypeParam(1) #>> values) {
+		return funcs.Cross(values, (f,v) => f.Invoke(v));
+	}//end of method
+
+	
+<#
+	}//end method loop for different Func types
+#>
+
+	}//end of class
+
+}//end of namespace
+<#+
+	const string OutParam = "TOut";
+	static string GetTypeParam(int n) {
+		return "T" + n;
+	}
+
+	static string GetParamName(int n) {
+		return "arg" + n;
+	}
+
+	static string GetLambdaParams(int lo, int hi) {
+		var p = Enumerable.Range(lo, hi - lo + 1).Select(GetParamName);
+		var joined = String.Join(",", p);
+		return joined;
+	}
+
+	static string GetGenericParams(int lo, int hi) {
+		var tParams = Enumerable.Range(lo, hi - lo + 1).Select(GetTypeParam);
+		return string.Format("{0}", String.Join(", ", tParams));
+	}
+
+	static string GetFuncName(int lo, int hi) {
+		return string.Format("Func<{0}, TOut>", GetGenericParams(lo, hi));
+	}#>

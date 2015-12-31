@@ -1,8 +1,0 @@
-Tests For:,SetLike
-Collection/Test,Add,AddRange
-FSharp.Set,74.548,76.189
-FunqSet,43.032,9.778
-FunqOrderedSet,16.648,15.776
-System.ImmutableSet,17.168,11.937
-System.ImmutableSortedSet,81.747,80.281
-

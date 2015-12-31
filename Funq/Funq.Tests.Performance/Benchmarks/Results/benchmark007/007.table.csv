@@ -1,4 +1,0 @@
-Tests For:,SetLike
-Collection/Test,Add,AddRange,Contains,Difference,Drop,DropRange,Except,IEnumerator,Intersection,IsProperSubset,IsProperSuperset,Iterate,SetEquals,Union
-FunqOrderedSet,4.665,4.175,4.080,1633.464,48.706,4.558,616.020,6.277,36.610,0.002,0.001,0.214,0.041,662.077
-

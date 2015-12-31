@@ -1,4 +1,0 @@
-Test,Target,Time,Target_InitialSize,Iterations,DataSource_Size,DataSource_Type,Target_InitialGenerator,DataGenerator,Description,Class,Ratio
-Skip,FunqList,0.020,10000,5,0,"","[Name = ""Integers by Length""; ElementType = System.Int32; Range = (1, 4)]","","",Subsequence,
-Skip,FunqVector,0.241,10000,5,0,"","[Name = ""Integers by Length""; ElementType = System.Int32; Range = (1, 4)]","","",Subsequence,
-Skip,System.ImmutableList,3.208,10000,5,0,"","[Name = ""Integers by Length""; ElementType = System.Int32; Range = (1, 4)]","","",Subsequence,

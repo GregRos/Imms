@@ -1,8 +1,0 @@
-Tests For:,SetLike
-Collection/Test,Except
-FSharp.Set,82.389
-FunqSet,13.641
-FunqOrderedSet,17.146
-System.ImmutableSet,32.449
-System.ImmutableSortedSet,111.099
-

@@ -1,8 +1,0 @@
-Tests For:,SetLike
-Collection/Test,Difference,Except,Intersection,Union
-FSharp.Set,16.766,7.470,0.769,3.975
-FunqSet,2.524,1.008,1.546,0.888
-FunqOrderedSet,4.795,1.176,1.797,1.914
-System.ImmutableSet,15.071,3.330,2.551,5.116
-System.ImmutableSortedSet,38.338,10.436,10.648,16.164
-

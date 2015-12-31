@@ -1,0 +1,46 @@
+<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+using System;
+namespace Imms {
+	
+	///Implements fast math operations.
+	public static partial class FastMath {
+		private static readonly int[][] ExpTable = new[] {
+<#
+	for (var i = 2; i <= MaxBase; i++) {
+#>
+		new[]{<#=GetAllExps(i, GetMaxTimesForBase(i)) #>},
+<#
+	}
+#>
+	};//end table
+		///<summary>
+		///Calculates b^e ('b' to the power of 'e') much faster than Math.Pow. Uses a lookup table. b must be in [2,10], maximum for 'e' depends on base.
+		///</summary>
+		public static int PowN(int b, int e) {
+			return ExpTable[b-2][e];
+		}//end method
+	}//end class
+
+} // end namespace
+<#+
+	static readonly int MaxBase = 10;
+
+	static int GetMaxTimesForBase(int b) {
+		return (int) Math.Log(Int32.MaxValue, b);
+	}
+
+	static string GetExpString(string symbol, int times) {
+		return string.Join(" * ", Enumerable.Repeat(symbol, times));
+	}
+
+	static string GetAllExps(int b, int max) {
+		var exps = Enumerable.Range(0, max).Select(n => Math.Pow(b, n).ToString());
+		return string.Join(",", exps);
+	}
+
+#>

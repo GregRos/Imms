@@ -1,0 +1,10 @@
+<#@ template debug="true" hostSpecific="true" #>
+<#@ output extension=".cs" #>
+<#@ include file="$(ProjectDir)Wrappers\Templates\Reusable.ttinclude" #>
+
+namespace Imm.Collections
+{
+	<# this.PushIndent("\t");#>
+	<#= ParameterizedTemplate.SetLikeClass.Process(this.Host, SetLikeClass => "ImmSet", HandlerObject => "IEqualityComparer")#>
+	<# this.PopIndent();#>
+}

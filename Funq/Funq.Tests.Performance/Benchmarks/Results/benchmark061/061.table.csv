@@ -1,8 +1,0 @@
-Tests For:,MapLike
-Collection/Test,Add,AddRange,DropKey,DropRange,IEnumerator,Iterate,Lookup
-FSharp.Map,108.316,121.644,15.447,24.182,0.751,0.856,3.445
-FunqMap,140.551,54.139,20.565,10.616,0.982,0.334,2.836
-FunqOrderedMap,150.490,50.550,22.540,11.317,0.681,0.227,2.689
-System.ImmutableDict,120.256,59.782,16.846,14.624,3.224,4.029,2.625
-System.ImmutableSortedDict,144.973,123.263,24.290,30.774,1.900,2.605,14.989
-

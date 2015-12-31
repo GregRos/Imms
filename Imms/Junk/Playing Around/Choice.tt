@@ -1,0 +1,123 @@
+<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+using Imm;
+using System;
+//this isn't part of the library, just playing around...
+namespace Imm {
+<#
+	for (var i = 2; i <= 3; i++) {
+#>
+	/// <summary>
+	/// Represents an object which may be of one of several types.
+	/// </summary>
+	/// <typeparam name="T1">The first possible type.</typeparam>
+	/// <typeparam name="T2">The second possible type.</typeparam>
+	internal struct <#=GetGenericName(i) #> {
+		private readonly int _choiceNum;
+		private int GetChoiceNumber() {
+<#
+		for (var j = i; j > 1; j--) {
+#>			if (_choice<#=j #>.IsSome) {
+				return <#=j #>;
+			}
+<#
+		} #>
+			return 1;
+		}//end method
+		
+<#
+		for (var j = 1; j <= i; j++) { #>
+
+		private readonly Option<<#=GetTypeParamName(j) #>> <#=GetFieldName(j) #>;
+		///<summary>
+		///If the actual value is of type <typeparamref name="<#=GetTypeParamName(j) #>"/>, returns it.
+		///</summary>
+		public Option<<#=GetTypeParamName(j) #>> <#=GetPropName(j) #> {
+			get {
+				return <#=GetFieldName(j) #>;
+			}//end getter
+		}//end property 
+
+		public static implicit operator <#=GetTypeParamName(j) #>(<#=GetGenericName(i) #> choice) {
+			return choice.Choice<#=j #>.Value;
+		}//end operator
+
+		public static implicit operator <#=GetGenericName(i) #>(<#=GetTypeParamName(j) #> x) {
+			return new <#=GetGenericName(i) #>(choice<#=j #>:x);
+		}//end operator
+
+<#
+		} #>
+		private <#=TypeName #>(
+			 Option<T1> choice1 = default(Option<T1>)<#
+			for (var j = 2; j <= i; j++) {
+#>
+			
+			,Option<<#=GetTypeParamName(j) #>> choice<#=j #> = default(Option<<#=GetTypeParamName(j) #>>)<#
+			} #>) {
+
+			<#=GetFieldName(1) #> = choice1;
+<#
+		for (var j = 2; j <= i; j++) {
+			#>
+			<#=GetFieldName(j) #> = choice<#=j #>;
+<#
+		}
+		
+#>			_choiceNum = 0;
+			_choiceNum = GetChoiceNumber();
+		}//end constructor
+
+		public int Choice {
+			get{
+				return _choiceNum;
+			}
+		}
+
+
+		public override string ToString() {
+			switch (Choice) {
+<#
+		for (var j = 1; j <= i; j++) {
+#>
+				case <#=j #>:
+					return <#=GetPropName(j) #>.Value.ToString();
+<#
+		}
+#>
+				default:
+					throw new Exception("Wrong choice!");
+			}//end switch
+		}//end ToString
+
+	}//end class
+
+<#
+	} ////END CLASS LOOP
+#>
+}//end namespace
+<#+
+	static string TypeName = "Choose";
+
+	static string GetFieldName(int number) {
+		return string.Format("_choice{0}", number);
+	}
+
+	static string GetPropName(int number) {
+		return string.Format("Choice{0}", number);
+	}
+
+	static string GetTypeParamName(int number) {
+		return string.Format("T{0}", number);
+	}
+
+	static string GetGenericName(int count) {
+		var typeParams = Enumerable.Range(1, count).Select(GetTypeParamName);
+		return string.Format("{0}<{1}>", TypeName, string.Join(", ", typeParams));
+	}
+
+#>

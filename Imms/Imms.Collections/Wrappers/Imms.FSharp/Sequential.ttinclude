@@ -1,0 +1,92 @@
+<#@ template debug="true" hostspecific="true" language="C#" #>
+<#@ assembly name="Microsoft.CSharp, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Dynamic" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="Microsoft.VisualStudio.TextTemplating" #>
+<#@ parameter name="TypeName" type="System.String"#>
+<#@ parameter name="ElementName" type="System.String"#>
+<#@ include file="Helpers.ttinclude"#><# if (!RanAlready) {
+		RanAlready = true;
+		return TransformText().Replace("\t", "    ");
+	}
+	var typeName = TypeName ?? "ImmList<T>";
+#><#= IncludeWithParameters("Base.ttinclude", new[] {Tu("TypeName", typeName)}, 0)#>
+let first (collection : <#=typeName#>) = collection.First
+
+///Returns the last element of the collection
+let last (collection : <#=typeName#>) = collection.Last
+
+///Returns the first element of the collection or None.
+let tryFirst (collection : <#=typeName#>) = collection.TryFirst |> fromOption
+
+///Returns the last element of the collection or None.
+let tryLast (collection : <#=typeName#>) = collection.TryLast |> fromOption
+
+///Returns a slice of the collection, starting from 'i1' and ending with 'i2'.
+let slice(i1, i2) (collection : <#=typeName#>) = collection.[i1, i2]
+
+///Iterates over the collection from end to start.
+let iterBack f (collection : <#=typeName#>) = collection.ForEachBack(toAction f)
+
+///Iterates over the collection from end to start while 'f' is true.
+let iterBackWhile f (collection : <#=typeName#>) = collection.ForEachBackWhile(toFunc1 f)
+
+///Folds over the collection from end to start.
+let foldBack initial f (collection : <#=typeName#>) = collection.AggregateBack(initial, toFunc2 f)
+
+///Folds over the collection from end to start, beginning by applying 'f' to the first two elements.
+let reduceBack f (collection : <#=typeName#>) = collection.AggregateBack(toFunc2 f)
+
+///Returns the first 'n' elements of the collection.
+let take n (collection : <#=typeName#>) = collection.Take(n)
+
+///Returns the first elements of the collection until 'f' returns false.
+let takeWhile f (collection : <#=typeName#>) = collection.TakeWhile(toFunc1 f)
+
+///Skips over 'n' elements of the collection
+let skip n (collection : <#=typeName#>) = collection.Skip(n)
+
+///Skips over elements of the collection until 'f' returns false.
+let skipWhile f (collection : <#=typeName#>) = collection.SkipWhile(toFunc1 f)
+
+let tryNth index (collection : <#=typeName#>) = collection.TryGet index |> fromOption
+
+///Returns the nth element of the collection.
+let nth index (collection : <#=typeName#>) = collection.[index]
+
+///Returns the last element of the collection that satisfies 'f'
+let findLast f (collection : <#=typeName#>) = collection.FindLast(toFunc1 f) |> fromOption
+
+///Returns the index of the last element of the collection that satisfies 'f'
+let findIndex f (collection : <#=typeName#>) = collection.FindIndex(toFunc1 f) |> fromOption
+
+///Returns the empty vector.
+let empty<<#=ElementName#>> = <#=TypeName #>.Empty
+
+///Returns a vector consisting of 'value'
+let ofItem value = empty.AddLast value
+
+///Adds an element to the end of the collection.
+let addLast value (collection : <#=TypeName #>)  = collection.AddLast(value)
+
+///Adds a sequence of elements to the end.
+let addLastRange vs (collection :<#=TypeName #>) = collection.AddLastRange(vs)
+
+///Adds a sequence of elements to the beginning.
+let addFirstRange vs (collection : <#=TypeName #>) = collection.AddFirstRange vs
+
+///Inserts a sequence of elements at the specified index.
+let insertRange i vs (collection : <#=TypeName #>) = collection.InsertRange(i,vs)
+
+///Removes the last element of the collection.
+let removeLast (collection :'elem ImmVector) = collection.RemoveLast()
+
+///Updates the value of the element at the specified index.
+let update index value (collection : <#=TypeName #>) = collection.Update(index, value)
+
+///Maps over the collection.
+let ofSeq vs = empty.AddLastRange vs
