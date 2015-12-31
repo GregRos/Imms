@@ -5,10 +5,10 @@ namespace Funq.Abstract {
 
 	/// <summary>
 	///     Used for abstracting over any Iterable collection type when the concrete type is unknown.
-	///     Should not be implemented in user code.
+	///     Should not be implemented in user code. Mainly provided for optimization purposes.
 	/// </summary>
 	/// <typeparam name="TElem"></typeparam>
-	public interface IAnyIterable<out TElem> : IEnumerable<TElem> {
+	internal interface IAnyIterable<out TElem> : IEnumerable<TElem> {
 
 		/// <summary>
 		///     Returns the number of elements in the collection.

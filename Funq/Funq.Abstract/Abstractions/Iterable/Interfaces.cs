@@ -7,7 +7,6 @@ using System.Text;
 namespace Funq.Abstract
 {
 	public abstract partial class AbstractIterable<TElem, TIterable, TBuilder> : ICollection<TElem>, ICollection {
-		private readonly object _syncRoot = new object();
 		void ICollection<TElem>.Add(TElem item) {
 			throw Errors.Collection_readonly;
 		}
@@ -33,12 +32,9 @@ namespace Funq.Abstract
 			get { return Length; }
 		}
 
-		object ICollection.SyncRoot
-		{
-			get { return _syncRoot;
-				
-			}
-		}
+		object ICollection.SyncRoot {
+			get;
+		} = new object();
 
 		bool ICollection.IsSynchronized
 		{

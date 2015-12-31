@@ -2,79 +2,65 @@
 
 namespace Funq
 {
-		using System.Globalization;
-	using Funq;
+		using System;
 	using System.Collections.Generic;
-	using System;
-	using System.Linq;
+	using Funq;
 	using Funq.Abstract;
-	using Linq = System.Linq;
-	using Enumerable = System.Linq.Enumerable;
 	
 	public partial class FunqVector<T> : AbstractSequential<T, FunqVector<T>> {
 		private static readonly FunqVector<T> Instance = new FunqVector<T>();
 	
-		private FunqVector()
-		{
-		}
-	
-		private FunqVector<TElem2> GetPrototype<TElem2>()
-		{
-			return FunqVector<TElem2>.Instance;
+		private FunqVector() {
 		}
 	
 	
 		/// <summary>
-		/// Applies a selector on every element of the collection.
+		///     Applies a selector on every element of the collection.
 		/// </summary>
 		/// <typeparam name="TRElem">The type of the result element.</typeparam>
 		/// <param name="selector">The selector.</param>
 		/// <returns></returns>
-		public FunqVector<TRElem> Select<TRElem>(Func<T, TRElem> selector)
-		{
+		public FunqVector<TRElem> Select<TRElem>(Func<T, TRElem> selector) {
 			return base.Select(GetPrototype<TRElem>(), selector);
 		}
 	
 		/// <summary>
-		/// Applies a selector on every element of the collection, also filtering elements
-		/// based on whether the selector returns Option.Some.
+		///     Applies a selector on every element of the collection, also filtering elements
+		///     based on whether the selector returns Option.Some.
 		/// </summary>
 		/// <typeparam name="TRElem">The type of the output collection element.</typeparam>
 		/// <param name="selector">The selector.</param>
 		/// <returns></returns>
-		public FunqVector<TRElem> Select<TRElem>(Func<T, Optional<TRElem>> selector)
-		{
-			return base.Choose(this.GetPrototype<TRElem>(), selector);
+		public FunqVector<TRElem> Select<TRElem>(Func<T, Optional<TRElem>> selector) {
+			return base.Choose(GetPrototype<TRElem>(), selector);
 		}
 	
 		/// <summary>
-		/// Applies a selector on every element of the collection, also filtering elements
-		/// based on whether the selector returns Option.Some.
+		///     Applies a selector on every element of the collection, also filtering elements
+		///     based on whether the selector returns Option.Some.
 		/// </summary>
 		/// <typeparam name="TRElem">The type of the output collection element.</typeparam>
 		/// <param name="selector">The selector.</param>
 		/// <returns></returns>
-		public FunqVector<TRElem> Choose<TRElem>(Func<T, Optional<TRElem>> selector)
-		{
-			return base.Choose(this.GetPrototype<TRElem>(), selector);
+		public FunqVector<TRElem> Choose<TRElem>(Func<T, Optional<TRElem>> selector) {
+			return base.Choose(GetPrototype<TRElem>(), selector);
 		}
 	
 		/// <summary>
-		/// Applies a selector on every element of the collection, yielding a sequence.
-		/// Adds all the elements to a single result collection.
+		///     Applies a selector on every element of the collection, yielding a sequence.
+		///     Adds all the elements to a single result collection.
 		/// </summary>
 		/// <typeparam name="TRElem">The type of the ouput collection elem.</typeparam>
 		/// <param name="selector">The selector.</param>
 		/// <returns></returns>
-		public FunqVector<TRElem> SelectMany<TRElem>(Func<T, IEnumerable<TRElem>> selector)
-		{
+		public FunqVector<TRElem> SelectMany<TRElem>(Func<T, IEnumerable<TRElem>> selector) {
 			return base.SelectMany(GetPrototype<TRElem>(), selector);
 		}
 	
 		/// <summary>
-		/// Applies an element selector on every element of the collection, yielding a sequence.
-		/// Applies a result selector on every source element and generated sequence, yielding a result.
-		/// Adds all the results to a collection.
+		///     Applies an element selector on every element of the collection, yielding a sequence.
+		///     Applies a result selector on every source element and generated sequence, yielding a result.
+		///     Adds all the results to a collection.
 		/// </summary>
 		/// <typeparam name="TElem2">The type of the sequence element.</typeparam>
 		/// <typeparam name="TRElem">The type of the result.</typeparam>
@@ -82,13 +68,13 @@ namespace Funq
 		/// <param name="rSelector">The result selector.</param>
 		/// <returns></returns>
 		public FunqVector<TRElem> SelectMany<TElem2, TRElem>(Func<T, IEnumerable<TElem2>> selector,
-			                                                         Func<T, IEnumerable<TElem2>, TRElem> rSelector)
-		{
+			Func<T, IEnumerable<TElem2>, TRElem> rSelector) {
 			return base.SelectMany(GetPrototype<TRElem>(), selector, rSelector);
 		}
 	
 		/// <summary>
-		/// Correlates the elements of the collection with those of the specified sequence. Uses the specified equality comparer.
+		///     Correlates the elements of the collection with those of the specified sequence. Uses the specified equality
+		///     comparer.
 		/// </summary>
 		/// <typeparam name="TKey">The type of the key.</typeparam>
 		/// <typeparam name="TInner">The type of the inner sequence.</typeparam>
@@ -100,14 +86,15 @@ namespace Funq
 		/// <param name="eq"></param>
 		/// <returns></returns>
 		public FunqVector<TRElem> Join<TRElem, TInner, TKey>(IEnumerable<TInner> inner, Func<T, TKey> oKeySelector,
-			                                                         Func<TInner, TKey> iKeySelector, Func<T, TInner, TRElem> rSelector,
-			                                                         IEqualityComparer<TKey> eq = null)
-		{
-			return base.Join(GetPrototype<TRElem>(), inner, oKeySelector, iKeySelector, rSelector, eq ?? EqualityComparer<TKey>.Default);
+			Func<TInner, TKey> iKeySelector, Func<T, TInner, TRElem> rSelector,
+			IEqualityComparer<TKey> eq = null) {
+			return base.Join(GetPrototype<TRElem>(), inner, oKeySelector, iKeySelector, rSelector,
+				eq ?? EqualityComparer<TKey>.Default);
 		}
 	
 		/// <summary>
-		/// Correlates the elements of the collection with those of the specified sequence. Uses the specified equality comparer.
+		///     Correlates the elements of the collection with those of the specified sequence. Uses the specified equality
+		///     comparer.
 		/// </summary>
 		/// <typeparam name="TKey">The type of the key.</typeparam>
 		/// <typeparam name="TInner">The type of the inner sequence.</typeparam>
@@ -117,15 +104,15 @@ namespace Funq
 		/// <param name="eq"></param>
 		/// <returns></returns>
 		public FunqVector<Tuple<T, TInner>> Join<TInner, TKey>(IEnumerable<TInner> inner, Func<T, TKey> oKeySelector,
-																						Func<TInner, TKey> iKeySelector, IEqualityComparer<TKey> eq = null)
-		{
+			Func<TInner, TKey> iKeySelector, IEqualityComparer<TKey> eq = null) {
 			Func<T, TInner, Tuple<T, TInner>> tuple = Tuple.Create;
 	
-			return this.Join(inner, oKeySelector, iKeySelector, tuple, eq);
+			return Join(inner, oKeySelector, iKeySelector, tuple, eq);
 		}
 	
 		/// <summary>
-		/// Groups the elements of the collection by key, applies a selector on each value, and then applies a result selector on each key-group pair. Uses the specified equality comparer.
+		///     Groups the elements of the collection by key, applies a selector on each value, and then applies a result selector
+		///     on each key-group pair. Uses the specified equality comparer.
 		/// </summary>
 		/// <typeparam name="TRElem">The type of the output collection elem.</typeparam>
 		/// <typeparam name="TElem2">The type of the elem2.</typeparam>
@@ -136,65 +123,66 @@ namespace Funq
 		/// <param name="eq">The equality comparer.</param>
 		/// <returns></returns>
 		public FunqVector<TRElem> GroupBy<TRElem, TElem2, TKey>(Func<T, TKey> keySelector, Func<T, TElem2> valueSelector,
-			                                                            Func<TKey, IEnumerable<TElem2>, TRElem> rSelector, IEqualityComparer<TKey> eq = null)
-		{
-			return base.GroupBy(GetPrototype<TRElem>(), keySelector, valueSelector, rSelector, eq ?? EqualityComparer<TKey>.Default);
+			Func<TKey, IEnumerable<TElem2>, TRElem> rSelector, IEqualityComparer<TKey> eq = null) {
+			return base.GroupBy(GetPrototype<TRElem>(), keySelector, valueSelector, rSelector,
+				eq ?? EqualityComparer<TKey>.Default);
 		}
 	
 		/// <summary>
-		/// Groups the elements of the collection by key, applies a selector on each value, and then applies a result selector on each key-group pair. Uses the specified equality comparer.
+		///     Groups the elements of the collection by key, applies a selector on each value, and then applies a result selector
+		///     on each key-group pair. Uses the specified equality comparer.
 		/// </summary>
-		/// <typeparam>The type of the key.
+		/// <typeparam>
+		///     The type of the key.
 		///     <name>TKey</name>
 		/// </typeparam>
 		/// <typeparam name="TKey">The type of key.</typeparam>
 		/// <param name="keySelector">The key selector.</param>
 		/// <param name="eq">The equality comparer.</param>
 		/// <returns></returns>
-		public FunqVector<Tuple<TKey, IEnumerable<T>>> GroupBy<TKey>(Func<T, TKey> keySelector,  IEqualityComparer<TKey> eq = null)
-		{
-			return this.GroupBy(keySelector, x => x, Tuple.Create, eq ?? EqualityComparer<TKey>.Default);
+		public FunqVector<Tuple<TKey, IEnumerable<T>>> GroupBy<TKey>(Func<T, TKey> keySelector,
+			IEqualityComparer<TKey> eq = null) {
+			return GroupBy(keySelector, x => x, Tuple.Create, eq ?? EqualityComparer<TKey>.Default);
 		}
 	
-		public FunqVector<TRElem> Cast<TRElem>()
-		{
+		public FunqVector<TRElem> Cast<TRElem>() {
 			return base.Cast<TRElem, FunqVector<TRElem>>(GetPrototype<TRElem>());
 		}
 	
 		/// <summary>
-		/// Applies the specified accumulator over each element of a collection, constructing a collection from its partial results.
+		///     Applies the specified accumulator over each element of a collection, constructing a collection from its partial
+		///     results.
 		/// </summary>
 		/// <typeparam name="TRElem">The type of the output collection elem.</typeparam>
 		/// <param name="initial">The initial value for the accumulator.</param>
 		/// <param name="accumulator">The accumulator.</param>
 		/// <returns></returns>
-		public FunqVector<TRElem> Scan<TRElem>(TRElem initial, Func<TRElem, T, TRElem> accumulator)
-		{
+		public FunqVector<TRElem> Scan<TRElem>(TRElem initial, Func<TRElem, T, TRElem> accumulator) {
 			return base.Scan(GetPrototype<TRElem>(), initial, accumulator);
 		}
 	
 		/// <summary>
-		/// Applies the specified accumulator over each element of a collection, constructing a collection from its partial results. The accumulator is applied from the last element to the first element.
+		///     Applies the specified accumulator over each element of a collection, constructing a collection from its partial
+		///     results. The accumulator is applied from the last element to the first element.
 		/// </summary>
 		/// <typeparam name="TRElem">The type of the output collection elem.</typeparam>
 		/// <param name="initial">The initial value for the accumulator.</param>
 		/// <param name="accumulator">The accumulator.</param>
 		/// <returns></returns>
-		public FunqVector<TRElem> ScanBack<TRElem>(TRElem initial, Func<TRElem, T, TRElem> accumulator)
-		{
+		public FunqVector<TRElem> ScanBack<TRElem>(TRElem initial, Func<TRElem, T, TRElem> accumulator) {
 			return base.ScanBack(GetPrototype<TRElem>(), initial, accumulator);
 		}
 	
-		public FunqVector<TRElem> Zip<TElem2, TRElem>(IEnumerable<TElem2> other, Func<T, TElem2, TRElem> selector)
-		{
+		public FunqVector<TRElem> Zip<TElem2, TRElem>(IEnumerable<TElem2> other, Func<T, TElem2, TRElem> selector) {
 			return base.Zip(GetPrototype<TRElem>(), other, selector);
 		}
 	
-		public FunqVector<Tuple<T, TElem2>> Zip<TElem2>(IEnumerable<TElem2> other)
-		{
-			return this.Zip(other, Tuple.Create);
+		public FunqVector<Tuple<T, TElem2>> Zip<TElem2>(IEnumerable<TElem2> other) {
+			return Zip(other, Tuple.Create);
 		}
 	
+		private FunqVector<TElem2> GetPrototype<TElem2>() {
+			return FunqVector<TElem2>.Instance;
+		}
 	}
-	
 		}

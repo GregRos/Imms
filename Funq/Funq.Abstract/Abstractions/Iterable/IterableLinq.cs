@@ -7,33 +7,6 @@ namespace Funq.Abstract {
 	partial class AbstractIterable<TElem, TIterable, TBuilder> {
 		
 		/// <summary>
-		/// (Implementation) Cartesian product between two iterable collections. You can supply a selector to apply on the result. The current instance is the left operand of the product.
-		/// </summary>
-		/// <typeparam name="TRight">The type of element in the second collection.</typeparam>
-		/// <typeparam name="TOut">The type of the output element.</typeparam>
-		/// <typeparam name="TOutIter">The type of the output collection.</typeparam>
-		/// <param name="bFactory">A prototype instance of the resulting collection provider, used as a builder factory.</param>
-		/// <param name="right">The right operand of the cartesian product. Must be an iterable collection. </param>
-		/// <param name="selector">A selector.</param>
-		/// <remarks>
-		/// This method basically applies a function on every combination of elements from the left operand and the right operand.
-		/// </remarks>
-		/// <returns></returns>
-		protected virtual TOutIter Cartesian<TRight, TOut, TOutIter>(TOutIter bFactory, IAnyIterable<TRight> right,
-		                                                           Func<TElem, TRight, TOut> selector)
-			where TOutIter : IBuilderFactory<IIterableBuilder<TOut, TOutIter>>
-		{
-			bFactory.CheckNotNull("bFactory");
-			right.CheckNotNull("right");
-			selector.CheckNotNull("selector");
-			using (var builder = bFactory.EmptyBuilder)
-			{
-				ForEach(x => { right.ForEach(y => { builder.Add(selector(x, y)); }); });
-				return builder.Produce();
-			}
-		}
-
-		/// <summary>
 		/// (Implementation) Cartesian product between two iterable collections. You can supply a selector to apply on the results. The current instance is the left operand of the product.
 		/// </summary>
 		/// <typeparam name="TRight">The type of element in the second collection.</typeparam>
