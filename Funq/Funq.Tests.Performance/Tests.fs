@@ -1,5 +1,6 @@
 ﻿namespace Funq.Tests.Performance
 open Funq.Tests
+open ExtraFunctional
 #nowarn "66"
 #nowarn "20"
 
@@ -13,12 +14,12 @@ module Test =
     let inline dataOf t = ((^s : (member DataLoaded : 'seq) t))
     let inline dataCountOf t = ((^s : (member Count : int) t))
     
-    type SimpleTest<'s>(Name : string, Group : string, Iters : int, test : SimpleTest<'s> -> 's -> unit) as x= 
+    type SimpleTest<'s>(Name : string, Group : string, Iters : int, test : SimpleTest<'s> -> 's -> unit)= 
         inherit Test<'s>(Name, Group, Iters)
         override x.Test s = test x s
 
     type DataSourceTest<'e, 's>
-        (Name : string, Group : string, Iters : int, Source : DataStructure<'e>, test : DataSourceTest<'e,'s> -> 's -> unit) as x =
+        (Name : string, Group : string, Iters : int, Source : DataStructure<'e>, test : DataSourceTest<'e,'s> -> 's -> unit) =
         inherit Test<'s>(Name, Group, Iters, Source)
         member val DataLoaded = Source.Object
         member val Iterations = Iters
@@ -49,7 +50,7 @@ module Test =
             for i = 1 to iters do
                 col <- col |> Ops.addFirst 0
 
-        simpleTest("AddFirst","DequeSingle",iters,test) <+ Desc("Adds arbitrary items repeatedly to the beginning of the sequence.")
+        simpleTest("AddFirst","DequeSingle",iters,test) <+. Desc("Adds arbitrary items repeatedly to the beginning of the sequence.")
     
     let inline AddLast iters = 
         let inline test t col = 
@@ -57,7 +58,7 @@ module Test =
             let mutable col = col |> Ops.addLast 0
             for i = 1 to iters do
                 col <- col |> Ops.addLast 0
-        simpleTest("AddLast", "DequeSingle",iters, test) <+ Class "DequeSingle"
+        simpleTest("AddLast", "DequeSingle",iters, test) <+. Class "DequeSingle"
     
     let inline AddLastRange(iters, data : DataStructure<_>) = 
         let inline test t col = 
@@ -66,7 +67,7 @@ module Test =
             let mutable col = col
             for i = 1 to iters do
                 col <- col |> Ops.addLastRange data
-        dataSourceTest("AddLastRange", "DequeRange",iters, data, test) <+ Desc("Adds a collection of items to the end {iters} times.")
+        dataSourceTest("AddLastRange", "DequeRange",iters, data, test) <+. Desc("Adds a collection of items to the end {iters} times.")
     
     let inline AddFirstRange(iters, data : DataStructure<_>) = 
         let inline test t col = 
@@ -74,8 +75,8 @@ module Test =
             let data = dataOf t |> seq
             let mutable col = col
             for i = 1 to iters do
-                col <- col |> Ops.addLastRange data
-        dataSourceTest("AddFirstRange", "DequeRange", iters, data, test) <+ Desc("Adds a collection of items to the beginning {iters} times.")
+                col <- col |> Ops.addFirstRange data
+        dataSourceTest("AddFirstRange", "DequeRange", iters, data, test) <+. Desc("Adds a collection of items to the beginning {iters} times.")
     
     let inline RemoveLast iters = 
         let inline test t col' = 
@@ -84,7 +85,7 @@ module Test =
             for i = 1 to iters do
                 if col |> Ops.isEmpty then col <- col'
                 col <- col |> Ops.removeLast
-        simpleTest("RemoveLast","DequeSingle", iters, test) <+ Class "DequeSingle"
+        simpleTest("RemoveLast","DequeSingle", iters, test) <+. Class "DequeSingle"
     
     let inline RemoveFirst iters = 
         let inline test t col' = 
@@ -93,7 +94,7 @@ module Test =
             for i = 1 to iters do
                 if col |> Ops.isEmpty then col <- col'
                 col <- col |> Ops.removeFirst
-        simpleTest("RemoveFirst","DequeSingle", iters, test) <+ Class "DequeSingle"
+        simpleTest("RemoveFirst","DequeSingle", iters, test) <+. Class "DequeSingle"
     
     let inline GetRandom iters = 
         let inline test t col = 
@@ -110,7 +111,7 @@ module Test =
                 col
                 |> Ops.get cur
                 |> ignore
-        simpleTest("Lookup", "IndexingSingle", iters, test) <+ Desc("Randomly looks up {iters} items by index from the entire collection.")
+        simpleTest("Lookup", "IndexingSingle", iters, test) <+. Desc("Randomly looks up {iters} items by index from the entire collection.")
     
     let inline SetRandom iters = 
         let inline test t col = 
@@ -126,7 +127,7 @@ module Test =
                 let mult = pdata.[i]
                 let cur = int (count * mult)
                 col |> Ops.set cur 0
-        simpleTest("Update", "IndexingSingle", iters, test) <+ Desc("Randomly updates items by index from the entire collection.")
+        simpleTest("Update", "IndexingSingle", iters, test) <+. Desc("Randomly updates items by index from the entire collection.")
 
     let inline Take iters = 
         let inline test t col = 
@@ -143,7 +144,7 @@ module Test =
                 let cur = int (count * mult)
                 col |> Ops.take cur
         simpleTest("Take", "Subsequence", iters, test) 
-        <+ Desc("Returns a starting subsequence consisting of a random number of items (from the entire collection), {iters} times.") 
+        <+. Desc("Returns a starting subsequence consisting of a random number of items (from the entire collection), {iters} times.") 
     
     let inline Skip iters = 
         let inline test t col = 
@@ -217,7 +218,7 @@ module Test =
             for i = 1 to iters do
                 let mult = pdata.[i]
                 let cur = int (count * mult)
-                col <- col |> Ops.remove cur
+                col <- col |> Ops.removeAt cur
                 count <- count - 1.
                 if col |> Ops.isEmpty then 
                     col <- col'
@@ -268,7 +269,7 @@ module Test =
             for i = 1 to iters do
                 let mult = pdata.[i]
                 let index = (float len) * mult |> int
-                col |> Ops.remove (keys.[index])
+                col |> Ops.removeKey (keys.[index])
         simpleTest("RemoveKey", "MapSingle", iters, test)
 
     let inline AddKeys(iters, data : DataStructure<_>) = 
@@ -288,7 +289,7 @@ module Test =
             let keys = (getAllKeys col).Take (ratio * (float len) |> int)
             for i = 1 to iters do
                 col |> Ops.removeMany keys
-        simpleTest("RemoveRange", "MapRange", iters, test) <+ Meta("Ratio", ratio)
+        simpleTest("RemoveRange", "MapRange", iters, test) <+. Meta("Ratio", ratio)
 
     let inline GetKeyRandom iters = 
         let inline test t col = 
@@ -311,7 +312,7 @@ module Test =
             let data = dataOf t
             for i = 1 to iters do
                 col |> Ops.union data
-        dataSourceTest("Union", "SetOperation", iters, source, test) <+ Desc("Computes the set-theoretic union with another data structure {iters} times.")
+        dataSourceTest("Union", "SetOperation", iters, source, test) <+. Desc("Computes the set-theoretic union with another data structure {iters} times.")
     
     let inline IntersectWithSet(iters, source) = 
         let inline test t col = 
@@ -319,7 +320,7 @@ module Test =
             let data = dataOf t
             for i = 1 to iters do
                 col |> Ops.intersect data
-        dataSourceTest("Intersection", "SetOperation", iters, source, test) <+ Desc("Computes the set-theoretic intersection with another data structure {iters} times.")
+        dataSourceTest("Intersection", "SetOperation", iters, source, test) <+. Desc("Computes the set-theoretic intersection with another data structure {iters} times.")
     
     let inline ExceptWithSet(iters, source) = 
         let inline test t col = 
@@ -327,7 +328,7 @@ module Test =
             let data = dataOf t
             for i = 1 to iters do
                 col |> Ops.except data
-        dataSourceTest("Except", "SetOperation", iters, source, test) <+ Desc("Computes the set-theoretic relative complement (or Except) operation.")
+        dataSourceTest("Except", "SetOperation", iters, source, test) <+. Desc("Computes the set-theoretic relative complement (or Except) operation.")
     
     let inline SymDifferenceWithSet(iters, source) = 
         let inline test t col = 
@@ -335,7 +336,7 @@ module Test =
             let data = dataOf t
             for i = 1 to iters do
                 col |> Ops.symDifference data
-        dataSourceTest("Difference", "SetOperation", iters, source, test) <+ Class("SetOperation") <+ Desc("Computes the set-theoretic symmetric difference operation.")
+        dataSourceTest("Difference", "SetOperation", iters, source, test) <+. Class("SetOperation") <+. Desc("Computes the set-theoretic symmetric difference operation.")
     
     let inline SetEquals(iters, source) = 
         let inline test t col = 
@@ -343,7 +344,7 @@ module Test =
             let data = dataOf t
             for i = 1 to iters do
                 col |> Ops.isSetEquals data
-        dataSourceTest("SetEquals", "SetRelation", iters, source, test) <+ Desc("Determines if this set equals another data structure, {iters} times.");
+        dataSourceTest("SetEquals", "SetRelation", iters, source, test) <+. Desc("Determines if this set equals another data structure, {iters} times.");
     
     let inline ProperSuperset(iters, source) = 
         let inline test t col = 
@@ -351,7 +352,7 @@ module Test =
             let data = dataOf t
             for i = 1 to iters do
                 col |> Ops.isSuperset data
-        dataSourceTest("IsProperSuperset", "SetRelation", iters, source, test) <+ Desc("Determines the Superset relation.");
+        dataSourceTest("IsProperSuperset", "SetRelation", iters, source, test) <+. Desc("Determines the Superset relation.");
     
     let inline ProperSubset(iters, source) = 
         let inline test t col = 
@@ -359,7 +360,7 @@ module Test =
             let data = dataOf t
             for i = 1 to iters do
                 col |> Ops.isSubset data
-        dataSourceTest("IsProperSubset", "SetRelation", iters, source, test)<+ Desc("Determines the Subset relation.");
+        dataSourceTest("IsProperSubset", "SetRelation", iters, source, test)<+. Desc("Determines the Subset relation.");
     
     let inline Contains iters = 
         let inline test t col = 
@@ -374,7 +375,7 @@ module Test =
                 let key = keys.[int cur]
                 let x = col |> Ops.setContains key
                 ()
-        simpleTest("Contains", "SetSingle", iters, test)<+ Desc("Determines if a random element of the set is part of it, {iters} times.");
+        simpleTest("Contains", "SetSingle", iters, test)<+. Desc("Determines if a random element of the set is part of it, {iters} times.");
         
     let inline AddSetItem(iters, data : DataStructure<_>) = 
         let inline test t col = 
@@ -407,7 +408,7 @@ module Test =
             for i = 1 to iters do
                 colx <- col
                 colx <- colx |> Ops.removeMany data
-        simpleTest("RemoveRange", "SetRange", iters, test) <+ Meta("Ratio", ratio)
+        simpleTest("RemoveRange", "SetRange", iters, test) <+. Meta("Ratio", ratio)
 
     let inline RemoveSetItem(iters) = 
         let inline test t col = 

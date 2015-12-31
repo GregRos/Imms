@@ -1,25 +1,25 @@
 ﻿using System.Collections.Generic;
 using Funq.Abstract;
-using Funq.Collections.Common;
-using Funq.Collections.Implementation;
+using Funq.Implementation;
 
-namespace Funq.Collections
-{
-	public partial class FunqSet<T>
-	{
-		internal sealed class Builder : SetBuilder<T>
-		{
+namespace Funq {
+	public partial class FunqSet<T> {
+		protected override ISetBuilder<T, FunqSet<T>> EmptyBuilder {
+			get { return new Builder(EqualityComparer, HashedAvlTree<T, bool>.Node.Empty); }
+		}
+
+		protected override ISetBuilder<T, FunqSet<T>> BuilderFrom(FunqSet<T> collection) {
+			return new Builder(collection.EqualityComparer, collection.Root);
+		}
+
+		protected override bool IsCompatibleWith(FunqSet<T> other) {
+			return EqualityComparer.Equals(other.EqualityComparer);
+		}
+
+		sealed class Builder : ISetBuilder<T, FunqSet<T>> {
 			readonly IEqualityComparer<T> _eq;
-			private HashedAvlTree<T, bool>.Node _inner;
+			HashedAvlTree<T, bool>.Node _inner;
 			Lineage _lineage;
-			public override object Result
-			{
-				get {
-					//we need to change the lineage to avoid mutating user-visible data
-					_lineage = Lineage.Mutable();
-					return _inner.Wrap(_eq);
-				}
-			}
 
 			public Builder(IEqualityComparer<T> eq, HashedAvlTree<T, bool>.Node inner) {
 				_eq = eq;
@@ -27,40 +27,53 @@ namespace Funq.Collections
 				_lineage = Lineage.Mutable();
 			}
 
-			protected override void add(T item) {
-				_inner = _inner.Root_Add(item, true, _lineage, _eq, false) ?? _inner;
+			public FunqSet<T> Produce() {
+				//we need to change the lineage to avoid mutating user-visible data
+				_lineage = Lineage.Mutable();
+				return _inner.Wrap(_eq);
 			}
 
-			public override bool Contains(T item) {
+			public bool Add(T item) {
+				var ret = _inner.Root_Add(item, true, _lineage, _eq, false);
+				if (ret == null) {
+					return false;
+				}
+				_inner = ret;
+				return true;
+			}
+
+			public void AddRange(IEnumerable<T> items) {
+				items.CheckNotNull("items");
+				var set = items as FunqSet<T>;
+				if (set != null && _eq.Equals(set.EqualityComparer)) {
+					_inner = _inner.Union(set.Root, _lineage);
+				} else {
+					items.ForEach(x => {
+						_inner = _inner.Root_Add(x, true, _lineage, _eq, false) ?? _inner;
+					});
+				}
+			}
+
+			public int Length {
+				get { return _inner.Count; }
+			}
+
+			public bool Contains(T item) {
 				return _inner.Root_Contains(item);
 			}
 
-			public override void Remove(T item) {
-				_inner = _inner.Root_Remove(item, _lineage) ?? _inner;
+			public bool Remove(T item) {
+				var res = _inner.Root_Remove(item, _lineage);
+				if (res == null) {
+					return false;
+				}
+				_inner = res;
+				return true;
 			}
-		}
 
-		protected internal override SetBuilder<T> EmptyBuilder
-		{
-			get
-			{
-				return new Builder(EqualityComparer, Root);
+			public void Dispose() {
+				_lineage = Lineage.Mutable();
 			}
-		}
-
-		protected internal override FunqSet<T> ProviderFrom(SetBuilder<T> builder)
-		{
-			return (FunqSet<T>)builder.Result;
-		}
-
-		protected internal override SetBuilder<T> BuilderFrom(FunqSet<T> provider)
-		{
-			return new Builder(EqualityComparer, provider.Root);
-		}
-
-		protected override bool IsCompatibleWith(FunqSet<T> other)
-		{
-			return EqualityComparer.Equals(other.EqualityComparer);
 		}
 	}
 }

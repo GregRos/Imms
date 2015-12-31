@@ -1,26 +1,15 @@
-using System;
-using System.Collections.Generic;
+namespace Funq.Abstract {
 
-namespace Funq.Abstract
-{
 	/// <summary>
-	/// Used for abstracting over builders for iterable collections when the underlying type is unknown.
+	/// A builder for any iterable collection. A builder is a mutable collection used to produce immutable collections.
 	/// </summary>
-	/// <typeparam name="TElem"></typeparam>
-	public interface IIterableBuilder<in TElem> : IDisposable
-	{
+	/// <typeparam name="TElem">The element type stored by the collection.</typeparam>
+	/// <typeparam name="TResult">The type of collection produced by the builder.</typeparam>
+	public interface IIterableBuilder<in TElem, out TResult> : IAnyIterableBuilder<TElem> {
 		/// <summary>
-		/// Adds an element to the builder.
+		/// Produces the result collection. While this method should be callable more than once, and should be efficient, it normally reduces the efficiency of future operations on this builder
 		/// </summary>
-		/// <param name="item"></param>
-		void Add(TElem item);
-
-		/// <summary>
-		/// Adds multiple elements to the builder.
-		/// </summary>
-		/// <param name="items"></param>
-		void AddMany(IEnumerable<TElem> items);
-
+		TResult Produce();
 	}
 
 }

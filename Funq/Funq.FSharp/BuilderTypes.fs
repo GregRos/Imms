@@ -1,5 +1,5 @@
 ﻿module Funq.FSharp.Implementation.BuilderTypes
-open Funq.Collections
+open Funq
 open Funq.FSharp
 open System
 open Funq.FSharp.Implementation

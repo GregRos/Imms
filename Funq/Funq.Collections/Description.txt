@@ -1,0 +1,500 @@
+virtual Length
+	Returns the length of the collection
+
+Aggregate(Func) [reduce]
+	Requires:
+		*	Func != null
+		*	!IsEmpty
+	Details:
+		*	Func applied to the first two elements first, then threaded.
+		*	If the collection has 1 element, the first element is returned
+		*	The function is called exactly [Length - 1] times, in the order of iteration.
+	
+Aggregate(Initial,Func) [fold]
+	Requires:
+		*	Func != null
+	Details:
+		*	Func is applied to Initial and the first element first, then threaded.
+		*	If the collection has 0 elements, Initial is returned.
+		*	Called exactly [Length] times, in order of iteration.
+		
+All(Func)
+	Requires:
+		*	Func != null
+	Details:
+		*	Func is applied to successive elements (in order of iteration) until it returns false.
+		*	If all return true, then true is returned.
+		*	If the collection is empty, true is returned.
+	
+Any(Func)
+	Requires:
+		*	Func != null
+	Details:
+		*	Func is applied to successive elements (in order of iteration) until true is returned.
+		*	If all return false, false is returned.
+		*	If the collection is empty, false is returned.
+	
+virtual CopyTo(T[] arr,int[index] arrStart,int[size] count)
+	-	Copies the first (in order of iteration) 'count' elements to arr, starting at arrStart.
+	Requires:
+		*	arr != null
+		*	Either:
+			1.	arrStart == 0 && count == 0
+			2.	arrStart in [-|arr|, |arr| - 1] && count in [0, |arr| - |arrStart|]
+	Details:
+		+	arrStart is an index, so it can be negative. count cannot be negative, as it is a size not an index.
+		*	If count == 0, no elements are copied. If also arrStart == 0, then arr can have 0 length.
+		*	In all other cases, arr cannot have 0 zero length.
+		*	Copied data overwrites previous data in the array.
+
+CopyTo(T[] arr, int[index] arrStart)
+	-	Copies all elements to arr, starting arrStart.
+	Requires:
+		* 	arr != null
+		* 	Either arrStart == 0 && this.IsEmpty, or arrStart in [-|arr|, |arr|-1].
+	Details:
+		* 	Calls copyTo(T[],int,int)
+		*	If this.IsEmpty, no elements are copied.
+		*	If this.IsEmpty and arrStart == 0, then arr can have 0 zero length. Otherwise, it cannot have zero length.
+		
+Count(Func)
+	Requires:
+		*	Func != null
+	Details:
+		*	Func is applied once to every element, in order of iteration.
+		*	If this.IsEmpty, then 0 is returned.
+		
+Find(Func)
+	Requires:
+		*	Func != null
+	Details:
+		*	Func is applied once to every element in order of iteration, until it returns true.
+		*	The first such element is returned.
+		*	If Func returns false for all elements, or there are no elements, Optional.None is returned.
+		
+virtual ForEach(Action)
+	Requires:
+		*	Action != null
+	Details:
+		*	Action is applied once to every element.
+		*	If this.IsEmpty, Action is not invoked at all.
+		
+virtual ForEachWhile(Func)
+	Requires:
+		*	Func != null
+	Details:
+		*	Identical to All(Func).
+		
+Pick(Func)
+	Requires:
+		*	Func != null
+	Details:
+		*	Func is applied once to every element in order of iteration,
+				until it returns Optional.Some. The first result is returned.
+		*	If the collection is empty or Func returns None for all elements, Optional.None is returned.
+		
+virtual Print(sep = "; ",Func = null)
+	Requires:
+		*	(none)
+	Details:
+		*	Concats the elements of the collection, separated by 'sep'.
+		*	If sep is null, "" is used instead.
+		*	If Func is null, the ToString method is called to transform each element to a string.
+			Otherwise, Func is called on every element in order of iteration.
+		*	If the collection is empty, "" is returned.
+		
+virtual Single()
+	Requires:
+		*	this.Length == 1
+	Details:
+		*	Returns the first and only element in the collection.
+			If the collection is empty, Errors.Is_empty should be thrown.
+			If the collection has more than one element, Errors.Too_many_elements(1) should be thrown
+			
+virtual ToArray()
+	Requires
+		*	(none)
+	Details
+		*	Converts the collection to a newly allocated array.
+		
+---------------------------------
+Sequential
+---------------------------------
+
+this[int[index] from, int[index] to]
+	-	Returns a slice of the collection, starting from 'from' and ending with 'to'.
+	Requires:
+		*	from in [-Length, Length - 1]
+		*	|to| in [|from|, Length - 1]
+	Details:
+		*	The collection cannot be empty. If it is, ArgumentOutOfRange is thrown.
+		*	The requirement is for |to|. Information about this should be returned in the exception.
+		*	Calls GetRange(int start, int count)
+
+protected virtual GetRange(int[+index] start, int[size] count)
+	-	Returns a slice of the collection, starting at 'start' and consisting of 'count' elements.
+	Requires:
+		*	Either:
+			1. count == 0 && start == 0
+			2. start in [0, Length-1] && count in [0, Length - start]
+	Details:
+		*	This implementation method doesn't use negative indexing.
+		*	If count, start == 0 then the collection can be empty. Otherwise, it is an error.
+		*	If count == 0, an empty collection is returned.
+		*	The default implementation uses direct iteration.
+		
+this[int[index] index]
+	Requires:
+		* index in [-Length, Length-1]
+	Details:
+		*	Returns the element at the position 'index'
+		*	Calls GetItem
+		
+protected virtual GetItem(int[+index] index)
+	-	Returns the element at position 'index'
+	Requires:
+		*	index in [0, Length-1]
+	Details:
+		*	This implementation method doesn't use negative indexing. Negative indexing is handled in the indexer.
+
+TryGet(int[index] index)
+	-	Returns the element at position 'index', or None if no such element exists.
+	Requires:
+		*	(none)
+	Details:
+		*	This method never throws an exception. If 'index' is invalid or doesn't exist, None is returned.
+		*	Otherwise, identical to this[int]
+		
+virtual First/Last 
+	Requires:
+		*	!this.IsEmpty
+	Details:
+		*	Returns the first/last element in the collection. If the collection is empty, throws Errors.Is_empty
+		
+virtual TryFirst/TryLast
+	Requires:
+		*	(none)
+	Details:
+		*	Returns the first/last element in the collection, but if one doesn't exist, returns Optional.None.
+		*	This method never throws exceptions.
+		
+virtual CopyTo(T[] arr, int[index] myStart, int[index] arrStart, int count)
+	Requires:
+		*	arr != null
+		*	Either:
+			1. count == 0 && myStart == 0
+			2. Both:
+				1.	myStart in [-Length, Length]
+				2.	count in [0, Length-|myStart|]
+		*	Either:
+			1. count == 0 && arrStart == 0
+			2. Both:
+				1.	arrStart in [-arr.Length, arr.Length-1]
+				2.	count in [0, Length - |arrStart|]
+	Details:
+		*	Copies 'count' elements of the collection to 'arr. Starts from 'myStart' collection index, and 'arrStart' array index.
+		*	As in other methods, if count, myStart == 0 then the collection can be empty. Otherwise, this is an error.
+		*	If count, arrStart == 0 then arr can be empty. Otherwise, this is an error.
+		*	if count == 0, no elements are copied.
+	
+virtual Equals(TList), TList==TList, TList!=TList, Equals(object)
+	Requires:
+		*	(none)
+	Details:
+		*	Determines sequence equality between the collections, using the default element comparer
+		
+virtual GetHashCode()
+	Details:
+		*	Uses FNV 1a.
+		
+AggregateBack(Result,Func) [fold]
+	Requires:
+		*	Func != null
+	Details:
+		*	Applies Func to Result and the last element, and then threads it backwards according to sequential order.
+		*	Func is called exactly [Length] times.
+		*	If the collection is empty, Result is returned.
+
+AggregateBack(Func) [reduce]
+	Requires:
+		*	Func != null
+		*	!this.IsEmpty
+	Details:
+		*	Applies Func to the last two elements, and then threads it backwards according to sequential order.
+		*	The first argument of Func is the the higher element, and the second is the lower element.
+		*	Func is called exactly [Length] times.
+		*	If the collection has one element, that element is returned.
+		
+FindIndex(Func) 
+	Requires:
+		*	Func != null
+	Details:
+		*	Applies Func to every element in sequential order, until it returns true. Then returns the index.
+		*	If Func returns false for all elements, or the collection is empty, None is returned.
+
+FindLastIndex(Func)
+	Requires: Func != null
+	Details: 
+	*	Applies func to every element, from last to first, until it returns true. Then returns the 0-based index of that element.
+	*	If the collection is empty or Func returns false for every element, None is returned.
+	
+FindLast(Func)
+	Requires: Func != null
+	Details: 
+	*	Applies func to every element, from last to first, until it returns true. Then returns that element.
+	*	If the collection is empty or Func returns false for every element, None is returned.
+	
+virtual ForEachBack(Action)
+	Requires: Action != null
+	Details: 
+	*	Applies Action to every element, from last to first. 
+	*	Action is invoked exactly [Length] times.
+	*	If the collection is empty, Action is not invoked.
+	
+virtual ForEachBackWhile(Func)
+	Requires: Func != null
+	Details: 
+	*	Applies Func to every element, from last to first, until it returns false. Returns the last result of the function.
+	*	If the collection is empty, Func is not invoked and true is returned.
+	
+virtual Reverse()
+	Details:
+		*	Returns a reversed collection.
+		*	If the collection has 1 element or is empty, it is returned.
+		
+virtual Skip(int[size] count)
+	Requires:
+		*	count in [0, *]
+	Details:
+		*	Returns the collection, with the first count elements skipped.
+		*	count can be any non-negative number. If count >= Length, an empty collection is returned.
+		*	If count == 0, the collection is returned.
+		
+SkipWhile(Func)
+	Requires: Func != null
+	Details:
+		*	Skips the first elements until Func returns false.
+		*	First finds the index at which Func returns false, and then calls Skip with that index.
+		*	If Func returns true for all elements, an empty collection is returned.
+		*	If Func returns false for the first element, the collection is returned.
+		
+virtual Take(int[size] count)
+	Requires:
+		*	count in [0, *]
+	Details:
+		*	Returns a collection consisting of the first 'count' elements.
+		*	If count >= Length, the collection is returned.
+		*	If count == 0, an empty collection is returned.
+		
+TakeWhile(Func)
+	Requires: Func != null
+	Details:
+		*	Returns a collection consisting of the first elements for which Func returns true.
+		*	Finds the index of the first element for which Func returns false, and calls Take with that index.
+		*	If Func never returns false, the collection is returned.
+		*	If Func returns false for the first element, and empty collection is returned.
+		
+++++++++++
+++++++++++
+
+AddFirst(T)
+	Details:
+		*	Adds the element T to the start of the sequential collection.
+
+AddFirstRange(seq<T> ts)
+	Requires: ts != null
+	Details:
+		*	The method is guaranteed to iterate over 'ts' exactly once.
+		*	Adds the elements 'ts' to the start of the collection.
+		*	The elements are concatted to the start of the collection, not added iteratively to the beginning.
+		*	If ts is empty, the collection is returned.
+	FunqList:
+		*	If ts is FunqList, this method is O(logn)
+		*	If ts is an array, the implementation is much more efficient.
+		*	If ts is a recognized collection type, the implementation is also more efficient.
+	FunqVector:
+		*	The method can be more efficient if ts is (in approximate order of efficiency): 
+				FunqVector, an array, or a known collection type.
+		
+AddLast(T)
+	Details:
+		*	Adds the element T to the end of the sequential collection.
+		
+AddLastRange(seq<T> ts)
+	Requires: ts != null
+	Details:
+		*	The method is guaranteed to iterate over 'ts' exactly once.
+		*	Adds the elements 'ts' to the end of the collection.
+		*	If ts is empty, the collection is returned.
+	FunqList:
+		*	If ts is also FunqList, this is O(logn)
+		*	If ts is an array or a known collection type, the implementation is more efficient.
+	FunqVector:
+		*	This method is much more efficient if ts is an array or a known collection type, though still around O(n).
+		
+RemoveFirst()
+	Requires: !this.IsEmpty
+	Details:
+		*	Removes the first element from the collection.
+
+RemoveLast()
+	Requires: !this.IsEmpty
+	Details:
+		*	Removes the last element from the collection.
+		
+Insert(int[index] index, T item)
+	Requires: index in [-Length-1, Length]
+	Details:
+		*	Inserts the element 'item' at position 'index' in the collection, pushing the previous occupant (if any) forward.
+		*	If index == Length, this is the same as AddLast.
+		*	If index == 0, this is the same as AddFirst.
+		*	In this method, an index of -1 points to after the end of the collection, so Insert(-1,item) is the same as Insert(Length,item)
+			To insert an element at position Length-1 and push the last element forward, you have to use Insert(-2,item)
+			Because of this, the negative indexes lag by one step, and so -Length-1 is identical to 0, rather than -Length
+			
+InsertRange(int[index] index, seq<T> ts)
+	Requires: 
+		*	ts != null
+		*	index in [-Length-1,Length]
+	Details:
+		*	The method is guaranteed to iterate over 'ts' exactly once.
+		*	Inserts the sequence ts at position 'index' in the collection, pushing the previous occupant forward.
+		*	If index == Length, this is identical to AddLastRange.
+		*	If index == 0, this is AddFirstRange.
+		*	Uses the same negative indexing as Insert.
+	FunqList:
+		*	If ts is also FunqList, this is O(logn).
+		*	The implementation for arrays and known collection types is more efficient.
+	FunqVector:
+		*	More efficient implementation for FunqVector, array, or a known collection type.
+		
+RemoveAt(int[index] index, T)
+	Requires: index in [-Length,Length-1]
+	Details:
+		*	Removes the element at position 'index', pulling the next element (if any) forward.
+		*	If index == Length-1, this is the same as RemoveLast
+		*	If index == 0, this is the same as RemoveFirst
+		
+
+Update(int[index] index, T)
+	Requires: index in [-Length, Length-1]
+	Details:
+		*	Updates the value of the element at position 'index'.
+		
+------------
+SetLike
+------------
+
+Ordered and unordered collections
+	*	Sets and maps come in two varieties: ordered and unordered. Ordered collections use an IComparer to determine the order of different keys/elements, while unordered collections use equality semantics.
+	*	You iterate over an ordered collection in ascending order, from smallest to largest. This applies to all forms of iteration, including using an IEnumerator, as well as the dedicated ForEach methods. Two such collections are structurally equal if and only if they are sequentially equal.
+	*	The iteration order over an unordered collection is undefined. Two unordered collections may be structurally equal, while having a different order of iteration. terating over the same instance of an unordered collection will always yield identical results, but it is not possible to predict how the order will be affected by addition/removal of elements, for example.
+	
+Compatibility
+	*	The library provides a much more efficient implementation of set-theoretic and map operations if the input collection is a set/map compatible with the current one.
+	*	Compatibility means that it is of the same type, and also that the equality/comparison handler used by the set/map is identical to the current one.
+	*	Equality between equality/comparison handlers is determined by the .Equals(object) of the handler used by the current instance.
+	*	Default handlers are always equal. The handlers may only be unequal if you define your own equality/comparison handler.
+	*	If you do this, you should make sure you either:
+			1. 	Create all sets using the same equality/comparison semantics with the same handler instance.
+			2. 	Override the .Equals method on your handler to act as structural/functional equality.
+		Note that implementing this method incorrectly results in undefined behavior.
+	
+	*	For maps, some operations retain compatibility even if the value type is different, as long as the key type and handler are the same. This is specified in the operation.
+	*	Also, some map operations have compatibility with sets of the same element type as the key (FunqMap can be compatible with FunqSet, and FunqOrderedMap with FunqOrderedSet)
+	If so, this is specified in the description.
+
+Set-theoretic Relations
+	*	Sets support set-theoretic relation operations with arbitrary sequences of the same element type. 
+	*	These operations are always much more efficient if the other sequence is a set compatible with the current instance.
+	*	In any case, whatever the input, the result is determined using the equality semantics of the current set.
+	*The operations provided are the general RelatesTo, which returns a set-theoretic relation in the form of an enumeration, and the specific Is[SetRelation] (e.g. IsEqual, IsSupersetOf, IsProperSupsersetOf, IsDisjointWith, ...)
+	The specific operations are usually much more efficient than the general RelatesTo because they need to gather less information, and can stop in the middle if it becomes clear the saught after relation doesn't hold.
+	
+	Note that RelatesTo returns a SetRelation, which is a flag enum. All of the relations are exclusive though, except for SetRelation.Disjoint, which can appear with other relations if one if the sets is empty. For example, two empty sets are both disjoint and equal.
+	
+	Duplicates (as determined by the semantics of the current set) never affect the set relation.
+	
+Set-theoretic Operations
+	Sets support set-theoretic operators with sequences, such as Union and Intersection. These are much more efficient if the input is a compatible set. Otherwise, the equality/comparison semantics of the current set will be used to determine the result.
+	
+	These operations accept sequences that may have duplicates, with regards to the equality semantics used by the current set. The existence of duplicates never affects the result of the operation.
+	
+	In all cases, when both sets contain the same element (as determined by the equality semantics of the current set) and one of them must appear in the result, the instance of the current set will appear in the result. This may be important, because structural equality may not be the same as absolute equality.
+	
+Map Operations
+	Funq supports an extension of set-theoretic operations to maps. Map operations typically accept as input a sequence of key-value pairs. These operations are also implemented efficiently when the input is a compatible map. Maps are compatible if they are of the same type, and have the same key semantics. For a few operations, maps with different value types (but identical key types) may also be compatible. 
+	
+	DUPLICATES
+		Duplicates in the input collection are a tricky issue in this case. Because the input is just a sequence (or an incompatible map), it may contain duplicates with regards to the key semantics used by the current map. If so, any specified selectors will be invoked on each of those duplicates, overwriting the previous result value each time according to the order of iteration. This is not ideal behavior, but it is best due to optimization reasons. Also, it is difficult to decide on which is the ideal behavior in this case.
+
+	KEY INSTANCES
+		Operations on a map never overwrite keys, only the values associated with them. For example, the method Set, which accepts a key and a value, may overwrite existing values, but the instance of the key of the current map is always retained. This behavior is similar to the behavior of sets, where the instance of the element in the current set is always retained.
+		
+		Similarly, result selectors accept a key and conflicting values. The key instance of the current map is always used, rather than the instance in the input map.
+		
+	Selectors are always invoked in the order of iteration over the current map, and are invoked once for every collision (though as mentioned above, if the input contains duplicates, this is treated as multiple separate collisions). 
+		
+	The primary set operations are:
+	
+	1. Merge, analogous to Union over sets. In addition to an input sequence of key-value pairs, it accepts an optional collision resolution function that determines the value in the result map when a key is present in both maps. If not specified, the values of the input map overwrite the values of the current map.
+	
+	2. Join, analogous to Intersection over sets. Key-value pairs are joined by key (using the equality semantics of the current map), and a selector is used to produce the value in the result map, accepting the key as well as the conflicting values. Join can accept a sequence of key-value pairs with a different value types, but in this case the input isn't compatible.
+	
+	3. Subtract, analogous to Except over sets. Accepts a sequence of key-value pairs. Optionally, you can provide a subtraction function that, in a sense, subtracts each value in the input from each one in the current map. This is a selector that takes as input the key, as well as the conflicting values. The subtraction function has an Optional return type, and if it returns None the key-value pair doesn't appear at all in the result map (this is the same behavior as Except over sets). If you don't provide a subtraction function, shared keys are also removed. It is important to note that maps with different value types can still be compatible for this operation, as long as they are of the same kind, have the same key type, and use the same key semantics.
+	
+	4. Difference, analogous to Difference over sets. Accepts a sequence of key-value pairs. For this operation, you cannot provide a selector.
+	
+	Selectors are invoked 
+	
+	DUPLICATES
+		
+		
+	
+	
+	
+	
+	
+RelatesTo(Seq<T> other)
+	Requires: other != null
+	Details:
+		*	The method is guaranteed to iterate over 'other' exactly once.
+		*	Returns the set-theoretic relation between this and other, in the form of the SetRelation enum.
+		*	SetRelation is a flag enum, which means the result can indicate several relations.
+		*	All SetRelations other than SetRelation.Disjoint are exclusive. Disjoint can appear alongside any other relation.
+			1. If both sets are empty, Disjoint | Equal is returned.
+			2. If this empty, Disjoint | ProperSubset is returned.
+			3. If other is empty, Disjoint | ProperSuperset is returned.
+		*	SetRel.None is returned if no set relation applies, which means each set contains elements the other does not, but they also share elements in common.
+		*	The method is much more efficient if 'other' is a set compatible with this one.
+		*	If the collections aren't compatible, the semantics of the current set are used to determine the relation.
+		*	The input collection may contain duplicates, according to the semantics of the current set.
+			If so, they do not effect the set relation.
+		
+Add(T)
+	Details:
+		*	Adds T to the set, if it doesn't already exist.
+		*	If it does exist, the current set is returned.
+		
+Remove(T)
+	Details:
+		*	Removes T from the set, if it exists.
+		*	If it doesn't exist, the current set is returned.
+		*	You can call this method on an empty set.
+		
+SetEquals(seq<T> other)
+	Requires: other != null
+	Details:
+		*	Determines set equality between this set and the specified sequence.
+		*	If the other sequence is a known collection with fewer elements than the set, the result is false.
+		*	The semantics of the current set are used to determine equality.
+		*	Specific set relation methods are faster than RelatesTo, because they can stop earlier and need to gather less information.
+		
+		
+
+			
+
+
+
+		
+		

@@ -1,25 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Funq.Abstract
-{
-	internal static class InterfaceExtensions 
-	{
-		public static void ForEach<T>(this IAnyIterable<T> iterable, Action<T> act)
+namespace Funq.Abstract {
+	static class InterfaceExtensions {
+
+		public static TIterable ToIterable<TElem, TIterable>(this IBuilderFactory<IIterableBuilder<TElem, TIterable>> factory, IEnumerable<TElem> values)
 		{
-			iterable.ForEachWhile(x =>
-			{
-				act(x);
-				return true;
-			});
+			using (var builder = factory.EmptyBuilder) {
+				builder.AddRange(values);
+				return builder.Produce();
+			}
 		}
 
-		public static bool IsEmpty<T>(this IAnyIterable<T> iterable)
-		{
-			return iterable.ForEachWhile(x => false);
+		public static void Set<TKey, TValue>(this IAnyMapBuilder<TKey, TValue> builder, TKey key, TValue value) {
+			builder.Add(Kvp.Of(key, value));
 		}
 
 	}

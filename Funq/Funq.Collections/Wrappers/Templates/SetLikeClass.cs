@@ -20,7 +20,6 @@ public partial class __SetLikeClass__<T> : AbstractSet<T, __SetLikeClass__<T>>
 	/// <returns></returns>
 	public __SetLikeClass__<TRElem> Select<TRElem>(Func<T, TRElem> selector, __HandlerObject__<TRElem> handler = null)
 	{
-		if (selector == null) throw Errors.Is_null;
 		return Select(GetPrototype(handler), selector);
 	}
 
@@ -31,9 +30,8 @@ public partial class __SetLikeClass__<T> : AbstractSet<T, __SetLikeClass__<T>>
 	/// <param name="selector">The selector.</param>
 	/// <param name="handler">A new equality or comparison handler for constructing the resulting set.</param>
 	/// <returns></returns>
-	public __SetLikeClass__<TRElem> Select<TRElem>(Func<T, Option<TRElem>> selector, __HandlerObject__<TRElem> handler = null )
+	public __SetLikeClass__<TRElem> Select<TRElem>(Func<T, Optional<TRElem>> selector, __HandlerObject__<TRElem> handler = null )
 	{
-		if (selector == null) throw Errors.Is_null;
 		return Choose(this.GetPrototype<TRElem>(handler), selector);
 	}
 
@@ -49,17 +47,6 @@ public partial class __SetLikeClass__<T> : AbstractSet<T, __SetLikeClass__<T>>
 	}
 
 	/// <summary>
-	/// Ofs the type.
-	/// </summary>
-	/// <typeparam name="TRElem">The type of the R elem.</typeparam>
-	/// <param name="handler">The handler.</param>
-	/// <returns></returns>
-	public __SetLikeClass__<TRElem> OfType<TRElem>(__HandlerObject__<TRElem> handler = null) 
-	{
-		return OfType<TRElem, __SetLikeClass__<TRElem>>(GetPrototype<TRElem>(handler));
-	}
-
-	/// <summary>
 	/// Applies the specified accumulator over each element of a collection, constructing a collection from its partial results.
 	/// </summary>
 	/// <typeparam name="TRElem">The type of the output collection elem.</typeparam>
@@ -69,7 +56,6 @@ public partial class __SetLikeClass__<T> : AbstractSet<T, __SetLikeClass__<T>>
 	/// <returns></returns>
 	public __SetLikeClass__<TRElem> Scan<TRElem>(TRElem initial, Func<TRElem, T, TRElem> accumulator, __HandlerObject__<TRElem> handler = null )
 	{
-		if (accumulator == null) throw Errors.Is_null;
 		return Scan(GetPrototype<TRElem>(handler), initial, accumulator);
 	}
 }

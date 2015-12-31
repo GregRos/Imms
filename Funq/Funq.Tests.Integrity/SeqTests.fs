@@ -3,447 +3,479 @@ open System
 open System.Diagnostics
 open Funq.FSharp.Implementation
 open Funq.FSharp
-
+open Funq.Abstract
+open ExtraFunctional
+open Funq
 type SeqTests(?seed : int) = 
     let create_test iters name test = Test(iters, name, ListLike, test)
+    let test_of n name (test : _ -> obj list) = create_test n name test
     let seed = defaultArg seed (Environment.TickCount)
-    let test_of n name (test : _ -> #TargetMetadata list) = create_test n name test
-    member private x.inner_add_last (n : int) (s : SeqWrapper<int>) = 
+
+    //The next are private test methods. They are integration tests, and rely on the unit tests defined above.
+    //The methods below are called as part of the test infrastructure, though the tests are exposed through the Test object and not directly.
+    //I used this format because some tests call other tests (in the order of their appearance), and should do it without invoking the test infrastructure.
+
+    (*
+        For operations accepting a collection
+        Collection type:
+            1. array
+            2. iterate once sequence
+            3. ICollection
+            4. ICollection<T>
+            5. Collection of the same type (no structural sharing)
+            6. Collection of the same type (structural sharing)
+        Element count:
+            1. empty
+            2. 1 element
+            3. 2 elements
+            4. n < Length elements
+            5. n > Length elements
+    *)
+
+    member private x.gen_collections n (s : SeqWrapper<int>) = 
+        let r = Random(seed)
+
+        let genData() = 
+            let init = r.Next()
+            fun n -> Array.init n (fun i -> i + init) |> Data.source n "Random" 
+        
+
+        let basics = genData() >> Data.basicCollections
+        
+        let subseq n = 
+            let st, en = r.IntInterval(0, s.Length-1, n)
+            let col =  s.U_slice(st, en)
+            col |> seq |> Data.collection' (en - st) "Subsequence"
+
+        let superseq n =
+            let data = (genData() n).Value
+            s.U_add_last_range(data) |> seq |> Data.collection' (s.Length + n) "Supersequence" 
+
+        let sameType n =
+            let data = genData() n
+            s.Empty.U_add_last_range(data.Value) |> seq |> Data.collection' n "SameType"
+
+        let values = [0; 1; 2; n]
+        let basics = values |> List.map basics |> List.collect id
+        let sameType = [subseq; sameType] |> List.cross_apply1 [0; 1; 2; n]
+        basics @ sameType
+        
+    ///Operations: AddLast
+    member private x.add_last (n : int) (s : SeqWrapper<int>) = 
         let mutable s = s
         let r = Random(seed)
         let rnd() = r.Next()
-        let initCount = s.Length
-        let initFirst = s.TryFirst|> Option.orValue 0
-        let initLast = s.TryLast |> Option.orValue 0
         for i = 0 to n do
             let v = rnd()
-            s <- s.AddLast(v)
-            assert_eq(s.Last, v)
-            assert_eq(s.First, initFirst)
-            assert_eq(s.[initCount+i], v)
-            assert_eq(s.[initCount - 1], initLast)
-            assert_eq(s.[-1], v)
-            assert_eq(s.[-initCount - i - 1], initFirst)
-            assert_eq(s.TryLast.Value,v)
-            assert_eq(s.TryFirst.Value, initFirst)
-            assert_eq(s.Length, initCount + i + 1)
+            s <- s.U_add_last v
         s
-    member private x.inner_add_first n (s : int SeqWrapper) = 
+
+    ///Operations: AddFirst
+    member private x.add_first n (s : int SeqWrapper) = 
         let mutable s = s
         let r = Random(seed)
         let rnd() = r.Next()
-        let initCount = s.Length
-        let initFirst = s.TryFirst |> Option.orValue 0
-        let initLast = s.TryLast |> Option.orValue 0
         for i = 0 to n do
             let v = rnd()
-            s <- s.AddFirst(v)
-            assert_eq(s.First, v)
-            assert_eq(s.Last, initLast)
-            assert_eq(s.[0], v)
-            assert_eq(s.[initCount + i], initLast)
-            assert_eq(s.[-1], initLast)
-            assert_eq(s.[-initCount - i - 1], v)
-            assert_eq(s.TryLast.Value,initLast)
-            assert_eq(s.TryFirst.Value, v)
-            assert_eq(s.Length, initCount + i + 1)
+            s <- s.U_add_first v
         s
-    member private x.inner_add_last_range n (s : int SeqWrapper) = 
-        let initCount = s.Length
-        let r = Random(seed)
-        let rnd() = r.Next(0, n |> float |> sqrt |> int)
-        let initFirst = s.TryFirst |> Option.orValue 0
-        let initLast = s.TryLast |> Option.orValue 0
+    ///Operations: RemoveLast
+    member private x.remove_last (n : int) (s : SeqWrapper<int>) = 
         let mutable s = s
-        for i = 0 to n do
-            let v = rnd()
-            s <- s.AddLastRange [0 .. v]
-            assert_eq(s.Last, v)
-            assert_eq(s.First, initFirst)
-            assert_eq(s.[initCount - 1], initLast)
-            assert_eq(s.[-1], v)
-            assert_eq(s.TryLast.Value,v)
-            assert_eq(s.TryFirst.Value, initFirst)
+        let mutable loop = true
+        let mutable i = 0
+        while loop && i < n do
+            match s.Length with
+            | 0 -> 
+                s.U_ex_is_empty |> ignore
+                loop <- false
+            | 1 -> s.U_ex_has_one_element |> ignore
+            | _ -> s <- s.U_drop_last
+            i <- i + 1
         s
-    member private x.inner_add_first_range  n (s : SeqWrapper<int>) = 
-        let initCount = s.Length
-        let r = Random(seed)
-        let rnd() = r.Next(0, n |> float |> sqrt |> int)
-        let initFirst = s.TryFirst |> Option.orValue 0
-        let initLast = s.TryLast |> Option.orValue 0
+
+    ///Operations: RemoveFirst
+    member private x.remove_first n (s : int SeqWrapper) = 
         let mutable s = s
-        for i = 0 to n do
-            let v = rnd()
-            s <- s.AddFirstRange [-v .. 0]
-            assert_eq(s.First, -v)
-            assert_eq(s.Last, initLast)
-            assert_eq(s.[0], -v)
-            assert_eq(s.[-1], initLast)
-            assert_eq(s.TryLast.Value, initLast)
-            assert_eq(s.TryFirst.Value, -v)
+        let mutable loop = true
+        let mutable i = 0
+        while loop && i < n do
+            match s.Length with
+            | 0 -> 
+                s.U_ex_is_empty |> ignore
+                loop <- false
+            | 1 -> s.U_ex_has_one_element |> ignore
+            | _ -> s <- s.U_drop_first
+            i <- i + 1
         s
-    member private x.inner_add_first_last  n (s : SeqWrapper<int>) = 
-        let mutable s = s
-        let initCount = s.Length
+
+    ///Operations: AddLastRange (concat and non-concat)
+    member private x.add_last_range n (s : int SeqWrapper) = 
         let r = Random(seed)
-        let rnd() = r.Next(0, n |> float |> sqrt |> int)
-        let initFirst = s.TryFirst |> Option.orValue 0
-        let initLast = s.TryLast |> Option.orValue 0
-        for i = 0 to n do
-            let last1, first1, last2, first2 = Fun.call_4 rnd ()
-            s <- s.AddLast last1
-            s <- s.AddFirst first1
-            s <- s.AddLast last2
-            s <- s.AddFirst first2
-            assert_eq(s.Last, last2)
-            assert_eq(s.First, first2)
-            assert_eq(s.[(initCount + 4 * (i + 1) - 1)], last2)
-            assert_eq(s.[0], first2)
-            assert_eq(s.[-1], last2)
-            assert_eq(s.[(-initCount - 4 *  (i + 1))], first2)
-            assert_eq(s.TryLast.Value,last2)
-            assert_eq(s.TryFirst.Value, first2)
-            assert_eq(s.Length, initCount + (i + 1)*4)
+        let n' = (n |> Math.intSqrt) / 5
+        let rnd = r.SpecialRecipe n'
+        let tests() = SeqTests(r.Next(seed))
+        let mutable s = s
+        for i = 0 to n' do
+            let cols = tests().gen_collections (rnd()) s
+            for col in cols do
+                s <- s.U_add_last_range (col.Value)       
+        s
+
+    ///Operations: AddFirstRange (concat and non-concat)
+    member private x.add_first_range  n (s : SeqWrapper<int>) = 
+        let r = Random(seed)
+        let n' = (n |> Math.intSqrt) / 5
+        let rnd = r.SpecialRecipe n'
+        let mutable s = s
+        let mutable t = []
+        let tests() = SeqTests(r.Next(seed))
+        for i = 0 to n' do
+            let cols = tests().gen_collections (rnd()) s
+            for col in cols do
+                s <- s.U_add_first_range (col.Value)
+            ()
+        s
+
+    ///Operations: AddFirst, AddLast, AddFirstRange, AddLastRange
+    member private x.add_first_last  n (s : SeqWrapper<int>) = 
+        let mutable s = s
+        let r = Random(seed)
+        let n' = (n |> Math.intSqrt) / 5
+        let rnd = r.SpecialRecipe n'
+        let tests() = SeqTests(r.Next())
+        for i = 0 to n' do
+            s <- s |> tests().add_last (rnd())
+            s <- s |> tests().add_first(rnd())
+            s <- s |> tests().add_last_range (rnd())
+            s <- s |> tests().add_first_range (rnd())
         s    
 
-    member private x.inner_add_remove_last  n (s : SeqWrapper<int>) = 
-        let mutable s = s
-        let initCount = s.Length
+    ///Operations: AddLast, AddLastRange, RemoveLast
+    member private x.add_remove_last  n (s : SeqWrapper<int>) = 
+        let mutable s = s        
         let r = Random(seed)
-        let rnd() = r.Next(0, n |> float |> sqrt |> int)
-        let initFirst = s.TryFirst |> Option.orValue 0
-        let initLast = s.TryLast |> Option.orValue 0
-        for i = 0 to n do
-            let last1, last2, last3, last4 = Fun.call_4 rnd ()
-            let count1, count2, count3, count4 = Fun.call_4 rnd ()
-            s <- s.AddLast last1
-            assert_eq(s.Last, last1)
-            s <- s.AddLast (last2)
-            s <- s.RemoveLast() 
-            s <- s.AddLastRange [|0 .. count1|]
-            s <- s.RemoveLast()
-            s <- s.AddLast last3
-            s <- s.AddLastRange [0]
-            s <- s.AddLastRange []
-            s <- s.AddLast last4
-            while s.Length > initCount do
-                s <- s.RemoveLast()
-            assert_eq(s.Length, initCount)
-            s <- s.AddLastRange [|0 ..count2|]
-            s <- s.AddLast i
-            s <- s.RemoveLast()
-            s <- s.AddLastRange [|0 .. count3|]
+        let n' = n / 8 |> Math.intSqrt
+        let rnd = r.SpecialRecipe n'
+        let tests() = SeqTests(r.Next())
+        for i = 0 to n' do
+            s <- s |> tests().add_last (rnd())
+            s <- s |> tests().remove_last (rnd())
+            s <- s |> tests().add_last_range (rnd())
+            s <- s |> tests().remove_last (rnd())
+            s <- s |> tests().remove_last ((rnd()))
+            s <- s |> tests().add_last_range (rnd())
+            s <- s |> tests().remove_last (rnd())
+            s <- s |> tests().add_last_range (rnd())
+        s
+    
+    ///Operations: AddFirst, RemoveFirst, and AddFirstRange (with concat).
+    member private x.add_remove_first  n (s : SeqWrapper<int>) = 
+        let r = Random(seed)
+        let n' = (n / 6 |> Math.intRoot 2)
+        let rnd = r.SpecialRecipe n'
+        let tests() = SeqTests(r.Next())
+        let mutable s = s
+        for i = 0 to n' do
+            s <- s |> tests().add_first (rnd())
+            s <- s |> tests().add_first (rnd())
+            s <- s |> tests().remove_first (rnd())
+            s <- s |> tests().add_first_range (rnd())
+            s <- s |> tests().remove_first (rnd())
+            s <- s |> tests().add_first_range (rnd())     
         s
 
-    member private x.inner_add_remove_first  n (s : SeqWrapper<int>) = 
-        let initCount = s.Length
-        let initFirst = s.TryFirst |> Option.orValue 0
-        let r = Random(seed)
-        let rnd() = r.Next(0, n |> float |> sqrt |> int)
-        let initLast = s.TryLast |> Option.orValue 0
+    ///Operations: AddFirst, AddLast, RemoveFirst, RemoveLast, AddFirstRange, AddLastRange
+    member private x.add_remove_first_last  n (s : SeqWrapper<int>) = 
         let mutable s = s
-        for i = 0 to n do
-            let first1, first2, first3, first4 = Fun.call_4 rnd ()
-            s <- s.AddFirst first1
-            assert_eq(s.First, first1)
-            s <- s.AddFirst first2
-            s <- s.RemoveFirst() 
-            s <- s.AddFirstRange [| -first3 .. 0 |]
-            s <- s.RemoveFirst()
-            s <- s.AddFirst first4
-            assert_eq(s.First, first4)
-            s <- s.AddFirstRange [-first1]
-            assert_eq(s.First, -first1)
-            s <- s.AddFirstRange []
-            assert_eq(s.First, -first1)
-            s <- s.AddFirst first2
-            assert_eq(s.First, first2)
-            while s.Length > initCount do
-                s <- s.RemoveFirst()
-            assert_eq(s.Length, initCount)
-            s <- s.AddFirstRange [| 0 .. first1 |]
-            assert_eq(s.First, 0)
-            s <- s.AddFirst first2
-            assert_eq(s.First, first2)
-            s <- s.RemoveFirst()
-            assert_eq(s.First, 0)
-            s <- s.AddFirstRange [| 0 .. 2 * first3|]
+        let r = Random(seed)
+        let n' = (n |> Math.intSqrt) / 10
+        let tests() = SeqTests(r.Next())
+        let rnd = r.SpecialRecipe n'
+        for i = 0 to n' do
+            s <- s |> tests().add_first (rnd())
+            s <- s |> tests().remove_first (rnd())
+            s <- s |> tests().add_last (rnd())
+            s <- s |> tests().add_last_range (rnd())
+            s <- s |> tests().remove_first (rnd())
+            s <- s |> tests().add_first_range (rnd())
+            s <- s |> tests().remove_first (rnd())
+            s <- s |> tests().add_last_range (rnd())
+            s <- s |> tests().add_first_range (rnd())
+            s <- s |> tests().remove_last (rnd())
+            s <- s |> tests().add_last_range (rnd())
         s
 
-    member private x.inner_add_remove_first_last  n (s : SeqWrapper<int>) = 
+    ///Operations: AddLast, RemoveLast, AddLastRange, AddFirstRange
+    member private x.add_remove_last_first_limited n (s : SeqWrapper<int>) =
         let mutable s = s
-        let initCount = s.Length
-        let initFirst = s.TryFirst |> Option.orValue 0
-        let initLast = s.TryLast |> Option.orValue 0
         let r = Random(seed)
-        let rnd() = r.Next(0, n |> float |> sqrt |> int)
-        for i = 0 to n do
-            let i_lower = Math.Sqrt(float i) |> int
-            let first1, first2, first3, first4 = Fun.call_4 rnd ()
-            let last1, last2, last3, last4 = Fun.call_4 rnd ()
-            s <- s.AddFirst first1
-            s <- s.AddFirst first2
-            s <- s.RemoveFirst() 
-            s <- s.AddFirstRange [|-first3 .. 0|]
-            s <- s.AddLastRange [|0 .. last1|]
-            s <- s.AddLast last2
-            s <- s.RemoveFirst()
-            s <- s.AddFirst first4
-            s <- s.AddFirstRange [first1]
-            s <- s.AddFirstRange []
-            s <- s.AddLastRange []
-            s <- s.AddFirstRange [first2]
-            s <- s.RemoveLast()
-            s <- s.RemoveFirst()
-            s <- s.AddFirst last3
-            let mutable t = s
-            while s.Length > initCount do
-                s <- s.RemoveFirst()
-
-            while t.Length > initCount do
-                t <- t.RemoveLast()
-            s <- t.AddFirstRange(s)
-
-            assert_eq(s.Length, 2*initCount)
-            s <- s.AddFirstRange [|-first3 .. 0|]
-            s <- s.AddFirst -first4
-            s <- s.RemoveLast()
-            s <- s.RemoveFirst()
-            s <- s.AddFirst -first1
-            s <- s.AddLastRange [|0 .. 2*last4|]
-            s <- s.AddFirstRange [|-2*first2 .. 0|]
+        let n' = (n |> Math.intSqrt) / 7
+        let tests() = SeqTests(r.Next())
+        let rnd = r.SpecialRecipe n'
+        for i = 0 to n' do
+            s <- s |> tests().add_last (rnd())
+            s <- s |> tests().add_last_range (rnd())
+            s <- s |> tests().add_first_range (rnd())
+            s <- s |> tests().add_last_range (rnd())
+            s <- s |> tests().add_first_range (rnd())
+            s <- s |> tests().remove_last (rnd())
+            s <- s |> tests().add_last_range (rnd())
         s
 
-
-    member private x.inner_get_index  n (s : SeqWrapper<int>) = 
-        let initCount = s.Length
-        let rnd = Random(seed)
-        let mlist = s.Empty
+    ///Operations: Indexing, AddLast
+    member private x.get_index  n (s : SeqWrapper<int>) = 
         let mutable t = s.Empty
-        for i in Seq.init n (fun _ -> rnd.Next(0,initCount)) do
-            t <- t.AddLast(s.[i])
+        let mutable i = 0
+        while i < n do
+            let mutable ix = i % (s.Length)
+            t <- t.U_add_last (s.U_get ix)
+            i <- i + 1
         t
 
-    member private x.inner_update  n (s : SeqWrapper<int>) = 
-        let initCount = s.Length
+    ///Operations: Update, indexing
+    member private x.update  n (s : SeqWrapper<int>) = 
         let rnd = Random(seed)
         let mutable s = s
         for i = 0 to n do
             let ix = rnd.Next(0, s.Length)
-            s <- s.Update(ix, rnd.Next(0, n))
-            s <- s.AddLastRange ((fun t -> rnd.Next(0, t)) |> Seq.init n |> Seq.cache)
-            s <- s.AddLast i
-            s <- s.RemoveLast().RemoveLast()
+            s <- s.U_update ix (rnd.Next(0, n))
         s
 
-    member private x.inner_insert  n (s : SeqWrapper<int>) = 
-        let initCount = s.Length
-        let rnd = Random(seed)
+    ///Operations: Insert
+    member private x.insert  n (s : SeqWrapper<int>) = 
+        let r = Random(seed)
+        let rnd() = r.Next(0, s.Length + 1)
         let mutable s = s
         for i = 0 to n do
-            let ix = rnd.Next(0, s.Length)
-            let old_len = s.Length
-            let v = rnd.Next(0, n)
-            s <- s.Insert(ix, v)
-            assert_eq(s.Length, old_len + 1)
-            assert_eq(s.[ix], v)
+            s <- s.U_insert (rnd()) (rnd())
         s
 
-    member private x.inner_insert_remove_update  n (s : SeqWrapper<int>) = 
-        let initCount = s.Length
-        let rnd = Random(seed)
-        let mutable s = s
-        for i = 0 to n do
-            let ix = rnd.Next(0, s.Length)
-            let ix2 = rnd.Next(0, s.Length)
-            let ix3 = rnd.Next(0, s.Length)
-            let v1 = rnd.Next(0, n)
-            let v2 = rnd.Next(0,n)
-            let v3 = rnd.Next(0,n)
-            let old_len = s.Length
-            let oldVal = s.[ix]
-            s <- s.Insert(ix, v1)
-            if ix < s.Length - 1 then
-                assert_eq(s.[ix+1], oldVal)
-            assert_eq(s.[ix], v1)
-            
-            assert_eq(s.Length, old_len + 1)
-            let expected_value = if ix2 = s.Length - 1 then None else Some <| s.[ix2 + 1]
-            let newS = s.Remove(ix2)
-            assert_eq(newS.Length, old_len)
-            if expected_value.IsSome then
-                assert_eq(newS.[ix2], expected_value.Value)
- 
-            assert_eq(newS.Length, old_len)
-            s <- newS
-        s
-
-    member private x.inner_take  n (s : SeqWrapper<int>) = 
-        let initCount = s.Length
-        let rnd = Random(seed)
+    ///Operations: Take, TakeWhile
+    member private x.take  n (s : SeqWrapper<int>) = 
+        let r = Random(seed)
+        let rnd = r.SpecialRecipe n
+        let n' = n |> Math.intSqrt
         let mutable m_seq = []
-        for i = 0 to n do
-            let n = rnd.Next(0,s.Length+1)
-            let res = s.Take(n)
+        for i = 0 to n' do
+            let m = rnd()
+            let res = s.U_take (m)
+            let at = rnd()
             m_seq <- res::m_seq
         m_seq
 
-    member private x.inner_skip  n (s : SeqWrapper<int>) = 
-        let initCount = s.Length
+    ///Operations: Skip, SkipWhile
+    member private x.skip  n (s : SeqWrapper<int>) = 
         let rnd = Random(seed)
+        let n' = n |> Math.intSqrt
+        let rnd = rnd.SpecialRecipe n' >> fun x -> max 0 (s.Length - x)
         let mutable m_seq = []
-        for i = 0 to n do
-            let res = s.Skip(rnd.Next(0, s.Length + 1))
-            m_seq <- res::m_seq
+        for i = 0 to n' do
+            let res1 = s.U_skip(rnd())
+            let l2=rnd()
+            m_seq <- res1::m_seq
         m_seq
 
-    member private x.inner_slices  n (s : SeqWrapper<int>) = 
+    ///Operations: Find(Last), Find(Last)Index, Pick, Count, Fold(Back), AddLast
+    member private x.find n (s : SeqWrapper<int>) =
         let rnd = Random(seed)
+        
+        let n' = n |> Math.intSqrt
+        let rnd = rnd.SpecialRecipe n'
+        let mutable t = s.Empty
+        for i = 0 to n' do
+            let at = min (s.Length - 1) (rnd())
+            let v = s.[at]
+            let a = s.Test_predicate (fun x -> x = v)
+            let b = s.Test_predicate (fun v -> true)
+            let c = s.Test_predicate (fun v -> false)
+            t <- [a;b;c] |> Seq.choose id |> Seq.fold (fun st cur -> st.AddLast cur) t
+        t
+
+    ///Operations: Slice
+    member private x.slices  n (s : SeqWrapper<int>) = 
+        let rnd = Random(seed)
+        
         let mutable m_seq = []
+        let n' = n |> Math.intSqrt
+        let lenRnd = rnd.SpecialRecipe n'
         let mutable s = s
-        for i = 0 to n do
-            let upTo = rnd.Next(0, s.Length)
-            let from = rnd.Next(0, upTo + 1)
-            let slice = s.[from, upTo]
+        for i = 0 to n' do
+            let a, b = rnd.IntInterval(0,s.Length - 1, lenRnd())
+            let slice = s.U_slice (a,b)
             m_seq <- slice::m_seq
         m_seq
 
-    member private x.inner_concat  n (s : SeqWrapper<int>) = 
+    member private x.slices_concat_all n (s : SeqWrapper<int>) =
         let rnd = Random(seed)
-        let mutable m_seq = []
+        let mutable l = []
+        let n' = n |> Math.intSqrt
         let mutable s = s
-        for i = 0 to n do
-            let num_a = rnd.Next(0, n)
-            let num_b = rnd.Next(0, n)
-            let rnd_seq = Seq.initInfinite (fun _ -> rnd.Next(0, n))
-            let a = s.AddLastRange (rnd_seq |> Seq.take num_a |> Seq.cache)
-            let b = s.AddLastRange (rnd_seq |> Seq.take num_b |> Seq.cache)
-            m_seq <- (a.AddLastRange(b.Inner).AddFirstRange(b.Inner))::m_seq
-        m_seq
+        let tests() = SeqTests(rnd.Next())
+        for i = 0 to n' do
+            let a, b = rnd.IntInterval(0,s.Length - 1)
+            let c, d = rnd.IntInterval(0, s.Length - 1)
+            let slice1, slice2 = s.U_slice(a, b), s.U_slice(c,d)
+            let r = slice1.U_add_last_range slice2
+            let r2 = r.U_add_first_range slice1
+            let add = r2 |> tests().add_remove_last_first_limited n
+            s <- add
+        s
 
-    member private x.inner_insert_range  n (s : SeqWrapper<int>) = 
+    ///Operations: Reverse
+    member private x.reverse n (s : SeqWrapper<int>) =
         let rnd = Random(seed)
+        let mutable l = []
+        let n' = n |> Math.intSqrt
+        let tests() = SeqTests(rnd.Next())
         let mutable s = s
-        for i = 0 to n do
-            let count = rnd.Next(0,n)
-            let what = Array.init count (fun _ -> rnd.Next(0, n))
-            let old_length = s.Length
-            
-            let where = rnd.Next(0, s.Length)
-            let old_value = s.[where]
-            s <- s.InsertRange(where, what)
-            assert_eq(s.Length, old_length + count)
-            if what.Length > 0 then 
-                let v = s.[where]
-                let w = s.[where + 1]
-                assert_eq(s.[where], what.[0])
-                assert_eq(s.[where + Seq.length what - 1], what.[what.Length - 1])
-            else
-                assert_eq(s.[where], old_value)
+        let lenRnd = rnd.SpecialRecipe n
+        for i = 0 to n' do
+            let a, b =  rnd.IntInterval(0, s.Length-1, lenRnd())
+            s <- s.[a, b]
+            let next = s |> tests().add_last n'
+            s <- next.U_reverse
+        s
+
+    ///Operations: InsertRange 
+    member private x.insert_range  n (s : SeqWrapper<int>) = 
+        let r = Random(seed)
+        let n' = (n |> Math.intSqrt) / 5
+        let rnd() = r.Next(0,n')
+        let mutable s = s
+        let tests() = SeqTests(r.Next())
+        let nRnd = r.SpecialRecipe n'
+        for i = 0 to n' do  
+            let n = nRnd()
+            let cols = tests().gen_collections n s
+            for col in cols do
+                s <- s.U_insert_range (rnd()) (col.Value)
         s
     
-    member private x.inner_remove n (s : SeqWrapper<int>) = 
+    ///Operations: RemoveAt
+    member private x.remove_at n (s : SeqWrapper<int>) = 
         let mutable s = s
         let rnd = Random(seed)
-        for i = 0 to n do
-            let ix = rnd.Next(0, s.Length)
-            s <- s.Remove(ix)
-            s <- s.AddLast i
-        s
-    member private x.inner_insert_concat  n (s : SeqWrapper<int>) = 
-        let mutable s = s
-        let rnd = Random(seed)
-        for i = 0 to n do
-            let num = rnd.Next(0, n)
-            let old_length = s.Length
-            
-            let ix = rnd.Next(0, s.Length)
-            let old_v = s.[ix]
-            let rnd_seq = Seq.init num (fun _ -> rnd.Next(0, n)) |> Seq.cache
-            let of_seq = s.Empty.AddLastRange rnd_seq
-            s <- s.InsertRange(ix, of_seq.Inner)
-            assert_eq(s.Length, old_length + of_seq.Length)
-            if of_seq.Length > 0 then
-                assert_eq(s.[ix], of_seq.[0])
-                assert_eq(s.[ix + of_seq.Length - 1], of_seq.[of_seq.Length - 1])
-            else
-                assert_eq(s.[ix], old_v)
+        let mutable loop = true
+        let mutable i = 0
+        let n = n / 2
+        while loop && i < n do
+            match s.Length with
+            | 0 -> 
+                s.U_ex_is_empty
+                loop <- false
+            | 1 -> s.U_ex_has_one_element
+            | _ -> s <- s.U_remove(rnd.Next(0,s.Length))
+            i <- i + 1
         s
 
-    member private x.inner_complex_add_remove_last n (s : SeqWrapper<int>) = 
-        let mutable s = s
-        let lower_n = n |> float |> sqrt |> int
+    ///Operations: Insert, RemoveAt, Update
+    member private x.insert_remove_update  n (s : SeqWrapper<int>) = 
         let r = Random(seed)
-        let rnd() = r.Next(0,lower_n)
-        for i = 0 to rnd() do
-            let new_test_obj() = SeqTests(r.Next())
-            s <-  s |> new_test_obj().inner_add_remove_last (rnd()) |> new_test_obj().inner_add_last_range(rnd()) |> new_test_obj().inner_add_last (rnd())
-            s <- s |> new_test_obj().inner_add_remove_last (rnd()) |> new_test_obj().inner_add_last_range (rnd()) |> new_test_obj().inner_add_remove_last (rnd())
+        let mutable s = s
+        let tests() = SeqTests(r.Next())
+        let n' = (n |> Math.intSqrt) / 4
+        let rnd = r.SpecialRecipe n'
+        for i = 0 to n' do
+            s <- s |> tests().insert (rnd())
+            s <- s |> tests().remove_at (rnd())
+            s <- s |> tests().update (rnd())
+            s <- s |> tests().insert_range (rnd())
         s
 
-    member private x.inner_complex_add_remove_first_last n (s : _ SeqWrapper)=
+    ///Operations: AddLast(Range), RemoveLast, AddFirstRange, InsertRange, 
+    member private x.complex_add_remove_first_last_limited n (s : SeqWrapper<int>) = 
         let mutable s = s
-        let lower_n = (n |> float |> sqrt |> int) / 2
+        let lower_n = (n |> Math.intSqrt) / 8
         let r = Random(seed)
-        let rnd() = r.Next(0,lower_n)
-        for i = 0 to rnd() do
-            let new_test_obj() = SeqTests(r.Next())
-            s <- s |> new_test_obj().inner_add_remove_last (rnd()) |> new_test_obj().inner_add_remove_first(rnd()) |> new_test_obj().inner_add_remove_first_last (rnd())
-            s <- s |> new_test_obj().inner_add_first_range (rnd()) |> new_test_obj().inner_add_last_range (rnd()) |> new_test_obj().inner_add_last (rnd())
-            s <- s |> new_test_obj().inner_add_first_last (rnd())
+        let getIters = r.SpecialRecipe lower_n
+        let tests() = SeqTests(r.Next()) 
+        for i = 0 to lower_n do
+            s <- s |> tests().add_remove_last (getIters())
+            s <- s |> tests().add_remove_last_first_limited (getIters())
+            s <- s |> tests().add_last_range(getIters())
+            s <- s |> tests().add_last (getIters())
+            s <- s |> tests().remove_last (getIters())
+            s <- s |> tests().add_remove_last(getIters())
+            s <- s |> tests().add_last_range(getIters())
+            s <- s |> tests().add_remove_last(getIters())
         s
-    member private x.inner_complex_add_last_take_and_indexing n (s : _ SeqWrapper) = 
+
+    member private x.complex_add_remove_first_last n (s : _ SeqWrapper)=
         let mutable s = s
-        let lower_n = (n |> float |> sqrt |> int) / 2
+        let lower_n = (n |> Math.intSqrt) / 6
+        let r = Random(seed)
+        let getIters = r.SpecialRecipe lower_n
+        let tests() = SeqTests(r.Next())
+        for i = 0 to lower_n do
+            s <- s |> tests().add_remove_last(getIters())
+            s <- s |> tests().add_remove_first(getIters())
+            s <- s |> tests().add_remove_first_last(getIters())
+            s <- s |> tests().add_first_range (getIters())
+            s <- s |> tests().add_last_range (getIters())
+            s <- s |> tests().add_last (getIters())
+        s
+    member private x.complex_add_last_slices_lookup_update n (s : _ SeqWrapper) = 
+        let mutable s = s
+        let lower_n = (n |> Math.intSqrt) / 6
         let r = Random seed
-        let rnd() = r.Next(0,lower_n)
+        let getIters = r.SpecialRecipe lower_n
         let mutable mSeq = []
-        for i = 0 to rnd() do
-            let new_test_obj() = SeqTests(r.Next())
-            s <- s |> new_test_obj().inner_complex_add_remove_last (rnd()) |> new_test_obj().inner_update (rnd()) |> new_test_obj().inner_add_remove_last (rnd())
-            s <- s |> new_test_obj().inner_update (rnd()) |> new_test_obj().inner_add_last_range (rnd())
-            let q = s |> new_test_obj().inner_get_index (rnd())
-            let take = s |> new_test_obj().inner_take (rnd())
+        let tests() = SeqTests(r.Next())
+        for i = 0 to lower_n do
+            s <- s |> tests().complex_add_remove_first_last_limited (getIters()) 
+            s <- s |> tests().update (getIters()) 
+            s <- s |> tests().add_remove_last (getIters())
+            s <- s |> tests().update (getIters()) 
+            s <- s |> tests().add_last_range (getIters())
+            let q = s |> tests().get_index (getIters())
+            let take = s |> tests().take (getIters())
             mSeq <- s::q::take @ mSeq
         mSeq
 
-    member private x.inner_complex_all_operations n (s : _ SeqWrapper) = 
+    member private x.complex_add_first_last_slices_all_indexing n (s : _ SeqWrapper) = 
         let mutable s = s
-        let lower_n = (n |> float |> sqrt |> sqrt |> int)
+        let lower_n = (n |> Math.intSqrt) / 8
         let r = Random seed
-        let rnd() = r.Next(0,lower_n)
+        let rnd = r.SpecialRecipe lower_n
         let mutable mSeq = []
-        for i = 0 to rnd() do
-            let new_test_obj() = SeqTests(r.Next())
-            s <- s |> new_test_obj().inner_complex_add_remove_first_last (rnd()) |> new_test_obj().inner_update (rnd()) |> new_test_obj().inner_add_remove_last (rnd())
-            s <- s |> new_test_obj().inner_update (rnd()) |> new_test_obj().inner_add_first_range (rnd())
-            s <- s |> new_test_obj().inner_insert_remove_update (rnd()) |> new_test_obj().inner_insert_range (rnd())
- 
-            let q = s |> new_test_obj().inner_get_index (rnd())
-            let take = s |> new_test_obj().inner_take (rnd())
-            mSeq <- s::q::mSeq @ take
+        for i = 0 to lower_n do
+            let tests() = SeqTests(r.Next())
+            s <- s |> tests().complex_add_remove_first_last (rnd()) 
+            s <- s |> tests().update (rnd()) 
+            s <- s |> tests().add_remove_last (rnd())
+            s <- s |> tests().update (rnd()) 
+            s <- s |> tests().add_first_range (rnd())
+            s <- s |> tests().insert_remove_update (rnd()) 
+            s <- s |> tests().insert_range (rnd())
+            let res = s |> tests().slices (rnd())
+            s <- res.Head
+            mSeq <- s::mSeq @ res
         mSeq
 
-    member x.add_last iters = create_test iters "AddLast" (x.inner_add_last iters >> toList1) 
-    member x.add_first n = create_test n "AddFirst" (x.inner_add_first n >> toList1 )
-    member x.add_first_last n = test_of n "Add first last" (x.inner_add_first_last n >> toList1 )
-    member x.add_remove_last n = test_of n "Add remove last" (x.inner_add_remove_last n >> toList1 )
-    member x.add_remove_first n = test_of n "Add remove first" (x.inner_add_remove_first n >> toList1 )
-    member x.add_remove_first_last n = test_of n "Add remove first last" (x.inner_add_remove_first_last n >> toList1 )
-    member x.add_last_range n = test_of n "Add last range" (x.inner_add_last_range n >> toList1 )
-    member x.add_first_range n = test_of n "Add first range" (x.inner_add_first_range n >> toList1 )
-    member x.get_index n = test_of n  "Lookup by index" (x.inner_get_index n >> toList1)
-    member x.update n = test_of n "update by index" (x.inner_update n >> toList1 )
-    member x.insert n = test_of n "Insert at index" (x.inner_insert n >> toList1 )
-    member x.take n = test_of n "Take count" (x.inner_take n )
-    member x.skip n = test_of n "Skip count" (x.inner_skip n)
-    member x.concat n = test_of n "Concat" (x.inner_concat n)
-    member x.slices n = test_of n "Slices" (x.inner_slices n)
-    member x.insert_remove_update n = test_of n "Insert, remove, update" (x.inner_insert_remove_update n >> toList1)
-    member x.insert_range n = test_of n "Insert range" (x.inner_insert_range n >> toList1)
-    member x.insert_range_concat n = test_of n "Insert range concat" (x.inner_insert_concat n >> toList1)
-    member x.complex_add_remove_last n = test_of n "Complex add/remove last sequence" (x.inner_complex_add_remove_last n >> toList1)
-    member x.complex_add_remove_first_last n = test_of n "Complex add/remove first/last sequence" (x.inner_complex_add_remove_first_last n >> toList1) 
-    member x.complex_add_last_take_and_indexing n = test_of n "Complex add/remove last + update/indexing" (x.inner_complex_add_last_take_and_indexing n)
-    member x.complex_add_and_take_and_indexing n = test_of n "Complex add/remove first/last + update/indexing" (x.inner_complex_all_operations n)
-    member x.remove_add n = test_of n "Remove add" (x.inner_remove n >> toList1)
+
+    member x.Add_last iters = create_test iters "AddLast" (x.add_last iters >> toList1) 
+    member x.Add_first n = create_test n "AddFirst" (x.add_first n >> toList1 )
+    member x.Add_first_last n = test_of n "Add first last" (x.add_first_last n >> toList1 )
+    member x.Add_remove_last n = test_of n "Add remove last" (x.add_remove_last n >> toList1 )
+    member x.Add_remove_first n = test_of n "Add remove first" (x.add_remove_first n >> toList1 )
+    member x.Add_remove_first_last n = test_of n "Add remove first last" (x.add_remove_first_last n >> toList1 )
+    member x.Add_remove_last_first_limited n = test_of n "Add remove last, first limited" (x.add_remove_last_first_limited n >> toList1 )
+    member x.Add_last_range n = test_of n "Add last range" (x.add_last_range n >> toList1 )
+    member x.Add_first_range n = test_of n "Add first range" (x.add_first_range n >> toList1 )
+    member x.Get_index n = test_of n  "Lookup by index" (x.get_index n >> toList1)
+    member x.Update n = test_of n "update by index" (x.update n >> toList1 )
+    member x.Insert n = test_of n "Insert at index" (x.insert n >> toList1 )
+    member x.Remove_add_last n = test_of n "Remove add" (x.remove_at n >> toList1)
+    member x.Take n = test_of n "Take count" (x.take n >> List.cast )
+    member x.Skip n = test_of n "Skip count" (x.skip n >> List.cast)
+    member x.Slices n = test_of n "Slices" (x.slices n >> List.cast)
+    member x.Insert_remove_update n = test_of n "Insert, remove, update" (x.insert_remove_update n >> toList1)
+    member x.Insert_range n = test_of n "Insert range" (x.insert_range n >> toList1)
+    
+    member x.Complex_add_remove_last n = test_of n "Complex add/remove last sequence" (x.complex_add_remove_first_last_limited n >> toList1)
+    member x.Complex_add_remove_first_last n = test_of n "Complex add/remove first/last sequence" (x.complex_add_remove_first_last n >> toList1) 
+    member x.Complex_add_last_slices_indexing n = test_of n "Complex add/remove last + slice + update/indexing" (x.complex_add_last_slices_lookup_update n >> List.cast)
+    member x.Complex_add_first_last_take_slices_indexing n = test_of n "Complex add/remove first/last + update/indexing + slices" (x.complex_add_first_last_slices_all_indexing n >> List.cast)
+    member x.Find n = test_of n "All predicate tests" (x.find n >> toList1)
+    member x.Reverse n = test_of n "Reverse" (x.reverse n >> toList1)

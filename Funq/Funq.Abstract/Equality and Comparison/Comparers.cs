@@ -1,91 +1,87 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
-namespace Funq.Abstract
-{
-	public static class Comparers
-	{
-		public static IComparer<T> CreateComparison<T>(Comparison<T> comparer) {
-			return new LambdaComparer<T>(comparer);
-		} 
+namespace Funq.Abstract {
+	/// <summary>
+	///     Container static class for various methods for creating comparers and equality comparers.
+	/// </summary>
+	internal static class Comparers {
 
-		public static IEqualityComparer<T> CreateEquality<T>(Func<T, T, bool> equals, Func<T, int> hash) {
+		/// <summary>
+		///     Creates a comparer from the specified comparison function.
+		/// </summary>
+		/// <typeparam name="T">The type for which the comparer is created.</typeparam>
+		/// <param name="comparison">The comparison function.</param>
+		public static IComparer<T> CreateComparer<T>(Comparison<T> comparison) {
+			return new LambdaComparer<T>(comparison);
+		}
+
+		/// <summary>
+		///     Creates an equality comparer from the specified equality and hash functions.
+		/// </summary>
+		/// <typeparam name="T">The type for which the equality comparer is created.</typeparam>
+		/// <param name="equals">The function that determines equality.</param>
+		/// <param name="hash">The hash function.</param>
+		/// <returns></returns>
+		public static IEqualityComparer<T> CreateEqComparer<T>(Func<T, T, bool> equals, Func<T, int> hash) {
 			return new LambdaEquality<T>(equals, hash);
 		}
 
+		/// <summary>
+		///     Returns an IComparer implementation that compares objects by key.
+		/// </summary>
+		/// <typeparam name="T">The type of the comparer.</typeparam>
+		/// <typeparam name="TKey">The type of the key.</typeparam>
+		/// <param name="selector">The key selector function.</param>
+		/// <returns></returns>
 		public static IComparer<T> KeyComparer<T, TKey>(Func<T, TKey> selector)
-		where TKey : IComparable<TKey>{
+			where TKey : IComparable<TKey> {
 			var comparer = FastComparer<TKey>.Default;
-			return CreateComparison<T>((a, b) => comparer.Compare(selector(a), selector(b)));
-		}
-
-		public static IComparer<T> KeyComparer<T, TKey>(Func<T, TKey> selector, IComparer<TKey> comparer) {
-			return CreateComparison<T>((a, b) => comparer.Compare(selector(a), selector(b)));
+			return CreateComparer<T>((a, b) => comparer.Compare(selector(a), selector(b)));
 		}
 
 		/// <summary>
-		/// Returns a lexicographic sequence comparer, comparing sequences like strings.
+		///     Returns an IComparer implementation that compares objects by key.
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="comparer"></param>
+		/// <typeparam name="T">The type of the comparer.</typeparam>
+		/// <typeparam name="TKey">The type of the key.</typeparam>
+		/// <param name="selector">The key selector function.</param>
+		/// <param name="comparer">A comparer used to compare the keys.</param>
+		/// <returns></returns>
+		public static IComparer<T> KeyComparer<T, TKey>(Func<T, TKey> selector, IComparer<TKey> comparer) {
+			return CreateComparer<T>((a, b) => comparer.Compare(selector(a), selector(b)));
+		}
+
+		/// <summary>
+		///     Returns a lexicographic sequence comparer, which compares each element according to its position, from first to
+		///     last.
+		/// </summary>
+		/// <param name="comparer">The comparer used to compare each element of the sequence.</param>
 		/// <returns></returns>
 		public static IComparer<IEnumerable<T>> LexSequenceComparer<T>(IComparer<T> comparer) {
-			return CreateComparison<IEnumerable<T>>((x, y) => EqualityHelper.Seq_CompareLex(x, y, comparer));
+			return CreateComparer<IEnumerable<T>>((x, y) => EqualityHelper.SeqCompareLex(x, y, comparer));
 		}
 
 		/// <summary>
-		/// Returns a lexicographic sequence comparer, comparing sequences like strings.
+		///     Returns a lexicographic sequence comparer, which compares each element according to its position, from first to
+		///     last.
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
+		/// <typeparam name="T">The type of element being compared. Must be IComparable[T].</typeparam>
 		/// <returns></returns>
 		public static IComparer<IEnumerable<T>> LexSequenceComparer<T>()
-			where T : IComparable<T>
-		{
-			return CreateComparison<IEnumerable<T>>((x, y) => EqualityHelper.Seq_CompareLex(x, y));
+			where T : IComparable<T> {
+			return CreateComparer<IEnumerable<T>>((x, y) => EqualityHelper.SeqCompareLex(x, y));
 		}
 
 		/// <summary>
-		/// Returns a sequence comparer that compares sequences like you compare numbers -- length first, and then lexicographically.
+		///     Returns an equality comparer for sequences, determining equality sequentially.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
-		/// <param name="comparer"></param>
-		/// <returns></returns>
-		public static IComparer<IEnumerable<T>> NumSequenceComparer<T>(IComparer<T> comparer)
-		{
-			return CreateComparison<IEnumerable<T>>((x, y) => EqualityHelper.Seq_CompareNum(x, y, comparer));
-		}
-
-		/// <summary>
-		/// Returns a numeric sequence comparer. It doesn't compare numbers, it just compares sequences like you compare numbers.
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		public static IComparer<IEnumerable<T>> NumSequenceComparer<T>()
-			where T : IComparable<T>
-		{
-			return CreateComparison<IEnumerable<T>>((x, y) => EqualityHelper.Seq_CompareNum(x, y));
-		} 
-
-		/// <summary>
-		/// Returns an equality comparer that compares sequences based on the order of their elements, like in a List or array.
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="eq"></param>
+		/// <param name="eq">Optionally, an equality comparer for the elements. Otherwise, the default equality comparer is used.</param>
 		/// <returns></returns>
 		public static IEqualityComparer<IEnumerable<T>> SequenceEquality<T>(IEqualityComparer<T> eq = null) {
-			return CreateEquality<IEnumerable<T>>((x, y) => EqualityHelper.Seq_Equals(x, y, eq), x => EqualityHelper.Seq_HashCode(x, eq));
-		}
-
-		/// <summary>
-		/// Returns an equality comparer that compares sequences like sets are compared.
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="eq"></param>
-		/// <returns></returns>
-		public static IEqualityComparer<IEnumerable<T>> SetEquality<T>(IEqualityComparer<T> eq = null)
-		{
-			return CreateEquality<IEnumerable<T>>((x, y) => EqualityHelper.Set_Equals(x, y, eq), x => EqualityHelper.Set_HashCode(x, eq));
+			return CreateEqComparer<IEnumerable<T>>((x, y) => EqualityHelper.SeqEquals(x, y, eq),
+				x => EqualityHelper.SeqHashCode(x, eq));
 		}
 	}
 }

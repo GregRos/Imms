@@ -7,20 +7,20 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 
 
-
 [assembly: AssemblyTitle("Funq.Abstract")]
 [assembly: AssemblyDescription(
-@"Library of abstract collection classes for Funq. ")]
-
+	@"Library of abstract collection classes for Funq. ")]
 [assembly: AssemblyCompany("Gregory Rosenbaum")]
 [assembly: AssemblyProduct("Funq.Abstract")]
 [assembly: AssemblyCopyright("Copyright ©  2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
-[assembly: InternalsVisibleTo("Funq.Collections")]
+[assembly: InternalsVisibleTo("Funq")]
 [assembly: InternalsVisibleTo("Funq.FSharp")]
 [assembly: InternalsVisibleTo("Funq.Tests.Performance")]
+[assembly: InternalsVisibleTo("Funq.Tests.Unit.CSharp")]
 [assembly: InternalsVisibleTo("Funq.Tests.Integrity")]
+[assembly: InternalsVisibleTo("Funq.Tests.Performance.CSharp")]
 [assembly: AssemblyVersion("0.2.*")]
 //[assembly: InternalsVisibleTo("Funq.Collections")]
 // Setting ComVisible to false makes the types in this assembly not visible 
@@ -43,5 +43,3 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-
-

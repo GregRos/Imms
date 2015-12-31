@@ -1,6 +1,6 @@
 ﻿[<AutoOpen>]
-module Funq.FSharp.Builders
-open Funq.Collections
+module Funq.Builders
+open Funq
 open Funq.FSharp
 open System
 open Funq.FSharp.Implementation

@@ -1,5 +1,10 @@
 ﻿module Funq.Tests.Integrity.Target
-let lst n = [0..n]
+open System
+let rnd1 = Random()
+let seed = rnd1.Next()
+let lst n =
+    let rnd = Random(seed)
+    [for i in 0 .. n -> rnd.Next()]
 module Funq = 
     let List n = FunqListWrapper<_>.FromSeq (lst n)
     let Vector n= FunqVectorWrapper<_>.FromSeq (lst n)

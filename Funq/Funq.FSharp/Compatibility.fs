@@ -1,6 +1,6 @@
 ﻿[<AutoOpen>]
 module Funq.FSharp.Implementation.Compatibility
-open Funq.Collections
+open Funq
 open Funq.FSharp
 open System
 type ComplRep = CompilationRepresentationAttribute
@@ -14,9 +14,9 @@ let toPredicate (f : 'a -> bool) = Predicate<'a>(f)
 let toConverter (f : 'a -> 'b) = Converter(f)
 let toOption maybe =
     match maybe with
-    | Some v -> Funq.Option.Some v
-    | None -> Funq.Option.NoneOf()
-let fromOption (c_option : Funq.Option<_>) = 
+    | Some v -> Funq.Optional.Some v
+    | None -> Funq.Optional.NoneOf()
+let fromOption (c_option : Funq.Optional<_>) = 
     if c_option.IsSome then Some c_option.Value else None
 let (|Kvp|) (kvp : Kvp<_,_>) = Kvp(kvp.Key, kvp.Value)
 let fromPair(k,v) = Funq.Kvp.Of(k, v)

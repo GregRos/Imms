@@ -1,0 +1,1117 @@
+#+ Negative Indexing
+	*	Sequential collections (and some ordered sets/maps) use negative indexing. Negative indexing allows you to supply a negative number to any index parameter, which is viewed as position from the end of the collection. When using lookup by index, `-1`  translates to the final element, at positive index `Length - 1`. You can view a negative index `-n` as simply being `Length - n`. 
+	*	All publically visible methods that accept indexes support negative indexing.
+	*	Parameters called `count`, `size` or similar are not indexes, they are sizes. As such, they do not support negative numbers and throw an exception.
+	*	Indexes are normally required to be in the range `[-Length, Length - 1]`, where `-Length` indicates position 0 (when using negative indexing). Indexes lower than -Length are considered out of range.
+	*	For Insert and InsertRange, things work a little differently. These methods add elements at an index, and it is legal to add elements to the end of the collection by supplying Length as an index. As such, the index '-1' refers to a point past the end of the collection, so inserting elements at index -1 is the same as inserting them at index Length. This means that to insert an element at position Length - 1, index '-2' must be used, and to insert at position 0, -Length-1 must be used. So the legal range here is [-Length-1, Length].
+	*	Empty collections have no indexes. Operations that accept an index and e.g. return an element at that index always fail on such collections. However, operations that accept both `index` and `count`, such as various `CopyTo` operations, may still work (returning an empty collection or copying no elements), if `count` is `0` and `index` is either `0` or `-1`. In this case, `index` can be viewed as a pointer to a position just before the element. 
+	** Tests:
+		*	All operations behave identically when an index parameter is positive, and when negative. 
+		*	All operations throw the appropriate exception when the index is too low, or too high.
+		*	Size-type parameters, those named `count`, don't accept negative values.
+		*	Appropriate behavior for Insert-type methods with negative indexes.
+		*	Appropriate behavior for methods like `CopyTo` for empty collections.
++#
+
+#+ Iteration
+	*	Collections support a number of forms of iteration. All iteration occurs sequentially, according to the sequence defined by the collection. The order of iteration is the same when using ForEach as when using an IEnumerator, and the same collection instance always has the same order of iteration.
+	*	The collections `FunqList, FunqVector, FunqOrderedSet, FunqOrderedMap` are sequential collections. Two such collections are structurally equal if and only if they are sequentially equal. However, the collections `FunqMap, FunqSet` aren't sequential, and iteration order has no meaning. While the order is always the same on the same instance, two collections may be structurally equal without being sequentially equal, and the same sequence of operations on sequentially equal collections may produce sequentially different collections.
+		This is why reference-based testing doesn't generally work on iteration-based methods, such as `ForEach`, `All`, `Any`, `Find`, etc. Such methods should be compared to the equivalent naive implemnetation used by e.g. `Seq.exists`, `Seq.forall`, etc.
+	
+	*	Tests for iteration methods that accept a function should check against a naive implementation, such as `Seq.reduce`, `Seq.fold`, etc.
+		*	The result should be identical
+		*	The number of times the function was executed should be identical.
+		*	The sequence of partial results (if any) should be identical.
++#
+
+#+ virtual Length	
+	Details:
+		*	Returns the length of the collection
++#
+
+#+ Aggregate(Func) [reduce]
+	Requires:
+		*	Func != null
+		*	!IsEmpty
+	Details:
+		*	Func applied to the first two elements first, then threaded.
+		*	If the collection has `1` element, the first element is returned
+		*	The function is called exactly `Length - 1` times, in the order of iteration.
+	Tests:
+		!	
+		*	The operation is identical to e.g. `Seq.reduce`, particularly for `Length == 1`.
+		*	`Errors.Is_empty` is thrown if `IsEmpty`.
+		*	`Errors_Is_null` is thrown if `Func == null`.
+		*	`Func` is called exactly `Length - 1` times.
+		
++#
+
+#+ Aggregate(Initial,Func) [fold]
+	Requires:
+		*	Func != null
+	Details:
+		*	Func is applied to Initial and the first element first, then threaded.
+		*	If the collection has `0` elements, Initial is returned.
+		*	Called exactly `Length` times, in order of iteration.
+	Tests:
+		*	The operation is identical to `Seq.fold`, particularly for `Length == 0, Length == 1`.
+		*	`Errors.Is_null` is thrown.
+		*	`Func` is called exactly `Length` times.
++#
+
+#+ All(Func)
+	Requires:
+		*	`Func != null`
+	Details:
+		*	Func is applied to successive elements (in order of iteration) until it returns false.
+		*	If all return true, then true is returned.
+		*	If the collection is empty, true is returned.
+	Tests:
+		*	Identical to `Seq.forall`, both when the predicate applies and when not.
+		*	`Func != null`.
+		*	`Func` is never called after it returns `false`.
+		*	`Func` is executed at most `Length` times.
++#
+
+#+ Any(Func)
+	Requires:
+		*	`Func != null`
+	Details:
+		*	Func is applied to successive elements (in order of iteration) until true is returned.
+		*	If all return false, false is returned.
+		*	If the collection is empty, false is returned.
+	Tests:
+		*	Identical to `Seq.exists`, for when the element exists, and doesn't exist.
+		*	`Func != null`
+		* 	Func is never called after it returns true.
+		*	`Func` is executed at most `Length` times.
++#		
+
+#+ virtual CopyTo(T[] arr, int[index] arrStart,int[size] count)
+	-	Copies the first (in order of iteration) `count` elements to `arr`, starting at `arrStart`.
+	Requires:
+		*	`arr != null`
+		*	Either:
+			1.	`count == 0`, and `arrStart` in `[-1, 0]`, or;
+			2.	`arrStart in [-|arr|, |arr| - 1] && count in [0, |arr| - |arrStart|]`
+	Details:
+		*	`arrStart` is an index, so it can be negative. count cannot be negative, as it is a size not an index.
+		*	If `count == 0`, no elements are copied. If also `arrStart` in `[-1, 0]`, then arr can have `0` length.
+		*	In all other cases, arr cannot have zero length.
+		*	Copied data overwrites previous data in the array.
+	Tests:
+		!	Esp for empty collection, empty `arr`, `count == 0,arr.Length,Length`, `arrStart == 0,-1`, 
+		*	Input an array already containing data to make sure needless data is not overwritten.
+		*	Result identical to naive implementation using an `IEnumerator`, especially for cases where:
+			`arrStart == 0, -1`, `count == 0, arr.Length`,
+		*	Correct behavior when `count == 0`,
+		*	Correct behavior for negative `arrStart`
+		*	Correct behavior when `arrStart`, `count` are out of bounds.
+		*	arr != null
+		
++#
+
+#+ CopyTo(T[] arr, int[index] arrStart)
+	-	Copies all elements to `arr`, starting at `arrStart`.
+	Requires:
+		* 	`arr != null`
+		* 	Either,
+			*	`this.IsEmpty` and `arrStart` in `[-1, 0]`, or;
+			*	 `arrStart` in `[-|arr|, |arr|-1]`.
+	Details:
+		* 	Calls `copyTo(T[],arrStart,Length)`
+		*	If `this.IsEmpty`, no elements are copied.
+		*	If `this.IsEmpty` and `arrStart == 0`, then arr can have zero length. Otherwise, it cannot have zero length.
+	Tests:
+		!	Esp for empty collection, empty `arr`, `arrStart == 0,-1`, 
+		*	Input an array already containing data to make sure needless data is not overwritten.
+		*	Result identical to naive implementation, in particular to cases when `arrStart == 0, -1`. 
+		*	Correct behavior when `arrStart` is negative.
+		*	Correct behavior when `this.IsEmpty`.
+		*	Correct behavior when `arrStart` is out of bounds (out of bounds of `this` or of `arr`, and if `arrStart + this.Length` is out of bounds of `arr`).
+
+#+ Count(Func)
+	Requires:
+		*	`Func != null`
+	Details:
+		*	Func is applied once to every element, in order of iteration.
+		*	If `this.IsEmpty`, then `0` is returned.
+	Tests:
+		!	Esp. for empty collection, when result is `Length` or `0`.
+		*	`Func != null`
+		*	Operation identical to naive `Seq.countWhere` implementation, especially when the result should be `0` and `Length`.
+		*	`Func` is executed exactly `Length` times.
+		
++#
+
+#+ Find(Func)
+	Requires:
+		*	`Func != null`
+	Details:
+		*	Func is applied once to every element in order of iteration, until it returns true.
+		*	The first such element is returned.
+		*	If Func returns false for all elements, or there are no elements, `Optional.None` is returned.		
+	Tests:
+		!	Esp. for an empty collection, when result is always `false` and `true`.
+		*	`Func != null`
+		*	Operation identical to naive `Seq.tryFind`.
+		*	`Func` is not executed after `true` is returned.
+		*	`Func` is is executed at most `Length` times
++#
+
+#+ virtual ForEach(Action)
+	Requires:
+		*	`Action != null`
+	Details:
+		*	Action is applied once to every element.
+		*	If `this.IsEmpty`, Action is not invoked at all.	
+	Tests:
+		!	Esp. for an empty collection.
+		*	`Action != null`
+		*	Operation is identical to `Seq.iter`.
+		*	`Action` is called exactly `Length` times.
+
++#
+	
+#+ virtual ForEachWhile(Func)
+	Requires:
+		*	`Func != null`
+	Details:
+		*	Identical to `All(Func)`.
+	Tests:
+		!	Esp. for empty collection, when result is always `true/false`.
+		*	`Func != null`
+		*	Operation is identical to `Seq.forall`
+		*	`Func` is not called after `false` is returned.
+		*	`Func` is called at most `Length` times.
++#	
+	
+#+ Pick(Func)
+	Requires:
+		*	`Func != null`
+	Details:
+		*	Func is applied once to every element in order of iteration,
+				until it returns `Optional.Some`. The first result is returned.
+		*	If the collection is empty or `Func` returns `None` for all elements, `Optional.None `is returned.
+	Tests:
+		!	Esp. for empty collection, when result is always `Some`, `None`.
+		*	`Func != null`
+		*	Operation is identical to `Seq.pick`.
+		*	`Func` is not called after `Some` is returned.
+		*	`Func` is called at most `Length` times.
++#
+		
+#+ virtual Print(sep = "; ",Func = null)
+	Details:
+		*	Concats the elements of the collection, separated by `sep`.
+		*	If sep is `null`, `""` is used instead.
+		*	If `Func` is null, the ToString method is called to transform each element to a string.
+			Otherwise, `Func` is called on every element in order of iteration.
+		*	If the collection is empty, `""` is returned.
+		*	`Func` is called exactly `Length` times (if specified).
+	Optimizations:
+		*	Use ForEach and a StringBuilder to construct the return string, instead of simply using
+			String.Join.
+	Tests:
+		!	Esp. when collection is empty, `Func` is specified and not specified.
+		*	Operation identical to naive implementation, when `Func` is specified and when not. 
+		*	`Func` is called exactly `Length` times, if specified.
++#	
+	
+#+ virtual Single()
+	Requires:
+		*	`this.Length == 1`
+	Details:
+		*	Returns the first and only element in the collection.
+			If the collection is empty, `Errors.Is_empty` should be thrown.
+			If the collection has more than one element, `Errors.Too_many_elements(1)` should be thrown
+	Tests:
+		*	Result is identical to naive implementation.
+		*	Behaves correctly when `Length > 1`, `Length == 0`.
++#
+		
+#+ virtual ToArray()
+	Details
+		*	Converts the collection to a newly allocated array.
+	Tests:
+		!	Esp. when collection is empty.
+		*	Result is identical to naive implementation, particularly when `Length == 0`.
++#		
+---------------------------------
+Sequential
+---------------------------------
+
+#+	Operations accepting collections
+	*	Some operations accept sequences as inputs. 
+	*	These operations perform much better if the input is actually a collection of the same type, an array, or a known collection type (known collection types implement `ICollection` or `ICollection<T>`.
+	Tests:
+		*	Different collection types:
+			a. Collection of the same type:
+				1. Structural sharing (edge case, `input == this`).
+				2. No structural sharing.
+			b. An array
+			c. Implements `ICollection<T>`
+			d. Implements `ICollection` but not `ICollection<T>`
+			e. Non-collection sequence.
+		* Different lengths:
+			a. 0, 1, 2
+			b. `n` when `n <= Length`
+			c. `n` when `n > Length` 
++#
+
+#+ this[int[index] from, int[index] to]
+	-	Returns a slice of the collection, starting from `from` and ending with `to`.
+	Requires:
+		*	`from` in `[-Length, Length - 1]`
+		*	`|to|` in `[|from|, Length - 1]`
+	Details:
+		*	The collection cannot be empty. If it is, `ArgumentOutOfRange` is thrown.
+		*	The requirement is for `|to|`. Information about this should be returned in the exception.
+		*	Calls `GetRange(int start, int count)`
+	Tests:
+		!	Esp. when `from==0,to,-1`, `to==0,-1`, collection is empty.
+		*	Operation identical to reference implementation
+		*	Correctly throws exception when `from` or `to` are out of bounds:
+			`from < -Length || from >= Length`, `to < -Length || to >= Length`, `|from| > |to|`.
+		*	Correct behavior for negative indexes.
++#
+		
+#+ protected virtual GetRange(int[index>0] start, int[size] count)
+	-	Returns a slice of the collection, starting at `start` and consisting of `count` elements.
+	Requires:
+		*	Either:
+			1. `count == 0` and `start` in `[-1, 0]`, or;
+			2. start in `[0, Length-1]` && `count in [0, Length - start]`
+	Details:
+		*	This implementation method doesn't use negative indexing.
+		*	If `count, start == 0` then the collection can be empty. Otherwise, it is an error.
+		*	If `count == 0`, an empty collection is returned.
+		*	The default implementation uses direct iteration.
++#
+
+#+ this[int[index] index]
+	Requires:
+		* `index` in `[-Length, Length-1]`
+	Details:
+		*	Returns the element at the position 'index'
+		*	Calls GetItem
+	Tests:
+		!	Esp when collection is empty.
+		*	Result identical to reference implementation.
+		*	Correct behavior when `index` is out of bounds, e.g. `index < -Length || index >= Length`.
+		*	Correct behavior for negative indexes.
++#
+
+#+ protected virtual GetItem(int[+index] index)
+	-	Returns the element at position 'index'
+	Requires:
+		*	`index` in `[0, Length-1]`
+	Details:
+		*	This implementation method doesn't use negative indexing. Negative indexing is handled in the indexer.
++#
+		
+#+ TryGet(int[index] index)
+	-	Returns the element at position `index`, or None if no such element exists.
+	Details:
+		*	This method never throws an exception. If `index` is invalid or doesn't exist, `None` is returned.
+		*	Otherwise, identical to `this[int]`
+	Tests:
+		!	Esp. when collection is empty.
+		*	Identical to reference implementation, particularly when `index` is in bounds and out of bounds, and when the collection is empty.
+		*	Correct behavior for negative indexes.
++#
+
+#+ virtual First/Last 
+	Requires:
+		*	`!this.IsEmpty`
+	Details:
+		*	Returns the first/last element in the collection. If the collection is empty, throws `Errors.Is_empty`
+	Tests:
+		*	Identical to reference implementation.
+		*	Exception `InvalidOperation` is thrown when the collection is empty.
++#
+	
+#+ virtual TryFirst/TryLast
+	Details:
+		*	Returns the first/last element in the collection, but if one doesn't exist, returns `Optional.None`.
+		*	This method never throws exceptions.
+	Tests:
+		!	Esp. when collection is empty.
+		*	Identical to reference implementation, in particular when the collection is empty and not empty.
++#
+	
+#+ virtual CopyTo(T[] arr, int[index] myStart, int[index] arrStart, int count)
+	Requires:
+		*	`arr != null`
+		*	Either:
+			1. `count == 0` and `myStart` in `[-1, 0]`.
+			2. Both:
+				1.	`myStart` in `[-Length, Length-1]`
+				2.	`count` in `[0, Length-|myStart|]`
+		*	Either:
+			1. `count == 0` and `myStart` in `[-1, 0]`
+			2. Both:
+				1.	`arrStart` in `[-arr.Length, arr.Length-1]`
+				2.	`count` in `[0, Length - |arrStart|]`
+	Details:
+		*	Copies `count` elements of the collection to `arr`. Starts from `myStart` collection index, and `arrStart` array index.
+		*	As in other methods, if `count, myStart == 0` then the collection can be empty. Otherwise, this is an error.
+		*	If `count, arrStart == 0` then arr can be empty. Otherwise, this is an error.
+		*	if `count == 0`, no elements are copied.
+	Tests:
+		!	Esp when collection is empty, `arr` is empty, `arrStart==0,-1`, `myStart==0,-1`, `count==0,Length`.
+		*	Input an array already containing data to make sure needless data is not overwritten.
+		*	Result identical to reference implementation..
+		*	`OutOfRange` Exception is thrown when `arrStart`, `myStart`, `count` are out of bounds:
+			*	`arrStart < -arr.Length || arrStart >= arr.Length`
+			*	`myStart < -Length || myStart >= Length`
+			*	`count > arr.Length - |arrStart|`
+			*	`count > Length - |myStart|`
+		*	Correct behavior when `count == 0`:
+			*	Result is empty.
+			*	If `myStart` not in `[-1, 0]` then apply the bounds above.
+			*	If `arrStart` not in`[-1, 0]` then apply the bounds above.
+		*	
++#
+//: Delete this!!
+#+ virtual Equals(TList other), this==other, this!=other, Equals(object other)
+	Details:
+		*	Determines sequence equality between `this` and `other` the collections, using the default element comparer
+	Tests:
+		*	`other` can be `null` (the result is `false` except for the operators, when the result is true if `this==null`.
+		*	Result equal to reference implementation.
++#
+		
+#+ virtual GetHashCode()
+	Details:
+		*	
++#
+://
+
+#+ AggregateBack(Result,Func) [fold]
+	Requires:
+		*	`Func != null`
+	Details:
+		*	Applies `Func` to `Result` and the last element, and then threads it backwards according to sequential order.
+		*	Func is called exactly `Length` times.
+		*	If the collection is empty, `Result` is returned.
+	Tests:
+		!	Esp when `Length==0,1`
+		*	`Func != null`
+		*	Operation identical to naive implementation `Seq.foldBack`.
+		*	`Func` executed exactly `Length` times.
+		*	If `IsEmpty`, `Func` is not executed.
++#
+
+#+ AggregateBack(Func) [reduce]
+	Requires:
+		*	`Func != null`
+		*	`!this.IsEmpty`
+	Details:
+		*	Applies `Func` to the last two elements, and then threads it backwards according to sequential order.
+		*	The first argument of Func is the the higher element, and the second is the lower element.
+		*	Func is called exactly `Length-1` times.
+		*	If the collection has one element, that element is returned.
+	Tests:
+		!	Esp. when `Length==1`
+		*	`Func != null`
+		*	Operation identical to `Seq.reduceBack`, esp. when `Length==1`.
+		*	Exception is thrown if `Length==0`.
+		*	`Func` is called exactly `Length-1` times.
++#		
+
+#+ FindIndex(Func) 
+	Requires:
+		*	`Func != null`
+	Details:
+		*	Applies `Func` to every element in sequential order, until it returns true. Then returns the index.
+		*	If `Func` returns false for all elements, or the collection is empty, `None` is returned.
+	Tests:
+		!	Esp. when `Length==0,1`, `Func` always returns `true`/`false`.
+		*	`Func != null`
+		*	Operation identical to `Seq.tryFindIndex` esp when `Length==0,1`.
+		*	`Func` is not called after it returns true.
++#
+
+#+ FindLastIndex(Func)
+	Requires: `Func != null`
+	Details: 
+		*	Applies func to every element, from last to first, until it returns true. Then returns the 0-based index of that element.
+		*	If the collection is empty or `Func` returns false for every element, `None` is returned.
+	Tests:
+		*	`Func != null`
+		*	Operation identical to `Seq.tryFindLastIndex` esp when `Length==0,1`.
+		*	`Func` is not called after it returns `true.`
+	
++#
+
+#+ FindLast(Func)
+	Requires: `Func != null`
+	Details: 
+		*	Applies func to every element, from last to first, until it returns true. Then returns that element.
+		*	If the collection is empty or Func returns false for every element, `None` is returned.
+	Tests:
+		*	`Func != null`
+		*	Operation is identical to `Seq.tryFindLast` esp when `Lenght==0,1`.
+		*	`Func` is not called after it returns `true`.
++#
+
+#+ virtual ForEachBack(Action)
+	Requires: `Action != null`
+	Details: 
+		*	Applies `Action` to every element, from last to first. 
+		*	Action is invoked exactly `Length` times.
+		*	If the collection is empty, `Action` is not invoked.
+	Tests:
+		*	`Action != null`
+		*	Operation is identical to `Seq.iterBack` esp when `Length==0,1`.
+		*	`Action` is called exactly `Length` times.
++#
+	
+#+ virtual ForEachBackWhile(Func)
+	Requires: `Func != null`
+	Details: 
+		*	Applies `Func` to every element, from last to first, until it returns false. Returns the last result of the function.
+		*	If the collection is empty, `Func` is not invoked and true is returned.
+	Tests:
+		*	`func != null`
+		*	Operation is identical to `Seq.iterBackWhile` esp when `Length==0,1`.
+		*	`Func` is not called after it returns `false`.
++#	
+
+#+ virtual Reverse()
+	Details:
+		*	Returns a reversed collection.
+		*	If the collection has `1` element or is empty, it is returned.
+		*	Optimization: If `Length <= 1`, `this` is returned.
+	Tests:
+		*	`result.Length == Length`
+		*	Identical to reference implementation, esp for empty collection, collection containing 1 element.
++#
+	
+#+ virtual Skip(int[size] count)
+	Requires:
+		*	count in `[0, *]`
+	Details:
+		*	Returns the collection, with the first count elements skipped.
+		*	count can be any non-negative number. If `count >= Length`, an empty collection is returned.
+		*	If `count == 0`, `this` is returned.
+	Tests:
+		*	`count` is out of range (`count < 0`).
+		*	`result.Length == max 0 (Length - count)`
+		*	Result is equal to reference implementation, esp when `count == 0, 1, Length,Length+1`.
++#
+	
+#+ SkipWhile(Func)
+	Requires: Func != null
+	Details:
+		*	Skips the first elements until `Func` returns false.
+		*	First finds the index at which `Func` returns false, and then calls `Skip` with that index.
+		*	If Func returns true for all elements, an empty collection is returned.
+		*	If Func returns false for the first element, the collection is returned.
+	Tests:
+		*	`Func != null`
+		*	Operation equal to reference implementation, including result, number of times `Func` was executed, and sequence of partial results, esp when `func` is never true and always true.
+		*	Result is equal to `Skip(FindIndex(!Func) | Length)`.
+		*	`Func` is not executed after it returns `false`.
++#
+	
+#+ virtual Take(int[size] count)
+	Requires:
+		*	`count` in `[0, *]`
+	Details:
+		*	Returns a collection consisting of the first `count` elements.
+		*	If `count >= Length`, the collection is returned.
+		*	If `count == 0`, an empty collection is returned.
+	Tests:
+		*	If `count < 0` throw exception.
+		*	`result.Length == min count Length`
+		*	Result equal to reference, especially when `count == 0, 1, Length, Length+1`.
++#
+	
+#+ TakeWhile(Func)
+	Requires: `Func != null`
+	Details:
+		*	Returns a collection consisting of the first elements for which `Func` returns true.
+		*	Finds the index of the first element for which Func returns false, and calls `Take` with that index.
+		*	If `Func` never returns false, the collection is returned.
+		*	If `Func` returns false for the first element, and empty collection is returned.
+	Tests:
+		*	`Func != null`
+		*	Operation is equal to reference implementation, esp when `Func` is never true and always true.
+		*	Result is equal to `Take(FindIndex(!Func) | Length)`.
++#	
+++++++++++
+++++++++++
+
+#+ AddFirst(T)
+	Details:
+		*	Adds the element `T` to the start of the sequential collection.
+	Tests:
+		! 	Esp. when `IsEmpty`
+		*	(result equal to reference)
+		*	`result.Length == Length+1`
+		*	`result.First == T`
+		*	If `IsEmpty`, then `result.Last == T` and otherwise, `result.Last == Last`.
++#
+
+#+ AddFirstRange(seq<T> ts)
+	Requires: `ts != null`
+	Details:
+		*	The method is guaranteed to iterate over 'ts' exactly once.
+		*	Adds the elements 'ts' to the start of the collection.
+		*	The elements are concatted to the start of the collection, not added iteratively to the beginning.
+		*	If ts is empty, the collection is returned.
+	FunqList:
+		*	Optimization: If ts is FunqList, Concat is used in O(logn).
+		*	Optimization: ToArrayFast is used to convert the collection to an array.
+	FunqVector:
+		*	Optimization: If this is empty and ts is FunqVector, ts is returned instead.
+		*	Optimization: If ts is empty, this is returned.
+		*	Optimization: If ts is FunqVector, AddLastRange is called instead. This is usually much faster.
+		*	Optimization: ToArrayFast is used to convert the collection to an array, which is then converted to a FunqVector, and then this is added to it using AddLastRange.
+	Tests:
+		!	Esp. when `ts` is: array, sequence, ICollection, ICollection<T>, collection of the same type, and collection of the same type with structural sharing (e.g. `this` in the extreme case)
+		!	Esp. when `ts.IsEmpty`, `ts.Length (<, >, ==) Length`, `this.IsEmpty`
+		*	(result equal to reference)
+		*	`ts == null` 
+		*	`result.Length == Length + ts.Length`
+		*	`result.First = ts.First`
+		*	`result[ts.Length-1] == ts.Last`
+		*	If `IsEmpty` then `result.Last == ts.Last` otherwise `result.Last == this.Last && result[ts.Length] = this.First`
++#	
+		
+#+ AddLast(T)
+	Details:
+		*	Adds the element T to the end of the sequential collection.
+	Tests:
+		!	Esp. when `IsEmpty`
+		*	(result equal to reference)
+		*	`result.Length==Length+1`
+		*	`result.Last==T`
+		*	if `IsEmpty` then `result.First==T` and otherwise `result.First==First`.
++#
+	
+#+ AddLastRange(seq<T> ts)
+	Requires: ts != null
+	Details:
+		*	The method is guaranteed to iterate over 'ts' exactly once.
+		*	Adds the elements 'ts' to the end of the collection.
+		*	If ts is empty, the collection is returned.
+	FunqList:
+		*	Optimization: If ts is also FunqList, Concat is used in O(logn)
+		*	Optimization: Otherwise, ToArrayFast is used to convert the collection to an array, and then the array into a finger tree. Then concat is used.
+	FunqVector:
+		*	Optimization: If ts is empty, this is returned.
+		*	Optimization: If this is empty and ts is FunqVector, ts is returned instead.
+		*	Optimization: ToArrayFast is used to convert the collection to an array, and then a specialized AddRange implementation is used.
+	Tests:
+		!	Try all relevant collection types
+		!	Esp. when `IsEmpty, ts.IsEmpty, ts === this, ts.Length (>, <, ==) Length`
+		*	(result equal to reference)
+		*	ts == null
+		*	`result.Length == Length + ts.Length`
+		*	`result.Last = ts.Last`
+		*	`result[ts.Length] == ts.First`
+		*	If `IsEmpty` then `result.First == ts.First` otherwise `result.First == First && result[-ts.Length-1] == Last`
++#
+	
+#+ RemoveFirst()
+	Requires: !this.IsEmpty
+	Details:
+		*	Removes the first element from the collection.
+	Tests:
+		!	Esp when `Length == 1`
+		*	Throws exception when `IsEmpty`
+		*	`result.Length==Length-1`
+		*	If `Length==1` then 
+				`result.IsEmpty` 
+			else 
+				`result.Last==this.Last`
+				`result.First==this[1]`
++#
+
+#+ RemoveLast()
+	Requires: !this.IsEmpty
+	Details:
+		*	Removes the last element from the collection.
+		
++#
+	
+#+ Insert(int[index] index, T item)
+	Requires: index in [-Length-1, Length]
+	Details:
+		*	Inserts the element 'item' at position 'index' in the collection, pushing the previous occupant (if any) forward.
+		*	If index == Length, this is the same as AddLast.
+		*	If index == 0, this is the same as AddFirst.
+		*	In this method, an index of -1 points to after the end of the collection, so Insert(-1,item) is the same as Insert(Length,item)
+			To insert an element at position Length-1 and push the last element forward, you have to use Insert(-2,item)
+			Because of this, the negative indexes lag by one step, and so -Length-1 is identical to 0, rather than -Length
+	Tests:
+		!	Esp when `Length==0,1` and `index==0,-1`
+		
++#
+			
+#+ InsertRange(int[index] index, seq<T> ts)
+	Requires: 
+		*	ts != null
+		*	index in [-Length-1,Length]
+	Details:
+		*	The method is guaranteed to iterate over 'ts' exactly once.
+		*	Inserts the sequence ts at position 'index' in the collection, pushing the previous occupant forward.
+		*	If index == Length, this is identical to AddLastRange.
+		*	If index == 0, this is AddFirstRange.
+		*	Uses the same negative indexing as Insert.
+	FunqList:
+		*	Optimization: If ts is empty, this is returned.
+		*	Optimization: If ts is also FunqList, Split and Concat is used in O(logn).
+		*	Optimization: ToArrayFast is used to convert the collection to an array, then the array to a finger tree, and then concat is used.
+	FunqVector:
+		*	Optimization: If this is empty and ts is FunqVector, ts is returned.
+		*	Optimization: If ts is empty, this is returned.
+		*	Optimization: Take is used to get the elements until index, then AddLastRange is used to add ts to the end, and then the remainder of the elements in this vector are converted to an array and added to the end.
++#	
+				
+#+ RemoveAt(int[index] index, T)
+	Requires: index in [-Length,Length-1]
+	Details:
+		*	Removes the element at position 'index', pulling the next element (if any) forward.
+		*	If index == Length-1, this is the same as RemoveLast
+		*	If index == 0, this is the same as RemoveFirst
++#	
+
+#+ Update(int[index] index, T)
+	Requires: index in [-Length, Length-1]
+	Details:
+		*	Updates the value of the element at position 'index'.
++#	
+------------
+SetLike
+------------
+
+#+ Ordered and unordered collections
+	*	Sets and maps come in two varieties: ordered and unordered. Ordered collections use an IComparer to determine the order of different keys/elements, while unordered collections use equality semantics.
+	*	You iterate over an ordered collection in ascending order, from smallest to largest. This applies to all forms of iteration, including using an IEnumerator, as well as the dedicated ForEach methods. Two such collections are structurally equal if and only if they are sequentially equal.
+	*	The iteration order over an unordered collection is undefined. Two unordered collections may be structurally equal, while having a different order of iteration. terating over the same instance of an unordered collection will always yield identical results, but it is not possible to predict how the order will be affected by addition/removal of elements, for example.
++#
+
+#+ Compatibility
+	*	The library provides a much more efficient implementation of set-theoretic and map operations if the input collection is a set/map compatible with the current one.
+	*	Compatibility means that it is of the same type, and also that the equality/comparison handler used by the set/map is identical to the current one.
+	*	Equality between equality/comparison handlers is determined by the .Equals(object) of the handler used by the current instance.
+	*	Default handlers are always equal. The handlers may only be unequal if you define your own equality/comparison handler.
+	*	If you do this, you should make sure you either:
+			1. 	Create all sets using the same equality/comparison semantics with the same handler instance.
+			2. 	Override the .Equals method on your handler to act as structural/functional equality.
+		Note that implementing this method incorrectly results in undefined behavior.
+	
+	*	For maps, some operations accept sequences of key-value pairs where the value type is different from that of the current map. In most cases, if the value type really is different (as determined during runtime), the maps cannot be compatible even if the key type and equality semantics are the same. 
++#
+
+#+ Set-theoretic Relations
+	*	Sets support set-theoretic relation operations with arbitrary sequences of the same element type. 
+	*	These operations are always much more efficient if the other sequence is a set compatible with the current instance.
+	*	In any case, whatever the input, the result is determined using the equality semantics of the current set.	
+	*	Duplicates (as determined by the semantics of the current set) never affect the set relation.
++#
+
+#+ Set-theoretic Operations
+	*	Sets support set-theoretic operators with sequences, such as Union and Intersection. These are much more efficient if the input is a compatible set. 
+	*	Otherwise, the equality/comparison semantics of the current set will be used to determine the result.
+	*	These operations accept sequences that may have duplicates, with regards to the equality semantics used by the current set. The existence of duplicates never affects the result of the operation.
+	*	In all cases, when both sets contain the same element (as determined by the equality semantics of the current set) and one of them must appear in the result, the instance of the current set will appear in the result. This may be important, because structural equality may not be the same as absolute equality.
++#
+	
+#+ RelatesTo(seq<T> other)
+	Requires: other != null
+	Details:
+		*	The method is guaranteed to iterate once (at most) over each element in 'other'
+		*	Returns the set-theoretic relation between this and other, in the form of the SetRelation enum.
+		*	SetRelation is a flag enum, which means the result can indicate several relations.
+		*	All SetRelations other than SetRelation.Disjoint are exclusive. Disjoint can appear alongside any other relation.
+			1. If both sets are empty, Disjoint | Equal is returned.
+			2. If this empty, Disjoint | ProperSubset is returned.
+			3. If other is empty, Disjoint | ProperSuperset is returned.
+		*	SetRel.None is returned if no set relation applies, which means each set contains elements the other does not, but they also share elements in common.
+		*	The method is much more efficient if 'other' is a set compatible with this one.
+		*	If the collections aren't compatible, the semantics of the current set are used to determine the relation.
+		*	The input collection may contain duplicates, according to the semantics of the current set.
+			If so, they do not effect the set relation.
+		*	Optimization: If this is reference equal to other, Equal or Disjoint|Equal is returned.
++#
+	
+#+ Add(T)
+	Details:
+		*	Adds T to the set, if it doesn't already exist.
+		*	If it does exist, the current set is returned.
++#
+	
+#+ Remove(T)
+	Details:
+		*	Removes T from the set, if it exists.
+		*	If it doesn't exist, the current set is returned.
+		*	You can call this method on an empty set.
++#
+	
+#+ IsEqual(seq<T> other)
+	Requires: other != null
+	Details:
+		*	Guaranteed to iterate over each element in 'other' once, at most.
+		*	Determines set equality between this set and the specified sequence.
+		*	The semantics of the current set are used to determine equality.
+		*	Specific set relation methods are faster than RelatesTo, because they can stop earlier and need to gather less information.
+		*	Optimization: If this is reference equal to other, the result is true.
+		*	Optimization: If the other sequence is a known collection with fewer elements than this set, the result is false.
++#	
+		
+#+ IsProperSubsetOf(seq<T> other)
+	Requires: other != null
+	Details:
+		*	Guaranteed to iterate over each element in 'other' once, at most.
+		*	Determines if this set is a proper subset of the other set.
+		*	Duplicates don't matter. The set {1} is not a proper subset of {1, 1, 1}.
+		*	If other is a compatible set, IsProperSupersetOf is called on that set.
+		*	Optimization: If this is refernece equal to other, the result is false.
+		*	Optimization: If the other sequence is a known collection type with fewer or equal number of elements as this set, the result is false.
++#
+	
+#+ IsProperSupersetOf(seq<T> other)
+	Requires: other != null
+	Details:
+		*	Iteration guarantee.
+		*	Determines if this set is a proper superset of the other set.
+		*	Duplicates don't matter.
+		*	May be overridden by implementing sets for compatible sets.
+	Optimizations:
+		*	If reference equality, the result is false.
+		*	If the other set is a compatible set and other.Length >= Length, the result is false. Note that if the other set isn't a compatible set, it may contain duplicates, so it may be a subset even if it has more elements.
++#
+
+#+ IsSupersetOf(seq<T> other)
+	Requires: other != null
+	Details:
+		*	Iteration guarantee.
+		*	Determines if this set is a superset of the other set.
+		*	Duplicates don't matter.
+	Optimizations:
+		*	If reference equality, the result is true.
+		*	If the sets are compatible and other.Length > Length, the result is false.
++#
+
+#+ IsSubsetOf(seq<T> other)
+	Requires: other != null
+	Details:
+		*	Iteration guarantee.
+		*	Determines if this set is a subset of the other set.
+		*	Duplicates don't matter.
+	Optimizations:
+		*	If reference equality, the result is true.
+		*	If other.Length < Length, the result is false.
++#
+
+#+ IsDisjointWith(seq<T> other)
+	Requires: other != null
+	Details:
+		*	Iteration guarantee.
+		*	Determines if this set is disjoint (shares no elements) with another set.
+	Optimizations:
+		*	If reference equality, the result is true only if this.IsEmpty.
+		*	Optimization: If the other is also a compatible set, the smaller set is iterated over and the larger set is used to check containment. This reduces complexity to O(n log m) where n < m.
++#
+
+#+ Union(set<T> other)
+	Requires: other != null
+	Details:
+		*	Iteration guarantee.
+		*	Performs a union between this set and the other collection.
+		*	If the other is a compatible set, a specialized algorithm is used.
+		*	If both contain an element, the instance contained in the current set is returned.
+		*	If the input sequence contains duplicates, the first duplicate instance is retained, and any additional duplicates are discarded.
+	Optimizations: 
+		*	If reference equality, this is returned.
+		*	Call builder.AddRange instead of using Add iteratively.
+		
++#
+		
+#+ Intersection(seq<T> other)
+	Requires: other != null
+	Details:
+		*	Iteration guarantee.
+		*	Performs an intersection between this set and the other set.
+		*	If the other set is a compatible set, a specialized algorithm is used.
+		*	If both sets contain an element, the instance contained in the current set is retained.
+		*	Duplicates in the input sequence are irrelevant, because only instances in the current set are retained.
+	Optimizations:
+		*	Is reference equality, this is returned.
+		*	If this.IsEmpty, Empty is returned.
+		*	Make a running count of the number of elements added to the set builder. Once the running count is equal to Length, iteration can stop because no more elements can be added.
++#
+
+#+ Except(seq<T> other)
+	Requires: other != null
+	Details:
+		*	Iteration guarantee.
+		*	Performs this - other, removing all the elements present in other from this set.
+		*	If the other is a compatible set, a specialized algorithm is used.
+		*	Duplicates don't affect the result.
+		*	Duplicates in the input sequence don't matter, because only instances in the current set are retained.
+	Optimizations:
+		*	If reference equality, Empty is returned.
+		*	While performing the operation, if the builder becomes empty, stop iterating and return Empty.
+		
++#
+
+#+ Difference(seq<T> other)
+	Requires: set != null
+	Details:
+		*	Iteration guarantee.
+		*	Performs this XOR other, returning a set containing elements present in exactly one of the sets.
+		*	Duplicates don't affect the result.
+		*	If the other set is compatible, a more efficient algorithm is used.
+	
++#
+
+#+ ExceptFrom(seq<T> other)
+	Requres: other != null
+	Details:
+		*	Iteration guarantee.
+		*	Returns a set consisting of the elements in other, without the elements in this.
+		*	If the input contains duplicates, the first instance is retained, and the rest are discarded.
+	Optimizations:
+		*	If 'other' is a set of the same, does other.Except(this), calling the specialized implementation.
++#
+	
+#+ ByOrder(int[index] index)
+	Requires: index in [-Length, Length-1]
+	Details:
+		*	Returns the element at the specified position in the sort order, also corresponding to the sequential position in the iteration order.
++#
+	
+#+ MinItem
+	Requires: !this.IsEmpty
+	Details:
+		*	Returns the minimum item in the ordered set, the same as ByOrder(0)
++#
+	
+#+ MaxItem
+	Requires: !this.IsEmpty
+	Details:
+		*	Returns the maximum item in the ordered set, the same as ByOrder(-1)
++#
+	
+#+ RemoveAt(int[index] index)
+	Reqires: index in [-Length,Length-1]
+	Details:
+		*	Removes the element at position index, i.e. ByOrder(index)
++#	
+-----------------------
+Map
+-----------------------
+#+ Map Operations
+	*	Map operations typically accept as input a sequence of key-value pairs. 
+	*	These operations are also implemented efficiently when the input is a compatible map. 
+	*	Maps are compatible if they are of the same type, and have the same key semantics. 
+	*	For a few operations, maps with different value types (but identical key types) may also be compatible. 
+	*	Because the input is just a sequence (or an incompatible map), it may contain duplicates with regards to the key semantics used by the current map. If so, any specified selectors will be invoked on each of those duplicates, overwriting the previous result value each time according to the order of iteration.
+
+	*	Operations on a map never overwrite keys, only the values associated with them. For example, the method Set, which accepts a key and a value, may overwrite existing values, but the instance of the key of the current map is always retained. This behavior is similar to the behavior of sets, where the instance of the element in the current set is always retained.
+		
+	*	Similarly, result selectors accept a key and conflicting values. The key instance of the current map is always used, rather than the instance in the input map.
+		
+	*	Selectors are always invoked in the order of iteration over the current map (skipping those elements that don't need to be selected), and are invoked once for every collision (though as mentioned above, if the input contains duplicates, this is treated as multiple separate collisions). 
++#
+
+#+ MapEquals(seq<Kvp> other, Func<Value, Value, bool> eq)
+	Requires: None
+	Details:
+		*	other can be null. If it is, the result is always false.
+		*	Determines if this and other are structurally equal as maps. Two maps are structurally equal if they have the same keys, and each key is associated with equal values, as determined by the equality function 'eq'.
+		*	Optimization: Reference equality.
+		*	Optimization: if other.TryGetLength() < Length, return false.
++#
+	
+#+ MapEquals(seq<Kvp> other, IEq<Value> eq = null)
+	Requires: None
+	Details:
+		*	If eq == null, eq is taken to be the default equality comparer.
+		*	Calls MapEquals(other, eq.Equals).
++#
+
+#+ MapEquals(seq<Kvp> other, ICmp<Value> cmp)
+	Requires:
+		*	cmp != null
+	Details:
+		*	Calls MapEquals(other, (a,b) => cmp.Compare(a,b) == 0)
++#
+	
+#+ abstract TryGet(Key)
+	Details:
+		*	Returns the value associated with Key, or None if no value as found. This method never throws an exception.
++#
+	
+#+ this[Key]
+	Requires:
+		*	this.ContainsKey(Key)
+	Details:	
+		*	Returns the value associated with Key, or throws an exception.
++#
+
+#+ Keys
+	Details:
+		*	Gets the IEnumerable of keys associated with this collection.
++#
+	
+#+ Values
+	Details:
+		*	Gets the IEnumerable of values.
++#
+	
+#+ Remove(Key)
+	Details:
+		*	Removes Key from the map, if it exists. Otherwise, this is returned.
++#
+	
+#+ Add(Key,Value)
+	Requires:
+		*	!this.ContainsKey(Key)
+	Details:
+		*	Adds a new key-value pair to the map, throwing an exception if the key already exists.
++# 
+	
+#+ AddRange(seq<Kvp> kvps)
+	Requires:
+		*	kvps != null
+		*	kvps and this are disjoint by key.
+	Details:
+		*	Adds a number of key-value pairs to the map, throwing a exception if ay key already exists in the map, or if there are duplicate keys in the input sequence.
+		*	Calls Merge, with the selector throwing an exception.
++#
+
+#+ SetRange(seq<Kvp> kvps) 
+	Requires:
+		*	kvps != null
+	Details:
+		*	Adds a number of key-value pairs to the map, overwriting old values but preserving the old key instance, as described above.
+		*	Calls Merge, with no selector.
++#
+
+#+ RemoveRange(seq<Key> keys)
+	Requires:
+		*	keys != null
+	Details:
+		*	Removes all keys present in 'keys' from this.
+		*	For this operation, much higher performance is achieved if 'keys' is actually a set using the same semantics as the current set. For example, FunqSet<T> is compatible with FunqMap<T, TValue> if they use the same equality comparer.
+		*	Optimization: If the builder becomes empty during the process, stop iterating.
++#
+
+#+ Aggregate(Result initial,Func<Key,Value,Result> func) [reduce]
+	Requires:
+		*	func != null
+	Details:
+		*	The same as the normal Aggregate method, except here func accepts two arguments, the key and the value. 
++#
+		
+#+ All(Func<Key,Value,bool> func)
+	Requires:
+		*	func != null
+	Details:
+		*	The same as the normal All method, but here func accepts two arguents: the key and the value.
++#
+	
+#+ Any(Func<Key,Value,bool> func)
+	Requires:
+		*	func != null
++#
+
+#+ ContainsKey(Key)
+	Details:
+		*	Returns true if Key is contained in this map.
++#
+
+#+ Count(Func func)
+	Requires: func != null
++#
+
+#+ Find(Func func)
+	Requires: func != null
++#
+
+#+ ForEach(Action act)
+	Requires: act != null
++#
+
+#+ ForEachWhile(Func func)
+	Requires: func != null
++#
+
+#+ Pick(Func)
+	Requres: Func != null
++#
+	
+#+ Join<Value2>(seq<Kvp<Key, Value2>> kvps, Func<Key, Value, Value2> selector)
+	Requires:
+		*	kvps != null
+		*	selector != null
+	Details:
+		*	This method joins the two maps by key, and uses the specified value selector to determine the value in the output map.
+		*	selector is called as `selector(myKey, myValue, otherValue)`
+		*	The value type of the input sequence may be different from the value type of the current map. In this case, the maps cannot be compatible.
+		*	'selector' will be called once for every key-value pair present in the result map.
+		*	The Key parameter to the selector is equal to the key instance in the current map.
+		*	Optimization Note: Optimizations are generally not possible.
++#
+	
+#+ Join(seq<Kvp<Key, Value>> kvps, Func<TKey, TValue, TValue, TValue> selector = null)
+	Requires:
+		*	kvps != null
+	Details:
+		*	If selector is null, data in the 2nd map overwrites data in the current map.
+		*	Calls Join<TValue>
+		*	Optimization: If selector == null && ReferenceEquals, return this.
++#
+		
+#+ Merge(seq<Kvp<Key, Value>> kvps, Func<Key, Value, Value, Value> selector = null)
+	Requires:
+		*	kvps != null
+	Details:
+		*	Merges two maps, returning a map consisting of all keys present in at least one map. For keys present in both maps, the selector is used to determine the key in the result map. 
+		*	If the selector is null, values in the other map overwrite values in the current map.
+		*	selector is called as `selector(myKey, myValue, otherValue)`.
+		*	If the maps are compatible, a specialized algorithm is used.
+		*	Optimization: If selector == null && reference equality, return this.
++#
+	
+#+ Subtract(seq<Kvp<Key, Value2>> kvps, Func<Key, Value, Value2, Optional<Value>> subtraction = null)
+	Requires:	
+		*	kvps != nulldd
+	Details:
+		*	Subtract the key-value pairs in 'kvps' from those in 'this'. When subtracting key-value pairs, the subtraction function is used to determine the value in the result map. The subtraction function may return Optional.None, and if so, the key-value pair is removed.
+		*	If subtraction == null, keys are simply removed.
+		*	Optimization: If subtraction == null and ReferenceEquals, return Empty.
+		*	Optimization: If builder.IsEmpty, stop iterating.
++#
+
+#+ Difference(seq<Kvp<Key,Value>> kvps) 
+	Requires:
+		*	kvps != null
+	Details:
+		*	Returns a map consisting of all the keys present in exactly one of the maps, without those present in both maps. 
+		*	No selector is provided in this case.
+		*	Uses this.Subtract(other).Merge(ToIterable(other).Subtract(this))
++#
+
+#+ ByOrder(int[index] index)
+	Requires:
+		*	index in [
++#	
+		
+
+		
+		
+
+			
+
+
+
+		
+		

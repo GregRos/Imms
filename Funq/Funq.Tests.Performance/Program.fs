@@ -4,6 +4,7 @@ module Funq.Tests.Performance.Main
 open Funq.Tests.Performance
 open Funq
 open System
+open ExtraFunctional
 open System.Diagnostics
 open LINQtoCSV
 open System.Collections.Immutable
@@ -34,11 +35,23 @@ let getFreeDir path dir =
             tryName, n
     tryNum 0
 
+let runTest (writer : IndentedTextWriter) (tag : ErasedTest) = 
+    fprintfn writer "Beginning Test '%s' with metadata:" tag.Test.Name
+    writer.Push()
+    fprintfn writer "%O" tag.Test
+    fprintfn writer "Target: '%s' with metadata:" tag.Target.Name
+    fprintfn writer "%O" tag.Target
+    let time = Bench.invoke (tag.RunTest)
+    fprintfn writer "Ending Test: '%s' for '%s' with time, '%A'\n" tag.Test.Name tag.Target.Name time
+    tag.Time <- time
+    writer.Pop()
+    tag :> TestInstanceMeta
+
 let runTests (tests : ErasedTest list) = 
     use writer = new IndentedTextWriter(Console.Out)
     let mutable results = []
 
-    let results = tests |> List.map (Bench.invoke writer)
+    let results = tests |> List.map (runTest writer)
     let charts = present results
     let mutable i = 0;
     let basePath = "..\..\Benchmarks\Results"
@@ -84,7 +97,7 @@ let  main argv =
     let c = Scripts.mapLike args
     let tests = a @ b @ c
     
-    let tests = tests// |> List.filter (fun x -> x.Target.Kind = MapLike || x.Target.Kind = SetLike)
+    let tests = tests |> List.filter (fun x -> x.Target.Kind = Sequential)
     runTests tests
     0
         

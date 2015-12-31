@@ -2,128 +2,246 @@
 open System
 open System.Diagnostics
 open Funq.FSharp.Implementation
+open ExtraFunctional
 open Funq.FSharp
+open Funq
+type MapTests<'e when 'e : comparison>(items : 'e array, ?seed : int) =
 
-type MapTests<'e>(items : 'e array, ?seed : int) =
     let seed = defaultArg seed (Environment.TickCount)
     let create_test iters name test = Test(iters, name, MapLike, test)
-    let floor x = x |> floor |> int
-    member private x.add_check v (set :_ MapWrapper)  =
-        let oldCount = set.Length
-        let alreadyExists = set.Contains v
-        let mutable set = set
-        if alreadyExists then
-            set <- set.Set(v, v)
-            assert_eq(set.Length, oldCount)
-            assert_eq(set.Get v, v )
-        else
-            set <- set.Add(v, v)
-            assert_eq(set.Length, oldCount + 1)
-            assert_eq(set.Get v, v)
-        set
+   
 
-    member private x.remove_check v (set :_ MapWrapper) =
-        let oldCount = set.Length
-        let alreadyExists = set.Contains v
-        let mutable set = set
-        if alreadyExists then
-            set <- set.Remove v
-            assert_eq(set.Length, oldCount - 1)
-        else
-            assert_eq(set.Length, oldCount)
-        set
-
-    member private x.add_range_check (st,en) (set :_ MapWrapper) = 
-        let slice = items.[st..en]
-        let newSet = slice |> Seq.map (fun x -> x,x) |> set.AddRange
-        let mutable increase = slice |> Seq.countWhere (fun x -> not <| set.Contains x)
-        assert_eq(newSet.Length, increase + set.Length)
-        for item in slice do
-            assert_true(newSet.Contains item)
-            assert_eq(newSet.Get item, item)
-        newSet
-
-    member private x.remove_range_check (st,en) (set :_ MapWrapper) = 
-        let slice = items.[st..en]
-        let newSet = set.RemoveRange slice
-        let mutable decrease = slice |> Seq.countWhere (fun x -> set.Contains x)
-        assert_eq(newSet.Length, -decrease + set.Length)
-        for item in slice do
-            assert_false(newSet.Contains item)
-        newSet
-
-    member private x.inner_add_remove (addBias : float) (n : int) (s: MapWrapper<_>) =
-        let mutable s = s
+    let rec rnd_kvp' mx (r : Random) (s : MapWrapper<_>) =        
+        let item = items.[r.Next(0, items.Length)]
+        assert_true(mx >= 0)
+        match s.TryGet item with
+        | Some v -> item, v
+        | None -> rnd_kvp' (mx - 1) r s
+    
+    let rnd_kvp r s = rnd_kvp' 10 r s
+         
+    member private x.get_kvp_slice (n : int) = 
         let r = Random(seed)
-        let rnd() = r.Next(items.Length)
-        let mutable expectedCount = s.Length
-        let reduced_n = n |> float |> sqrt |> int
-        let addCeil = float reduced_n * addBias |> int
-        let removeCeil = reduced_n |> int
-        for i = 0 to reduced_n do
-            let iters = r.Next(0, addCeil)
-            for j = 0 to iters do
-                let ix = rnd()
-                s <- s |> x.add_check (items.[ix])
+        let st1,en1 = r.IntInterval(0, items.Length, n)
+        let st2 = r.Next(0, items.Length - (en1 - st1))
+        let keys,values = items.[st1..en1], items.[st2..st2+(en1-st1)]
+        let kvps = Seq.zip keys values |> Seq.map (Kvp.Of)
+        kvps
+
+    member private x.gen_disjoint n (map:_ MapWrapper) =
+        let r = Random(seed)
+        let mutable working = map.Empty
+        let rnd() = r.Next(0,items.Length)
+        for i = 0 to n do
+            let k,v = items.[rnd()], items.[rnd()]
+            if k|> map.ContainsKey |> not then 
+               working <- working.U_add k v 
+        working
+
+    member private x.gen_different n (map:_ MapWrapper) =
+        let r = Random(seed)
+        let mutable map = map
+        let mutable drop = min n (map.Length .* 0.5)
+
+        for i = 0 to drop do
+            let k, v = map |> rnd_kvp r
+            map <- map.U_remove k
+        let rnd() = r.Next(0,items.Length)
+        while drop >= 0 do
+            let k, v = items.[rnd()], items.[rnd()]
+            if k |> map.ContainsKey |> not then
+                map <- map.U_add k v
+                drop <- drop - 1
+        map
+
+    member private x.gen_equal_keys_dif_values n (map:_ MapWrapper) =
+        let r = Random(seed)
+        let mutable next = map
+        for i = 0 to n do
+            let k, v = next |> rnd_kvp r
+            let v = items.[r.Next(0,items.Length)]
+            next <- next.U_add k v
+        next
+        
+    member private x.add n (map :_ MapWrapper) =
+        let mutable map = map
+        let r = Random(seed)
+        let rnd() = r.Next(0,items.Length)
+        for i = 0 to n do
+            map <- map.U_add (items.[rnd()]) (items.[rnd()])
+        map
+
+    member private x.remove n (map :_ MapWrapper) =
+        let mutable map = map
+        let r = Random(seed)
+        let n = n /2
+        let rnd() = r.Next(0,items.Length)
+        for i = 0 to n do
+            let k = items.[rnd()]
+            map <- map.U_remove k
+
+        for i = 0 to n do
+            let k,v = map |> rnd_kvp r
+            map <- map.U_remove k
+        map
+
+    member private x.add_remove n (map:_ MapWrapper) =
+        let mutable map = map
+        let r = Random(seed)
+        let n' = n |> Math.intSqrt
+        let tests() = MapTests(items,r.Next())
+        for i = 0 to n' do
+            map <- map |> tests().add n'
+            map <- map |> tests().remove n'
+        map
+
+    member private x.add_range n (map:_ MapWrapper) =
+        let mutable map = map
+        let r = Random(seed)
+        let n = n / 2
+        let n' = n |> Math.intSqrt
+        let tests() = MapTests(items, r.Next())
+        let mutable results = []
+        for i = 0 to n' do
+            let t = map
+            let fs = tests().add, tests().remove, tests().gen_disjoint, tests().gen_equal_keys_dif_values, tests().gen_different
+            let maps = fs |> Tuple.apply2 n map
+            let super,sub,disjoint,eq,dif as curResults = maps |> Tuple.mapAll (fun mp -> t.U_addRange mp)
+            results <- (curResults |> Tuple.toList) @ results
+            let curResults = maps |> Tuple.mapAll (Seq.asArray >> fun mp -> t.U_addRange mp) |> Tuple.toList
+            results <- curResults @ results
+            map <- dif
+        results
+
+    member private x.remove_range n (map:_ MapWrapper) = 
+        let mutable map = map
+        let r = Random(seed)
+        let n = n / 2
+        let n' = n |> Math.intSqrt
+        let tests() = MapTests(items, r.Next())
+        let mutable results = []
+        for i = 0 to n' do
+            let t = map
+            let fs = tests().add, tests().remove, tests().gen_disjoint, tests().gen_equal_keys_dif_values, tests().gen_different, tests().gen_different
+            let maps = fs |> Tuple.apply2 n map |> Tuple.mapAll (fun s -> s.toSet)
+            let super,sub,disjoint,eq,dif1,dif2 as curResults = maps |> Tuple.mapAll (fun set -> t.U_removeRange set)
+            results <- (curResults |> Tuple.toList) @ results
+            let curResults = maps |> Tuple.mapAll (Seq.toArray >> fun mp -> t.U_removeRange mp) |> Tuple.toList
+            results <- curResults @ results
+            map <- dif1.U_addRange dif2|> tests().add n
+        results    
+
+    member private x.merge n (map:_ MapWrapper) = 
+        let mutable map = map
+        let r = Random(seed)
+        let n = n / 2
+        let n' = n |> Math.intSqrt
+        let tests() = MapTests(items, r.Next())
+        let mutable results = []
+        let merge k v1 v2 = if r.Next(0,2) = 0 then v1 else v2
+        for i = 0 to n' do
+            let t = map
+            let fs = tests().add, tests().remove, tests().gen_disjoint, tests().gen_equal_keys_dif_values, tests().gen_different
+            let maps = fs |> Tuple.apply2 n map
+            let super,sub,disjoint,eq,dif as curResults = maps |> Tuple.mapAll (fun set -> t.U_merge (Some merge) set)
+            results <- (curResults |> Tuple.toList) @ results
+            let super,sub,disjoint,eq,dif as curResults = maps |> Tuple.mapAll (Seq.asArray >> fun mp -> t.U_merge (Some merge) mp)
+            results <- (curResults |> Tuple.toList) @ results
+            map <- dif
+        results  
+
+    member private x.join n (map:_ MapWrapper) = 
+        let mutable map = map
+        let r = Random(seed)
+        let n = n / 2
+        let n' = n |> Math.intSqrt
+
+        let tests() = MapTests(items, r.Next())
+        let mutable results = []
+        let join k v1 v2 = if r.Next(0,2) = 0 then v1 else v2
+        for i = 0 to n' do
+            let t = map
+            let fs = tests().add, tests().remove, tests().gen_disjoint, tests().gen_equal_keys_dif_values, tests().gen_different, tests().gen_different
+            let maps = fs |> Tuple.apply2 n map
+            let super,sub,disjoint,eq,dif1,dif2 as curResults = maps |> Tuple.mapAll (fun set -> t.U_join (Some join) set)
+            results <- (curResults |> Tuple.toList) @ results
+            let curResults = maps |> Tuple.mapAll (Seq.asArray >> fun mp -> t.U_join (Some join) mp) |> Tuple.toList
+            results <- curResults @ results
+            map <- dif1 |> tests().add n
+        results 
+
+    member private x.except n (map:_ MapWrapper) = 
+        let mutable map = map
+        let r = Random(seed)
+        let n = n / 2
+        let n' = n |> Math.intSqrt
+        let tests() = MapTests(items, r.Next())
+        let mutable results = []
+        let join k v1 v2 =
+            match k.GetHashCode() % 5 with
+            | 0 -> Some v1
+            | 1 -> Some v2
+            | _ -> None
+        for i = 0 to n' do
+            let t = map
+            let fs = tests().add, tests().remove, tests().gen_disjoint, tests().gen_equal_keys_dif_values, tests().gen_different, tests().gen_different
+            let maps = fs |> Tuple.apply2 n map
+            let super,sub,disjoint,eq,dif1,dif2 as curResults = maps |> Tuple.mapAll (fun set -> t.U_except (Some join) set)
+            results <- (curResults |> Tuple.toList) @ results
+            let curResults = maps |> Tuple.mapAll (Seq.asArray >> fun mp -> t.U_except (Some join) mp) |> Tuple.toList
+            results <- curResults @ results
+            let curResults = maps |> Tuple.mapAll (Seq.asArray >> fun mp -> t.U_except (None) mp) |> Tuple.toList
+            results <- curResults @ results
+            map <- dif1.U_addRange dif2 |> tests().add n
+        results 
+
+    member private x.difference n (map:_ MapWrapper) = 
+        let mutable map = map
+        let r = Random(seed)
+        let n = n / 2
+        let n' = n |> Math.intSqrt
+        let tests() = MapTests(items, r.Next())
+        let mutable results = []
+        for i = 0 to n' do
+            let t = map
+            let fs = tests().add, tests().remove, tests().gen_disjoint, tests().gen_equal_keys_dif_values, tests().gen_different, tests().gen_different
+            let maps = fs |> Tuple.apply2 n map
+            let super,sub,disjoint,eq,dif1,dif2 as curResults = maps |> Tuple.mapAll (fun set -> t.U_difference set)
+            results <- (curResults |> Tuple.toList) @ results
+            let curResults = maps |> Tuple.mapAll (Seq.asArray >> fun mp -> t.U_difference  mp) |> Tuple.toList
+            results <- curResults @ results
+            map <- dif1 |> tests().add n
+        results 
+
+
+    member private x.find n (s : MapWrapper<_>) =
+        let rnd = Random(seed)
+        let n' = n |> Math.intSqrt
+        let mutable t = []
+        for i = 0 to n' do
+            let rePair = s |> rnd_kvp rnd
+            let r = s.Test_predicate (fun (Kvp(pair)) -> pair = rePair)
+            if r.IsSome then
+                t <- (r.Value.Key, r.Value.Value)::t
+        t
+    member x.Add iters = create_test iters "Add" (x.add iters >> toList1 >> List.cast)
+    member x.Remove iters = create_test iters "Remove" (x.remove iters >> toList1 >> List.cast)
+    member x.Remove_range iters = create_test iters "RemoveRange" (x.remove_range iters >> List.cast)
+    member x.Add_range iters = create_test iters "AddRange" (x.add_range iters >> List.cast)
+    member x.Merge iters = create_test iters "Merge" (x.merge iters >> List.cast)
+    member x.Join iters = create_test iters "Join" (x.join iters >> List.cast)
+    member x.Except iters = create_test iters "Except" (x.except iters >> List.cast)
+    member x.Difference iters = create_test iters "Difference" (x.difference iters >> List.cast)
+    member x.Add_remove iters = create_test iters "Add, Remove" (x.add_remove iters >> toList1 >> List.cast)
+    member x.Find iters = create_test iters "Find" (x.find iters >> toList1 >> List.cast)
+
+
+
+
+
+
+
             
-            let iters = r.Next(0, removeCeil)
 
-            for j = 0 to iters do
-                let ix = rnd()
-                s <- s |> x.remove_check (items.[ix])
-        s
 
-    member private x.inner_add_remove_range (n : int) (s : MapWrapper<_>) =
-        let mutable results = []
-        let r = Random(seed)
-        let rnd x = r.Next((items.Length |> float) * x |> floor)
-        let mx = items.Length - 1
-        let reduced_n = n |> float |> sqrt |> floor |> int
-        let mutable s =s
-        for i = 0 to reduced_n do
-            let st1,st2 = (rnd 0.5),(rnd 0.5)
-            let en1,en2 = r.Next(st1, st1 + reduced_n), r.Next(st2, st2 + reduced_n)
-            let en1,en2 = min en1 mx, min en2 mx
-            let added = s |> x.add_range_check (st1,en1) 
-            let removeped = added |> x.remove_range_check (st2,en2)
-            s <- removeped
-        s
 
-    member private x.inner_add_range (n : int) (s : MapWrapper<_>) =
-        let mutable results = []
-        let r = Random(seed)
-        let rnd x = r.Next((items.Length |> float) * x |> floor)
-        let mx = items.Length - 1
-        let reduced_n = n |> float |> sqrt |> floor |> int
-        let mutable s =s
-        for i = 0 to reduced_n do
-            let st1,st2 = (rnd 0.5),(rnd 0.5)
-            let en1,en2 = r.Next(st1, st1 + reduced_n), r.Next(st2, st2 + reduced_n)
-            let en1,en2 = min en1 mx, min en2 mx
-            let added = s |> x.add_range_check (st1,en1) 
-            s <- added
-        s
-
-    member private x.inner_normal_add_remove_range (n : int) (s : MapWrapper<_>) =
-        let mutable results = []
-        let r = Random(seed)
-        let rnd x = r.Next((items.Length |> float) * x |> floor)
-        let mx = items.Length - 1
-        let reduced_n = n |> float |> sqrt |> floor |> int
-        let mutable s =s
-        for i = 0 to reduced_n do
-            let seed1,seed2 = r.Next(), r.Next()
-            let obj1,obj2 = MapTests(items, seed1), MapTests(items, seed2)
-            let st1,st2 = (rnd 0.5),(rnd 0.5)
-            let en1,en2 = r.Next(st1, st1 + reduced_n), r.Next(st2, st2 + reduced_n)
-            let en1,en2 = min en1 mx, min en2 mx
-            let bias = r.ExpDouble(10.)
-            let added = s |> obj1.inner_add_remove bias reduced_n
-            let removeped = added |> x.remove_range_check (st2,en2)
-            s <- removeped
-        s
-
-    member x.add_remove iters  = create_test iters "AddRemove" (x.inner_add_remove 1.3 iters >> toList1)
-    member x.add_remove_range iters  = create_test iters "AddRemoveRange" (x.inner_add_remove_range iters >> toList1)
-    member x.add_range iters  = create_test iters "AddRange" (x.inner_add_range iters >> toList1)
-    member x.remove_range iters  = create_test iters "AddRange" (x.inner_normal_add_remove_range iters >> toList1)

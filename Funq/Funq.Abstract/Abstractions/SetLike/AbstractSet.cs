@@ -1,45 +1,54 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
+using System.Net.Sockets;
+using System.Reflection;
 
 namespace Funq.Abstract {
+
+
 	/// <summary>
 	///     Parent of all unordered collections containing distinct values, which can efficiently determine membership.
 	/// </summary>
 	/// <typeparam name="TElem"> </typeparam>
 	/// <typeparam name="TSet"> </typeparam>
 	public abstract partial class AbstractSet<TElem, TSet>
-		: AbstractIterable<TElem, TSet, SetBuilder<TElem>>, IAnySetLike<TElem>
+		: AbstractIterable<TElem, TSet, ISetBuilder<TElem, TSet>>
 		where TSet : AbstractSet<TElem, TSet> {
 
-
 		/// <summary>
-		/// Returns true if the item is contained in the set.
+		///     Returns true if the item is contained in the set.
 		/// </summary>
 		/// <param name="item"></param>
 		/// <returns></returns>
-		public abstract bool Contains(TElem item);
+		public virtual bool Contains(TElem item) {
+			return TryGet(item).IsSome;
+		}
 
 		/// <summary>
-		/// Returns the set-theoretic relation between this set and another set. This member is optimized depending on the actual type of the input.
+		///     Returns the set-theoretic relation between this set and another set. This member is optimized depending on the
+		///     actual type of the input.
 		/// </summary>
 		/// <param name="other">The input sequence, treated as a set.</param>
 		/// <returns></returns>
 		public SetRelation RelatesTo(IEnumerable<TElem> other) {
-			if (other is TSet && IsCompatibleWith((TSet)other)) return RelatesTo((TSet) other);
-			if (other is IAnySetLike<TElem>) return RelatesTo_Unchecked((IAnySetLike<TElem>) other);
-			if (this.RefEquals(other)) return IsEmpty ? SetRelation.Disjoint | SetRelation.Equal : SetRelation.Equal;
+			other.CheckNotNull("other");
+			TSet set = other as TSet;
+			if (set != null && IsCompatibleWith(set)) return RelatesTo(set);
+			if (ReferenceEquals(this, other)) return IsEmpty ? SetRelation.Disjoint | SetRelation.Equal : SetRelation.Equal;
 			var total = 0;
 			var intersectSize = other.Count(x => {
 				total += 1;
 				return Contains(x);
 			});
-			if (IsEmpty && total == 0) return SetRelation.Equal | SetRelation.Disjoint;
-			if (IsEmpty && total != 0) return SetRelation.ProperSubsetOf | SetRelation.Disjoint;
-			if (!IsEmpty && total == 0) return SetRelation.ProperSupersetOf | SetRelation.Disjoint;
+			if (IsEmpty) {
+				if (total == 0) return SetRelation.Equal | SetRelation.Disjoint;
+				if (total != 0) return SetRelation.ProperSubsetOf | SetRelation.Disjoint;
+			}
+			else if (total == 0) {
+				return SetRelation.ProperSupersetOf | SetRelation.Disjoint;
+			}
 			if (intersectSize == 0) return SetRelation.Disjoint;
-			var otherContainsThis = intersectSize == this.Length;
+			var otherContainsThis = intersectSize == Length;
 			var thisContainsOther = intersectSize == total;
 			if (thisContainsOther && otherContainsThis) return SetRelation.Equal;
 			if (thisContainsOther) return SetRelation.ProperSupersetOf;
@@ -47,24 +56,91 @@ namespace Funq.Abstract {
 			return SetRelation.None;
 		}
 
+		public abstract TSet Add(TElem item);
+
+		public abstract TSet Remove(TElem item);
+
 		/// <summary>
-		/// Returns if this set is equal to another set. This member is optimized based on the actual type of the input.
+		/// Returns the instance of the specified element, as it appears in this set, or None if no such instance exists.
 		/// </summary>
-		/// <param name="seq">The other set.</param>
+		/// <param name="item"></param>
 		/// <returns></returns>
-		public bool SetEquals(IEnumerable<TElem> seq) {
-			var length = 0;
-			var res = IsSupersetOf(seq, out length);
-			return res && length == Length;
+		protected abstract Optional<TElem> TryGet(TElem item);
+
+		/// <summary>
+		///     Returns if this set is equal to another set. This member is optimized based on the actual type of the input.
+		/// </summary>
+		/// <param name="other">The other set.</param>
+		/// <returns></returns>
+		public virtual bool SetEquals(IEnumerable<TElem> other) {
+			other.CheckNotNull("other");
+			var set = other as TSet;
+			if (set != null && IsCompatibleWith(set)) {
+				return set.Length == Length && IsSupersetOf(set);
+			}
+			var guessLength = other.TryGuessLength();
+			if (guessLength.IsSome && guessLength.Value < Length) {
+				return false;
+			}
+			set = ToSet(other);
+			return set.Length == Length && IsSupersetOf(set);
+		}
+
+		public bool IsSupersetOf(IEnumerable<TElem> other) {
+			other.CheckNotNull("other");
+			var set = other as TSet;
+			if (set != null && IsCompatibleWith(set)) {
+				return set.Length <= Length && IsSupersetOf(set);
+			}
+			return other.ForEachWhile(Contains);
+		}
+
+		public bool IsProperSupersetOf(IEnumerable<TElem> other) {
+			other.CheckNotNull("other");
+			TSet set = other as TSet;
+			if (set != null && IsCompatibleWith(set)) {
+				return set.Length < Length && IsSupersetOf(set);
+			}
+			set = ToSet(other);
+			return set.Length < Length && IsSupersetOf(set);
+		}
+
+		public bool IsProperSubsetOf(IEnumerable<TElem> other) {
+			other.CheckNotNull("other");
+			var set = other as TSet;
+			if (set != null && IsCompatibleWith(set)) {
+				return set.IsProperSupersetOf(this);
+			}
+			var guessLength = other.TryGuessLength();
+			if (guessLength.IsSome && guessLength.Value <= Length) {
+				return false;
+			}
+			var tSet = ToSet(other);
+			return tSet.IsProperSupersetOf(this);
+		}
+
+		public bool IsSubsetOf(IEnumerable<TElem> other) {
+			other.CheckNotNull("other");
+			TSet set = other as TSet;
+			if (set != null && IsCompatibleWith(set)) {
+				return set.IsSupersetOf(this);
+			}
+			var guessLength = other.TryGuessLength();
+			if (guessLength.IsSome && guessLength.Value < Length) {
+				return false;
+			}
+			var tSet = ToSet(other);
+			return tSet.IsProperSupersetOf(this);
 		}
 
 		/// <summary>
-		/// Override this to provide an efficient implementation for the operation.
+		///     Override this to provide an efficient implementation for the operation.
 		/// </summary>
 		/// <param name="other"></param>
 		/// <returns></returns>
 		protected virtual TSet Difference(TSet other) {
-			var ex1 = this.Except(other);
+			other.CheckNotNull("other");
+			var ex1 = Except(other);
 			var ex2 = other.Except(this);
 			return ex1.Union(ex2);
 		}
@@ -74,114 +150,188 @@ namespace Funq.Abstract {
 		/// </summary>
 		/// <param name="other"></param>
 		/// <returns></returns>
-		public TSet Difference(IEnumerable<TElem> other) {
-			if (other is TSet) return Difference((TSet) other);
-			if (other is IAnySetLike<TElem>) return Unchecked_Difference((IAnySetLike<TElem>) other);
-			TSet otherProvider = ToIterable(this, other);
-			return Difference(otherProvider);
+		public virtual TSet Difference(IEnumerable<TElem> other) {
+			other.CheckNotNull("other");
+			if (ReferenceEquals(this, other)) {
+				return Empty;
+			}
+			TSet set = other as TSet;
+			if (set != null && IsCompatibleWith(set)) return Difference(set);
+			set = this.ToIterable(other);
+			return Difference(set);
 		}
 
+		/// <summary>
+		///     Applies an inverse except operation, essentially other - this.
+		/// </summary>
+		/// <param name="other">The other collection, taken to be a set.</param>
+		/// <returns></returns>
 		public TSet ExceptInverse(IEnumerable<TElem> other) {
-			if (this.RefEquals(other)) {
-				return ProviderFrom(EmptyBuilder);
-			}
-			if (other is TSet && IsCompatibleWith((TSet)other)) {
-				return ((TSet) other).Except(this);
-			}
+			other.CheckNotNull("other");
+			if (ReferenceEquals(this, other)) return Empty;
+			TSet set = other as TSet;
+			if (set != null && IsCompatibleWith(set)) return set.Except(this);
 			using (var builder = EmptyBuilder) {
 				other.ForEach(item => {
 					if (!Contains(item)) {
 						builder.Add(item);
 					}
 				});
-				return ProviderFrom(builder);
+				return builder.Produce();
 			}
 		}
 
 		/// <summary>
-		/// Checks if this set is compatible with (e.g. same equality semantics) with another set.
+		///     Checks if this set is compatible with (e.g. same equality semantics) with another set.
 		/// </summary>
 		/// <param name="other"></param>
 		/// <returns></returns>
 		protected abstract bool IsCompatibleWith(TSet other);
 
-		
-		TSet Unchecked_Difference(IAnySetLike<TElem> other) {
-			var union = Union(other);
-			var intersect = Unchecked_Intersect(other);
-			return union.Except(intersect);
-		}
-
 		/// <summary>
-		/// Override this to provide an efficient implementation for the operation.
+		///     Override this to provide an efficient implementation for the operation.
 		/// </summary>
 		/// <param name="other"></param>
 		/// <returns></returns>
 		protected virtual TSet Except(TSet other) {
+			other.CheckNotNull("other");
 			return Unchecked_Except(other);
 		}
 
 		/// <summary>
-		/// Performs the set-theoretic Except operation (non-symmetric difference) with the other collection.
+		///     Performs the set-theoretic Except operation (non-symmetric difference) with the other collection.
 		/// </summary>
 		/// <param name="other"></param>
 		/// <returns></returns>
-		public TSet Except(IEnumerable<TElem> other) {
-			if (ReferenceEquals(this, other)) return ProviderFrom(EmptyBuilder);
-			if (other is TSet && IsCompatibleWith((TSet)other)) return Except((TSet) other);
+		public virtual TSet Except(IEnumerable<TElem> other) {
+			other.CheckNotNull("other");
+			if (ReferenceEquals(this, other)) return Empty;
+			TSet set = other as TSet;
+			if (set != null && IsCompatibleWith(set)) return Except(set);
 			return Unchecked_Except(other);
 		}
 
-		TSet Unchecked_Except(IEnumerable<TElem> other)
-		{
-			using (var builder = BuilderFrom(this))
-			{
-				other.ForEach(x => { builder.Remove(x); });
-				return ProviderFrom(builder);
-			}
-		}
-
-		/// <summary>
-		/// Applies the set-theoretic Intersect operation.
-		/// </summary>
-		/// <param name="other"></param>
-		/// <returns></returns>
-		public TSet Intersect(IEnumerable<TElem> other) {
-			if (ReferenceEquals(this, other)) return this;
-			if (other is TSet && IsCompatibleWith((TSet)other)) return Intersect((TSet) other);
-			if (other is IAnySetLike<TElem>) return Unchecked_Intersect((IAnySetLike<TElem>) other);
-			using (var builder = EmptyBuilder) {
-				other.ForEach(item => {
-					if (Contains(item)) builder.Add(item);
+		TSet Unchecked_Except(IEnumerable<TElem> other) {
+			using (var builder = BuilderFrom(this)) {
+				var len = Length;
+				other.ForEachWhile(x => {
+					if (builder.Remove(x)) {
+						len--;
+					}
+					return len > 0;
 				});
-				return ProviderFrom(builder);
+				return builder.Produce();
 			}
 		}
 
-		TSet Unchecked_Intersect(IAnySetLike<TElem> other) {
+		/// <summary>
+		///     Applies the set-theoretic Intersect operation.
+		/// </summary>
+		/// <param name="other"></param>
+		/// <returns></returns>
+		public virtual TSet Intersect(IEnumerable<TElem> other) {
+			other.CheckNotNull("other");
+			if (ReferenceEquals(this, other)) return this;
+			TSet set = other as TSet;
+			if (set != null && IsCompatibleWith(set)) return Intersect(set);
+			int total = 0;
+			int len = Length;
 			using (var builder = EmptyBuilder) {
-				var shorterSet = Length > other.Length ? other : this;
-				var longerSet = shorterSet == other ? this : other;
-				shorterSet.ForEach(x => { if (longerSet.Contains(x)) builder.Add(x); });
-				return ProviderFrom(builder);
+				other.ForEachWhile(item => {
+					var myKey = TryGet(item);
+					if (myKey.IsSome) {
+						builder.Add(myKey.Value);
+						total++;
+					}
+					return total < len;
+				});
+				return builder.Produce();
 			}
 		}
+
+
 		/// <summary>
-		/// Override this to provide an efficient implementation for the operation.
+		///     Override this to provide an efficient implementation for the operation.
 		/// </summary>
 		/// <param name="other"></param>
 		/// <returns></returns>
 		protected virtual TSet Intersect(TSet other) {
-			return Unchecked_Intersect(other);
+			other.CheckNotNull("other");
+			using (var builder = EmptyBuilder) {
+				var thisIsShorter = Length <= other.Length;
+				var shorterSet = thisIsShorter ? this : (AbstractSet<TElem, TSet>) other;
+				var longerSet = thisIsShorter ? (AbstractSet<TElem, TSet>) other : this;
+				shorterSet.ForEach(x => {
+					if (thisIsShorter) {
+						if (longerSet.Contains(x)) builder.Add(x);
+					}
+					else {
+						var myKey = shorterSet.TryGet(x);
+						if (myKey.IsSome) {
+							builder.Add(myKey.Value);
+						}
+					}
+					
+				});
+				return builder.Produce();
+			}
 		}
 
-		SetRelation RelatesTo_Unchecked(IAnySetLike<TElem> other) {
-			if (this.RefEquals(other)) return IsEmpty ? SetRelation.Disjoint | SetRelation.Equal : SetRelation.Equal;
-			if (IsEmpty && other.IsEmpty()) return SetRelation.Equal | SetRelation.Disjoint;
-			if (IsEmpty && !other.IsEmpty()) return SetRelation.ProperSubsetOf | SetRelation.Disjoint;
-			if (!IsEmpty && other.IsEmpty()) return SetRelation.ProperSupersetOf | SetRelation.Disjoint;
-			var driver = Length > other.Length ? other : this;
-			var checker = driver == this ? other : this;
+		private TSet ToSet(IEnumerable<TElem> other) {
+			TSet set = other as TSet;
+			if (set != null && IsCompatibleWith(set)) {
+				return set;
+			}
+			using (var builder = EmptyBuilder) {
+				builder.AddRange(other);
+				return builder.Produce();
+			}
+		}
+
+		/// <summary>
+		///     Returns true if this set is disjoint (shares no elements with) 'other'. The empty set is disjoint with all sets.
+		/// </summary>
+		/// <param name="other"></param>
+		/// <returns></returns>
+		public bool IsDisjointWith(IEnumerable<TElem> other) {
+			other.CheckNotNull("other");
+			if (ReferenceEquals(this, other)) return IsEmpty;
+			TSet set = other as TSet;
+			if (set != null && IsCompatibleWith(set)) return IsDisjointWith(set);
+			return !other.Any(Contains);
+		}
+
+		/// <summary>
+		///     Override this to provide an efficient implementation for the operation.
+		/// </summary>
+		/// <param name="other"></param>
+		/// <returns></returns>
+		protected virtual bool IsSupersetOf(TSet other) {
+			return other.Length <= Length && other.All(Contains);
+		}
+
+		/// <summary>
+		///     Override this to provide an efficient implementation for the operation.
+		/// </summary>
+		/// <param name="other"></param>
+		/// <returns></returns>
+		protected virtual bool IsDisjointWith(TSet other) {
+			if (Length < other.Length) return !Any(other.Contains);
+			return !other.Any(Contains);
+		}
+
+		/// <summary>
+		///     Override this to provide an efficient implementation for the operation.
+		/// </summary>
+		/// <param name="other"></param>
+		/// <returns></returns>
+		protected virtual SetRelation RelatesTo(TSet other) {
+			if (ReferenceEquals(this, other)) return IsEmpty ? SetRelation.Disjoint | SetRelation.Equal : SetRelation.Equal;
+			if (IsEmpty && other.IsEmpty) return SetRelation.Equal | SetRelation.Disjoint;
+			if (IsEmpty && !other.IsEmpty) return SetRelation.ProperSubsetOf | SetRelation.Disjoint;
+			if (!IsEmpty && other.IsEmpty) return SetRelation.ProperSupersetOf | SetRelation.Disjoint;
+			var driver = Length > other.Length ? other : (TSet)this;
+			var checker = driver == this ? other : (TSet)this;
 			var intersectCount = driver.Count(checker.Contains);
 			if (intersectCount == 0) return SetRelation.Disjoint;
 			var otherContainsThis = intersectCount == Length;
@@ -193,138 +343,7 @@ namespace Funq.Abstract {
 		}
 
 		/// <summary>
-		///     Returns true if this is a superset of the other, and maybe also the length of seq as an output parameter.
-		///     IF THIS METHOD RETURNS 'false' LENGTH IS PROBABLY WRONG
-		/// </summary>
-		/// <param name="seq"></param>
-		/// <param name="length"></param>
-		/// <returns></returns>
-		bool IsSupersetOf(IEnumerable<TElem> seq, out int length) {
-			if (this.RefEquals(seq)) {
-				length = Length;
-				return true;
-			}
-			var isSuper = true;
-			if (seq is TSet && IsCompatibleWith((TSet)seq)) {
-				var asSet = (TSet) seq;
-				length = asSet.Length;
-				return IsSupersetOf(asSet);
-			}
-			return IsSupersetOf_Unchecked(seq, out length);
-		}
-
-		public bool IsDisjointWith(IEnumerable<TElem> seq) {
-			if (this.RefEquals(seq)) return IsEmpty;
-			if (seq is TSet && IsCompatibleWith((TSet)seq)) return IsDisjointWith((TSet) seq);
-			if (seq is IAnySetLike<TElem>) return IsDisjointWith_Unchecked((IAnySetLike<TElem>) seq);
-			return !seq.ForEachWhile(Contains);
-		}
-
-		bool IsDisjointWith_Unchecked(IAnySetLike<TElem> other) {
-			if (Length < other.Length) return !ForEachWhile(other.Contains);
-			else return !other.ForEachWhile(Contains);
-		}
-
-		bool IsSupersetOf_Unchecked(IEnumerable<TElem> seq, out int length) {
-			var len = 0;
-			var ret = seq.ForEachWhile(x => {
-				len++;
-				if (!Contains(x)) return false;
-				return true;
-			});
-			length = len;
-			return ret;
-		}
-
-		public bool IsSupersetOf(IEnumerable<TElem> seq) {
-			var length = 0;
-			var res = IsSupersetOf(seq, out length);
-			return res;
-		}
-
-		public bool IsProperSupersetOf(IEnumerable<TElem> seq) {
-			var length = 0;
-			var res = IsSupersetOf(seq, out length);
-			return res && length > Length;
-		}
-
-		public bool IsProperSubsetOf(IEnumerable<TElem> seq) {
-			var length = 0;
-			var res = IsSubsetOf(seq, out length);
-			return res && length > Length;
-		}
-
-		public bool IsSubsetOf(IEnumerable<TElem> seq) {
-			var dummy = 0;
-			return IsSubsetOf(seq, out dummy);
-		}
-
-		/// <summary>
-		///     This method should not be called o
-		///     <br />
-		///     Returns if this set is a subset of seq, and the length of seq if it is true. <br />
-		///     In this case the lenght is always correct, even if the result is false.
-		/// </summary>
-		/// <param name="seq"></param>
-		/// <param name="length"></param>
-		/// <returns></returns>
-		bool IsSubsetOf(IEnumerable<TElem> seq, out int length) {
-			if (this.RefEquals(seq)) {
-				length = Length;
-				return true;
-			}
-			if (seq is TSet) {
-				var asSet = seq as TSet;
-				length = asSet.Length;
-				return asSet.IsSupersetOf(this);
-			}
-			if (seq is IAnySetLike<TElem>) {
-				var set = (IAnySetLike<TElem>) seq;
-				length = set.Length;
-				return IsSubsetOf_Unchecked(set);
-			}
-			var hs = seq.ToHashSet();
-			length = hs.Count;
-			var ret = this.ForEachWhile(item => {
-				if (!hs.Contains(item)) return false;
-				return true;
-			});
-			return ret;
-		}
-
-		bool IsSubsetOf_Unchecked(IAnySetLike<TElem> set) {
-			if (Length < set.Length) return ForEachWhile(set.Contains);
-			else return set.ForEachWhile(this.Contains);
-		}
-		/// <summary>
-		/// Override this to provide an efficient implementation for the operation.
-		/// </summary>
-		/// <param name="other"></param>
-		/// <returns></returns>
-		protected virtual bool IsSupersetOf(TSet other) {
-			return IsSupersetOf((IEnumerable<TElem>) other);
-		}
-
-		/// <summary>
-		/// Override this to provide an efficient implementation for the operation.
-		/// </summary>
-		/// <param name="other"></param>
-		/// <returns></returns>
-		protected virtual bool IsDisjointWith(TSet other) {
-			return IsDisjointWith_Unchecked(other);
-		}
-
-		/// <summary>
-		/// Override this to provide an efficient implementation for the operation.
-		/// </summary>
-		/// <param name="other"></param>
-		/// <returns></returns>
-		protected virtual SetRelation RelatesTo(TSet other) {
-			return RelatesTo_Unchecked(other);
-		}
-
-		/// <summary>
-		/// Override this to provide an efficient implementation for the operation.
+		///     Override this to provide an efficient implementation for the operation.
 		/// </summary>
 		/// <param name="other"></param>
 		/// <returns></returns>
@@ -333,22 +352,25 @@ namespace Funq.Abstract {
 		}
 
 		TSet Union_Unchecked(IEnumerable<TElem> other) {
-			if (this.RefEquals(other)) return this;
+			if (ReferenceEquals(this, other)) return this;
 			using (var builder = BuilderFrom(this)) {
-				other.ForEach(x => { builder.Add(x); });
-				return ProviderFrom(builder);
+				builder.AddRange(other);
+				return builder.Produce();
 			}
 		}
 
 		/// <summary>
-		/// Returns the set-theoretic union between this set and a set-like collection.
+		///     Returns the set-theoretic union between this set and a set-like collection.
 		/// </summary>
 		/// <param name="other"></param>
 		/// <returns></returns>
-		public TSet Union(IEnumerable<TElem> other) {
-			if (other.RefEquals(this)) return this;
-			if (other is TSet && IsCompatibleWith((TSet)other)) return Union((TSet) other);
+		public virtual TSet Union(IEnumerable<TElem> other) {
+			other.CheckNotNull("other");
+			if (ReferenceEquals(other, this)) return this;
+			TSet set = other as TSet;
+			if (set != null && IsCompatibleWith(set)) return Union(set);
 			return Union_Unchecked(other);
 		}
 	}
+
 }

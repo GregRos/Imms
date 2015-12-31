@@ -1,39 +1,29 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Funq;
-using Funq.Collections.Common;
-using Funq.Collections.Implementation;
+using Funq.Implementation;
 
-namespace Funq.Collections
-{
+namespace Funq {
 	//This file contains method for iterating, folding, and projecting over the collection.
-	partial class FunqList<T> : IEnumerable<T>
-	{
-		public override bool ForEachBackWhile(Func<T, bool> iterator)
-		{
-			return _root.IterBackWhile(x => iterator(x));
+	partial class FunqList<T> : IEnumerable<T> {
+		IEnumerator IEnumerable.GetEnumerator() {
+			return GetEnumerator();
 		}
 
-		public override bool ForEachWhile(Func<T, bool> iterator)
-		{
-			return _root.IterWhile(x => iterator(x));
+		public override bool ForEachBackWhile(Func<T, bool> function) {
+			return Root.IterBackWhile(x => function(x));
 		}
 
+		public override bool ForEachWhile(Func<T, bool> function) {
+			return Root.IterWhile(x => function(x));
+		}
 
 		/// <summary>
-		///   Gets a new enumerator that iterates over the list.
+		///     Gets a new enumerator that iterates over the list.
 		/// </summary>
 		/// <returns> </returns>
-		protected override IEnumerator<T> GetEnumerator() {
-			return new FingerTreeIterator<T>(_root);
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return (this as IEnumerable<T>).GetEnumerator();
+		public override IEnumerator<T> GetEnumerator() {
+			return new FingerTreeIterator<T>(Root);
 		}
 	}
 }

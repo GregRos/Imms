@@ -1,6 +1,4 @@
-﻿//+
-[<AutoOpen>]
-module Funq.FSharp.Implementation.Metadata
+﻿namespace Funq.FSharp.Implementation
 open System
 open System.Collections.Generic
 open System.Collections
@@ -15,13 +13,14 @@ type IDict<'k,'v> = IDictionary<'k,'v>
 (* 
     This file contains metadata classes. 
 *)
-
-type MemberInfo with
-    member x.GetAttr<'t>(inheritance : bool) = 
-        match x.GetCustomAttributes(typeof<'t>,inheritance) with
-        | [| |] -> None
-        | [| attr |] -> Some attr
-        | _ -> failwith "Found more than one!"
+[<AutoOpen>]
+module Ext = 
+    type MemberInfo with
+        member x.GetAttr<'t>(inheritance : bool) = 
+            match x.GetCustomAttributes(typeof<'t>,inheritance) with
+            | [| |] -> None
+            | [| attr |] -> Some attr
+            | _ -> failwith "Found more than one!"
 
 ///Specifies that this property or field is part of the object's meta data, which should be printed in a report.
 [<AttributeUsage(AttributeTargets.Property ||| AttributeTargets.Field)>]
@@ -73,7 +72,7 @@ and InvalidMetadataNameException private (message) =
     inherit MetadataException(message)
     new (container : MetaContainer, name : string, ?expected_type : Type) = 
         let type_name = expected_type |> Option.map (fun t -> t.PrettyName())
-        let all_fields = container.AsMetaSeq |> Seq.print ", "
+        let all_fields = container.AsMetaSeq |> String.join ", "
         let message = 
             match type_name with
             | Some type_name -> sprintf "A metadata field with the name '%s' (expected type '%s') wasn't found in this container. Existing field names: %s." name type_name all_fields
@@ -96,7 +95,8 @@ and[<StructuredFormatDisplay("{AsString}")>]
     do 
         x.LoadReflectionMetas()
         propCache.[myType] |> List.map (fun prop -> ReflectionMeta(prop, x) :> AbstractMeta) |> List.iter (x.AddMeta)
-    new (?metas : AbstractMeta seq) = MetaContainer(metas |> Option.orValue (Seq.empty) |> Seq.map (fun meta -> meta.Name, meta) |> Dict.ofSeq)
+    new() = MetaContainer(Dict.empty)
+    new (metas : AbstractMeta seq) = MetaContainer(metas |> Seq.map (fun meta -> meta.Name, meta) |> Dict.ofSeq)
     member private x.LoadReflectionMetas() = 
         if not <| propCache.ContainsKey myType then
             let props = 
@@ -145,7 +145,7 @@ module MetaOps =
         for meta in Seq.append (container1.AsMetaSeq) (container2.AsMetaSeq) do
             container12.AddMeta meta
         container12
-    let (<+) (container : #MetaContainer) meta =
+    let (<+.) (container : #MetaContainer) meta =
         container.AddMeta meta
         container
 [<Extension>]
@@ -171,14 +171,14 @@ type ICloneableObject =
 
 [<AutoOpen>]
 [<Extension>]
-type Ext private() = 
+type Ext2 private() = 
     [<Extension>]
     static member Clone (sd : 'a :> ICloneableObject) = 
         let m = sd.GetType().GetMethod("MemberwiseClone", BindingFlags.NonPublic ||| BindingFlags.Instance)
         m.Invoke(sd, null) :?> 'a
     [<Extension>]
     static member With (sd : 'a :> ICloneableObject, f : 'a -> unit) = 
-        let clone = Ext.Clone(sd)
+        let clone = Ext2.Clone(sd)
         f clone
         clone
 

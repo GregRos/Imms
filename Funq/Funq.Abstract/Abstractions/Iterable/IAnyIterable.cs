@@ -1,29 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Funq.Abstract
-{
+namespace Funq.Abstract {
 
 	/// <summary>
-	/// Used for abstracting over any Iterable collection type when the concrete type is unknown.
-	/// Should not be implemented in user code.
+	///     Used for abstracting over any Iterable collection type when the concrete type is unknown.
+	///     Should not be implemented in user code.
 	/// </summary>
 	/// <typeparam name="TElem"></typeparam>
 	public interface IAnyIterable<out TElem> : IEnumerable<TElem> {
 
 		/// <summary>
-		///   Returns the number of elements in the collection.
+		///     Returns the number of elements in the collection.
 		/// </summary>
-		int Length
-		{
-			get;
-		}
+		int Length { get; }
 
 		/// <summary>
-		///   Applies the specified delegate on every item in the collection, in the default ordering.
+		///     Applies the specified delegate on every item in the collection, in the default ordering, until the function returns false
 		/// </summary>
-		/// <param name="iterator"> The iterator. </param>
+		/// <param name="function"> The function. </param>
 		/// <returns> </returns>
-		bool ForEachWhile(Func<TElem, bool> iterator);
+		bool ForEachWhile(Func<TElem, bool> function);
 	}
 }

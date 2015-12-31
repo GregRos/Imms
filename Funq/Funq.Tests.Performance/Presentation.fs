@@ -9,6 +9,7 @@ open Funq.Tests
 open System
 open System.IO
 open LINQtoCSV
+open ExtraFunctional
 [<AutoOpen>]
 module Exts = 
     type Meta with

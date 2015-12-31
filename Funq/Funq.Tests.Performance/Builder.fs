@@ -2,6 +2,7 @@
 open Funq.FSharp.Implementation
 open Funq.Tests.Performance
 open Funq.Tests
+open ExtraFunctional
 ///An object that binds typed tests to concrete targets and collects fully bound tests ready for execution.
 type internal Builder<'s>(bound : ErasedTest list, targets : DataStructure<'s> list, tests : Test<'s> list) = 
     
@@ -41,7 +42,7 @@ type internal Builder<'s>(bound : ErasedTest list, targets : DataStructure<'s> l
         let erasedTests = 
             x.Targets
             |> List.cross x.Tests
-            |> List.mapPairs (fun test targ -> test.Bind targ)
+            |> List.map (fun (test,targ)-> test.Bind targ)
         Builder<'next>(x.Bound @ erasedTests, [], [])
     
     ///Returns a new builder initialized with blank caches.
@@ -91,12 +92,3 @@ module internal Builder =
 
     let inline cross partials args = 
         Seq.cross partials args |> Seq.map (fun (test, args) -> test args) |> Seq.toList
-
-[<AutoOpen>]
-module internal BuilderOperators = 
-    let inline (<<+) builder test = builder |> Builder.addTest test
-    let (<<++) builder testGroup =
-        builder |> Builder.addTests testGroup
-
-    let inline ( *<< ) partials args = 
-        List.cross partials args |> List.mapPairs (fun f args -> f args)

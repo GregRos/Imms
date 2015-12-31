@@ -3,8 +3,13 @@
 module Funq.FSharp.Patterns
 open Funq
 open Funq.FSharp.Implementation
+let (|FunqSome|FunqNone|) (optional : Funq.Optional<'T>) = 
+    if optional.IsSome then 
+        FunqSome(optional.Value)
+    else
+        FunqNone
 ///Decomposes a collection by 1 element, from the end. 
-let inline (|Last|_|) o = 
+let inline (|Last1|_|) o = 
     if o |>Ops.isEmpty then
         None
     else
@@ -26,7 +31,7 @@ let inline (|Last2|_|) o =
 ///Decomposes a collection by 3 elements, from the end.
 let inline (|Last3|_|) o = 
     match o with
-    | Last(Last2(tail, item1,item2),item3) -> Some(tail, item1,item2,item3)
+    | Last1(Last2(tail, item1,item2),item3) -> Some(tail, item1,item2,item3)
     | _ -> None
 ///Decomposes a collection by 4 elements, from the end.
 let inline (|Last4|_|) o = 
@@ -34,7 +39,7 @@ let inline (|Last4|_|) o =
     | Last2(Last2(tail, item1, item2), item3, item4) -> Some(tail, item1, item2, item3, item4)
     | _ -> None
 ///Decomposes a collection by 1 element, from the start.
-let inline (|First|_|) o =
+let inline (|First1|_|) o =
     if o |>Ops.isEmpty then
         None
     else
@@ -55,7 +60,7 @@ let inline (|First2|_|) o =
 ///Decomposes a collection by 3 elements, from the start.
 let inline (|First3|_|) o =
     match o with
-    | First2(item1, item2, First(item3, rest)) -> Some(item1, item2, item3, rest)
+    | First2(item1, item2, First1(item3, rest)) -> Some(item1, item2, item3, rest)
     | _ -> None
 ///Decomposes a collection by 4 elements, from the start.
 let inline (|First4|_|) o =
@@ -73,7 +78,7 @@ let inline (|Nil|_|) o =
 ///Decomposes a collection by two elements, one from each end.
 let inline (|Mid|_|) o = 
     match o with
-    | First(first, Last(mid, last)) -> Some(first, mid, last)
+    | First1(first, Last1(mid, last)) -> Some(first, mid, last)
     | _ -> None
 
 ///Decomposes a collection by four elements, two from each end.

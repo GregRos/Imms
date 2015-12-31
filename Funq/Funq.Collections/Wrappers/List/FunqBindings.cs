@@ -1,70 +1,65 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Funq.Abstract;
-using Funq.Collections.Common;
-using Funq;
-using Funq.Collections.Implementation;
+using Funq.Implementation;
 
-namespace Funq.Collections
-{
-	public partial class FunqList<T>
-	{
-		internal class Builder : IterableBuilder<T>
-		{
-			private FingerTree<T>.FTree<Leaf<T>> _inner;
-			private Lineage _lineage;
+namespace Funq {
+	public partial class FunqList<T> {
+		protected override ISequentialBuilder<T, FunqList<T>> EmptyBuilder {
+			get { return new Builder(); }
+		}
+
+		protected override ISequentialBuilder<T, FunqList<T>> BuilderFrom(FunqList<T> collection) {
+			return new Builder(collection);
+		}
+
+		protected override T GetItem(int index) {
+			return Root[index];
+		}
+
+		class Builder : ISequentialBuilder<T, FunqList<T>> {
+			FingerTree<T>.FTree<Leaf<T>> _inner;
+			Lineage _lineage;
 
 			public Builder()
-				: this(FunqList<T>.Empty)
-			{
-			}
+				: this(Empty) {}
 
-			public Builder(FunqList<T> inner)
-			{
-				this._inner = inner._root;
+			public Builder(FunqList<T> inner) {
+				_inner = inner.Root;
 				_lineage = Lineage.Mutable();
 			}
 
+			public FunqList<T> Produce() {
+				_lineage = Lineage.Mutable();
+				return _inner.Wrap();
+			}
 
-			public override object Result
-			{
-				get
-				{
-					_lineage = Lineage.Mutable();
-					return _inner.Wrap();
+			public bool Add(T item) {
+				_inner = _inner.AddLast(item, _lineage);
+				return true;
+			}
+
+			public void AddRange(IEnumerable<T> items) {
+				items.CheckNotNull("items");
+				var list = items as FunqList<T>;
+				if (list != null) {
+					_inner = _inner.AddLastList(list.Root, _lineage);
+				} else {
+					int len;
+					var arr = items.ToArrayFast(out len);
+					int i = 0;
+					var tree = FingerTree<T>.FTree<Leaf<T>>.Construct(arr, ref i, len, _lineage);
+					_inner = _inner.AddLastList(tree, _lineage);
 				}
 			}
 
-			protected override void add(T item)
-			{
-				_inner = _inner.AddLast(item, _lineage);
+			public int Length {
+				get { return _inner.Measure; }
 			}
-		}
 
-		protected internal override IterableBuilder<T> EmptyBuilder
-		{
-			get
-			{
-				return new Builder();
+
+			public void Dispose() {
+				_lineage = Lineage.Mutable();
 			}
-		}
-
-		protected internal override IterableBuilder<T> BuilderFrom(FunqList<T> provider)
-		{
-			return new Builder(provider);
-		}
-
-		protected internal override FunqList<T> ProviderFrom(IterableBuilder<T> builder)
-		{
-			return (FunqList<T>) builder.Result;
-		}
-
-		protected override T GetItem(int index)
-		{
-			return _root[index];
 		}
 	}
 }

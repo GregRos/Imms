@@ -5,12 +5,16 @@ open Funq.Collections
 open Funq.FSharp.Operators
 open System.Reflection
 open System
+open Funq
+open Funq.FSharp
+open Funq.FSharp.Implementation
 
 let tryThis<'elem> (v : FunqList<'elem>) (x : 'elem) = v <+ x
    
+let test f = FunqList.empty.All f
+
 [<EntryPoint>]
 let main argv = 
-
-  
-    printfn "%A" argv
+    let tuple = (1, "hi", 3)
+    printfn "%A" tuple
     0 // return an integer exit code

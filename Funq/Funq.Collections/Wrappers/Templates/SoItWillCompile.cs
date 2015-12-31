@@ -19,26 +19,16 @@ public interface __Parent__
 
 partial class __ListLikeClass__<T>
 {
-	protected internal override IterableBuilder<T> EmptyBuilder
-	{
-		get
-		{
-			throw new NotImplementedException();
-		}
+	protected override ISequentialBuilder<T, __ListLikeClass__<T>> EmptyBuilder {
+		get;
 	}
 
-	protected internal override __ListLikeClass__<T> ProviderFrom(IterableBuilder<T> builder)
-	{
+
+	protected override ISequentialBuilder<T, __ListLikeClass__<T>> BuilderFrom(__ListLikeClass__<T> collection) {
 		throw new NotImplementedException();
 	}
 
-	protected internal override IterableBuilder<T> BuilderFrom(__ListLikeClass__<T> provider)
-	{
-		throw new NotImplementedException();
-	}
-
-	protected override IEnumerator<T> GetEnumerator()
-	{
+	public override IEnumerator<T> GetEnumerator() {
 		throw new NotImplementedException();
 	}
 }
@@ -46,53 +36,39 @@ partial class __ListLikeClass__<T>
 
 partial class __OrderedSetLikeClass__<T>
 {
-	private __OrderedSetLikeClass__(__HandlerObject__<T> ph)
-	{
-
+		private static __OrderedSetLikeClass__<T> Empty(__HandlerObject__<T> handler) {
+		return null;
 	}
 
-	protected override bool IsCompatibleWith(__OrderedSetLikeClass__<T> other)
-	{
+	private __HandlerObject__<T> __CurrentHandler__ {
+		get;
+	} 
+
+	protected override ISetBuilder<T, __OrderedSetLikeClass__<T>> EmptyBuilder {
+		get;
+	}
+
+	protected override ISetBuilder<T, __OrderedSetLikeClass__<T>> BuilderFrom(__OrderedSetLikeClass__<T> collection) {
 		throw new NotImplementedException();
 	}
 
-	public override bool Contains(T item)
-	{
-		throw new NotImplementedException();
-	}
-	private static __HandlerObject__<T> Default
-	{
-		get
-		{
-			return null;
-		}
-	}
-
-	private static __OrderedSetLikeClass__<T> Empty(__HandlerObject__<T> ph) {
-		return new __OrderedSetLikeClass__<T>(ph ?? Default);
-	}
-
-
-	protected internal override SetBuilder<T> EmptyBuilder
-	{
-		get
-		{
-			throw new NotImplementedException();
-		}
-	}
-
-	protected internal override SetBuilder<T> BuilderFrom(__OrderedSetLikeClass__<T> provider)
-	{
+	public override IEnumerator<T> GetEnumerator() {
 		throw new NotImplementedException();
 	}
 
-	protected override IEnumerator<T> GetEnumerator()
-	{
+	public override __OrderedSetLikeClass__<T> Add(T item) {
 		throw new NotImplementedException();
 	}
 
-	protected internal override __OrderedSetLikeClass__<T> ProviderFrom(SetBuilder<T> builder)
-	{
+	public override __OrderedSetLikeClass__<T> Remove(T item) {
+		throw new NotImplementedException();
+	}
+
+	protected override Optional<T> TryGet(T item) {
+		throw new NotImplementedException();
+	}
+
+	protected override bool IsCompatibleWith(__OrderedSetLikeClass__<T> other) {
 		throw new NotImplementedException();
 	}
 }
@@ -100,116 +76,77 @@ partial class __OrderedSetLikeClass__<T>
 
 partial class __SetLikeClass__<T>
 {
-	private __SetLikeClass__(__HandlerObject__<T> ph)
-	{
+	private __HandlerObject__<T> __CurrentHandler__ {
+		get;
+	} 
 
+	private static __SetLikeClass__<T> Empty(__HandlerObject__<T> handler) {
+		return null;
+	}
+	protected override ISetBuilder<T, __SetLikeClass__<T>> EmptyBuilder {
+		get;
 	}
 
-	protected override bool IsCompatibleWith(__SetLikeClass__<T> other)
-	{
-		throw new NotImplementedException();
-	}
-	public override bool Contains(T item)
-	{
-		throw new NotImplementedException();
-	}
-	private static __HandlerObject__<T> Default
-	{
-		get
-		{
-			return null;
-		}
-	}
-
-	private static __SetLikeClass__<T> Empty(__HandlerObject__<T> ph)
-	{
-		return new __SetLikeClass__<T>(ph ?? Default);
-	}
-
-
-	protected internal override SetBuilder<T> EmptyBuilder
-	{
-		get
-		{
-			throw new NotImplementedException();
-		}
-	}
-
-
-	protected internal override SetBuilder<T> BuilderFrom(__SetLikeClass__<T> provider)
-	{
+	protected override ISetBuilder<T, __SetLikeClass__<T>> BuilderFrom(__SetLikeClass__<T> collection) {
 		throw new NotImplementedException();
 	}
 
-	protected override IEnumerator<T> GetEnumerator()
-	{
+	public override IEnumerator<T> GetEnumerator() {
 		throw new NotImplementedException();
 	}
 
-	protected internal override __SetLikeClass__<T> ProviderFrom(SetBuilder<T> builder)
-	{
+	public override __SetLikeClass__<T> Add(T item) {
+		throw new NotImplementedException();
+	}
+
+	public override __SetLikeClass__<T> Remove(T item) {
+		throw new NotImplementedException();
+	}
+
+	protected override Optional<T> TryGet(T item) {
+		throw new NotImplementedException();
+	}
+
+	protected override bool IsCompatibleWith(__SetLikeClass__<T> other) {
 		throw new NotImplementedException();
 	}
 }
 
 partial class __MapLikeClass__<TKey, TValue>
 {
-
-	private __MapLikeClass__(__HandlerObject__<TKey> ph)
-	{
+	protected override IMapBuilder<TKey, TValue, __MapLikeClass__<TKey, TValue>> EmptyBuilder {
+		get;
 	}
 
-	protected override bool IsCompatibleWith(__MapLikeClass__<TKey, TValue> other)
-	{
+	private __HandlerObject__<TKey> __CurrentHandler__ {
+		get;
+	}
+
+	private static __MapLikeClass__<TKey, TValue> Empty(__HandlerObject__<TKey> handler) {
+		return null;
+	}
+
+	protected override IMapBuilder<TKey, TValue, __MapLikeClass__<TKey, TValue>> BuilderFrom(__MapLikeClass__<TKey, TValue> collection) {
 		throw new NotImplementedException();
 	}
 
-	private static __MapLikeClass__<TKey, TValue> Empty(__HandlerObject__<TKey> ph)
-	{
-		return new __MapLikeClass__<TKey, TValue>(ph ?? DefaultHandler);
-	}
-
-	private static __HandlerObject__<TKey> DefaultHandler
-	{
-		get
-		{
-			return null;
-		}
-	}
-
-	private __HandlerObject__<TKey> __CurrentHandler__
-	{
-		get
-		{
-			return null;
-		}
-	}
-
-	protected internal override MapBuilder<TKey, TValue> EmptyBuilder
-	{
-		get
-		{
-			throw new NotImplementedException();
-		}
-	}
-
-	protected internal override MapBuilder<TKey, TValue> BuilderFrom(__MapLikeClass__<TKey, TValue> provider)
-	{
+	public override IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() {
 		throw new NotImplementedException();
 	}
 
-	protected override IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
-	{
+	protected override Optional<KeyValuePair<TKey, TValue>> TryGetKvp(TKey key) {
 		throw new NotImplementedException();
 	}
 
-	protected internal override __MapLikeClass__<TKey, TValue> ProviderFrom(MapBuilder<TKey, TValue> builder)
-	{
+	protected override bool IsCompatibleWith(__MapLikeClass__<TKey, TValue> other) {
 		throw new NotImplementedException();
 	}
 
-	public override Option<TValue> TryGet(TKey k)
-	{
+	protected override __MapLikeClass__<TKey, TValue> Set(TKey key, TValue value, OverwriteBehavior behavior) {
+		throw new NotImplementedException();
+	}
+
+	public override __MapLikeClass__<TKey, TValue> Remove(TKey key) {
 		throw new NotImplementedException();
 	}
 }
@@ -217,63 +154,40 @@ partial class __MapLikeClass__<TKey, TValue>
 
 partial class __OrderedMapLikeClass__<TKey, TValue>
 {
-
-	private __OrderedMapLikeClass__(__HandlerObject__<TKey> ph)
-	{
+	protected override IMapBuilder<TKey, TValue, __OrderedMapLikeClass__<TKey, TValue>> EmptyBuilder {
+		get;
 	}
 
-	protected override bool IsCompatibleWith(__OrderedMapLikeClass__<TKey, TValue> other)
-	{
+	private __HandlerObject__<TKey> __CurrentHandler__ {
+		get;
+	} 
+
+	private static __OrderedMapLikeClass__<TKey, TValue> Empty(__HandlerObject__<TKey> handler) {
+		return null;
+	}
+
+
+	protected override IMapBuilder<TKey, TValue, __OrderedMapLikeClass__<TKey, TValue>> BuilderFrom(__OrderedMapLikeClass__<TKey, TValue> collection) {
 		throw new NotImplementedException();
 	}
 
-
-	private static __OrderedMapLikeClass__<TKey, TValue> Empty(__HandlerObject__<TKey> ph)
-	{
-		return new __OrderedMapLikeClass__<TKey, TValue>(ph ?? DefaultHandler);
-	}
-
-	private static __HandlerObject__<TKey> DefaultHandler
-	{
-		get
-		{
-			return null;
-		}
-	}
-
-	private __HandlerObject__<TKey> __CurrentHandler__
-	{
-		get
-		{
-			return null;
-		}
-	}
-
-	protected internal override MapBuilder<TKey, TValue> EmptyBuilder
-	{
-		get
-		{
-			throw new NotImplementedException();
-		}
-	}
-
-	protected internal override MapBuilder<TKey, TValue> BuilderFrom(__OrderedMapLikeClass__<TKey, TValue> provider)
-	{
+	public override IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() {
 		throw new NotImplementedException();
 	}
 
-	protected override IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
-	{
+	protected override Optional<KeyValuePair<TKey, TValue>> TryGetKvp(TKey key) {
 		throw new NotImplementedException();
 	}
 
-	protected internal override __OrderedMapLikeClass__<TKey, TValue> ProviderFrom(MapBuilder<TKey, TValue> builder)
-	{
+	protected override bool IsCompatibleWith(__OrderedMapLikeClass__<TKey, TValue> other) {
 		throw new NotImplementedException();
 	}
 
-	public override Option<TValue> TryGet(TKey k)
-	{
+	protected override __OrderedMapLikeClass__<TKey, TValue> Set(TKey key, TValue value, OverwriteBehavior behavior) {
+		throw new NotImplementedException();
+	}
+
+	public override __OrderedMapLikeClass__<TKey, TValue> Remove(TKey key) {
 		throw new NotImplementedException();
 	}
 }

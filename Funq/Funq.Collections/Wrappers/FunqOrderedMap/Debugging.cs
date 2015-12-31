@@ -1,44 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Funq.Abstract;
 
-namespace Funq.Collections
-{
+namespace Funq {
 	[DebuggerDisplay("{DebuggerDisplay,nq}")]
-	[DebuggerTypeProxy(typeof(FunqOrderedMap<,>.MapDebugView))]
-	partial class FunqOrderedMap<TKey, TValue>
-	{
-		private class MapDebugView 
-		{
-			public MapDebugView(FunqOrderedMap<TKey, TValue> map)
-			{
+	[DebuggerTypeProxy(typeof (FunqOrderedMap<,>.MapDebugView))]
+	partial class FunqOrderedMap<TKey, TValue> {
+		class MapDebugView {
+			public MapDebugView(FunqOrderedMap<TKey, TValue> map) {
 				zIterableView = new IterableDebugView(map);
 			}
 
-			public KeyValuePair<TKey, TValue> MaxItem
-			{
-				get
-				{
-					return zIterableView.Object.MaxItem;
-				}
+			public KeyValuePair<TKey, TValue> MaxItem {
+				get { return zIterableView.Object.MaxItem; }
 			}
 
-			public KeyValuePair<TKey, TValue> MinItem
-			{
-				get
-				{
-					return zIterableView.Object.MinItem;
-				}
+			public KeyValuePair<TKey, TValue> MinItem {
+				get { return zIterableView.Object.MinItem; }
 			}
 
 			[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-			public IterableDebugView zIterableView
-			{
-				get; set;
-			}
+			public IterableDebugView zIterableView { get; set; }
+		}
+
+		protected override IMapBuilder<TKey, TValue, FunqOrderedMap<TKey, TValue>> BuilderFrom(FunqOrderedMap<TKey, TValue> collection) {
+			return new Builder(collection);
 		}
 	}
 }

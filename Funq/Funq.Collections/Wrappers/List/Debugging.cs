@@ -1,36 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 
-namespace Funq.Collections
-{
+namespace Funq {
+
 	[DebuggerDisplay("{DebuggerDisplay,nq}")]
 	[DebuggerTypeProxy(typeof (FunqList<>.ListDebugView))]
-	public partial class FunqList<T>
-	{
-		private class ListDebugView
-		{
-			public ListDebugView(FunqList<T> list) 
-			{
-				View = new SequentialDebugView(list);
-			}
-
-			[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-			public SequentialDebugView View
-			{
-				get;
-				set;
+	public partial class FunqList<T> {
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public IEnumerable<T> AsSeq {
+			get {
+				return this;
 			}
 		}
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public IEnumerable<T> AsSeq
-		{
-			get
-			{
-				return this;
+
+		class ListDebugView {
+			private readonly FunqList<T> _x;
+
+			public ListDebugView(FunqList<T> x) {
+				_x = x;
+
+			}
+
+			public SequentialDebugView DebugView {
+				get {
+					return new SequentialDebugView(_x);
+				}
 			}
 		}
 	}

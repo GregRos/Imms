@@ -1,5 +1,6 @@
 ﻿module internal Funq.Tests.Performance.Scripts
 open Funq.Tests.Performance
+open ExtraFunctional
 open Funq.Tests
 do()
 open Funq.FSharp.Implementation
@@ -163,7 +164,7 @@ let sequential(args : BaseArgs) =
     let builder = 
          [AddLastRange] |> List.cross_apply1 data_iters |> builder.AddTests
     let builder = 
-        [AddLastRange; AddFirstRange] 
+        [AddLastRange] 
         |> List.cross_apply1 [bulkIters, Data.FSharpx.Vector dataSourceInit] 
         |> List.chain_iter (fun test -> test.Name <- test.Name + " (concat)")
         |> builder.AddTests
@@ -230,7 +231,7 @@ let setLike(args : AdvancedArgs<_>) = //(set1, set2, iters, src1, src2) =
     let dataSourceInit = (set2,src2)
     let targetInit = (set1,src1)
     let removeRatio = args.RemoveRatio
-    let arr = Data.Basic.Array targetInit
+    let arr = Data.Basic.Array dataSourceInit
     let inline standard_tests makeSet= 
         let a = 
             [UnionWithSet; IntersectWithSet; 

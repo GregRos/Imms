@@ -18,8 +18,6 @@ However, Funq has several distinguishing and important features that make it dif
 
 Currently, all library assemblies require .NET Framework 4.0 Client Profile, and all test assemblies require .NET Framework 4.5.1. The F# libraries require F# 3.0.
 
-
-
 ## Current Status
 The collections are in an early version right now, and not fit for production use. They're definitely usable and the core functionality is stable, though some things like edge cases and error messages probably need to be worked out.
 

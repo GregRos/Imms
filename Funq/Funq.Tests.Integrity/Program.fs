@@ -4,12 +4,11 @@ module Funq.Tests.Integrity.Main
 open Funq.FSharp.Implementation
 open System.CodeDom.Compiler
 open System
+open System.Linq
 open System.IO
-type String with
-    member str.ContainsWords (words : string) = 
-        let split = words.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
-        split |> Seq.forall (fun s -> String.contains_insensitive s str)
-
+open ExtraFunctional
+open Funq.FSharp.Operators
+open Funq
 type MultiTextWriter(writers : TextWriter list) = 
     inherit TextWriter()
     member x.F = 4
@@ -25,23 +24,28 @@ let seqTests initial parameter =
     let targets = [Target.Funq.List initial; Target.Funq.Vector initial]
     let reference = Target.Sys.List initial
     let tests = 
-        [x.add_remove_first;
-         x.insert_range; 
-         x.insert; 
-         x.update;
-         x.remove_add
-         x.add_first_range;
-         x.complex_add_last_take_and_indexing;
-         x.complex_add_and_take_and_indexing;
-         x.insert_remove_update;
-         x.insert_range_concat;
-         x.concat;
-         x.slices;
-         x.add_first_last;
-         x.complex_add_remove_last;
-         x.update;
-         x.get_index;
-         x.insert_range]
+        [x.Add_remove_first;
+         x.Insert_range; 
+         x.Insert; 
+         x.Update;
+         x.Remove_add_last
+         x.Add_first_range;
+         x.Complex_add_last_slices_indexing;
+         x.Complex_add_first_last_take_slices_indexing;
+         x.Add_remove_last_first_limited;
+         x.Insert_remove_update;
+         x.Slices;
+         x.Take;
+         x.Skip;
+         x.Find;
+         x.Get_index;
+         x.Add_first;
+         x.Add_remove_last_first_limited;
+         x.Complex_add_remove_first_last;
+         x.Add_first_last;
+         x.Complex_add_remove_last;
+         x.Reverse;
+         x.Insert_range]
         |> List.apply1 parameter
         |> Test.bindAll reference targets
     tests
@@ -53,7 +57,7 @@ let setTests initial parameter dataSet=
     let targets = [Target.Funq.Set generator; Target.Funq.OrderedSet generator]
     let reference = Target.Sys.OrderedSet generator
     let tests = 
-        [x.add_remove; x.difference; x.except; x.intersection; x.union; x.many_operations; x.add_remove_range]
+        [x.Add_remove; x.Difference; x.Except; x.Intersection; x.Union; x.Set_relation; x.Find]
         |> List.apply1 parameter
         |> Test.bindAll reference targets
     tests
@@ -65,26 +69,31 @@ let mapTests initial parameter dataSet =
     let targets = [Target.Funq.Map generator; Target.Funq.OrderedMap generator]
     let reference = Target.Sys.OrderedMap generator
     let tests = 
-        [x.add_remove;x.add_remove_range; x.add_range; x.remove_range]
+        [x.Add; x.Remove; x.Add_range; x.Remove_range; x.Except; x.Merge; x.Join; x.Difference; x.Add_remove; x.Find]
         |> List.apply1 parameter
         |> Test.bindAll reference targets
     tests
 
+let f a b = 0
+let g a b = 1
+
 [<EntryPoint>]
 let main argv = 
-    let x = SeqTests()
+
+    let fl = FunqList<_>.Empty <+ 1
+    let s = fl.Select(fun x -> x + 1)
+    let dsf = s.First
     let fs = File.OpenWrite("log.txt")
     let writer = Console.Out
-   
     let allTests initial param ds = 
         seqTests initial param  @ setTests initial param ds @ mapTests initial param ds
     let r = Random()
     let mutable tests = []
     for i = 0 to 0 do
-        let initial, param, ds = r.Next(0, 3000), r.Next(500, 2000), r.Next( 5000, 10000)
+        let initial, param, ds = r.Next(0, 10000), r.Next(50000, 100000), r.Next( 30000, 40000)
         printfn "Initial: %d, Param: %d, ds: %d" initial param ds
         tests <- allTests initial param ds @ tests
-    let tests = tests |> List.filter (fun t -> (t.Test.Kind = SetLike || t.Test.Kind = MapLike))
+    let tests = tests |> List.filter (fun t -> t.Test.Kind = ListLike && t.Test.Name |> String.containsAll false ["update"; "slice"])
     tests |> Test.runAll writer |> Report.byTest writer 
     Console.Read() |> ignore
     fs.Flush()

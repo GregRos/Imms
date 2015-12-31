@@ -2,7 +2,7 @@
 <#@ output extension=".cs" #>
 <#@ include file="$(ProjectDir)Wrappers\Templates\Reusable.ttinclude" #>
 
-namespace Funq.Collections
+namespace Funq
 {
 	<# this.PushIndent("\t");#>
 	<#= ParameterizedTemplate.ListLikeClass.Process(this.Host, ListLikeClass => "FunqVector")#>

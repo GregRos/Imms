@@ -1,19 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9FA6751B-0904-4E51-A06D-D9540E1AF0AB}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Funq.Abstract", "Funq.Abstract\Funq.Abstract.csproj", "{D971396E-7A09-40A5-BDA1-B28FC734C73C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Funq.Collections", "Funq.Collections\Funq.Collections.csproj", "{7AF97CC1-4B4C-4112-82AF-BF9FC4B16407}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Funq", "Funq.Collections\Funq.csproj", "{7AF97CC1-4B4C-4112-82AF-BF9FC4B16407}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Funq.FSharp", "Funq.FSharp\Funq.FSharp.fsproj", "{4AE0206D-527D-43D7-9DCB-E88A8E1D47B6}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Funq.Tests.Performance", "Funq.Tests.Performance\Funq.Tests.Performance.fsproj", "{7EC95555-CA5B-4E87-A8DA-525FA4E01FAC}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Funq.Tests.Unit", "Funq.Tests.Unit\Funq.Tests.Unit.fsproj", "{C67469A7-0963-4F60-9D34-671BB0A7B735}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Funq.Tests.Integrity", "Funq.Tests.Integrity\Funq.Tests.Integrity.fsproj", "{E7D95FA6-DFC0-45F8-A549-4B917F1B5D49}"
 EndProject
@@ -24,7 +20,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{F3CDA6
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ExtraFunctional", "..\..\ExtraFunctional\ExtraFunctional\ExtraFunctional.fsproj", "{D0648CE4-2886-4E09-964C-C4E675DDA3C3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtraFunctional.Templates", "..\..\ExtraFunctional\ExtraFunctional.Templates\ExtraFunctional.Templates.csproj", "{8E19E64B-EB5C-4042-B419-C1A9E9A05997}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{FF0AD0C9-1BDB-43DF-9362-DB80BA7CDBDF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FSharp", "FSharp", "{2797B070-F9A5-4644-B542-94017868B619}"
+EndProject
 Global
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -46,19 +53,27 @@ Global
 		{7EC95555-CA5B-4E87-A8DA-525FA4E01FAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7EC95555-CA5B-4E87-A8DA-525FA4E01FAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7EC95555-CA5B-4E87-A8DA-525FA4E01FAC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C67469A7-0963-4F60-9D34-671BB0A7B735}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C67469A7-0963-4F60-9D34-671BB0A7B735}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C67469A7-0963-4F60-9D34-671BB0A7B735}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C67469A7-0963-4F60-9D34-671BB0A7B735}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E7D95FA6-DFC0-45F8-A549-4B917F1B5D49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E7D95FA6-DFC0-45F8-A549-4B917F1B5D49}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E7D95FA6-DFC0-45F8-A549-4B917F1B5D49}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E7D95FA6-DFC0-45F8-A549-4B917F1B5D49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0648CE4-2886-4E09-964C-C4E675DDA3C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0648CE4-2886-4E09-964C-C4E675DDA3C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0648CE4-2886-4E09-964C-C4E675DDA3C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0648CE4-2886-4E09-964C-C4E675DDA3C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E19E64B-EB5C-4042-B419-C1A9E9A05997}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E19E64B-EB5C-4042-B419-C1A9E9A05997}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E19E64B-EB5C-4042-B419-C1A9E9A05997}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E19E64B-EB5C-4042-B419-C1A9E9A05997}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
+	GlobalSection(NestedProjects) = preSolution
+		{4AE0206D-527D-43D7-9DCB-E88A8E1D47B6} = {2797B070-F9A5-4644-B542-94017868B619}
+		{7EC95555-CA5B-4E87-A8DA-525FA4E01FAC} = {FF0AD0C9-1BDB-43DF-9362-DB80BA7CDBDF}
+		{E7D95FA6-DFC0-45F8-A549-4B917F1B5D49} = {FF0AD0C9-1BDB-43DF-9362-DB80BA7CDBDF}
+		{D0648CE4-2886-4E09-964C-C4E675DDA3C3} = {2797B070-F9A5-4644-B542-94017868B619}
+		{8E19E64B-EB5C-4042-B419-C1A9E9A05997} = {2797B070-F9A5-4644-B542-94017868B619}
 	EndGlobalSection
 EndGlobal

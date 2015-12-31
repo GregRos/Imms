@@ -21,7 +21,6 @@ public partial class __MapLikeClass__<TKey,TValue> : AbstractMap<TKey,TValue,__M
 	/// <returns></returns>
 	public __MapLikeClass__<TRKey,TRValue> Select<TRKey,TRValue>(Func<KeyValuePair<TKey,TValue>, KeyValuePair<TRKey,TRValue>> selector, __HandlerObject__<TRKey> handler = null)
 	{
-		if (selector == null) throw Errors.Is_null;
 		return base.Select(GetPrototype<TRKey,TRValue>(handler), selector);
 	}
 
@@ -33,9 +32,8 @@ public partial class __MapLikeClass__<TKey,TValue> : AbstractMap<TKey,TValue,__M
 	/// <param name="selector">The selector.</param>
 	/// <param name="handler">A new equality or comparison handler for constructing the resulting map.</param>
 	/// <returns></returns>
-	public __MapLikeClass__<TRKey, TRValue> Select<TRKey, TRValue>(Func<KeyValuePair<TKey, TValue>, Option<KeyValuePair<TRKey, TRValue>>> selector, __HandlerObject__<TRKey> handler = null)
+	public __MapLikeClass__<TRKey, TRValue> Select<TRKey, TRValue>(Func<KeyValuePair<TKey, TValue>, Optional<KeyValuePair<TRKey, TRValue>>> selector, __HandlerObject__<TRKey> handler = null)
 	{
-		if (selector == null) throw Errors.Is_null;
 		return base.Choose(this.GetPrototype<TRKey,TRValue>(handler), selector);
 	}
 
@@ -49,7 +47,6 @@ public partial class __MapLikeClass__<TKey,TValue> : AbstractMap<TKey,TValue,__M
 	/// <returns></returns>
 	public __MapLikeClass__<TRKey,TRValue> Select<TRKey,TRValue>(Func<TKey, TValue, KeyValuePair<TRKey,TRValue>> selector, __HandlerObject__<TRKey> handler = null)
 	{
-		if (selector == null) throw Errors.Is_null;
 		return base.Select(this.GetPrototype<TRKey, TRValue>(handler), kvp => selector(kvp.Key, kvp.Value));
 	}
 
@@ -59,15 +56,12 @@ public partial class __MapLikeClass__<TKey,TValue> : AbstractMap<TKey,TValue,__M
 	/// <typeparam name="TRValue">The type of the R value.</typeparam>
 	/// <param name="selector">The selector.</param>
 	/// <returns></returns>
-	public __MapLikeClass__<TKey,TRValue> SelectValues<TRValue>(Func<TKey,TValue,Option<TRValue>> selector)
-	{
-		if (selector == null) throw Errors.Is_null;
-		return base.Choose(GetPrototype<TKey, TRValue>(__CurrentHandler__), kvp =>
-			                                                {
-				                                                var maybe = selector(kvp.Key, kvp.Value);
-																				if (maybe.IsSome) return Kvp.Of(kvp.Key, maybe.Value).AsSome();
-				                                                return Option.None;
-			                                                });
+	public __MapLikeClass__<TKey,TRValue> SelectValues<TRValue>(Func<TKey,TValue,Optional<TRValue>> selector) {
+		return base.Choose(GetPrototype<TKey, TRValue>(__CurrentHandler__), kvp => {
+			var maybe = selector(kvp.Key, kvp.Value);
+			if (maybe.IsSome) return Kvp.Of(kvp.Key, maybe.Value);
+			return Optional.NoneOf<KeyValuePair<TKey, TRValue>>();
+		});
 	}
 
 	/// <summary>
@@ -78,10 +72,7 @@ public partial class __MapLikeClass__<TKey,TValue> : AbstractMap<TKey,TValue,__M
 	/// <param name="other"></param>
 	/// <param name="collision"></param>
 	/// <returns></returns>
-	public __MapLikeClass__<TKey, TRValue> Join<TValue2, TRValue>(IEnumerable<KeyValuePair<TKey, TValue2>> other, Func<TKey, TValue, TValue2, TRValue> collision)
-	{
-		if (other == null) throw Errors.Is_null;
-		if (collision == null) throw Errors.Is_null;
+	public __MapLikeClass__<TKey, TRValue> Join<TValue2, TRValue>(IEnumerable<KeyValuePair<TKey, TValue2>> other, Func<TKey, TValue, TValue2, TRValue> collision){
 		return base.Join(GetPrototype<TKey, TRValue>(__CurrentHandler__), other, collision);
 	}
 
@@ -98,35 +89,6 @@ public partial class __MapLikeClass__<TKey,TValue> : AbstractMap<TKey,TValue,__M
 	public __MapLikeClass__<TRKey,TRValue> SelectMany<TRKey,TRValue,TProject>(Func<KeyValuePair<TKey,TValue>, IEnumerable<TProject>> selector,
 																					Func<KeyValuePair<TKey,TValue>, IEnumerable<TProject>, KeyValuePair<TRKey,TRValue>> rSelector, __HandlerObject__<TRKey> handler = null)
 	{
-		if (selector == null) throw Errors.Is_null;
-		if (rSelector == null) throw Errors.Is_null;
 		return base.SelectMany(GetPrototype<TRKey,TRValue>(handler), selector, rSelector);
 	}
-
-	/// <summary>
-	/// Casts the keys and values of this collection to a different type.
-	/// </summary>
-	/// <typeparam name="TRKey">The type of the R key.</typeparam>
-	/// <typeparam name="TRValue">The type of the R value.</typeparam>
-	/// <param name="handler">A new equality or comparison handler for constructing the resulting map.</param>
-	/// <returns></returns>
-	public __MapLikeClass__<TRKey,TRValue> Cast<TRKey,TRValue>(__HandlerObject__<TRKey> handler = null)
-	{
-		return base.Cast<__MapLikeClass__<TRKey, TRValue>, TRKey, TRValue>(GetPrototype<TRKey, TRValue>(handler));
-	}
-
-	/// <summary>
-	/// Filters the keys and values of this collection based on type.
-	/// </summary>
-	/// <typeparam name="TRKey">The type of the R key.</typeparam>
-	/// <typeparam name="TRValue">The type of the R value.</typeparam>
-	/// <param name="handler">A new equality or comparison handler for constructing the resulting map.</param>
-	/// <returns></returns>
-	public __MapLikeClass__<TRKey, TRValue> OfType<TRKey, TRValue>(__HandlerObject__<TRKey> handler = null)
-	{
-		return base.OfType<__MapLikeClass__<TRKey,TRValue>,TRKey,TRValue>(GetPrototype<TRKey,TRValue>(handler));
-	}
-
-
-
 }

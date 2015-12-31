@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Funq.Collections {
+namespace Funq {
 	public static class FunqSet {
 		public static FunqSet<T> Empty<T>() {
 			return FunqSet<T>.Empty();

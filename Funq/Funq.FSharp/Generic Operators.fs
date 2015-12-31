@@ -1,7 +1,12 @@
-﻿module Funq.FSharp.Implementation.Ops
-
+﻿///An implementation module not for use in user code. Contains definitions for generic functions that use statically resolved type parameters.
+module Funq.FSharp.Implementation.Ops
+open Funq.FSharp
+open Funq.Abstract
+open Funq
+open Funq.FSharp
 open System
 #nowarn"77"
+
 let inline isEmpty o      = (^s : (member IsEmpty : bool) o )
 let inline removeLast o     = (^s : (member RemoveLast : unit -> 's) o)
 let inline removeFirst o    = (^s : (member RemoveFirst : unit -> 's) o )
@@ -9,8 +14,10 @@ let inline first o        = (^s : (member First : 'a) o)
 let inline last o         = (^s : (member Last : 'a) o)
 let inline length o       = (^s : (member Length : int) o )
 let inline getEmpty()     = (^s : (static member Empty : 's) ())
-let inline op_Add item col = (^s : (member op_Add : 't -> 's) col, item)
 let inline op_AddRange items col = (^s : (member op_AddRange : 't seq -> 's) col, items)
+let inline op_Add item col = (^s : (member op_Add : 't -> 's) col, item)
+let inline op_Remove item col = (^s : (member op_Remove : 't -> 's) col, item)
+let inline op_RemoveRange items col = (^s : (member op_RemoveRange : 't seq-> 's) col, items)
 let inline getEmptyWith c = (^s : (static member Empty : 'c -> 's) c)
 ///Calls an instance AddLast method.
 let inline addLast item col        = (^s : (member AddLast : 'a -> 's) col, item)
@@ -20,7 +27,10 @@ let inline addFirst item col       = (^s : (member AddFirst : 'a -> 's) col, ite
 ///Calls an instance Insert method.
 let inline insert index item col   = (^s : (member Insert : int * 'a -> 's) col, index, item)
 ///Calls an instance Remove method.
-let inline remove index col        = (^s : (member Remove : 'k -> 's) col, index)
+let inline removeKey index col        = (^s : (member Remove : 'k -> 's) col, index)
+
+let inline removeAt index col = (^s : (member RemoveAt : int -> 's) col, index)
+
 ///Calls an instance AddLastRange method.
 let inline addLastRange items col  = (^s : (member AddLastRange : 'v seq -> 's) col, items)
 ///Calls an instance AddFirstRange method.
@@ -44,6 +54,7 @@ let inline removeSet k col           = (^s : (member Remove : 'k -> 's) col, k)
 let inline union o col             = (^s : (member Union : 't -> 's) col, o)
 let inline intersect o col         = (^s : (member Intersect : 't -> 's) col, o)
 let inline except o col            = (^s : (member Except : 't -> 's) col, o)
+let inline difference o col     = (^s : (member Difference : 't -> 's) col, o)
 let inline symDifference o col     = (^s : (member SymmetricDifference : 't -> 's) col, o)
 let inline isSetEquals o col       = (^s : (member IsSetEqual : 't -> bool) col, o)
 let inline isSuperset o col        = (^s : (member IsProperSuperset : 't -> bool) col, o)
@@ -58,10 +69,10 @@ let inline iter col                = (^s : (member ForEach : Action<'a> -> unit)
 let inline filter f s                       = (^s : (member Where : Func<'a, bool> -> 's) s, toFunc1 f)
 let inline collect f c s                    = (^s : (member SelectMany : Func<'a, 'b seq> * 'o -> 't) s, toFunc1 f, c)
 let inline fold v f s                       = (^s : (member Aggregate : 'r * Func<'r, 'u, 'r> -> 'r) s, v, toFunc2 f)
-let inline choose (f : 'a -> 'b option) c s = (^s : (member Select : Func<'a, Funq.Option<'b>> * 'o -> 't) s, (f >> toOption) |> toFunc1,c)
+let inline choose (f : 'a -> 'b option) c s = (^s : (member Select : Func<'a, Funq.Optional<'b>> * 'o -> 't) s, (f >> toOption) |> toFunc1,c)
 let inline reduce f s                       = (^s : (member Reduce : Func<'a, 'a, 'a> -> 'a) s, f)
-let inline tryFind f s                      = (^s : (member Find : Func<'a, bool>  -> 'a Funq.Option) s, toFunc1 f) |> fromOption
-let inline pick f s                         = (^s : (member Pick : Func<'a, 'b Funq.Option>  -> 'b Funq.Option) s, f >> toOption |> toFunc1) |> fromOption
+let inline tryFind f s                      = (^s : (member Find : Func<'a, bool>  -> 'a Funq.Optional) s, toFunc1 f) |> fromOption
+let inline pick f s                         = (^s : (member Pick : Func<'a, 'b Funq.Optional>  -> 'b Funq.Optional) s, f >> toOption |> toFunc1) |> fromOption
 let inline exists f s                       = (^s : (member Any : Func<'a, bool> -> bool) s, f |> toFunc1)
 let inline forAll f s                       = (^s : (member All : Func<'a, bool> -> bool) s, f |> toFunc1)
 let inline count f s                        = (^s : (member Count : Func<'a, bool> -> int) s, f |> toFunc1)
@@ -72,7 +83,6 @@ let inline removeMin s                        = (^s : (member RemoveMin : unit -
 let inline removeMax s                        = (^s : (member RemoveMax : unit -> 's) s)
 let inline merge f m2 m1                    = (^s : (member Merge : 's * Func<'k, 'v, 'v, 'v> -> 's) m1, m2, toFunc3 f)
 let inline join f m2 m1                     = (^s : (member Join : 's * Func<'k, 'v, 'v, 'v> -> 's) m1, m2, toFunc3 f)
-let inline difference m2 m1                 = (^s : (member Difference : 's -> 's) m1, m2)
 let inline addMany vs s                   = (^s : (member AddRange : seq<'v> -> 's) s, vs)
 let inline removeMany vs s                    = (^s : (member RemoveRange : seq<'v> -> 's) s, vs)
 let inline update(i,v) o                  = (^s : (member Update : int * 'a -> 's) o, i, v)
@@ -84,12 +94,12 @@ let inline iterBackWhile f o              = (^s : (member ForEachBackWhile : Fun
 let inline zip r l                        = (^s : (member Zip : 'b seq * Func<'a, 'b, 'a * 'b> -> 'r) l, r, toFunc2 (fun l r -> (l,r)))
 let inline foldBack v f o                 = (^s : (member AggregateBack : 'r * Func<'r, 'u, 'r> -> 'r) o, v, toFunc2 f)
 
-let inline tryFirst o                     = (^s : (member TryFirst : 'b Funq.Option) o) |> fromOption
-let inline tryLast o                      = (^s : (member TryLast : 'b Funq.Option) o ) |> fromOption
+let inline tryFirst o                     = (^s : (member TryFirst : 'b Funq.Optional) o) |> fromOption
+let inline tryLast o                      = (^s : (member TryLast : 'b Funq.Optional) o ) |> fromOption
 
 let inline reduceBack f o                 = (^s : (member ReduceBack : Func<'a, 'a, 'a> -> 'a) o, f)
 
-let inline tryFindIndex f o               = (^s : (member FindIndex : Func<'a, bool> -> int Funq.Option) o, toFunc1 f) |> fromOption
+let inline tryFindIndex f o               = (^s : (member FindIndex : Func<'a, bool> -> int Funq.Optional) o, toFunc1 f) |> fromOption
 
 let inline takeWhile f o                  = (^s : (member TakeWhile : Func<'a, bool> -> 's) o, f |> toFunc1)
 

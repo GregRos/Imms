@@ -1,28 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 
-namespace Funq.Collections
-{
+namespace Funq {
 	[DebuggerDisplay("{DebuggerDisplay,nq}")]
-	[DebuggerTypeProxy(typeof(FunqSet<>.SetDebugView))]
-	partial class FunqSet<T>
-	{
-		private class SetDebugView
-		{
-			public SetDebugView(FunqSet<T> set)
-			{
+	[DebuggerTypeProxy(typeof (FunqSet<>.SetDebugView))]
+	partial class FunqSet<T> {
+		class SetDebugView {
+			public SetDebugView(FunqSet<T> set) {
 				IterableView = new IterableDebugView(set);
 			}
 
 			[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-			public IterableDebugView IterableView
-			{
-				get; set;
-			}
+			public IterableDebugView IterableView { get; private set; }
 		}
 	}
 }

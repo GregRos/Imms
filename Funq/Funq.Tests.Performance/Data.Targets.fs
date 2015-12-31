@@ -1,5 +1,4 @@
 ﻿namespace Funq.Tests.Performance.Data
-open Funq.Collections
 open Funq.Tests.Performance
 open System.Collections.Immutable
 open Funq.Tests.Performance.Wrappers

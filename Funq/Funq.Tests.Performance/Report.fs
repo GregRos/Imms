@@ -3,6 +3,7 @@ open System.IO
 open Funq.FSharp.Implementation
 open LINQtoCSV
 open CsvHelper
+open ExtraFunctional
 type FullRecord = 
     {
         Test : string

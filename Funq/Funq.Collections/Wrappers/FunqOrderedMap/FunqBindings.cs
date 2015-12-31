@@ -1,73 +1,77 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using Funq.Abstract;
-using Funq.Collections.Common;
-using Funq.Collections.Implementation;
+using Funq.Implementation;
 
-namespace Funq.Collections
-{
-	public partial class FunqOrderedMap<TKey, TValue>
-	{
-		internal class Builder : MapBuilder<TKey, TValue>
-		{
-			private OrderedAvlTree<TKey, TValue>.Node _inner;
-			private Lineage _lineage;
-			private readonly IComparer<TKey> _comparer; 
-			public Builder(OrderedAvlTree<TKey, TValue>.Node inner, IComparer<TKey> comparer )
-			{
+namespace Funq {
+	public partial class FunqOrderedMap<TKey, TValue> {
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		protected override IMapBuilder<TKey, TValue, FunqOrderedMap<TKey, TValue>> EmptyBuilder {
+			get { return new Builder(Empty(_comparer)); }
+		}
+
+		protected override bool IsCompatibleWith(FunqOrderedMap<TKey, TValue> other) {
+			return _comparer.Equals(other._comparer);
+		}
+
+		class Builder : IMapBuilder<TKey, TValue, FunqOrderedMap<TKey, TValue>> {
+			readonly IComparer<TKey> _comparer;
+			OrderedAvlTree<TKey, TValue>.Node _inner;
+			Lineage _lineage;
+
+			Builder(OrderedAvlTree<TKey, TValue>.Node inner, IComparer<TKey> comparer) {
 				_inner = inner;
 				_comparer = comparer;
 				_lineage = Lineage.Mutable();
 			}
 
 			public Builder(FunqOrderedMap<TKey, TValue> inner)
-				: this(inner.Root, inner.Comparer)
-			{
-			
+				: this(inner._root, inner._comparer) {}
+
+			public FunqOrderedMap<TKey, TValue> Produce() {
+				_lineage = Lineage.Mutable();
+				return _inner.WrapMap(_comparer);
 			}
-			public override object Result
-			{
-				get {
-					_lineage = Lineage.Mutable();
-					return _inner.WrapMap(_comparer);
+
+			public bool Add(KeyValuePair<TKey, TValue> item) {
+				_inner = _inner.Root_Add(item.Key, item.Value, _comparer, true, _lineage) ?? _inner;
+				return true;
+			}
+
+			public void AddRange(IEnumerable<KeyValuePair<TKey, TValue>> items) {
+				items.CheckNotNull("items");
+				var map = items as FunqOrderedMap<TKey, TValue>;
+				if (map != null && _comparer.Equals(map._comparer)) {
+					_inner = _inner.Union(map._root, null, _lineage);
+				} else {
+					items.ForEach(x => Add(x));
 				}
 			}
-			protected override void add(KeyValuePair<TKey, TValue> item) {
-				_inner = _inner.Root_Add(item.Key, item.Value, _comparer, true, _lineage) ?? _inner;
+
+			public int Length {
+				get { return _inner.Count; }
 			}
 
-			public override void Remove(TKey key) {
-				_inner = _inner.AvlRemove(key, _lineage) ?? _inner;
+			public Optional<KeyValuePair<TKey, TValue>> TryGetKvp(TKey key) {
+				return _inner.FindKvp(key);
 			}
 
-			public override Option<TValue> Lookup(TKey k)
-			{
+			public bool Remove(TKey key) {
+				var ret = _inner.AvlRemove(key, _lineage);
+				if (ret == null) {
+					return false;
+				}
+				_inner = ret;
+				return true;
+			}
+
+			public Optional<TValue> TryGet(TKey k) {
 				return _inner.Find(k);
 			}
-		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		protected internal override MapBuilder<TKey, TValue> EmptyBuilder
-		{
-			get
-			{
-				return new Builder(Empty(Comparer));
+			public void Dispose() {
+				
 			}
-		}
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		protected internal override FunqOrderedMap<TKey, TValue> ProviderFrom(MapBuilder<TKey, TValue> builder)
-		{
-			return (FunqOrderedMap<TKey, TValue>)builder.Result;
-
-		}
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		protected internal override MapBuilder<TKey, TValue> BuilderFrom(FunqOrderedMap<TKey, TValue> provider)
-		{
-			return new Builder(provider);
-		}
-
-		protected override bool IsCompatibleWith(FunqOrderedMap<TKey, TValue> other) {
-			return Comparer.Equals(other.Comparer);
 		}
 	}
 }

@@ -48,19 +48,18 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Aliases.fs" />
-    <Compile Include="Helpers.fs" />
     <Compile Include="Compatibility.fs" />
-    <Compile Include="Metadata.fs" />
-    <Compile Include="PublicImplementation.fs" />
+    <Compile Include="..\Funq.Collections\Wrappers\Funq.FSharp\Modules.fs">
+      <Link>Modules.fs</Link>
+    </Compile>
+    <Compile Include="MoreModules.fs" />
     <Compile Include="Generic Operators.fs" />
     <Compile Include="Operators.fs" />
-    <Compile Include="Extensions.fs" />
-    <Compile Include="ModuleTypes.fs" />
-    <Compile Include="Modules.fs" />
     <Compile Include="Patterns.fs" />
     <Compile Include="BuilderTypes.fs" />
     <Compile Include="Builders.fs" />
     <None Include="App.config" />
+    <None Include="Readme.md" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Funq.Abstract\Funq.Abstract.csproj">
@@ -68,8 +67,8 @@
       <Project>{d971396e-7a09-40a5-bda1-b28fc734c73c}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\Funq.Collections\Funq.Collections.csproj">
-      <Name>Funq.Collections</Name>
+    <ProjectReference Include="..\Funq.Collections\Funq.csproj">
+      <Name>Funq</Name>
       <Project>{7af97cc1-4b4c-4112-82af-bf9fc4b16407}</Project>
       <Private>True</Private>
     </ProjectReference>

@@ -13,7 +13,7 @@ TestResults
 *.sln.docstates
 [Hh]istory/
 # Build results
-
+/Funq/Funq.Tests.Performance/Benchmarks/Results
 [Dd]ebug/
 [Rr]elease/
 x64/
