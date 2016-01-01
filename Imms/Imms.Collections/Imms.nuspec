@@ -9,7 +9,7 @@
     <licenseUrl>https://raw.githubusercontent.com/GregRos/Imms/master/license.md</licenseUrl>
     <projectUrl>https://github.com/GregRos/Imms</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-	<iconUrl>https://raw.githubusercontent.com/GregRos/Imms/master/Icon.png</iconUrl>
+	<iconUrl>https://raw.githubusercontent.com/GregRos/Imms/828487d1618697d85208f2ab9953ddda01e190f8/Icon.png</iconUrl>
 	<summary>High-performance immutable collections for .NET.</summary>
     <description>$description$</description>
     <releaseNotes>First release since rename.</releaseNotes>
