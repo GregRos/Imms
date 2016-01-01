@@ -1,7 +1,7 @@
 # Imms
 ---
 
-Imms is a library of [persistent](http://en.wikipedia.org/wiki/Persistent_data_structure), and [immutable](http://en.wikipedia.org/wiki/Immutable_object) collections for the .NET framework. It is available on [NuGet](https://www.nuget.org/packages/ImmCollections/).
+Imms is a library of [persistent](http://en.wikipedia.org/wiki/Persistent_data_structure), and [immutable](http://en.wikipedia.org/wiki/Immutable_object) collections for the .NET framework.
 
 However, Imms has several distinguishing features that make it different from pretty much any other library of this sort that has been released for .NET so far.
 
@@ -21,15 +21,60 @@ The collections are in beta.
 
 ## The Collections
 
-To see up to date benchmarks you can go to the [benchmarks folder](https://github.com/GregRos/Imms/tree/master/Imms/Imms.Tests.Performance/Benchmarks). Each set of benchmarks includes charts, a CSV table, and a CSV log file with explicit information about the parameters of the benchmark.
+Imms provides 6 collections, divided into 3 groups.
 
-### Sequential Collections
+### Sequential
+Sequential collections store elements in order. An example of a sequential collection is `List<T>`.
 
-Imms provides two sequential collections:
+Imms provides the following sequential collections:
 
- 1. **ImmList:** A very versatile sequential collection that  supports pretty much every operation you can name (see the table below). Implemented as a 2-3-4 finger tree. 
+ 1. **ImmList:** A very versatile sequential collection that supports pretty much every operation you can name, including addition/removal at either end, get and set by index, insert/remove by index, concatenation, splitting, subsequences... all of these are implemented using specialized algorithms that perform up to `O(logn)`.
+ 1. **ImmVector:** Offers less functionality than ImmList, but performs a lot better for most operations. It is generally recommended that you use ImmList for most purposes. ImmVector's performance approaches mutable collections for some operations.
 
- 1. **ImmVector:** Offers less functionality than ImmList, but performs a lot better for most operations. It is generally recommended that you use ImmList for most purposes. 
+### Sets
+Sets store collections of unique elements. An example of a set is `HashSet<T>`.
+
+Imms provides the following set collections:
+
+  1. **ImmSet**, which is an equality-based set that uses hashing, similarly to `HashSet` (except that it is immutable, of course).
+  2. **ImmOrderedSet**, which is a comparison-based set that stores elements in order. Supports additional operations, such as retrieval by sort order index.
+
+Both sets support the following various set-theoretic operations. These operations accept an `IEnumerable<T>`, but are actually significantly faster when the input collection is of the same type and uses the same membership semantics. The sets support the following:
+
+1. Add, Remove, Contains, Length, ...
+2. Intersect, Union, Except, (Symmetric) Difference
+2. RelatesTo, which returns the set relation as an enumeration (with values such as `ProperSubsetOf`).
+3. IsSetRelation-type operations, such as IsSubsetOf. 
+
+### Maps
+Maps store key-value pairs and allow for fast retrieval by the key. They are also known as dictionaries. An example of a map is `Dictionary<TKey, TValue>`.
+
+Imms provides the following map collections:
+
+1. **ImmMap**, which is equality-based and uses hashing, similarly to `Dictionary<,>` (except that it is immutable).
+2. **ImmOrderedMap**, which is ordered by the key. Provides additional operations, such as retrieval by sort order index.
+
+Both maps support set-theoretic operations extended to maps. These operations `IEnumerable<T>`, but are actually significantly faster when the input collection is of the same type and uses the same key semantics. The maps support the following:
+
+1. Add, Remove, Contains, Length, ...
+2. `Join`, which is similar to the LINQ operation of the same name, and is analogous to Intersect over sets. You must provide a selector to determine the value in the result map.
+3. `Merge`, which combines two maps into one. It's analogous to Union over sets. You can provide a selector to determine the value in the result map, in case of a duplicate.
+4. `Subtract`, which is similar to `Except` over sets, except that you provide a selector that determines the value in the result map, and this selector may also indicate that the key-value pair should be removed.
+5. `Difference`, which is similar to `Difference` over sets. No selector can be provided in this case.
+
+### Note about Maps and Sets
+The set and map collections in this library support custom equality and comparison semantics (by accepting an `IComparer<T>` or `IEqualityComparer<T>`). This isn't as trivial as it sounds.
+
+Remember that these collections use special algorithms for operations such as `Intersect` and `Union`. These algorithms only make sense when both collections are compatible, i.e. use the same equality or comparison semantics. Otherwise, the result will be corrupted.
+
+To avoid dangerous and hard to track bugs, Imms collections only use the special algorithms if both collections use the same equi/comp handler. This is determined by calling `.Equals`. For this reason, if you plan to use a custom handler, you should either:
+
+1. Make sure to use the same handler instance for all Imms collections that use that handler. This pattern is made more convenient by extension methods on handlers that lets you use them as 'factories' of collections. An example is `IComparer<T>.CreateOrderedSet`.
+2. Override `.Equals` on your custom handler to support functional equality.
+
+If Imms decides that the comparison handlers are different, a generic implementation will be used, which can be significantly slower. That is to say, the implementation is as slow as what some other collection libraries use. ◕‿◕
+
+## Extra Features
 
 #### Equality Semantics
 Imms's sequential collections implement structural equality, overriding `Equals` and `GetHashCode`, as well as the `==` operator. 
@@ -37,6 +82,63 @@ Imms's sequential collections implement structural equality, overriding `Equals`
 For two collections to be equal, they must be of the exact same type, and must also contain the same sequence of elements. 
 
 The equality comparer used to equate elements is the default equality comparer, and this cannot be changed. However, the `SequenceEquals` method lets you provide your own comparer.
+
+### LINQ Implementation
+Imms collections implement 'override' LINQ operations so that they return a collection of the same kind. This is usually very convenient. In addition, the implementation is generally much faster than the generic LINQ implementation for various reasons.
+
+You can still use the default LINQ operations by calling `AsEnumerable`.
+
+### Optional type
+**Imms** provides an optional value type. An optional value type is used to indicate a possibly missing value. It is similar to how we sometimes us `int?` to indicate the possibility of a missing integer. 
+
+This option type is called `Optional<T>` and has two 'states':
+
+1. `Some(v)`, in which state the object wraps a value `v` of type `T`.
+2. `None`, in which state the object indicates a missing value.
+
+It's really very similar to a nullable type, except that it can be used on reference types as well. You can even have `Optional<Optional<T>>`. 
+
+`Optional<T>` is a struct, which has many advantages. For example, you can always view it in the debugger, you can always call methods such as `ToString()` on it, you can always recover what missing `T` it represents, etc. It is initialized to `None` by default.
+
+You can use it in optional parameters too, but doing this is a little wordy. Here is an example of how to do so:
+
+	public static void DoThisAndThat(Optional<int> maybeNumber = default(Optional<int>)) {
+		//...
+	}
+
+Imms provides a variety of methods to work with optional values, such as `Map`.
+
+#### Use in Imms
+The optional value type is used quite frequently. Generally, any method like `bool TryX(object,out T)` is instead written with the more elegant, `Optional<T> TryX(object)`. 
+
+Another example is the method `Choose`, which is similar to `Select`, except that it takes a selector of the form `Func<T, Optional<TOut>>` and returning `None` indicates that the value should be ignored.
+
+### F# Integration
+**Imms** is written primarily in C# and targets that language. But the library has a separate companion assembly, `Imms.FSharp`, that provides various extensions and modules for use with F#.
+
+These modules were heavily used in performance and integrity testing.
+
+Here are some example features:
+
+1. Extension overloads for methods that normally take `Func<T>`. The overloads take F#'s function value.
+2. Special F# operators for adding elements to collections, and concatenating them.
+2. Module bindings for most of the instance-level operations.
+3. Generic active patterns for decomposing collections in various ways.
+4. Computational expressions (aka monads) for constructing Imms collections. You can also construct maps and sets in this way.
+
+### Comparison Handlers
+I originally wanted Imms collections to support functional equality or comparison by default. However, this is brings about many problems in practice, especially when dealing with maps and sets which have configurable comparison handlers, so I've extended this support to sequential collections alone.
+
+Nevertheless, all collections have methods that determine equality; they simply don't use them as default equality semantics.
+
+## Performance
+To see up to date benchmarks you can go to the [benchmarks folder](https://github.com/GregRos/Imms/tree/master/Imms/Imms.Tests.Performance/Benchmarks). Each set of benchmarks includes charts, a CSV table, and a CSV log file with explicit information about the parameters of the benchmark. The log files are very detailed.
+
+The benchmarking system itself is available in the namespace `Imms.Tests.Performance`. It really is a system, and the way it works is quite complicated. However, running it is quite self-explanatory. There are lots of settings you can tweak.
+
+It's written in F#, and heavily uses (or perhaps _abuses_ is a better word) the *inline* functions feature, which basically allows performance test code to be generated implicitly, so that the human-written code is generic, but still executes with very little overhead. I'll write an article about it at some point, as it involves concepts that can be reused.
+
+### Sequential Collections
 
 #### Complexity
 Here is an overview of the time complexity of the operations offered by the different sequential collections. Note that time complexity is not always a good indicator of performance in the real world.
@@ -61,79 +163,58 @@ These are the benchmark results for the sequential collections, compared with si
 
 	| Collection/Test      | AddFirst | AddFirstRange | AddFirstRange (concat) | AddLast | AddLastRange | AddLastRange (concat) | IEnumerator | Insert | Insert Range | Insert Range (concat) | Iterate | Lookup | Remove | RemoveFirst | RemoveLast | Skip  | Take  | Update |
 	|----------------------|----------|---------------|------------------------|---------|--------------|-----------------------|-------------|--------|--------------|-----------------------|---------|--------|--------|-------------|------------|-------|-------|--------|
-	| FSharpx.Deque        | 0.527    | 2.247         | 2.633                  | 0.414   | 2.258        | 2.659                 | 0.175       | X      | X            | X                     | 0.228   | X      | X      | 0.538       | 1.311      | X     | X     | X      |
-	| FSharpx.Vector       | X        | X             | X                      | 1.316   | 8.132        | 8.405                 | 0.149       | X      | X            | X                     | 0.205   | 0.358  | X      | X           | 5.183      | X     | X     | 6.289  |
-	| ImmList              | 2.484    | 1.97          | 0.016                  | 2.391   | 1.959        | 0.012                 | 0.491       | 15.936 | 2.28         | 0.024                 | 0.097   | 1.713  | 12.019 | 1.069       | 1.203      | 0.008 | 0.006 | 7.482  |
-	| ImmVector            | X        | 0.649         | 0.589                  | 2.96    | 0.1          | 0.271                 | 0.114       | X      | 0.505        | 0.767                 | 0.031   | 0.434  | X      | X           | 2.467      | 0.179 | 0.001 | 3.088  |
-	| System.ImmutableList | 11.228   | 19.869        | 26.715                 | 11.446  | 20.148       | 27.261                | 1.859       | 14.542 | 21.594       | 28.807                | 2.112   | 1.28   | 9.758  | 5.708       | 5.78       | 2.354 | 1.145 | 5.833  |
+	| FSharpx.Deque        | 0.448    | 1.987         | 2.229                  | 0.414   | 1.802        | 2.437                 | 0.172       | X      | X            | X                     | 0.23    | X      | X      | 0.33        | 1.208      | X     | X     | X      |
+	| FSharpx.Vector       | X        | X             | X                      | 1.208   | 6.212        | 6.604                 | 0.15        | X      | X            | X                     | 0.197   | 0.282  | X      | X           | 4.381      | X     | X     | 5.983  |
+	| ImmList              | 2.139    | 1.651         | 0.011                  | 2.006   | 1.834        | 0.012                 | 0.425       | 14.892 | 1.793        | 0.025                 | 0.092   | 1.548  | 10.395 | 0.948       | 0.969      | 0.007 | 0.008 | 6.6    |
+	| ImmVector            | X        | 0.64          | 0.538                  | 2.504   | 0.102        | 0.273                 | 0.115       | X      | 0.378        | 0.546                 | 0.032   | 0.415  | X      | X           | 2.21       | 0.161 | 0.002 | 2.853  |
+	| System.ImmutableList | 9.618    | 17.089        | 22.52                  | 9.508   | 17.148       | 22.937                | 1.612       | 11.69  | 17.947       | 23.7                  | 1.923   | 1.161  | 8.048  | 4.812       | 5.261      | 1.817 | 1.376 | 5.07   |
 
 ### Sets
-Imms provides two set-like collections.
-
-  1. **ImmSet**, which is an equality-based set that uses hashing. Implemented as an AVL tree.
-  2. **ImmOrderedSet**, which is a comparison-based set that stores elements in order. Supports extra operations, such as getting/removing the maximal element, and retrieving elements by sort order index. Implemented as an AVL tree.
-
-Imms set-theoretic operations accept any `IEnumerable<T>`, but they perform much better if the input happens to be a collection of the same type that uses the same membership semantics.
-
-Set-theoretic operations between sets of the same type are much faster for Imms sets than any other set.
 
 #### Time Complexity
 The following is the time complexity of Imms sets for different operations. Time complexity is much better when the two inputs are sets of the same type and with the same membership semantics.
 
 I don't have similar data about sets from other libraries.
 
-	| Set Operation           | Compatible                 | Naive             
-	|-------------------------|----------------------------|-------------------
-	| Add, Remove, Contains   | logn                       |                   
-	| IsSuperset/IsSubset/etc | min(m,n)                   | m logm + min(m, n)
-	| Intersect               | min(m logn, n logm, m + n) | m (logn + logm)   
-	| Union                   | min(m logn, n logm, m + n) | m log(m + n)      
-	| Except                  | min(m logn, n logm, m + n) | m log n           
-	| Xor / Sym. Difference   | min(m logn, n logm, m + n) | (m + n) log(m + n) 
+	| Set Operation           | Compatible                  | Naive             
+	|-------------------------|-----------------------------|-------------------
+	| Add, Remove, Contains   | logn                        |                   
+	| IsSuperset/IsSubset/etc | min(m,n)                    | m logm + min(m, n)
+	| Intersect               | min(m logn, n logm, m + n)* | m (logn + logm)   
+	| Union                   | min(m logn, n logm, m + n)* | m log(m + n)      
+	| Except                  | min(m logn, n logm, m + n)* | m log n           
+	| Xor / Sym. Difference   | min(m logn, n logm, m + n)* | (m + n) log(m + n)
+	* Heuristically, based on the original algorithms.	
 
 The naive option is used when one of the collections is not a set. Note that in pretty much all cases, operations between two compatible sets take time proportional to the smaller of the two.
 
 #### Benchmarks
 (Note strings were used to benchmark the collections. F#'s ordered map and set force ordinal comparison for strings, which generally means that the collections can't order strings properly, but perform better)
+
 Like I implied in the previous section, in order to properly appreciate the performance of sets you have to test them at different numbers of elements, and with different *types* of elements. Comparison-based sets don't do very well with long string-based keys, but the opposite is true for integer keys. 
 
 In this benchmark, the input collection and the target collection both had 10,000 elements (for AddRange, etc), and the key was string based. 
 
-	| Collection/Test           | Add     | AddRange | Contains | Difference | Except | IEnumerator | Intersection | IsProperSubset | IsProperSuperset | Iterate | Remove | RemoveRange | SetEquals | Union  |   |   |   |   |
-	|---------------------------|---------|----------|----------|------------|--------|-------------|--------------|----------------|------------------|---------|--------|-------------|-----------|--------|---|---|---|---|
-	| FSharp.Set*               | 67.382  | 68.505   | 3.255    | 129.81     | 51.651 | 0.657       | 11.168       | 0.002          | 0.002            | 0.746   | 8.921  | 29.285      | 0.007     | 23.541 |   |   |   |   |
-	| ImmSet                    | 62.399  | 56.196   | 1.808    | 58.015     | 16.181 | 0.997       | 9.45         | 0.001          | 0.001            | 0.234   | 7.878  | 21.661      | 0.005     | 17.497 |   |   |   |   |
-	| ImmOrderedSet             | 109.937 | 75.433   | 16.887   | 86.887     | 26.349 | 0.797       | 40.261       | 0.001          | 0.001            | 0.12    | 24.002 | 49.73       | 0.007     | 28.834 |   |   |   |   |
-	| System.ImmutableSet       | 86.627  | 42.993   | 2.48     | 117.573    | 21.424 | 3.816       | 20.388       | 15.469         | 0.008            | 5.066   | 18.031 | 19.312      | 16.117    | 55.454 |   |   |   |   |
-	| System.ImmutableSortedSet | 107.384 | 84.234   | 17.311   | 329.102    | 81.761 | 2.508       | 72.092       | 53.965         | 0.019            | 3.12    | 28.086 | 44.66       | 53.3      | 98.149 |   |   |   |   |
-	  
+	| Collection/Test           | Add     | AddRange | Contains | Difference | Except | IEnumerator | Intersection | IsProperSubset | IsProperSuperset | Iterate | Remove | RemoveRange | SetEquals | Union  |
+	|---------------------------|---------|----------|----------|------------|--------|-------------|--------------|----------------|------------------|---------|--------|-------------|-----------|--------|
+	| FSharp.Set                | 61.475  | 61.298   | 3.109    | 118.343    | 46.464 | 0.605       | 9.833        | 0.002          | 0.002            | 0.756   | 12.53  | 25.874      | 0.007     | 21.08  |
+	| ImmSet                    | 53.953  | 21.787   | 1.773    | 21.722     | 7.295  | 0.984       | 8.105        | 0.002          | 0.001            | 0.25    | 5.979  | 9.274       | 0.005     | 10.429 |
+	| ImmOrderedSet             | 109.294 | 60.933   | 15.481   | 47.394     | 16.212 | 0.78        | 36.875       | 0.002          | 0.001            | 0.12    | 20.646 | 33.55       | 0.006     | 17.64  |
+	| System.ImmutableSet       | 75.933  | 38.076   | 2.368    | 106.883    | 18.302 | 3.737       | 18.279       | 14.165         | 0.008            | 4.326   | 14.685 | 18.173      | 14.092    | 49.788 |
+	| System.ImmutableSortedSet | 100.757 | 79.588   | 17.452   | 306.202    | 74.829 | 2.424       | 65.854       | 50.431         | 0.019            | 2.956   | 24.725 | 40.408      | 49.866    | 91.959 |
+
 Here is another set of benchmarks in which the target collection has 100 elements but the input collection has 10,000 elements (relevant for operations with an input collection). It demonstrates how performance scales with the size of the smaller collection.
 
-	| Collection/Test           | Add     | AddRange | Contains | Difference | Except | IEnumerator | Intersection | IsProperSubset | IsProperSuperset | Iterate | Remove | RemoveRange | SetEquals | Union |
-	|---------------------------|---------|----------|----------|------------|--------|-------------|--------------|----------------|------------------|---------|--------|-------------|-----------|-------|
-	| FSharp.Set                | 60.557  | 57.727   | 1.064    | 28.183     | 23.127 | 0.677       | 4.809        | 0.003          | 0.002            | 0.01    | 5.742  | 0.103       | 0.007     | 0.535 |
-	| ImmSet                    | 50.986  | 54.101   | 0.838    | 1.152      | 0.456  | 0.895       | 0.222        | 0.009          | 0.001            | 0.012   | 4.702  | 0.079       | 0.001     | 0.369 |
-	| ImmOrderedSet             | 88.613  | 50.492   | 11.32    | 2.192      | 0.677  | 0.813       | 0.925        | 0.068          | 0.001            | 0.001   | 10.288 | 0.171       | 0.001     | 0.811 |
-	| System.ImmutableSet       | 76.444  | 40.43    | 1.56     | 58.797     | 20.568 | 4.854       | 20.007       | 21.321         | 0.008            | 0.06    | 9.391  | 0.092       | 19.317    | 57.79 |
-	| System.ImmutableSortedSet | 110.752 | 66.802   | 9.378    | 163.663    | 51.658 | 3.013       | 46.331       | 100.225        | 0.012            | 0.032   | 13.852 | 0.204       | 56.71     | 1.334 |
-	
+	| Collection/Test           | Add    | AddRange | Contains | Difference | Except | IEnumerator | Intersection | IsProperSubset | IsProperSuperset | Iterate | Remove | RemoveRange | SetEquals | Union  |
+	|---------------------------|--------|----------|----------|------------|--------|-------------|--------------|----------------|------------------|---------|--------|-------------|-----------|--------|
+	| FSharp.Set                | 47.892 | 47.515   | 1.03     | 18.364     | 17.115 | 0.61        | 3.474        | 0.002          | 0.002            | 0.01    | 3.896  | 0.096       | 0.006     | 0.395  |
+	| ImmSet                    | 43.781 | 15.273   | 0.566    | 0.686      | 0.327  | 0.852       | 0.226        | 0.006          | 0.001            | 0.004   | 3.106  | 0.039       | 0.002     | 0.282  |
+	| ImmOrderedSet             | 75.199 | 41.317   | 7.678    | 1.572      | 0.51   | 0.747       | 0.912        | 0.009          | 0.001            | 0.001   | 10.715 | 0.146       | 0.001     | 0.613  |
+	| System.ImmutableSet       | 64.296 | 32.131   | 1.36     | 47.848     | 16.171 | 3.702       | 15.645       | 16.928         | 0.008            | 0.053   | 7.665  | 0.104       | 14.281    | 43.856 |
+	| System.ImmutableSortedSet | 87.077 | 57.689   | 7.742    | 126.132    | 37.829 | 2.46        | 39.116       | 75.305         | 0.011            | 0.037   | 11.961 | 0.181       | 49.086    | 0.802  |
 
 ### Maps and dictionaries
-A map or dictionary is a collection that allows efficiently retrieving values using a key. Imms provides two dictionary collections:
 
-1. ImmMap, which is equality-based and uses hashing. Implemented as an AVL tree.
-2. ImmOrderedMap, which is ordered by key. Provides additional operations, such as max key-value pair, and retrieval by sort order index. Implemented as an AVL tree.
-
-The performance of these collections is identical to the performance of sets (except that in the case of hash-based maps, performance is average over all inputs).
-
-Imms maps also provide operations between maps, such as Merge, Join, Except, and Difference which are analogous to the same operations over sets, except that in some cases you are allowed to supply a value selector to determine the value in the resulting map.
-
-1. `Merge`, which merges two maps of the same type by key. The user provides a collision resolution function to determine the value in case the maps share identical keys. It is equivalent to `Union` on sets.
-2. `Join`, which joins the two maps based on their keys. The user provides a collision resolution function to determine the resulting value (similar to a Join LINQ statement).
-3. `Except`, which is identical to the set-theoretic operation. The user can provide a subtraction function that determines the resulting value if the maps share a key. Can be used with maps of a different value type.
-4. `Difference`, which returns the symmetric difference. No function can be given here, as the operation is too complicated.
-
-These operations perform similarly to the set-theoretic operations on which they are based.
 
 #### Benchmarks
 
@@ -141,95 +222,11 @@ These operations perform similarly to the set-theoretic operations on which they
 
 	| Collection/Test            | Add     | AddRange | IEnumerator | Iterate | Lookup | RemoveKey | RemoveRange |
 	|----------------------------|---------|----------|-------------|---------|--------|-----------|-------------|
-	| FSharp.Map                 | 70.111  | 69.119   | 0.654       | 0.876   | 3.442  | 15.506    | 32.156      |
-	| ImmMap                     | 59.558  | 70.916   | 0.873       | 0.418   | 1.816  | 10.061    | 21.001      |
-	| ImmOrderedMap              | 111.013 | 83.716   | 0.734       | 0.276   | 16.774 | 25.053    | 50.792      |
-	| System.ImmutableDict       | 111.24  | 53.706   | 4.422       | 4.6     | 3.135  | 26.467    | 22.103      |
-	| System.ImmutableSortedDict | 112.515 | 83.715   | 2.149       | 2.754   | 17.459 | 31.208    | 45.454      |
-## Notes
-### Custom comparison handlers
-The set and map collections in this library support custom equality and comparison semantics (by accepting an `IComparer<T>` or `IEqualityComparer<T>`). This isn't as trivial as it sounds.
-
-Remember that these collections support specialized implementations of operations such as `Intersect` and `Union`, but these specialized implementations only make sense when both collections use the same equality/comparison semantics. Otherwise, the result will be corrupted.
-
-In order to avoid these dangerous and hard to track bugs, Imms collections will only use specialized implementations if both collections have the same comparison handler (determined by `.Equals`). For this reason, it is recommended that if you use custom equality semantics, you should either:
-
-1. Make sure to use the same comparer instance for all Imms collections using that comparer, and avoid creating separate but functionally identical instances of it. This pattern is enforced by extension methods allowing comparison handlers to serve as 'factories' for Imms collections. E.g. `IComparer<T>.CreateOrderedSet` creates a `ImmOrderedSet` that uses that comparison handler.
-2. Override `.Equals` on your custom comparison handler for functional equality. 
-
-If Imms decides that the comparison handlers are different, a generic implementation will be used, which doesn't carry the same performance guarantees discussed in the previous section. 
-
-### Benchmarking 
-Benchmark data is available in the form of charts (automatically generated using the Microsoft charting controls and the `FSharp.Chart` library), raw logs in the form of CSV files which contain the exact parameters and tests executed, and a CSV table for comparison (the tables in this file were generated in this way, in fact).
-
-The benchmarking system itself is available in the namespace `Imms.Tests.Performance`. It really is a system, and the way it works is quite complicated. 
-
-It's written in F#, and heavily uses (or perhaps _abuses_ is a better word) the *inline* functions feature, which basically allows performance test code to be generated implicitly, so that the human-written code is generic, but still executes with zero overhead. I'll write an article about it at some point, as it involves concepts that can be reused.
-
-## Extra Features
-### LINQ Implementation
-A very common use-case when working with concrete collections, is to apply various operations on them, such as filtering, or projection. In such cases, you usually want to get a collection of the same type in return, rather than an `IEnumerable` that you then need to convert.
-
-Standard `.NET` collections, such as `List<T>` do implement a limited set of collection-based operations. Examples are `ConvertAll`, which is similar to the `select` operator, and `FindAll` which is similar to `where`. However, these operations are seldom used for several reasons. Instead, we tend to use the various `LINQ` operators, whether as keywords or as extension methods.
-
-**Imms** collections effectively override the LINQ operators, so that they directly return collections of the same kind as the source. They also provide a number of LINQ-like operations geared for map collections. Operations such as `Any` are implemented more efficiently as well.
-
-### Optional type
-**Imms** provides its own implementation of an _optional value_: a generic type `Optional<T>` that indicates a possibly missing value. Option types have two effective states:
-
-1. The `Some` state, in which the object wraps a value of type `T`
-2. The `None` state, in which case the object indicates a missing value.
-
-An option type is kind of similar to a regular reference type (with its dedicated `null` value), but it's more similar to a nullable type such as `int?`.
-
-1. `Optional<T>` is a value type. It is initialized to `None` by default. 
-2. This means that an `Optional<T>` can always be the target of a method call. In particular, you can call `Equals` or `ToString` on it. A `None` value is also visualized in the debugger.
-1. You can define an `Optional<T>` for any `T`, including both reference types and value types. You can even have `Optional<Optional<int>>`.
-
-Although F# defines its own option type, due to technical considerations I decided to implement a separate type. 
-
-The option type is used very frequently in Imms. Any method that has a signature similar to, `bool TryX(object arg, out TResult result)` is replaced with the more elegant and convenient `Optional<TResult> TryX(object arg)`. 
-
-Also supported is the method `Choose` which is similar to `Select`, except that it returns an `Option<T>` and if it is equal to `None`, the element is skipped. There are other examples.
-
-### F# Integration
-**Imms** itself is written primarily in C#, and targets that language. However, the library also has a separate companion assembly that that provides various extensions and modules for use with F#.
-
-Here are some example features:
-
-1. Extension overloads for methods that normally take `Func<T>`. The overloads take F#'s function value.
-2. Special F# operators for adding elements to collections, and concatenating them.
-2. Module bindings for most of the instance-level operations.
-3. Generic active patterns for decomposing collections in various ways.
-4. Computational expressions (aka monads) for constructing Imms collections. You can also construct maps and sets in this way.
-
-### Comparison Handlers
-I originally wanted Imms collections to support functional equality or comparison by default. However, this is brings about many problems in practice, especially when dealing with maps and sets which have configurable comparison handlers, so I've extended this support to sequential collections alone.
-
-Nevertheless, all collections have methods that determine equality; they simply don't use them as default equality semantics.
-
-## Imms.Abstract
-Imms uses a library of collection abstractions called `Imms.Abstract` that all collections inherit from.
-
-This library implements common collection operations once (such as `Where`, `Select`, and so forth) and inheriting collections reuse those implementations, or alternatively override them with specialized versions. It's also possible to abstract over similar collections using this library.
-
-This part of the library is inspired by Scala's collection library, which uses advanced type system features such as type variables, higher-kinded types, implicit parameters, and traits. 
-
-These aren't available in C#, so the library's structure is somewhat convoluted, requires a thorough explanation, and some operations need to be partially implemented by hand. In `Imms.Collections`, method stubs for operations such as `Select` are automatically generated from T4 text templates. 
-
-The library is stand-alone and has no dependencies.
-
-**Imms.Abstract** offers the following collection abstractions:
- 
-* `AbstractIterable`, the parent class for all collections that support some form of iteration. Implements LINQ-operations such as `Any, All, Find, ForEach, Aggregate` and provides partial implementations for operations such as `Cast, Select, GroupBy`.
-
-* `AbstractSequential`, the parent class for all sequential collections (where one element follows another in order).  Naively implements operations such as `this[int]`, `FindIndex`, `OrderBy`, and `Take`. 
-
-* `AbstractMap`, the parent class for all map- or dictionary-like collections, offering implementations for set-like operations over maps, such as `Join` (joins by key), `Merge` (merge by key), and so forth. Also offers specialized versions of some of the operations implemented on `AbstractIterable`.
-
-* `AbstractSet`, the parent class of all set-like collections, offering naive implementations for standard set operations.
-
-The library is meant to allow extension of immutable collections with common methods, and can be used separately in order to extend your own collections. However, a more complete guide will be required in order to learn how to use it properly. 
+	| FSharp.Map                 | 63.886  | 63.895   | 0.648       | 0.823   | 3.266  | 13.633    | 28.199      |
+	| ImmMap                     | 57.989  | 25.13    | 0.845       | 0.414   | 1.837  | 9.445     | 9.499       |
+	| ImmOrderedMap              | 100.089 | 68.299   | 0.664       | 0.27    | 15.43  | 22.604    | 33.056      |
+	| System.ImmutableDict       | 99.958  | 47.393   | 3.819       | 4.351   | 2.702  | 23.377    | 20.237      |
+	| System.ImmutableSortedDict | 101.172 | 75.326   | 2.084       | 2.674   | 15.63  | 28.808    | 42.563      |
 
 ## Possibilities
 Imms is designed with users directly in mind. However, its combination of power and performance can provide the basis for other libraries. Here are some of the things that could be implemented using the features provided by Imms:

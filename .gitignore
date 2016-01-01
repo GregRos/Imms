@@ -1,6 +1,5 @@
 # Build Folders (you can keep bin if you'd like, to store dlls and pdbs)
 [Oo]bj/
-
 # mstest test results
 TestResults
 
@@ -14,7 +13,7 @@ Junk
 *.sln.docstates
 [Hh]istory/
 # Build results
-/Imms/Imms.Tests.Performance/Benchmarks/Results
+
 [Dd]ebug/
 [Rr]elease/
 x64/

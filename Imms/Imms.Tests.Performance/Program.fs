@@ -83,7 +83,7 @@ let  main argv =
     let args = 
         Scripts.AdvancedArgs<_>(
            Simple_Iterations = 10000,
-           Target_Size = 10000,
+           Target_Size = 100,
            DataSource_Size = 10000,
            Full_Iterations = 1,
            DataSource_Iterations = 3,
