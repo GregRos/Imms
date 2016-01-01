@@ -48,7 +48,8 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>NO_MUTATION</DefineConstants>
+    <DefineConstants>
+    </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>1</WarningLevel>
     <DocumentationFile>bin\Release\Imms.xml</DocumentationFile>
@@ -165,7 +166,7 @@
     <None Include="Wrappers\Templates\Reusable.ttinclude" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Optimizations and Tests.txt" />
+    <None Include="Optimizations and Tests.txt" />
     <Content Include="Wrappers\Imms.FSharp\Modules.fs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
