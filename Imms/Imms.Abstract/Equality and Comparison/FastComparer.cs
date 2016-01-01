@@ -9,8 +9,7 @@ namespace Imms.Abstract {
 
 		public static IComparer<TKey> Default {
 			get {
-				if (_isComparable.IsNone) LoadComparer();
-				return _defaultComparer;
+				return Comparer<TKey>.Default;
 			}
 		}
 

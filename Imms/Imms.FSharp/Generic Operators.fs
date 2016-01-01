@@ -1,5 +1,5 @@
 ///An implementation module not for use in user code. Contains definitions for generic functions that use statically resolved type parameters.
-module internal Imms.FSharp.Implementation.Ops
+module Imms.FSharp.Implementation.Ops
 open Imms.FSharp
 open Imms.Abstract
 open Imms

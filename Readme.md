@@ -20,6 +20,7 @@ Currently, all library assemblies require .NET Framework 4.0 Client Profile, and
 The collections are in beta. 
 
 ## The Collections
+
 To see up to date benchmarks you can go to the [benchmarks folder](https://github.com/GregRos/Imms/tree/master/Imms/Imms.Tests.Performance/Benchmarks). Each set of benchmarks includes charts, a CSV table, and a CSV log file with explicit information about the parameters of the benchmark.
 
 ### Sequential Collections
@@ -60,11 +61,11 @@ These are the benchmark results for the sequential collections, compared with si
 
 	| Collection/Test      | AddFirst | AddFirstRange | AddFirstRange (concat) | AddLast | AddLastRange | AddLastRange (concat) | IEnumerator | Insert | Insert Range | Insert Range (concat) | Iterate | Lookup | Remove | RemoveFirst | RemoveLast | Skip  | Take  | Update |
 	|----------------------|----------|---------------|------------------------|---------|--------------|-----------------------|-------------|--------|--------------|-----------------------|---------|--------|--------|-------------|------------|-------|-------|--------|
-	| FSharpx.Deque        | 0.524    | 2.335         | 3.37                   | 0.47    | 2.26         | 2.734                 | 0.203       | X      | X            | X                     | 0.39    | X      | X      | 0.549       | 1.486      | X     | X     | X      |
-	| FSharpx.Vector       | X        | X             | 11.472                 | 2.247   | 9.072        | 16.574                | 0.167       | X      | X            | X                     | 0.246   | 0.454  | X      | X           | 4.96       | X     | X     | 6.272  |
-	| ImmList              | 2.004    | 3.672         | 0.009                  | 1.936   | 3.847        | 0.009                 | 0.471       | 20.26  | 3.66         | 0.045                 | 0.102   | 1.737  | 20.523 | 0.861       | 1.05       | 0.008 | 0.008 | 11.923 |
-	| ImmVector            | X        | 0.205         | 0.318                  | 3.187   | 0.281        | 0.419                 | 0.142       | X      | 0.392        | 0.737                 | 0.029   | 0.146  | X      | X           | 2.935      | 0.116 | 0.001 | 2.959  |
-	| System.ImmutableList | 12.835   | 21.376        | 34.088                 | 8.298   | 17.303       | 24.198                | 2.128       | 23.897 | 20.022       | 27.188                | 2.092   | 2.155  | 8.789  | 4.59        | 5.19       | 1.63  | 2.293 | 5.959  |
+	| FSharpx.Deque        | 0.527    | 2.247         | 2.633                  | 0.414   | 2.258        | 2.659                 | 0.175       | X      | X            | X                     | 0.228   | X      | X      | 0.538       | 1.311      | X     | X     | X      |
+	| FSharpx.Vector       | X        | X             | X                      | 1.316   | 8.132        | 8.405                 | 0.149       | X      | X            | X                     | 0.205   | 0.358  | X      | X           | 5.183      | X     | X     | 6.289  |
+	| ImmList              | 2.484    | 1.97          | 0.016                  | 2.391   | 1.959        | 0.012                 | 0.491       | 15.936 | 2.28         | 0.024                 | 0.097   | 1.713  | 12.019 | 1.069       | 1.203      | 0.008 | 0.006 | 7.482  |
+	| ImmVector            | X        | 0.649         | 0.589                  | 2.96    | 0.1          | 0.271                 | 0.114       | X      | 0.505        | 0.767                 | 0.031   | 0.434  | X      | X           | 2.467      | 0.179 | 0.001 | 3.088  |
+	| System.ImmutableList | 11.228   | 19.869        | 26.715                 | 11.446  | 20.148       | 27.261                | 1.859       | 14.542 | 21.594       | 28.807                | 2.112   | 1.28   | 9.758  | 5.708       | 5.78       | 2.354 | 1.145 | 5.833  |
 
 ### Sets
 Imms provides two set-like collections.
@@ -93,28 +94,29 @@ I don't have similar data about sets from other libraries.
 The naive option is used when one of the collections is not a set. Note that in pretty much all cases, operations between two compatible sets take time proportional to the smaller of the two.
 
 #### Benchmarks
+(Note strings were used to benchmark the collections. F#'s ordered map and set force ordinal comparison for strings, which generally means that the collections can't order strings properly, but perform better)
 Like I implied in the previous section, in order to properly appreciate the performance of sets you have to test them at different numbers of elements, and with different *types* of elements. Comparison-based sets don't do very well with long string-based keys, but the opposite is true for integer keys. 
 
 In this benchmark, the input collection and the target collection both had 10,000 elements (for AddRange, etc), and the key was string based. 
 
-	| Collection/Test           | Add    | AddRange | Contains | Difference | Except | IEnumerator | Intersection | IsProperSubset | IsProperSuperset | Iterate | Remove | RemoveRange | SetEquals | Union  |
-	|---------------------------|--------|----------|----------|------------|--------|-------------|--------------|----------------|------------------|---------|--------|-------------|-----------|--------|
-	| FSharp.Set                | 51.496 | 54.061   | 5.192    | 148.187    | 55.046 | 0.745       | 15.467       | 0.002          | 0.002            | 1.065   | 14.208 | 35.956      | 0.007     | 28.515 |
-	| ImmSet                    | 9.679  | 7.676    | 3.763    | 30.71      | 11.241 | 1.478       | 14.005       | 0.006          | 0.006            | 0.339   | 8.032  | 14.517      | 0.006     | 13.612 |
-	| ImmOrderedSet             | 14.487 | 14.156   | 6.863    | 47.256     | 12.767 | 1.618       | 19.424       | 0.014          | 0.008            | 0.309   | 16.296 | 17.667      | 0.005     | 14.333 |
-	| System.ImmutableSet       | 10.367 | 8.745    | 3.138    | 112.661    | 23.747 | 3.951       | 26.111       | 17.293         | 0.008            | 4.824   | 16.571 | 20.679      | 19.04     | 54.249 |
-	| System.ImmutableSortedSet | 57.695 | 57.937   | 20.884   | 344.763    | 99.322 | 2.465       | 77.411       | 58.545         | 0.014            | 3.441   | 26.427 | 44.63       | 67.019    | 97.147 |
-
+	| Collection/Test           | Add     | AddRange | Contains | Difference | Except | IEnumerator | Intersection | IsProperSubset | IsProperSuperset | Iterate | Remove | RemoveRange | SetEquals | Union  |   |   |   |   |
+	|---------------------------|---------|----------|----------|------------|--------|-------------|--------------|----------------|------------------|---------|--------|-------------|-----------|--------|---|---|---|---|
+	| FSharp.Set*               | 67.382  | 68.505   | 3.255    | 129.81     | 51.651 | 0.657       | 11.168       | 0.002          | 0.002            | 0.746   | 8.921  | 29.285      | 0.007     | 23.541 |   |   |   |   |
+	| ImmSet                    | 62.399  | 56.196   | 1.808    | 58.015     | 16.181 | 0.997       | 9.45         | 0.001          | 0.001            | 0.234   | 7.878  | 21.661      | 0.005     | 17.497 |   |   |   |   |
+	| ImmOrderedSet             | 109.937 | 75.433   | 16.887   | 86.887     | 26.349 | 0.797       | 40.261       | 0.001          | 0.001            | 0.12    | 24.002 | 49.73       | 0.007     | 28.834 |   |   |   |   |
+	| System.ImmutableSet       | 86.627  | 42.993   | 2.48     | 117.573    | 21.424 | 3.816       | 20.388       | 15.469         | 0.008            | 5.066   | 18.031 | 19.312      | 16.117    | 55.454 |   |   |   |   |
+	| System.ImmutableSortedSet | 107.384 | 84.234   | 17.311   | 329.102    | 81.761 | 2.508       | 72.092       | 53.965         | 0.019            | 3.12    | 28.086 | 44.66       | 53.3      | 98.149 |   |   |   |   |
+	  
 Here is another set of benchmarks in which the target collection has 100 elements but the input collection has 10,000 elements (relevant for operations with an input collection). It demonstrates how performance scales with the size of the smaller collection.
 
-	| Collection/Test           | Difference | Except | Intersection | IsProperSubset | IsProperSuperset | RemoveRange | SetEquals | Union  |
-	|---------------------------|------------|--------|--------------|----------------|------------------|-------------|-----------|--------|
-	| FSharp.Set                | 23.868     | 23.559 | 4.15         | 0.002          | 0.002            | 0.147       | 0.007     | 0.524  |
-	| ImmSet                    | 0.791      | 0.438  | 0.401        | 0.006          | 0.005            | 0.047       | 0.002     | 0.351  |
-	| ImmOrderedSet             | 1.009      | 0.246  | 0.383        | 0.024          | 0.002            | 0.041       | 0.002     | 0.408  |
-	| System.ImmutableSet       | 64.99      | 17.645 | 17.43        | 22.886         | 0.01             | 0.081       | 16.913    | 41.338 |
-	| System.ImmutableSortedSet | 131.557    | 40.526 | 41.335       | 88.106         | 0.011            | 0.184       | 58.584    | 0.931  |
-
+	| Collection/Test           | Add     | AddRange | Contains | Difference | Except | IEnumerator | Intersection | IsProperSubset | IsProperSuperset | Iterate | Remove | RemoveRange | SetEquals | Union |
+	|---------------------------|---------|----------|----------|------------|--------|-------------|--------------|----------------|------------------|---------|--------|-------------|-----------|-------|
+	| FSharp.Set                | 60.557  | 57.727   | 1.064    | 28.183     | 23.127 | 0.677       | 4.809        | 0.003          | 0.002            | 0.01    | 5.742  | 0.103       | 0.007     | 0.535 |
+	| ImmSet                    | 50.986  | 54.101   | 0.838    | 1.152      | 0.456  | 0.895       | 0.222        | 0.009          | 0.001            | 0.012   | 4.702  | 0.079       | 0.001     | 0.369 |
+	| ImmOrderedSet             | 88.613  | 50.492   | 11.32    | 2.192      | 0.677  | 0.813       | 0.925        | 0.068          | 0.001            | 0.001   | 10.288 | 0.171       | 0.001     | 0.811 |
+	| System.ImmutableSet       | 76.444  | 40.43    | 1.56     | 58.797     | 20.568 | 4.854       | 20.007       | 21.321         | 0.008            | 0.06    | 9.391  | 0.092       | 19.317    | 57.79 |
+	| System.ImmutableSortedSet | 110.752 | 66.802   | 9.378    | 163.663    | 51.658 | 3.013       | 46.331       | 100.225        | 0.012            | 0.032   | 13.852 | 0.204       | 56.71     | 1.334 |
+	
 
 ### Maps and dictionaries
 A map or dictionary is a collection that allows efficiently retrieving values using a key. Imms provides two dictionary collections:
@@ -137,14 +139,13 @@ These operations perform similarly to the set-theoretic operations on which they
 
 **Technical Note:** `System.Collections.Immutable` dictionaries have a mechanism that checks whether values are equal (using the default equality comparer), and if they are, it doesn't update them. I forced this mechanism off for the purpose of this benchmark because of the way I generate data (as identical key-value pairs).
 
-	| Collection/Test            | Add     | AddRange | DropKey | DropRange | IEnumerator | Iterate | Lookup |
-	|----------------------------|---------|----------|---------|-----------|-------------|---------|--------|
-	| FSharp.Map                 | 183.877 | 193.356  | 25.077  | 37.747    | 1.541       | 1.282   | 9.441  |
-	| ImmMap                     | 172.237 | 89.343   | 22.318  | 25.009    | 2.815       | 1.3     | 4.105  |
-	| ImmOrderedMap              | 192.106 | 76.973   | 26.027  | 16.219    | 1.2         | 0.52    | 3.89   |
-	| System.ImmutableDict       | 197.622 | 99.538   | 28.36   | 29.539    | 6.466       | 7.373   | 5.063  |
-	| System.ImmutableSortedDict | 250.299 | 178.54   | 37.232  | 48.54     | 3.732       | 3.728   | 26.033 |
-
+	| Collection/Test            | Add     | AddRange | IEnumerator | Iterate | Lookup | RemoveKey | RemoveRange |
+	|----------------------------|---------|----------|-------------|---------|--------|-----------|-------------|
+	| FSharp.Map                 | 70.111  | 69.119   | 0.654       | 0.876   | 3.442  | 15.506    | 32.156      |
+	| ImmMap                     | 59.558  | 70.916   | 0.873       | 0.418   | 1.816  | 10.061    | 21.001      |
+	| ImmOrderedMap              | 111.013 | 83.716   | 0.734       | 0.276   | 16.774 | 25.053    | 50.792      |
+	| System.ImmutableDict       | 111.24  | 53.706   | 4.422       | 4.6     | 3.135  | 26.467    | 22.103      |
+	| System.ImmutableSortedDict | 112.515 | 83.715   | 2.149       | 2.754   | 17.459 | 31.208    | 45.454      |
 ## Notes
 ### Custom comparison handlers
 The set and map collections in this library support custom equality and comparison semantics (by accepting an `IComparer<T>` or `IEqualityComparer<T>`). This isn't as trivial as it sounds.
