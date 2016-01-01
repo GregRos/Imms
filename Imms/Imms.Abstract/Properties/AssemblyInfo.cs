@@ -21,7 +21,7 @@ using System.Runtime.InteropServices;
 [assembly: InternalsVisibleTo("Imms.Tests.Unit.CSharp")]
 [assembly: InternalsVisibleTo("Imms.Tests.Integrity")]
 [assembly: InternalsVisibleTo("Imms.Tests.Performance.CSharp")]
-[assembly: AssemblyVersion("0.2.*")]
+[assembly: AssemblyVersion("0.5.0")]
 //[assembly: InternalsVisibleTo("Imms.Collections")]
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 

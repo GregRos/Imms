@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -37,7 +37,8 @@
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Release\Imms.Tests.Integrity2.XML</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
@@ -65,7 +66,6 @@
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
-    <None Include="Readme.md" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ExtraFunctional\ExtraFunctional\ExtraFunctional.fsproj">
