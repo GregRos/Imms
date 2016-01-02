@@ -36,7 +36,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;ASSERTS</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;ASSERTS; NO_MUTATION</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -51,11 +51,11 @@
     <DefineConstants>
     </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>1</WarningLevel>
+    <WarningLevel>2</WarningLevel>
     <DocumentationFile>bin\Release\Imms.xml</DocumentationFile>
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <Prefer32Bit>false</Prefer32Bit>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
@@ -65,7 +65,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChainingAssertion.NUnit.cs" Condition="$(DefineConstants.Contains('ASSERTS'))" />
+    <Compile Include="Implementation\Common\Assertions.cs" Condition="$(DefineConstants.Contains('ASSERTS'))" />
     <Compile Include="Implementation\Common\Marked.cs" />
     <Compile Include="Implementation\FingerTree\Measured.cs" />
     <Compile Include="Implementation\FingerTree\FingerTreeElement.cs" />
@@ -157,6 +157,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Imms.nuspec">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Implementation\FingerTree\Explanation.md" />
     <None Include="Wrappers\Imms.FSharp\Base.ttinclude" />
     <None Include="Wrappers\Imms.FSharp\Helpers.ttinclude" />

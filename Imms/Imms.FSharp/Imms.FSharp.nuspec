@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Imms.FSharp</id>
+    <version>0.5.0</version>
+    <title>Imms.FSharp</title>
+    <authors>Gregory Rosenbaum</authors>
+    <owners>Gregory Rosenbaum</owners>
+    <licenseUrl>https://raw.githubusercontent.com/GregRos/Imms/master/license.md</licenseUrl>
+    <projectUrl>https://github.com/GregRos/Imms</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <iconUrl>https://raw.githubusercontent.com/GregRos/Imms/master/Icon.png</iconUrl>
+    <summary>Provides F# integration for Imms collections.</summary>
+    <description>
+      This library provides F# integration for the Imms immutable collections library.
+      
+      It contains extension methods, active patterns, modules, computational expressions, and other syntactic sugar.
+      
+      It is not useful if you're not writing in F#.
+    </description>
+    <releaseNotes>First release since rename.</releaseNotes>
+    <copyright>Copyright 2016</copyright>
+    <tags>collection collections fsharp immutable persistent imms imm functional deque vector map dictionary list queue stack performance set</tags>
+    <dependencies>
+      <dependency id="Imms" version="0.5.0"/>
+      <dependency id="FSharp.Core" version="3.1.2.1"/>
+    </dependencies>
+
+  </metadata>
+  <files>
+    <file src="Imms.FSharp.dll" target="lib/net40-client"/>
+    <file src="Imms.FSharp.xml" target="lib"/>
+  </files>
+</package>

@@ -8,7 +8,7 @@ using System;
 namespace Imms {
 	
 	///Implements fast math operations.
-	public static partial class FastMath {
+	internal static partial class FastMath {
 		private static readonly int[][] ExpTable = new[] {
 <#
 	for (var i = 2; i <= MaxBase; i++) {

@@ -57,7 +57,7 @@ let setTests initial parameter dataSet=
     let targets = [Target.Imms.Set generator; Target.Imms.OrderedSet generator]
     let reference = Target.Sys.OrderedSet generator
     let tests = 
-        [x.Add_remove; x.Difference; x.Except; x.Intersection; x.Union; x.Set_relation; x.Find]
+        [x.Add_remove; x.Difference; x.Except; x.Intersection; x.Union; x.Find]
         |> List.apply1 parameter
         |> Test.bindAll reference targets
     tests
@@ -90,10 +90,10 @@ let main argv =
     let r = Random()
     let mutable tests = []
     for i = 0 to 0 do
-        let initial, param, ds = r.Next(0, 10000), r.Next(50000, 100000), r.Next( 30000, 40000)
+        let initial, param, ds = r.Next(0, 1000), r.Next(100, 1000), r.Next( 30000, 40000)
         printfn "Initial: %d, Param: %d, ds: %d" initial param ds
         tests <- allTests initial param ds @ tests
-    let tests = tests |> List.filter (fun t -> t.Test.Kind = ListLike && t.Test.Name |> String.containsAll false ["update"; "slice"])
+    let tests = tests |> List.filter (fun t -> t.Test.Kind = SetLike)
     tests |> Test.runAll writer |> Report.byTest writer 
     Console.Read() |> ignore
     fs.Flush()

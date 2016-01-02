@@ -55,14 +55,11 @@ type SetWrapper<'v when 'v : comparison>(name : string) =
         match other with
         | :? SetWrapper<'v> as other -> 
             let eq1 = x.SetEquals(other) && other.Length = x.Length
-            if x.IsOrdered && other.IsOrdered then
-                eq1 && Seq.equals x other
-            else
-                eq1
+            eq1
         | _ -> failwith "Unexpected equality!"
     override x.GetHashCode() = failwith "Don't call this method"
     
-type ReferenceSetWrapper<'v when 'v : comparison>(Inner : Set<ComparableKey<'v>>, Ordering : ImmOrderedSet<ComparableKey<'v>>, Comparer : KeySemantics<'v>) = 
+type ReferenceSetWrapper<'v when 'v : comparison> private (Inner : Set<ComparableKey<'v>>, Ordering : ImmOrderedSet<ComparableKey<'v>>, Comparer : KeySemantics<'v>) = 
     inherit SetWrapper<'v>("FSharpSet")    
     static let wrap cmp ord x  = ReferenceSetWrapper<'v>(x, ord, cmp) :> SetWrapper<'v>
     static let unwrapKey (x : ComparableKey<_>) = x.Value
@@ -79,7 +76,7 @@ type ReferenceSetWrapper<'v when 'v : comparison>(Inner : Set<ComparableKey<'v>>
         let v = wrapKey v
         if Inner.Contains v then Inner.Remove v |> wrapInst (Ordering.Remove v) else x:>_
     override x.Contains v = Inner.Contains (wrapKey v)
-    override x.Length = Ordering.Length
+    override x.Length = Inner.Count
     override x.SelfTest() = true
     override x.Empty = Set.empty |> wrapInst (ImmOrderedSet.empty)
     override x.IsEmpty = Inner.IsEmpty
@@ -215,7 +212,8 @@ type ImmSetWrapper<'v when 'v : comparison>(Inner : ImmSet<'v>, Ordering : ImmOr
     override x.RelatesTo vs = vs |> unwrap |> Inner.RelatesTo
     override x.SetEquals vs = vs |> unwrap |> Inner.SetEquals
     static member FromSeqWith cmp s = ImmSet.ofSeqWith cmp s |> wrap (s |> Seq.disableIterateOnce |> ImmOrderedSet.ofSeqWith cmp)
-    static member FromSeq s = ImmSet.ofSeq(s) |> wrap (ImmOrderedSet.ofSeq (s |> Seq.disableIterateOnce))
+    static member FromSeq s = 
+        ImmSet.ofSeq(s) |> wrap (ImmOrderedSet.ofSeq (s |> Seq.disableIterateOnce))
     
 
 type ImmOrderedSetWrapper<'v when 'v : comparison>(Inner : ImmOrderedSet<'v>) = 

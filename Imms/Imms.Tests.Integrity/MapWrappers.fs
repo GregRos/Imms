@@ -232,7 +232,7 @@ type ImmOrderedMapWrapper<'k when 'k : comparison>(Inner : ImmOrderedMap<'k, 'k>
     override x.Fold initial f = Inner |> ImmOrderedMap.fold initial f
     override x.Reduce f = Inner |> ImmOrderedMap.reduce f
     static member FromSeq s = 
-        ImmOrderedMapWrapper(ImmOrderedMap.ofSeqWith Cmp.Default s) :> MapWrapper<_>
+        ImmOrderedMapWrapper(ImmOrderedMap.ofKvpSeqWith Cmp.Default s) :> MapWrapper<_>
 
 type ImmMapWrapper<'k when 'k : comparison>(Inner : ImmMap<'k,'k>) =
     inherit MapWrapper<'k>("ImmMap")
@@ -275,7 +275,7 @@ type ImmMapWrapper<'k when 'k : comparison>(Inner : ImmMap<'k,'k>) =
     override x.Find f = Inner.Find f |> fromOption
     override x.Fold initial f = Inner.Aggregate(initial, toFunc2 f)
     override x.Reduce f = Inner |> ImmMap.reduce f
-    static member FromSeq s = ImmMapWrapper(ImmMap.ofSeq'(s))  :> MapWrapper<_>
+    static member FromSeq s = ImmMapWrapper(ImmMap.ofKvpSeq(s))  :> MapWrapper<_>
 
 type MapWrapper<'k when 'k : comparison> with
     member x.assert_keyExists k  =

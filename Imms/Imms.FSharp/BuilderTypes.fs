@@ -68,14 +68,13 @@ let inline internal set_build c : collection_ops<'elem, 's, 's> =
         final = id
     }
 
-let inline internal map_build c : collection_ops<'k * 'v, 's, 's> =
+let inline internal map_build c : collection_ops<Kvp<'k,'v>, 's, 's> =
     {
-        left_combine = fun elem many -> many /+ elem
-        empty = fun () -> Ops.getEmptyWith c
+        left_combine = fun e many -> many /+ e
+        empty = fun () -> (Ops.getEmptyWith c : 's)
         of_seq = fun sq -> (Ops.getEmptyWith c : 's) /++ sq
         right_combine = fun elem many -> many /+ elem
-        concat = fun (many1,many2) -> 
-            (^s : (member AddRange : 's -> 's) many1, many2)
+        concat = fun (many1,many2) -> many1 |> Ops.addRange many2
         final = id
     }
 

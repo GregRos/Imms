@@ -5,6 +5,10 @@ using Imms.Implementation;
 
 namespace Imms {
 
+	/// <summary>
+	/// Immutable and persistent set that uses hashing and equality for membership.
+	/// </summary>
+	/// <typeparam name="T">The type of element contained in the set.</typeparam>
 	public sealed partial class ImmSet<T> : AbstractSet<T, ImmSet<T>> {
 		internal readonly IEqualityComparer<T> EqualityComparer;
 		internal readonly HashedAvlTree<T, bool>.Node Root;
@@ -31,6 +35,11 @@ namespace Imms {
 			get { return Root.IsEmpty; }
 		}
 
+		/// <summary>
+		/// Returns an empty <see cref="ImmSet{T}"/> using the specified eq comparer, or the default.
+		/// </summary>
+		/// <param name="eq"></param>
+		/// <returns></returns>
 		public new static ImmSet<T> Empty(IEqualityComparer<T> eq = null) {
 			return new ImmSet<T>(HashedAvlTree<T, bool>.Node.Empty, eq ?? FastEquality<T>.Default);
 		}

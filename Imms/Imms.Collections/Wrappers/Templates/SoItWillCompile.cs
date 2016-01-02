@@ -7,17 +7,17 @@ using System.Threading.Tasks;
 using Imms;
 using Imms.Abstract;
 
-public interface __HandlerObject__<TKey>
+internal interface __HandlerObject__<TKey>
 {
 
 }
 
-public interface __Parent__
+internal interface __Parent__
 {
 	
 }
 
-partial class __ListLikeClass__<T>
+internal partial class __ListLikeClass__<T>
 {
 	protected override ISequentialBuilder<T, __ListLikeClass__<T>> EmptyBuilder {
 		get;

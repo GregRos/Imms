@@ -30,7 +30,7 @@ namespace Imms.Abstract {
 			/// The length of the collection.
 			/// </summary>
 			public int Length {
-				get { return -1 * Object.Length; }
+				get { return Object.Length; }
 			}
 
 			/// <summary>

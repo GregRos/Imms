@@ -4,6 +4,10 @@ using Imms.Abstract;
 using Imms.Implementation;
 
 namespace Imms {
+	/// <summary>
+	/// Immutable and persistent ordered set. Uses comparison semantics, and allows looking up items by sort order.
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
 	public sealed partial class ImmOrderedSet<T> : AbstractSet<T, ImmOrderedSet<T>> {
 		internal readonly IComparer<T> Comparer;
 		internal readonly OrderedAvlTree<T, bool>.Node Root;
@@ -47,6 +51,11 @@ namespace Imms {
 			get { return this; }
 		}
 
+		/// <summary>
+		/// Returns an empty <see cref="ImmOrderedSet{T}"/> using the specified comparer.
+		/// </summary>
+		/// <param name="cm"></param>
+		/// <returns></returns>
 		public new static ImmOrderedSet<T> Empty(IComparer<T> cm) {
 			return new ImmOrderedSet<T>(OrderedAvlTree<T, bool>.Node.Empty, cm ?? FastComparer<T>.Default);
 		}
@@ -119,6 +128,10 @@ namespace Imms {
 			return Root.ForEachWhile((k, v) => function(k));
 		}
 
+		/// <summary>
+		/// Removes the maximal element from the set.
+		/// </summary>
+		/// <returns></returns>
 		public ImmOrderedSet<T> RemoveMax() {
 			if (Root.IsEmpty) throw Errors.Is_empty;
 			return Root.RemoveMax(Lineage.Mutable()).Wrap(Comparer);
@@ -135,6 +148,10 @@ namespace Imms {
 			return Root.ByOrder(index).Key;
 		}
 
+		/// <summary>
+		/// Removes the minimal element from this set.
+		/// </summary>
+		/// <returns></returns>
 		public ImmOrderedSet<T> RemoveMin() {
 			return Root.RemoveMin(Lineage.Mutable()).Wrap(Comparer);
 		}

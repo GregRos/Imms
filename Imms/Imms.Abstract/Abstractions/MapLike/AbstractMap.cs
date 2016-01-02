@@ -14,8 +14,17 @@ namespace Imms.Abstract {
 		: AbstractIterable<KeyValuePair<TKey, TValue>, TMap, IMapBuilder<TKey, TValue, TMap>>
 		where TMap : AbstractMap<TKey, TValue, TMap> {
 
+		/// <summary>
+		/// Indicates the behavior that should be used when a KVP already exists in the map.
+		/// </summary>
 		protected enum OverwriteBehavior {
+			/// <summary>
+			/// The existing value should be overwritten.
+			/// </summary>
 			Overwrite,
+			/// <summary>
+			/// An exception should be thrown.
+			/// </summary>
 			Throw
 		}
 
@@ -23,7 +32,9 @@ namespace Imms.Abstract {
 		///     The keys contained in this map.
 		/// </summary>
 		public virtual IEnumerable<TKey> Keys {
-			get { return this.Select(x => x.Key); }
+			get {
+				return this.Select(x => x.Key);
+			}
 		}
 
 		/// <summary>
@@ -33,8 +44,21 @@ namespace Imms.Abstract {
 			get { return this.Select(x => x.Value); }
 		}
 
+		/// <summary>
+		/// Tries to find the key-value pair with the specified key, or returns None.
+		/// </summary>
+		/// <param name="key">The key.</param>
+		/// <returns></returns>
 		protected abstract Optional<KeyValuePair<TKey, TValue>> TryGetKvp(TKey key);
 
+		/// <summary>
+		/// Adds a new key-value pair to the map.
+		/// </summary>
+		/// <param name="kvp">The key-value pair.</param>
+		/// <returns></returns>
+		public TMap Add(KeyValuePair<TKey, TValue> kvp) {
+			return Add(kvp.Key, kvp.Value);
+		}
 
 		/// <summary>
 		/// Returns the value associated with the specified key, or None if no such key exists.
@@ -152,9 +176,6 @@ namespace Imms.Abstract {
 		/// <summary>
 		/// Returns the value associated with the specified key.
 		/// </summary>
-		/// <value>
-		/// The <see cref="TValue"/> associated with the key.
-		/// </value>
 		/// <param name="key">The key.</param>
 		/// <returns></returns>
 		public TValue this[TKey key] {
@@ -205,19 +226,6 @@ namespace Imms.Abstract {
 			return base.Find(kvp => predicate(kvp.Key, kvp.Value));
 		}
 
-		public TMap Join(IEnumerable<KeyValuePair<TKey, TValue>> other, Func<TKey, TValue, TValue, TValue> selector = null) {
-			other.CheckNotNull("other");
-			if (selector == null && ReferenceEquals(this, other)) {
-				return this;
-			}
-			var map = other as TMap;
-			if (map != null && IsCompatibleWith(map)) return Join(map, selector);
-			if (selector == null) {
-				selector = (k, v1, v2) => v2;
-			}
-			return Join_Unchecked(other, selector);
-		}
-
 		/// <summary>
 		///     Joins this map with another map by key, returning a map consisting of the keys present in both maps, the value of each such key being determined by the specified collision resolution function.
 		/// </summary>
@@ -251,7 +259,7 @@ namespace Imms.Abstract {
 		/// <param name="bFactory">A prototype instance used as a builder factory.</param>
 		/// <param name="other">The other map.</param>
 		/// <param name="collision">The collision resolution function.</param>
-		protected internal virtual TRMap Join<TValue2, TRMap, TRValue>(TRMap bFactory,
+		protected internal virtual TRMap _Join<TValue2, TRMap, TRValue>(TRMap bFactory,
 			IEnumerable<KeyValuePair<TKey, TValue2>> other, Func<TKey, TValue, TValue2, TRValue> collision)
 			where TRMap : IBuilderFactory<IMapBuilder<TKey, TRValue, TRMap>>  {
 			bFactory.CheckNotNull("bFactory");
@@ -341,7 +349,7 @@ namespace Imms.Abstract {
 						}
 					}
 					else {
-						var tryGet = builder.TryGet(item.Key);
+						var tryGet = builder.TryGetKvp(item.Key).Map(x => x.Value);
 						if (tryGet.IsNone) return len > 0;
 						var newValue = subtraction(item.Key, tryGet.Value, item.Value);
 						if (newValue.IsSome) {
@@ -380,17 +388,40 @@ namespace Imms.Abstract {
 			return Merge_Unchecked(other, collision);
 		}
 
+		/// <summary>
+		/// Adds a new key-value pair to the map, possibly overwriting any previous value.
+		/// </summary>
+		/// <param name="key">The key to add.</param>
+		/// <param name="value">The value to add.</param>
+		/// <param name="behavior">The overwrite behavior requested.</param>
+		/// <returns></returns>
 		protected abstract TMap Set(TKey key, TValue value, OverwriteBehavior behavior);
 
+		/// <summary>
+		/// Adds a new key-value pair to the map, overwriting any previous value.
+		/// </summary>
+		/// <param name="key">The key to add.</param>
+		/// <param name="value">The value to add.</param>
+		/// <returns></returns>
 		public TMap Set(TKey key, TValue value) {
 			return Set(key, value, OverwriteBehavior.Overwrite);
 		}
 
+		/// <summary>
+		/// Adds a new key-value pair to the map, throwing an exception if a pair with this key already exists.
+		/// </summary>
+		/// <param name="key">The key to add.</param>
+		/// <param name="value">The value to add.</param>
+		/// <returns></returns>
 		public TMap Add(TKey key, TValue value) {
 			return Set(key, value, OverwriteBehavior.Throw);
 		}
 
-
+		/// <summary>
+		/// Removes a key from the map.
+		/// </summary>
+		/// <param name="key">The key to remove.</param>
+		/// <returns></returns>
 		public abstract TMap Remove(TKey key);
 
 		/// <summary>
@@ -425,7 +456,7 @@ namespace Imms.Abstract {
 				other.ForEach(item => {
 					if (collision == null) builder.Set(item.Key, item.Value);
 					else {
-						var myElement = builder.TryGet(item.Key);
+						var myElement = builder.TryGetKvp(item.Key).Map(x => x.Value);
 						builder.Set(item.Key, myElement.IsSome ? collision(item.Key, myElement.Value, item.Value) : item.Value);
 					}
 				});
@@ -483,14 +514,6 @@ namespace Imms.Abstract {
 			return base.All(kvp => predicate(kvp.Key, kvp.Value));
 		}
 
-		protected override TMap ToIterable(IEnumerable<KeyValuePair<TKey, TValue>> seq) {
-			var asMap = seq as TMap;
-			if (asMap != null && IsCompatibleWith(asMap)) {
-				return asMap;
-			}
-			return base.ToIterable(seq);
-		}
-
 		/// <summary>
 		///     Returns a map consisting of all the key-value pairs where the key is contained in exactly one map.
 		/// </summary>
@@ -500,8 +523,8 @@ namespace Imms.Abstract {
 			other.CheckNotNull("other");
 			var map = other as TMap;
 			if (map != null && IsCompatibleWith(map)) return Difference(map);
-			var otherMap = ToIterable(other);
-			return Subtract(other).Merge(otherMap.Subtract(this));
+			var otherMap = this.ToIterable(other);
+			return Subtract(otherMap).Merge(otherMap.Subtract(this));
 		}
 
 		/// <summary>

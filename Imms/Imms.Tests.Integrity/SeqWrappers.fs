@@ -108,7 +108,7 @@ type SeqReferenceWrapper<'v>(inner : ImmutableList<'v>) as x=
         let i = if i < 0 then i + x.Length + 1 else i
         SeqReferenceWrapper(inner.InsertRange(i,vs)) :>_
     override x.FindLastIndex f =
-        let r = inner.FindLastIndex(f |> toPredicate) 
+        let r = inner.FindLastIndex(f |> toPredicate)
         if r >= 0 then Some r else None
 
     override x.Take n = 

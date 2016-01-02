@@ -5,6 +5,12 @@ using System.ComponentModel;
 using System.Linq;
 
 namespace Imms.Abstract {
+	/// <summary>
+	/// Abstracts over maps of any kind.
+	/// </summary>
+	/// <typeparam name="TKey">The type of the key.</typeparam>
+	/// <typeparam name="TValue">The type of the value.</typeparam>
+	/// <typeparam name="TMap">A self-reference to the type implementing this class.</typeparam>
 	public abstract partial class AbstractMap<TKey, TValue, TMap> 
 	: IDictionary<TKey, TValue>
 	{
@@ -40,36 +46,6 @@ namespace Imms.Abstract {
 
 		ICollection<TValue> IDictionary<TKey, TValue>.Values {
 			get { return new FakeCollection<TValue>(Values, Length); }
-		}
-
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public TMap op_Remove(TKey item)
-		{
-			return Remove(item);
-		}
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public TMap op_RemoveRange(IEnumerable<TKey> items) {
-			return RemoveRange(items);
-		}
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public TMap op_Add(KeyValuePair<TKey, TValue> item) {
-			return Add(item.Key, item.Value);
-		}
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public TMap op_AddRange(IEnumerable<KeyValuePair<TKey, TValue>> items) {
-			return SetRange(items);
-		}
-	
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public TMap op_Add(Tuple<TKey, TValue> item)
-		{
-			return Add(item.Item1, item.Item2);
-		}
-		
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public TMap op_AddRange(IEnumerable<Tuple<TKey, TValue>> items)
-		{
-			return SetRange(items.Select(x => Kvp.Of(x)));
 		}
 	}
 }

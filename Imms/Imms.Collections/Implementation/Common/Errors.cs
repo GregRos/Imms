@@ -7,9 +7,9 @@ namespace Imms.Implementation {
 	/// An exception thrown by the deep, technical implementation level of a data structure.<br/>
 	/// Checks for all exceptions must be performed at the user-visible wrapper level. If this exception is thrown, it means that there is a bug.
 	/// </summary>
-	public class ImplementationException : Exception {
-		public ImplementationException(string message, Exception innerException = null) :
-			base("If this exception is visible, it indicates a bug. More info: " + message, innerException) { }
+	internal class ImplementationException : Exception {
+		internal ImplementationException(string message, Exception innerException = null) :
+			base("This exception is thrown by the deep implementation level of a data structure. It should not be visible and if it is, this indicates a bug. More info: " + message, innerException) { }
 	}
 
 	/// <summary>

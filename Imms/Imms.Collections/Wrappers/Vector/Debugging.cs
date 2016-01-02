@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -7,7 +8,11 @@ namespace Imms {
 	[DebuggerTypeProxy(typeof (ImmVector<>.VectorDebugView))]
 	public partial class ImmVector<T> {
 
+		/// <summary>
+		/// Should not be visible.
+		/// </summary>
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("This member is not meant to be used.", true)]
 		public IEnumerable<T> AsSeq {
 			get { return this; }
 		}

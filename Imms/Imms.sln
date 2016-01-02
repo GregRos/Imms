@@ -29,6 +29,10 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ExtraFunctional", "ExtraFun
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtraFunctional.Templates", "ExtraFunctional\ExtraFunctional.Templates\ExtraFunctional.Templates.csproj", "{8E19E64B-EB5C-4042-B419-C1A9E9A05997}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Imms.Messing.FSharp", "Imms.Messing.FSharp\Imms.Messing.FSharp.fsproj", "{1A652D10-CCFE-4C81-A729-B9835284488F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Imms.Messing.CSharp", "Imms.Messing.CSharp\Imms.Messing.CSharp.csproj", "{C3BE5E9F-7CA1-4ADB-98C4-39AEB91E2591}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +67,14 @@ Global
 		{8E19E64B-EB5C-4042-B419-C1A9E9A05997}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E19E64B-EB5C-4042-B419-C1A9E9A05997}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E19E64B-EB5C-4042-B419-C1A9E9A05997}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A652D10-CCFE-4C81-A729-B9835284488F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A652D10-CCFE-4C81-A729-B9835284488F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A652D10-CCFE-4C81-A729-B9835284488F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A652D10-CCFE-4C81-A729-B9835284488F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3BE5E9F-7CA1-4ADB-98C4-39AEB91E2591}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3BE5E9F-7CA1-4ADB-98C4-39AEB91E2591}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3BE5E9F-7CA1-4ADB-98C4-39AEB91E2591}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3BE5E9F-7CA1-4ADB-98C4-39AEB91E2591}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -75,5 +87,7 @@ Global
 		{E7D95FA6-DFC0-45F8-A549-4B917F1B5D49} = {FF0AD0C9-1BDB-43DF-9362-DB80BA7CDBDF}
 		{D0648CE4-2886-4E09-964C-C4E675DDA3C3} = {FF0AD0C9-1BDB-43DF-9362-DB80BA7CDBDF}
 		{8E19E64B-EB5C-4042-B419-C1A9E9A05997} = {FF0AD0C9-1BDB-43DF-9362-DB80BA7CDBDF}
+		{1A652D10-CCFE-4C81-A729-B9835284488F} = {FF0AD0C9-1BDB-43DF-9362-DB80BA7CDBDF}
+		{C3BE5E9F-7CA1-4ADB-98C4-39AEB91E2591} = {FF0AD0C9-1BDB-43DF-9362-DB80BA7CDBDF}
 	EndGlobalSection
 EndGlobal

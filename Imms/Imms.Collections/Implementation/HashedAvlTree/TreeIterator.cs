@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace Imms.Implementation {
 	partial class HashedAvlTree<TKey, TValue> {
-		public class TreeIterator {
+		internal class TreeIterator {
 			readonly List<Marked<Node, bool>> _future;
 			Node _current;
 			Optional<Node> _oldNode = Optional.None;

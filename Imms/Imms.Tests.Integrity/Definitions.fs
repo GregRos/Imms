@@ -499,7 +499,7 @@ and ComparableKey<'t>(Value : 't, Comparer : KeySemantics<'t>) =
                 match r with
                 | :? ComparableKey<'t> as r -> r.Value
                 | _ -> r :?> 't
-            Comparer.Compare (r) (Value)
+            Comparer.Compare Value r
         
     member val Value = Value
     override x.Equals o = (x :> IComparable).CompareTo(o) = 0

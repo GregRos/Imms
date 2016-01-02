@@ -5,13 +5,6 @@ using Imms.Abstract;
 
 namespace Imms {
 
-	public static class TupleTest {
-
-		public static int Test<T1,T2>(this Tuple<T1, T2> a) {
-			return 0;
-		}
-
-	}
 
 	static partial class Fun {
 

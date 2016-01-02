@@ -18,11 +18,28 @@ namespace Imms.Abstract {
 	/// <typeparam name="TBuilder">The type of collection builder used by the collection that implements this class. </typeparam>
 	public abstract partial class AbstractIterable<TElem, TIterable, TBuilder>
 		: IEnumerable<TElem>, IBuilderFactory<TBuilder>, IAnyIterable<TElem>
-		where TBuilder : IIterableBuilder<TElem, TIterable> 
+		where TBuilder : IIterableBuilder<TElem, TIterable>
 		where TIterable : AbstractIterable<TElem, TIterable, TBuilder> {
+		/// <summary>
+		///   Filters the collection using the specified predicate.
+		/// </summary>
+		/// <param name="predicate"> The predicate. </param>
+		/// <returns> </returns>
+		/// <exception cref="ArgumentNullException">Thrown if the argument is null.</exception>
+		public virtual TIterable Where(Func<TElem, bool> predicate) {
+			if (predicate == null) throw Errors.Argument_null("predicate");
+			using (var builder = EmptyBuilder) {
+				ForEach(v => {
+					if (predicate(v)) builder.Add(v);
+				});
+				return builder.Produce();
+			}
+		}
 
 		TBuilder IBuilderFactory<TBuilder>.EmptyBuilder {
-			get { return EmptyBuilder; }
+			get {
+				return EmptyBuilder;
+			}
 		}
 
 
@@ -30,13 +47,20 @@ namespace Imms.Abstract {
 		/// Returns an empty builder used to construct a new instance of the collection.
 		/// </summary>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		protected abstract TBuilder EmptyBuilder { get; }
-
-		protected virtual TIterable Empty {
-			get { return EmptyBuilder.Produce(); }
+		protected abstract TBuilder EmptyBuilder {
+			get;
 		}
 
-		
+		/// <summary>
+		/// Returns an empty collection of the current type.
+		/// </summary>
+		protected TIterable Empty {
+			get {
+				return EmptyBuilder.Produce();
+			}
+		}
+
+
 		/// <summary>
 		/// The type parameter TIterable is assumed to be the implementing collection, 
 		/// but there is no way to enforce this through the type system, so the type system doesn't "know" it.
@@ -46,10 +70,8 @@ namespace Imms.Abstract {
 		/// In order to improve performance.
 		/// </summary>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		protected virtual TIterable UnderlyingCollection
-		{
-			get
-			{
+		protected virtual TIterable UnderlyingCollection {
+			get {
 				//We use the method Fun.CastObject because this type also supports a used-defined conversion to TIterable
 				//And we don't want to invoke it.
 				return Fun.CastObject<AbstractIterable<TElem, TIterable, TBuilder>, TIterable>(this);
@@ -61,13 +83,12 @@ namespace Imms.Abstract {
 		/// </summary>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public virtual bool IsEmpty {
-			get
-			{
+			get {
 				return !ForEachWhile(v => false);
 			}
 		}
 
-		
+
 		/// <summary>
 		/// (Implementation) Applies a selector on each element of the collection.
 		/// </summary>
@@ -80,10 +101,9 @@ namespace Imms.Abstract {
 			where TRSeq : IBuilderFactory<IIterableBuilder<TElem2, TRSeq>> {
 			bFactory.CheckNotNull("bFactory");
 			selector.CheckNotNull("selector");
-			using (var builder = bFactory.EmptyBuilder)
-			{
+			using (var builder = bFactory.EmptyBuilder) {
 				ForEach(v => builder.Add(selector(v)));
-				var ib =  builder.Produce();
+				var ib = builder.Produce();
 				return ib;
 			}
 		}
@@ -92,7 +112,9 @@ namespace Imms.Abstract {
 		///     Returns the number of elements in the collection.
 		/// </summary>
 		public virtual int Length {
-			get { return Count(x => true); }
+			get {
+				return Count(x => true);
+			}
 		}
 
 		/// <summary>
@@ -227,7 +249,7 @@ namespace Imms.Abstract {
 				return true;
 			});
 			return item;
-		} 
+		}
 
 		/// <summary>
 		///     Applies the specified delegate on every item in the collection, from first to last.
@@ -240,13 +262,6 @@ namespace Imms.Abstract {
 				action(x);
 				return true;
 			});
-		}
-
-		protected virtual TIterable ToIterable(IEnumerable<TElem> seq) {
-			using (var builder = EmptyBuilder) {
-				builder.AddRange(seq);
-				return builder.Produce();
-			}
 		}
 
 

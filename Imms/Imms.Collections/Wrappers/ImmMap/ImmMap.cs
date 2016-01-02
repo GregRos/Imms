@@ -6,7 +6,11 @@ using Imms.Implementation;
 namespace Imms {
 
 
-
+		/// <summary>
+	/// Immutable and persistent key-value map.
+	/// </summary>
+	/// <typeparam name="TKey">The type of the key.</typeparam>
+	/// <typeparam name="TValue">The type of the value.</typeparam>
 	public sealed partial class ImmMap<TKey, TValue> : AbstractMap<TKey, TValue, ImmMap<TKey, TValue>> {
 		private readonly IEqualityComparer<TKey> _equality;
 		private readonly HashedAvlTree<TKey, TValue>.Node _root;
@@ -16,6 +20,9 @@ namespace Imms {
 			_equality = equality;
 		}
 
+		/// <summary>
+		///     Returns the number of elements in the collection.
+		/// </summary>
 		public override int Length {
 			get { return _root.Count; }
 		}
@@ -29,6 +36,11 @@ namespace Imms {
 			get { return _root.IsEmpty; }
 		}
 
+		/// <summary>
+		/// Returns an empty <see cref="ImmMap{TKey,TValue}"/> using the specified eq comparer.
+		/// </summary>
+		/// <param name="equality"></param>
+		/// <returns></returns>
 		public new static ImmMap<TKey, TValue>  Empty(IEqualityComparer<TKey> equality = null) {
 			return new ImmMap<TKey, TValue>(HashedAvlTree<TKey, TValue>.Node.Empty, equality ?? FastEquality<TKey>.Default);
 		}
@@ -112,7 +124,11 @@ namespace Imms {
 			return _root.SymDifference(other._root, Lineage.Mutable()).WrapMap(_equality);
 		}
 
-
+		/// <summary>
+		/// Adds a new key-value pair (as a tuple) to the map.
+		/// </summary>
+		/// <param name="pair"></param>
+		/// <returns></returns>
 		public ImmMap<TKey, TValue> Add(Tuple<TKey, TValue> pair) {
 			pair.CheckNotNull("pair");
 			return Add(pair.Item1, pair.Item2);

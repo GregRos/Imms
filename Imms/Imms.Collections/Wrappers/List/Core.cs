@@ -6,7 +6,7 @@ using Imms.Implementation;
 
 namespace Imms {
 	/// <summary>
-	///     A sequential data structure supporting many efficient operations.
+	///     Immutable and persistent double-ended queue supporting many operations.
 	/// </summary>
 	/// <typeparam name="T"> The type of value stored in the data structure. </typeparam>
 	public sealed partial class ImmList<T> : AbstractSequential<T, ImmList<T>> {
@@ -20,14 +20,18 @@ namespace Imms {
 		///     Gets the empty list.
 		/// </summary>
 		public new static ImmList<T> Empty {
-			get { return empty; }
+			get {
+				return empty;
+			}
 		}
 
 		/// <summary>
 		///     Gets the number of items in the list.
 		/// </summary>
 		public override int Length {
-			get { return Root.Measure; }
+			get {
+				return Root.Measure;
+			}
 		}
 
 		/// <summary>
@@ -76,11 +80,6 @@ namespace Imms {
 			FingerTree<T>.FTree<Leaf<T>> left, right;
 			Root.Split(atIndex, out left, out right, Lineage.Immutable);
 			return Tuple.Create(left.Wrap(), right.Wrap());
-		}
-
-		public override ImmList<T> Skip(int count) {
-			count.CheckIsBetween("count", 0);
-			return count >= Root.Measure ? Empty : this[count, -1];
 		}
 
 		/// <summary>
@@ -302,7 +301,7 @@ namespace Imms {
 		}
 
 		/// <summary>
-		///     Reverses the list. O(n).
+		///     Reverses the list.
 		/// </summary>
 		/// <returns> </returns>
 		public override ImmList<T> Reverse() {
@@ -354,6 +353,7 @@ namespace Imms {
 		}
 
 		static readonly FingerTree<T>.FTree<Leaf<T>> EmptyFTree = FingerTree<T>.FTree<Leaf<T>>.Empty;
+
 		static readonly ImmList<T> empty = new ImmList<T>(EmptyFTree);
 
 	}

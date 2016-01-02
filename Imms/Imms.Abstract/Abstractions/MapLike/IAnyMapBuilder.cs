@@ -7,13 +7,13 @@ namespace Imms.Abstract {
 	/// <typeparam name="TKey">The type of key.</typeparam>
 	/// <typeparam name="TValue">The type of value.</typeparam>
 	public interface IAnyMapBuilder<TKey, TValue> : IAnyIterableBuilder<KeyValuePair<TKey, TValue>> {
-		/// <summary>
-		/// Returns the value associated with the specified key, or None if no such value exists.
-		/// </summary>
-		/// <param name="key">The key to get.</param>
-		/// <returns></returns>
-		Optional<TValue> TryGet(TKey key);
 
+
+		/// <summary>
+		/// Returns the key-value pair with the specified key, or None if no such pair exists.
+		/// </summary>
+		/// <param name="key"></param>
+		/// <returns></returns>
 		Optional<KeyValuePair<TKey, TValue>> TryGetKvp(TKey key);
 
 		/// <summary>

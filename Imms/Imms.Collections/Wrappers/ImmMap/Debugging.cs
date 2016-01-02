@@ -1,10 +1,11 @@
 using System.Diagnostics;
 
 namespace Imms {
+
 	[DebuggerTypeProxy(typeof (ImmMap<,>.MapDebugView))]
 	[DebuggerDisplay("{DebuggerDisplay,nq}")]
 	partial class ImmMap<TKey, TValue> {
-		class MapDebugView {
+		private class MapDebugView {
 			public MapDebugView(ImmMap<TKey, TValue> map) {
 				IterableView = new IterableDebugView(map);
 			}

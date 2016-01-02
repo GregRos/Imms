@@ -1,18 +1,18 @@
 # Imms
 ---
 
-Imms is a library of [persistent](http://en.wikipedia.org/wiki/Persistent_data_structure), and [immutable](http://en.wikipedia.org/wiki/Immutable_object) collections for the .NET framework.
+**Imms** is a library of [persistent](http://en.wikipedia.org/wiki/Persistent_data_structure), and [immutable](http://en.wikipedia.org/wiki/Immutable_object) collections for the .NET framework. It is available on [NuGet](https://www.nuget.org/packages/**Imms**/).
 
-However, Imms has several distinguishing features that make it different from pretty much any other library of this sort that has been released for .NET so far.
+However, **Imms** has several distinguishing features that make it different from pretty much any other library of this sort that has been released for .NET so far.
 
-  1. *Performance:* Imms collections perform very well, usually far better than other collections of the same kind. 
-  2. *Functionality:* Imms collections provide more inherent functionality than any collection of a similar kind.
-  3. *LINQ interface:* Imms collections support true collection-based operations through LINQ syntax. For example, they implement a `Select` statement that returns a collection of the same kind.
-  5. *F# Integration*: Imms collections are integrated with F# in the assembly `Imms.FSharp`, which provides extension methods, module bindings, collection builders (computation expressions), and active patterns for working with the collections. 
-  6. *Permissive License:* Available under the [MIT license](https://github.com/GregRos/Imms/blob/master/license.md).
-  7. *Zero dependencies*: Imms assemblies have zero dependencies.
+  1. *Performance:* **Imms** collections perform very well, usually far better than other collections of the same kind. 
+  2. *Functionality:* **Imms** collections provide more inherent functionality than any collection of a similar kind.
+  3. *LINQ interface:* **Imms** collections support true collection-based operations through LINQ syntax. For example, they implement a `Select` statement that returns a collection of the same kind.
+  5. *F# Integration*: **Imms** collections are integrated with F# in the assembly `Imms.FSharp`, which provides extension methods, module bindings, collection builders (computation expressions), and active patterns for working with the collections. 
+  6. *Permissive License:* Available under the [MIT license](https://github.com/GregRos/**Imms**/blob/master/license.md).
+  7. *Zero dependencies*: **Imms** assemblies have zero dependencies.
 
-**Note:** Imms collections can't be called *purely functional* because they involve mutations behind the scenes. However, no user-visible instance is ever mutated.
+**Note:** **Imms** collections can't be called *purely functional* because they involve mutations behind the scenes. However, no user-visible instance is ever mutated.
 
 Currently, all library assemblies require .NET Framework 4.0 Client Profile, and all test assemblies require .NET Framework 4.5.1. The F# libraries require F# 3.0.
 
@@ -21,12 +21,12 @@ The collections are in beta.
 
 ## The Collections
 
-Imms provides 6 collections, divided into 3 groups.
+**Imms** provides 6 collections, divided into 3 groups.
 
 ### Sequential
 Sequential collections store elements in order. An example of a sequential collection is `List<T>`.
 
-Imms provides the following sequential collections:
+**Imms** provides the following sequential collections:
 
  1. **ImmList:** A very versatile sequential collection that supports pretty much every operation you can name, including addition/removal at either end, get and set by index, insert/remove by index, concatenation, splitting, subsequences... all of these are implemented using specialized algorithms that perform up to `O(logn)`.
  1. **ImmVector:** Offers less functionality than ImmList, but performs a lot better for most operations. It is generally recommended that you use ImmList for most purposes. ImmVector's performance approaches mutable collections for some operations.
@@ -34,7 +34,7 @@ Imms provides the following sequential collections:
 ### Sets
 Sets store collections of unique elements. An example of a set is `HashSet<T>`.
 
-Imms provides the following set collections:
+**Imms** provides the following set collections:
 
   1. **ImmSet**, which is an equality-based set that uses hashing, similarly to `HashSet` (except that it is immutable, of course).
   2. **ImmOrderedSet**, which is a comparison-based set that stores elements in order. Supports additional operations, such as retrieval by sort order index.
@@ -49,7 +49,7 @@ Both sets support the following various set-theoretic operations. These operatio
 ### Maps
 Maps store key-value pairs and allow for fast retrieval by the key. They are also known as dictionaries. An example of a map is `Dictionary<TKey, TValue>`.
 
-Imms provides the following map collections:
+**Imms** provides the following map collections:
 
 1. **ImmMap**, which is equality-based and uses hashing, similarly to `Dictionary<,>` (except that it is immutable).
 2. **ImmOrderedMap**, which is ordered by the key. Provides additional operations, such as retrieval by sort order index.
@@ -62,29 +62,51 @@ Both maps support set-theoretic operations extended to maps. These operations `I
 4. `Subtract`, which is similar to `Except` over sets, except that you provide a selector that determines the value in the result map, and this selector may also indicate that the key-value pair should be removed.
 5. `Difference`, which is similar to `Difference` over sets. No selector can be provided in this case.
 
+## API Gotcha's
+A few things you should be aware of about the API.
+
+1. `Length` returns the length of a collection, not `Count`. `Count` is instead a method that counts the number of items in the collection (like in LINQ).
+2. Collections don't have visible constructors. You must construct them using factory methods, e.g. `ImmList.Empty<int>()`.
+3. Collections support negative indexing (see sections below). This means that things that used to throw exceptions can instead cause unexpected behavior.
+4. `AddLast`/`AddFirst` add items to sequential collections, not `Add` alone.
+5. The collections 'override' LINQ operations. To use the original LINQ operations (which are lazy and return `IEnumerable`), use `AsEnumerable`.
+6. The collections are sealed.
+
+### F# Companion Library
+1. F# option type is not the same as **Imms**'s `Optional` type. Sorry.
+2. Instance methods exposed by collections often take parameters of type `Func<T>`, which isn't directly compatible with F#'s function objects. To get around this, use the module bindings.
+3. Some constructs in the `Imms.FSharp.Implementation` namespace are accessible, but are not meant to be used in user code, and aren't supported.
+
 ### Note about Maps and Sets
 The set and map collections in this library support custom equality and comparison semantics (by accepting an `IComparer<T>` or `IEqualityComparer<T>`). This isn't as trivial as it sounds.
 
 Remember that these collections use special algorithms for operations such as `Intersect` and `Union`. These algorithms only make sense when both collections are compatible, i.e. use the same equality or comparison semantics. Otherwise, the result will be corrupted.
 
-To avoid dangerous and hard to track bugs, Imms collections only use the special algorithms if both collections use the same equi/comp handler. This is determined by calling `.Equals`. For this reason, if you plan to use a custom handler, you should either:
+To avoid dangerous and hard to track bugs, **Imms** collections only use the special algorithms if both collections use the same equi/comp handler. This is determined by calling `.Equals`. For this reason, if you plan to use a custom handler, you should either:
 
-1. Make sure to use the same handler instance for all Imms collections that use that handler. This pattern is made more convenient by extension methods on handlers that lets you use them as 'factories' of collections. An example is `IComparer<T>.CreateOrderedSet`.
+1. Make sure to use the same handler instance for all **Imms** collections that use that handler. This pattern is made more convenient by extension methods on handlers that lets you use them as 'factories' of collections. An example is `IComparer<T>.CreateOrderedSet`.
 2. Override `.Equals` on your custom handler to support functional equality.
 
-If Imms decides that the comparison handlers are different, a generic implementation will be used, which can be significantly slower. That is to say, the implementation is as slow as what some other collection libraries use. ◕‿◕
+If **Imms** decides that the comparison handlers are different, a generic implementation will be used, which can be significantly slower. That is to say, the implementation is as slow as what some other collection libraries use. ◕‿◕
+
+
 
 ## Extra Features
 
-#### Equality Semantics
-Imms's sequential collections implement structural equality, overriding `Equals` and `GetHashCode`, as well as the `==` operator. 
+### Compatibility Interfaces
+Imms collections implement various interfaces such as `IList<T>` and others for the sake of compatibility.
 
-For two collections to be equal, they must be of the exact same type, and must also contain the same sequence of elements. 
+### Implicit Optimization
+Although re-iterated in other parts, it is worth noting here as well. **Imms** allows you to specify an `IEnumerable<T>` for many operations. 
 
-The equality comparer used to equate elements is the default equality comparer, and this cannot be changed. However, the `SequenceEquals` method lets you provide your own comparer.
+However, operations can often be much faster (sometimes by several orders of magnitude) if the input is a collection of the same type. When this applies, it will be noted in the description.
+
+Milder performance benefits can also be achieved for other known collection types.
+
+This approach is chosen because otherwise, collections would be cluttered up by many methods that essentially do the same thing.
 
 ### LINQ Implementation
-Imms collections implement 'override' LINQ operations so that they return a collection of the same kind. This is usually very convenient. In addition, the implementation is generally much faster than the generic LINQ implementation for various reasons.
+**Imms** collections implement 'override' LINQ operations so that they return a collection of the same kind. This is usually very convenient. In addition, the implementation is generally much faster than the generic LINQ implementation for various reasons.
 
 You can still use the default LINQ operations by calling `AsEnumerable`.
 
@@ -100,18 +122,30 @@ It's really very similar to a nullable type, except that it can be used on refer
 
 `Optional<T>` is a struct, which has many advantages. For example, you can always view it in the debugger, you can always call methods such as `ToString()` on it, you can always recover what missing `T` it represents, etc. It is initialized to `None` by default.
 
-You can use it in optional parameters too, but doing this is a little wordy. Here is an example of how to do so:
+**Imms** provides a variety of methods to work with optional values, such as `Map`.
 
-	public static void DoThisAndThat(Optional<int> maybeNumber = default(Optional<int>)) {
-		//...
-	}
-
-Imms provides a variety of methods to work with optional values, such as `Map`.
-
-#### Use in Imms
+#### Use in **Imms**
 The optional value type is used quite frequently. Generally, any method like `bool TryX(object,out T)` is instead written with the more elegant, `Optional<T> TryX(object)`. 
 
 Another example is the method `Choose`, which is similar to `Select`, except that it takes a selector of the form `Func<T, Optional<TOut>>` and returning `None` indicates that the value should be ignored.
+
+### Convenience Features
+The library offers the following minor features:
+
+#### Negative Indexing
+Every operation supports negative indexes, which indicate distance from the end of the list. 
+
+For example, `list[-1]` gets the last item of `list` and `list[-3]` gets the third one from the end. Using negative indexing, `list[-list.Length]` gets the first item.
+
+#### Slices Indexer
+Collections that support indexing allow you to get a slice of the collection using the `[int,int]` indexer. For example, the following gives you a slice starting with index `2` and stretching to the end of the list: `list[2, -1]`.
+#### Sequence Equality
+**Imms**'s sequential collections implement structural equality, overriding `Equals` and `GetHashCode`, as well as the `==` operator. 
+
+For two collections to be equal, they must be of the exact same type, and must also contain the same sequence of elements. 
+
+The equality comparer used to equate elements is the default equality comparer, and this cannot be changed. However, the `SequenceEquals` method lets you provide your own comparer.
+
 
 ### F# Integration
 **Imms** is written primarily in C# and targets that language. But the library has a separate companion assembly, `Imms.FSharp`, that provides various extensions and modules for use with F#.
@@ -120,19 +154,13 @@ These modules were heavily used in performance and integrity testing.
 
 Here are some example features:
 
-1. Extension overloads for methods that normally take `Func<T>`. The overloads take F#'s function value.
 2. Special F# operators for adding elements to collections, and concatenating them.
 2. Module bindings for most of the instance-level operations.
 3. Generic active patterns for decomposing collections in various ways.
-4. Computational expressions (aka monads) for constructing Imms collections. You can also construct maps and sets in this way.
-
-### Comparison Handlers
-I originally wanted Imms collections to support functional equality or comparison by default. However, this is brings about many problems in practice, especially when dealing with maps and sets which have configurable comparison handlers, so I've extended this support to sequential collections alone.
-
-Nevertheless, all collections have methods that determine equality; they simply don't use them as default equality semantics.
+4. Computational expressions (aka monads) for constructing **Imms** collections. You can also construct maps and sets in this way.
 
 ## Performance
-To see up to date benchmarks you can go to the [benchmarks folder](https://github.com/GregRos/Imms/tree/master/Imms/Imms.Tests.Performance/Benchmarks). Each set of benchmarks includes charts, a CSV table, and a CSV log file with explicit information about the parameters of the benchmark. The log files are very detailed.
+To see up to date benchmarks you can go to the [benchmarks folder](https://github.com/GregRos/**Imms**/tree/master/**Imms**/**Imms**.Tests.Performance/Benchmarks). Each set of benchmarks includes charts, a CSV table, and a CSV log file with explicit information about the parameters of the benchmark. The log files are very detailed.
 
 The benchmarking system itself is available in the namespace `Imms.Tests.Performance`. It really is a system, and the way it works is quite complicated. However, running it is quite self-explanatory. There are lots of settings you can tweak.
 
@@ -172,7 +200,7 @@ These are the benchmark results for the sequential collections, compared with si
 ### Sets
 
 #### Time Complexity
-The following is the time complexity of Imms sets for different operations. Time complexity is much better when the two inputs are sets of the same type and with the same membership semantics.
+The following is the time complexity of **Imms** sets for different operations. Time complexity is much better when the two inputs are sets of the same type and with the same membership semantics.
 
 I don't have similar data about sets from other libraries.
 
@@ -229,7 +257,7 @@ Here is another set of benchmarks in which the target collection has 100 element
 	| System.ImmutableSortedDict | 101.172 | 75.326   | 2.084       | 2.674   | 15.63  | 28.808    | 42.563      |
 
 ## Possibilities
-Imms is designed with users directly in mind. However, its combination of power and performance can provide the basis for other libraries. Here are some of the things that could be implemented using the features provided by Imms:
+**Imms** is designed with users directly in mind. However, its combination of power and performance can provide the basis for other libraries. Here are some of the things that could be implemented using the features provided by **Imms**:
 
 1. Mutable, observable, thread-safe collections supporting such things as implicit copying, snapshots, and history tracking (undo/redo). 
 2. An immutable workflow object, composed of individual computation steps, which is also catenable.

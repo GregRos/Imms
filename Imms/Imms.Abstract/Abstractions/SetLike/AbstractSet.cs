@@ -25,6 +25,26 @@ namespace Imms.Abstract {
 		}
 
 		/// <summary>
+		/// Returns true if the item is contained in this set.
+		/// </summary>
+		/// <param name="item"></param>
+		/// <returns></returns>
+		public bool this[TElem item] {
+			get {
+				return Contains(item);
+			}
+		}
+
+		/// <summary>
+		/// Identical to <see cref="Union(TSet)"/>.
+		/// </summary>
+		/// <param name="items"></param>
+		/// <returns></returns>
+		public TSet AddRange(IEnumerable<TElem> items) {
+			return Union(items);
+		}
+
+		/// <summary>
 		///     Returns the set-theoretic relation between this set and another set. This member is optimized depending on the
 		///     actual type of the input.
 		/// </summary>
@@ -56,8 +76,18 @@ namespace Imms.Abstract {
 			return SetRelation.None;
 		}
 
+		/// <summary>
+		/// Adds a new item to the set, or does nothing if the item already exists.
+		/// </summary>
+		/// <param name="item">The item to add.</param>
+		/// <returns></returns>
 		public abstract TSet Add(TElem item);
 
+		/// <summary>
+		/// Removes an item from the set, or does nothing if the item does not exist.
+		/// </summary>
+		/// <param name="item">The item to remove.</param>
+		/// <returns></returns>
 		public abstract TSet Remove(TElem item);
 
 		/// <summary>
@@ -82,10 +112,15 @@ namespace Imms.Abstract {
 			if (guessLength.IsSome && guessLength.Value < Length) {
 				return false;
 			}
-			set = ToSet(other);
+			set = this.ToIterable(other);
 			return set.Length == Length && IsSupersetOf(set);
 		}
 
+		/// <summary>
+		/// Returns true if this set is a superset of the other set.
+		/// </summary>
+		/// <param name="other">The other set.</param>
+		/// <returns></returns>
 		public bool IsSupersetOf(IEnumerable<TElem> other) {
 			other.CheckNotNull("other");
 			var set = other as TSet;
@@ -95,16 +130,26 @@ namespace Imms.Abstract {
 			return other.ForEachWhile(Contains);
 		}
 
+		/// <summary>
+		/// Returns true if this set is a proper superset of the other set.
+		/// </summary>
+		/// <param name="other">The other set.</param>
+		/// <returns></returns>
 		public bool IsProperSupersetOf(IEnumerable<TElem> other) {
 			other.CheckNotNull("other");
 			TSet set = other as TSet;
 			if (set != null && IsCompatibleWith(set)) {
 				return set.Length < Length && IsSupersetOf(set);
 			}
-			set = ToSet(other);
+			set = this.ToIterable(other);
 			return set.Length < Length && IsSupersetOf(set);
 		}
 
+		/// <summary>
+		/// Returns true if this set is a proper subset of the other set.
+		/// </summary>
+		/// <param name="other">The other set.</param>
+		/// <returns></returns>
 		public bool IsProperSubsetOf(IEnumerable<TElem> other) {
 			other.CheckNotNull("other");
 			var set = other as TSet;
@@ -115,10 +160,15 @@ namespace Imms.Abstract {
 			if (guessLength.IsSome && guessLength.Value <= Length) {
 				return false;
 			}
-			var tSet = ToSet(other);
+			var tSet = this.ToIterable(other);
 			return tSet.IsProperSupersetOf(this);
 		}
 
+		/// <summary>
+		/// Returns true if this set is a subset of the other set.
+		/// </summary>
+		/// <param name="other">The other set.</param>
+		/// <returns></returns>
 		public bool IsSubsetOf(IEnumerable<TElem> other) {
 			other.CheckNotNull("other");
 			TSet set = other as TSet;
@@ -129,7 +179,7 @@ namespace Imms.Abstract {
 			if (guessLength.IsSome && guessLength.Value < Length) {
 				return false;
 			}
-			var tSet = ToSet(other);
+			var tSet = this.ToIterable(other);
 			return tSet.IsProperSupersetOf(this);
 		}
 
@@ -264,26 +314,14 @@ namespace Imms.Abstract {
 				shorterSet.ForEach(x => {
 					if (thisIsShorter) {
 						if (longerSet.Contains(x)) builder.Add(x);
-					}
-					else {
+					} else {
 						var myKey = shorterSet.TryGet(x);
 						if (myKey.IsSome) {
 							builder.Add(myKey.Value);
 						}
 					}
-					
-				});
-				return builder.Produce();
-			}
-		}
 
-		private TSet ToSet(IEnumerable<TElem> other) {
-			TSet set = other as TSet;
-			if (set != null && IsCompatibleWith(set)) {
-				return set;
-			}
-			using (var builder = EmptyBuilder) {
-				builder.AddRange(other);
+				});
 				return builder.Produce();
 			}
 		}

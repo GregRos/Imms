@@ -108,7 +108,7 @@ namespace Imms.Abstract {
 			}
 		}
 
-		[Pure]
+		
 		internal static Optional<bool> BoilerEquality<T>(T left, T right) {
 			if (left is ValueType) return Optional.None;
 			if (ReferenceEquals(left, right)) return true;

@@ -6,28 +6,6 @@ namespace Imms.Abstract {
 
 
 	public partial class AbstractSet<TElem, TSet> : ISet<TElem> {
-		
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public TSet op_Add(TElem item) {
-			return Add(item);
-		}
-		
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public TSet op_Remove(TElem item)
-		{
-			return Remove(item);
-		}
-		
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public TSet op_AddRange(IEnumerable<TElem> items) {
-			return Union(items);
-		}
-		
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public TSet op_RemoveRange(IEnumerable<TElem> items) {
-			return Except(items);
-		}
-
 		bool ISet<TElem>.Add(TElem item) {
 			throw Errors.Collection_readonly;
 		}

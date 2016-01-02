@@ -7,9 +7,7 @@ using Imms.Abstract;
 namespace Imms {
 
 	/// <summary>
-	/// Represents an optional value, where the underlying value type is unknown. 
-	/// Used for iteractions between optional values with different underlying value types.
-	/// Should not be implemented in user code.
+	/// Represents an optional value, where the underlying value type is unknown. User for abstracting over all optional types.
 	/// </summary>
 	public interface IAnyOptional {
 		/// <summary>
@@ -54,10 +52,14 @@ namespace Imms {
 		/// <summary>
 		///     Returns an instance indicating a missing value.
 		/// </summary>
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static Optional<T> None {
 			get { return new Optional<T>(); }
 		}
 
+		/// <summary>
+		/// Returns true if this optional value is None.
+		/// </summary>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public bool IsNone {
 			get { return !_isSome; }
@@ -88,6 +90,9 @@ namespace Imms {
 			return IsSome ? this : other;
 		}
 
+		/// <summary>
+		/// Returns true if this optional value is Some.
+		/// </summary>
 		public bool IsSome {
 			get { return _isSome; }
 		}
@@ -225,6 +230,8 @@ namespace Imms {
 		public static bool operator !=(T other, Optional<T> self) {
 			return !(other == self);
 		}
+
+
 
 		/// <summary>
 		///     Returns a hash code for this optional value instance. If it has an underlying value, the hash code of the underlying value is returned. Otherwise, a hash code of 0 is returned.
@@ -456,6 +463,7 @@ namespace Imms {
 			get { return false; }
 		}
 
+	
 		public bool IsNone { get { return true; } }
 
 		public object Value

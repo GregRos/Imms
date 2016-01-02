@@ -1,16 +1,14 @@
 //Implementation Note: I do not use conditional compilation by itself due to performance reasons.
 //Even though conditional compilation eliminates the actual call to a method, it does not eliminate
 //the operations you perform to get the parameters of the method. These could potentially be expensive.
-#if ASSERTS
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using Imms.Abstract;
-namespace Imms
+
+namespace Imms.Implementation
 {
 	/// <summary>
 	/// Indicates that an assertion has failed.
@@ -139,4 +137,3 @@ namespace Imms
 		}
 	}
 }
-#endif

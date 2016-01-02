@@ -4,6 +4,11 @@ using Imms.Abstract;
 using Imms.Implementation;
 
 namespace Imms {
+	/// <summary>
+	/// Immutable and persistent ordered map that uses comparison and allows looking up key-value pairs by sort order. 
+	/// </summary>
+	/// <typeparam name="TKey"></typeparam>
+	/// <typeparam name="TValue"></typeparam>
 	public sealed partial class ImmOrderedMap<TKey, TValue> : AbstractMap<TKey, TValue, ImmOrderedMap<TKey, TValue>> {
 		private readonly IComparer<TKey> _comparer;
 		private readonly OrderedAvlTree<TKey, TValue>.Node _root;
@@ -24,7 +29,9 @@ namespace Imms {
 		public override int Length {
 			get { return _root.Count; }
 		}
-
+		/// <summary>
+		/// Returns the maximal key-value pair in this map.
+		/// </summary>
 		public KeyValuePair<TKey, TValue> MaxItem {
 			get {
 				if (_root.IsEmpty) throw Errors.Is_empty;
@@ -33,6 +40,9 @@ namespace Imms {
 			}
 		}
 
+		/// <summary>
+		/// Returns the minimal key-value pair in this map.
+		/// </summary>
 		public KeyValuePair<TKey, TValue> MinItem {
 			get {
 				if (_root.IsEmpty) throw Errors.Is_empty;
@@ -56,6 +66,11 @@ namespace Imms {
 			return newRoot.WrapMap(_comparer);
 		}
 
+		/// <summary>
+		/// Returns an empty <see cref="ImmOrderedMap{TKey,TValue}"/> using the specified comparer.
+		/// </summary>
+		/// <param name="comparer"></param>
+		/// <returns></returns>
 		public new static ImmOrderedMap<TKey, TValue> Empty(IComparer<TKey> comparer) {
 			return new ImmOrderedMap<TKey, TValue>(OrderedAvlTree<TKey, TValue>.Node.Empty,
 				comparer ?? FastComparer<TKey>.Default);
@@ -131,11 +146,19 @@ namespace Imms {
 			return removed.WrapMap(_comparer);
 		}
 
+		/// <summary>
+		/// Removes the maximal key-value pair from this map.
+		/// </summary>
+		/// <returns></returns>
 		public ImmOrderedMap<TKey, TValue> RemoveMax() {
 			if (_root.IsEmpty) throw Errors.Is_empty;
 			return _root.RemoveMax(Lineage.Mutable()).WrapMap(_comparer);
 		}
 
+		/// <summary>
+		/// removes the minimal key-value pair from this map.
+		/// </summary>
+		/// <returns></returns>
 		public ImmOrderedMap<TKey, TValue> RemoveMin() {
 			if (_root.IsEmpty) throw Errors.Is_empty;
 			return _root.RemoveMin(Lineage.Mutable()).WrapMap(_comparer);

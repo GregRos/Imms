@@ -19,14 +19,14 @@ namespace Imms.Abstract {
 		/// This method basically applies a function on every combination of elements from the left operand and the right operand.
 		/// </remarks>
 		/// <returns></returns>
-		protected virtual TOIter Cartesian<TRight, TOut, TOIter>(TOIter bFactory, IEnumerable<TRight> right,
+		protected virtual TOIter _Cartesian<TRight, TOut, TOIter>(TOIter bFactory, IEnumerable<TRight> right,
 		                                                           Func<TElem, TRight, TOut> selector)
 			where TOIter : IBuilderFactory<IIterableBuilder<TOut, TOIter>> {
 			bFactory.CheckNotNull("bFactory");
 			right.CheckNotNull("right");
 			selector.CheckNotNull("selector");
 			if (right is IAnyIterable<TElem>) {
-				return Cartesian(bFactory, (IAnyIterable<TRight>) right, selector);
+				return _Cartesian(bFactory, (IAnyIterable<TRight>) right, selector);
 			}
 			using (var builder = bFactory.EmptyBuilder)
 			{
@@ -48,7 +48,7 @@ namespace Imms.Abstract {
 		/// <typeparam name="TOIter">The type of the collection returned by the method.</typeparam>
 		/// <param name="bFactory"> A prototype instance of the resulting collection used as a builder factory. </param>
 		/// <returns> </returns>
-		protected virtual TOIter Cast<TOut, TOIter>(TOIter bFactory)
+		protected virtual TOIter _Cast<TOut, TOIter>(TOIter bFactory)
 			where TOIter : IBuilderFactory<IIterableBuilder<TOut, TOIter>>
 		{
 			return Select(bFactory, (v) => (TOut) (object) v);
@@ -62,7 +62,7 @@ namespace Imms.Abstract {
 		/// <param name="bFactory"> A prototype instance of the resulting collection, used as a builder factory. </param>
 		/// <param name="selector"> The selector. </param>
 		/// <returns> </returns>
-		protected virtual TOutIter Choose<TOut, TOutIter>(TOutIter bFactory, Func<TElem, Optional<TOut>> selector)
+		protected virtual TOutIter _Choose<TOut, TOutIter>(TOutIter bFactory, Func<TElem, Optional<TOut>> selector)
 			where TOutIter : IBuilderFactory<IIterableBuilder<TOut, TOutIter>> {
 			bFactory.CheckNotNull("bFactory");
 			selector.CheckNotNull("selector");
@@ -91,7 +91,7 @@ namespace Imms.Abstract {
 		/// <param name="resultSelector">The result selector.</param>
 		/// <param name="eq">The eq.</param>
 		/// <returns></returns>
-		protected virtual TOutMap GroupBy<TOutMap, TElem2, TOut, TKey>(
+		protected virtual TOutMap _GroupBy<TOutMap, TElem2, TOut, TKey>(
 			TOutMap bFactory, Func<TElem, TKey> keySelector,
 			Func<TElem, TElem2> valueSelector,
 			Func<TKey, IEnumerable<TElem2>, TOut> resultSelector,
@@ -135,12 +135,12 @@ namespace Imms.Abstract {
 		/// <param name="valueSelector">The value selector.</param>
 		/// <param name="eq">The eq.</param>
 		/// <returns></returns>
-		protected virtual TROuterMap GroupBy<TROuterMap, TRInnerSeq, TElem2, TKey>(
+		protected virtual TROuterMap _GroupBy<TROuterMap, TRInnerSeq, TElem2, TKey>(
 			TROuterMap mapFactory, TRInnerSeq seqFactory, Func<TElem, TKey> keySelector, Func<TElem, TElem2> valueSelector, IEqualityComparer<TKey> eq)
 			where TROuterMap : IBuilderFactory<IMapBuilder<TKey, TRInnerSeq, TROuterMap>> 
 			where TRInnerSeq : IBuilderFactory<IIterableBuilder<TElem2, TRInnerSeq>>
 		{
-			return GroupBy(mapFactory, keySelector, valueSelector, (k, vs) =>
+			return _GroupBy(mapFactory, keySelector, valueSelector, (k, vs) =>
 			                                                       {
 				                                                       var theSeq = seqFactory.ToIterable(vs);
 				                                                       return Kvp.Of(k, theSeq);
@@ -161,7 +161,7 @@ namespace Imms.Abstract {
 		/// <param name="rSelector"> The return element selector. </param>
 		/// <param name="eq"> The equality comparer. </param>
 		/// <returns> </returns>
-		protected virtual TOutIter GroupJoin<TOut, TOutIter, TInner, TKey>(TOutIter bFactory, IEnumerable<TInner> inner,
+		protected virtual TOutIter _GroupJoin<TOut, TOutIter, TInner, TKey>(TOutIter bFactory, IEnumerable<TInner> inner,
 																							Func<TElem, TKey> oKeySelector, Func<TInner, TKey> iKeySelector,
 																							Func<TElem, IEnumerable<TInner>, TOut> rSelector,
 																							IEqualityComparer<TKey> eq = null)
@@ -205,7 +205,7 @@ namespace Imms.Abstract {
 		/// <param name="rSelector"> The return element selector. </param>
 		/// <param name="eq"> The equality comparer. </param>
 		/// <returns> </returns>
-		protected virtual TOutIter Join<TOut, TOutIter, TInner, TKey>(TOutIter bFactory, IEnumerable<TInner> inner, Func<TElem, TKey> oKeySelector,
+		protected virtual TOutIter _Join<TOut, TOutIter, TInner, TKey>(TOutIter bFactory, IEnumerable<TInner> inner, Func<TElem, TKey> oKeySelector,
 																					 Func<TInner, TKey> iKeySelector, Func<TElem, TInner, TOut> rSelector,
 																					 IEqualityComparer<TKey> eq)
 			where TOutIter : IBuilderFactory<IIterableBuilder<TOut, TOutIter>>
@@ -242,7 +242,7 @@ namespace Imms.Abstract {
 		/// <param name="bFactory"></param>
 		/// <param name="comparer"></param>
 		/// <returns></returns>
-		protected internal virtual TRList OrderBy<TRList>(TRList bFactory, IComparer<TElem> comparer)
+		protected internal virtual TRList _OrderBy<TRList>(TRList bFactory, IComparer<TElem> comparer)
 			where TRList : IBuilderFactory<ISequentialBuilder<TElem, TRList>> {
 			bFactory.CheckNotNull("bFactory");
 			comparer.CheckNotNull("comparer");
@@ -264,7 +264,7 @@ namespace Imms.Abstract {
 		/// <param name="initial"> The initial value for the accumulator. </param>
 		/// <param name="accumulator"> The accumulator. </param>
 		/// <returns> </returns>
-		protected virtual TRSeq Scan<TElem2, TRSeq>(TRSeq bFactory,
+		protected virtual TRSeq _Scan<TElem2, TRSeq>(TRSeq bFactory,
 		                                            TElem2 initial,
 		                                            Func<TElem2, TElem, TElem2> accumulator)
 			where TRSeq : IBuilderFactory<IIterableBuilder<TElem2, TRSeq>> {
@@ -291,7 +291,7 @@ namespace Imms.Abstract {
 		/// <param name="selector"> The selector. </param>
 		/// <param name="bFactory"> </param>
 		/// <returns> </returns>
-		protected virtual TOutIter SelectMany<TOut, TOutIter>(
+		protected virtual TOutIter _SelectMany<TOut, TOutIter>(
 	TOutIter bFactory, Func<TElem, IEnumerable<TOut>> selector)
 			where TOutIter : IBuilderFactory<IIterableBuilder<TOut, TOutIter>> {
 			bFactory.CheckNotNull("bFactory");
@@ -317,7 +317,7 @@ namespace Imms.Abstract {
 		/// <param name="selector"> The selector. </param>
 		/// <param name="rSelector"> </param>
 		/// <returns> </returns>
-		protected virtual TRSeq SelectMany<TRElem, TRSeq, TElem2>(TRSeq bFactory, Func<TElem, IEnumerable<TElem2>> selector,
+		protected virtual TRSeq _SelectMany<TRElem, TRSeq, TElem2>(TRSeq bFactory, Func<TElem, IEnumerable<TElem2>> selector,
 		                                                          Func<TElem, IEnumerable<TElem2>, TRElem> rSelector)
 			where TRSeq : IBuilderFactory<IIterableBuilder<TRElem, TRSeq>> {
 			bFactory.CheckNotNull("bFactory");
@@ -333,61 +333,5 @@ namespace Imms.Abstract {
 				return builder.Produce();
 			}
 		}
-
-			/// <summary>
-		/// (Implementation) Constructs a concrete map-like collection from the current collection.
-		/// </summary>
-		/// <typeparam name="TKey"> The type of the key. </typeparam>
-		/// <typeparam name="TValue"> The type of the value. </typeparam>
-		/// <typeparam name="TRMap"> The type of the provider returned. </typeparam>
-		/// <param name="bFactory"> A prototype instance of the resulting collection provider, used as a builder factory. </param>
-		/// <param name="selector"> A selector that returns a key-value pair. </param>
-		/// <returns> </returns>
-		protected virtual TRMap ToMapLike<TKey, TValue, TRMap>(
-			TRMap bFactory, Func<TElem, KeyValuePair<TKey, TValue>> selector)
-			where TRMap : IBuilderFactory<IMapBuilder<TKey, TValue, TRMap>>
-		{
-			bFactory.CheckNotNull("bFactory");
-			selector.CheckNotNull("selector");
-			using (var builder = bFactory.EmptyBuilder)
-			{
-				ForEach((v) =>
-				        {
-					        var kvp = selector(v);
-					        builder.Add(kvp);
-				        });
-				return builder.Produce();
-			}
-		}
-
-		/// <summary>
-		/// (Implementation) Constructs a concrete iterable collection from the current collection. 
-		/// </summary>
-		/// <typeparam name="TRSeq"> The type of the return provider. </typeparam>
-		/// <param name="bFactory"> A prototype instance of the resulting collection provider, used as a builder factory. </param>
-		/// <returns> </returns>
-		protected virtual TRSeq ToIterable<TRSeq>(TRSeq bFactory)
-			where TRSeq : IBuilderFactory<IIterableBuilder<TElem, TRSeq>> {
-			bFactory.CheckNotNull("bFactory");
-			return Select(bFactory, x => x);
-		}
-
-		/// <summary>
-		/// (Implementation) Constructs a concrete set-like collection from the current collection.
-		/// </summary>
-		/// <typeparam name="TRSet"></typeparam>
-		/// <param name="bFactory"></param>
-		/// <returns></returns>
-		protected virtual TRSet ToSetLike<TRSet>(TRSet bFactory)
-			where TRSet : IBuilderFactory<ISetBuilder<TElem, TRSet>>
-		{
-			bFactory.CheckNotNull("bFactory");
-			using (var builder = bFactory.EmptyBuilder)
-			{
-				ForEach(v => { builder.Add(v); });
-				return builder.Produce();
-			}
-		}
-
 	}
 }

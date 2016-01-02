@@ -21,6 +21,9 @@ namespace Imms.Abstract {
 		/// <param name="items"></param>
 		void AddRange(IEnumerable<TElem> items);
 
+		/// <summary>
+		/// Gets the length of the builder.
+		/// </summary>
 		int Length { get; }
 	}
 }

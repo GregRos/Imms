@@ -277,7 +277,7 @@ namespace Imms.Abstract {
 		/// <param name="other"></param>
 		/// <param name="eq"></param>
 		/// <returns></returns>
-		protected virtual bool SequenceEquals(IEnumerable<TElem> other, IEqualityComparer<TElem> eq = null) {
+		public virtual bool SequenceEquals(IEnumerable<TElem> other, IEqualityComparer<TElem> eq = null) {
 			other.CheckNotNull("other");
 			TList list = other as TList;
 			if (list != null) return SequenceEquals(list, eq);
@@ -294,9 +294,6 @@ namespace Imms.Abstract {
 			other.CheckNotNull("other");
 			return EqualityHelper.SeqEquals(this, other, eq);
 		}
-
-
-
 
 		/// <summary>
 		/// Returns the index of the last element that satisfies the given predicate.
@@ -429,6 +426,7 @@ namespace Imms.Abstract {
 			return index.IsNone ? Empty : Skip(index.Value);
 		}
 
+
 		public sealed override void CopyTo(TElem[] arr, int arrStart, int count) {
 			CopyTo(arr, 0, arrStart, count);
 		}
@@ -469,7 +467,7 @@ namespace Imms.Abstract {
 		/// <param name="accumulator"> The accumulator. </param>
         /// <exception cref="ArgumentNullException">Thrown if the argument null.</exception>
 		/// <returns> </returns>
-		protected virtual TRSeq ScanBack<TElem2, TRSeq>(TRSeq bFactory, TElem2 initial, Func<TElem2, TElem, TElem2> accumulator)
+		protected virtual TRSeq _ScanBack<TElem2, TRSeq>(TRSeq bFactory, TElem2 initial, Func<TElem2, TElem, TElem2> accumulator)
 			where TRSeq : IBuilderFactory<ISequentialBuilder<TElem2, TRSeq>>
 		{
 			bFactory.CheckNotNull("bFactory");
@@ -496,7 +494,7 @@ namespace Imms.Abstract {
 		/// <param name="o"> The o. </param>
 		/// <param name="selector"> The selector. </param>
 		/// <returns> </returns>
-		protected virtual TRSeq Zip<TRElem, TRSeq, TInner>(TRSeq bFactory, IEnumerable<TInner> o, Func<TElem, TInner, TRElem> selector)
+		protected virtual TRSeq _Zip<TRElem, TRSeq, TInner>(TRSeq bFactory, IEnumerable<TInner> o, Func<TElem, TInner, TRElem> selector)
 			where TRSeq : IBuilderFactory<ISequentialBuilder<TRElem, TRSeq>>
 		{
 			using (var builder = bFactory.EmptyBuilder)

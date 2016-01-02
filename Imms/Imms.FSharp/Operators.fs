@@ -3,7 +3,6 @@ open Imms
 open Imms.Abstract
 module Operators = 
     open Imms.FSharp.Implementation
-
     ///Alias of AddFirst. Adds an item to the beginning of the collection.
     let inline (^+>) (item : 'element) (col : ^sequential) = col |> Ops.addFirst item
 
@@ -17,16 +16,16 @@ module Operators =
     let inline (<++) (col : ^sequential) (items : 'element seq) = col |> Ops.addLastRange items
 
     ///Adds a sequence of elements to a set, or a sequence of KeyValuePairs or 2-tuples to a map.
-    let inline ( /++ ) (col : ^setOrMap) (vs : 'element seq) = col |> Ops.op_AddRange vs
+    let inline ( /++ ) (col : ^setOrMap) (vs : 'element seq) = col |> Ops.addRange vs
 
     ///Adds an element to a set, or adds a KeyValuePair or 2-tuple to a map.
-    let inline ( /+ ) (col : ^setOrMap) (v : 'element) = col |> Ops.op_Add v
+    let inline ( /+ ) (col : ^setOrMap) (v : 'element) = col |> Ops.addSet v
     
     ///Removes an element from a set, or a key from a map.
-    let inline ( /-) (col : ^setOrMap) (v : 'element) = col |> Ops.op_Remove v
+    let inline ( /-) (col : ^setOrMap) (v : 'element) = col |> Ops.removeSet v
 
     ///Removes a sequence of elements or keys from a set or map.
-    let inline (/--) (col : ^setOrMap) (vs : 'element seq) = col |> Ops.op_RemoveRange vs
+    let inline (/--) (col : ^setOrMap) (vs : 'element seq) = col |> Ops.removeMany vs
 
     module Extra = 
         ///Computes the set-theoretic intersection.

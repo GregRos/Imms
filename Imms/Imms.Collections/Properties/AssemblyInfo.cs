@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Imms;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
@@ -8,22 +9,22 @@ using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("Imms")]
 [assembly: AssemblyDescription(
-	@"High performance persistent and immutable collections for .NET, supporting many operations efficiently. 
+	@"High performance persistent and immutable collections for .NET, supporting many operations efficiently.
+ 
 Includes a catenable/indexed deque, a high performance vector, sets, and maps/dictionaries. 
-Strictly better than anything released for .NET previously. Check out the comparisons in the project website.
+
+Better than anything released for .NET previously (as of this writing, and that I'm aware of). Check out the comparisons in the project website.
+
 Currently mostly tested."
 	)]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Gregory Rosenbaum")]
-[assembly: AssemblyCopyright("Gregory Rosenbaum")]
+[assembly: AssemblyCompany(ImmsInfo.Author)]
+[assembly: AssemblyCopyright(ImmsInfo.Copyright)]
 [assembly: AssemblyProduct("Imms")]
 [assembly: InternalsVisibleTo("Imms.FSharp")]
 [assembly: InternalsVisibleTo("Imms.Tests.Performance")]
 [assembly: InternalsVisibleTo("Imms.Tests.Integrity")]
-[assembly: InternalsVisibleTo("Imms.Tests.Unit")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
-[assembly: AssemblyVersion("0.5.0")]
+[assembly: AssemblyVersion(ImmsInfo.Version)]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 

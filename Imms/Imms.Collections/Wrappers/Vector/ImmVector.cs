@@ -85,6 +85,12 @@ namespace Imms {
 			return arr.ToImmVector();
 		}
 
+		/// <summary>
+		/// Inserts a sequence of elements at the specified index.
+		/// </summary>
+		/// <param name="index"></param>
+		/// <param name="items"></param>
+		/// <returns></returns>
 		public ImmVector<T> InsertRange(int index, IEnumerable<T> items) {
 			index.CheckIsBetween("index", -Root.Length-1, Root.Length);
 			items.CheckNotNull("items");
