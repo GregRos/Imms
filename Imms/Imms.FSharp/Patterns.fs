@@ -1,8 +1,9 @@
-///Provides active patterns for consuming Imm collections.
+///Provides active patterns for consuming Imm collections and other types. Auto-opened.
 [<AutoOpen>]
 module Imms.FSharp.Patterns
 open Imms
 open Imms.FSharp.Implementation
+///Compatibility active pattern for matching Imms's Optional type.
 let (|ImmSome|ImmNone|) (optional : Imms.Optional<'T>) = 
     if optional.IsSome then 
         ImmSome(optional.Value)

@@ -15,6 +15,7 @@
 	}
 	var typeName = TypeName ?? "ImmList<T>";
 #><#= IncludeWithParameters("Base.ttinclude", new[] {Tu("TypeName", typeName)}, 0)#>
+///Returns the first element of the collection.
 let first (collection : <#=typeName#>) = collection.First
 
 ///Returns the last element of the collection
@@ -64,7 +65,7 @@ let findLast f (collection : <#=typeName#>) = collection.FindLast(toFunc1 f) |> 
 ///Returns the index of the last element of the collection that satisfies 'f'
 let findIndex f (collection : <#=typeName#>) = collection.FindIndex(toFunc1 f) |> fromOption
 
-///Returns the empty vector.
+///Returns the empty collection.
 let empty<<#=ElementName#>> = <#=TypeName #>.Empty
 
 ///Returns a vector consisting of 'value'

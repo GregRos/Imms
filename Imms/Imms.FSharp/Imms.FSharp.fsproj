@@ -57,12 +57,10 @@
     <Compile Include="Compatibility.fs" />
     <Compile Include="Generic Operators.fs" />
     <Compile Include="Operators.fs" />
-    <Compile Include="MoreModules.fs" />
     <Compile Include="Patterns.fs" />
     <Compile Include="BuilderTypes.fs" />
     <Compile Include="Builders.fs" />
     <None Include="App.config" />
-    <None Include="Readme.md" />
     <Compile Include="..\Imms.Collections\Wrappers\Imms.FSharp\Modules.fs">
       <Link>Modules.fs</Link>
     </Compile>
@@ -90,6 +88,9 @@
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
+  <Target Name="AfterBuild" Condition="'$(Configuration)' == 'Release'">
+    <Exec ContinueOnError="false" WorkingDirectory="$(OutDir)" Command="&quot;$(SolutionDir).nuget\nuget.exe&quot; pack &quot;$(ProjectDir)$(OutDir)Imms.FSharp.nuspec&quot;" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

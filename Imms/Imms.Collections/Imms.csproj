@@ -189,6 +189,9 @@
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="AfterBuild" Condition="'$(Configuration)' == 'Release'">
+    <Exec ContinueOnError="false" WorkingDirectory="$(OutDir)" Command="&quot;$(SolutionDir).nuget\nuget.exe&quot; pack &quot;$(ProjectPath)&quot; -Exclude &quot;*.nlp&quot; -IncludeReferencedProjects -NonInteractive -Verbosity detailed -NoDefaultExcludes -Properties Configuration=&quot;$(Configuration)&quot;;Platform=&quot;$(Platform)&quot;" />
+  </Target>
   <PropertyGroup>
     <PostBuildEvent>
     </PostBuildEvent>

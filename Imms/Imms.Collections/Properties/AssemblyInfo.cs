@@ -13,9 +13,7 @@ using Imms;
  
 Includes a catenable/indexed deque, a high performance vector, sets, and maps/dictionaries. 
 
-Better than anything released for .NET previously (as of this writing, and that I'm aware of). Check out the comparisons in the project website.
-
-Currently mostly tested."
+Better than anything released for .NET previously (as of this writing, and that I'm aware of). Check out the comparisons in the project website."
 	)]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany(ImmsInfo.Author)]

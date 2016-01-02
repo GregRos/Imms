@@ -1,3 +1,4 @@
+///For internal use. Implements a generic collection builder used in the Builders module.
 module Imms.FSharp.Implementation.BuilderTypes
 open Imms
 open Imms.FSharp

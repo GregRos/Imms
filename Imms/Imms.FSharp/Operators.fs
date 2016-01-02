@@ -1,6 +1,7 @@
 namespace Imms.FSharp
 open Imms
 open Imms.Abstract
+///Contains operators that work on Imms collection types. Open this module to use the operators.
 module Operators = 
     open Imms.FSharp.Implementation
     ///Alias of AddFirst. Adds an item to the beginning of the collection.

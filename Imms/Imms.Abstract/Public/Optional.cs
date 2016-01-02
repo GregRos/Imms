@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using Imms.Abstract;
+#pragma warning disable 618
 
 namespace Imms {
 
@@ -452,20 +453,32 @@ namespace Imms {
 	///     Normally hidden. Used to indicate a generic None value that can be converted to a typed None. Also acts as a None value where the value type is unknown.
 	/// </summary>
 	[EditorBrowsable(EditorBrowsableState.Never)]
+	[Obsolete("This type is not meant to be referenced directly in user code.")]
 	[Serializable]
 	public class AnyNone : IAnyOptional {
+		/// <summary>
+		/// Returns the instance of AnyNone.
+		/// </summary>
 		internal static readonly AnyNone Instance = new AnyNone();
 
 		AnyNone() {}
 
+		/// <summary>
+		/// Returns false.
+		/// </summary>
 		public bool IsSome
 		{
 			get { return false; }
 		}
 
-	
+		/// <summary>
+		/// Returns true.
+		/// </summary>
 		public bool IsNone { get { return true; } }
 
+		/// <summary>
+		/// Throws a <see cref="NoValueException"/>.
+		/// </summary>
 		public object Value
 		{
 			get { throw Errors.NoValue(); }

@@ -1,3 +1,4 @@
+///For internal use. Provides functions for compatibility between F# types and .NET standard types.
 [<AutoOpen>]
 module Imms.FSharp.Implementation.Compatibility
 open Imms

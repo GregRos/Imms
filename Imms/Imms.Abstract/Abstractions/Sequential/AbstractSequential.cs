@@ -177,7 +177,9 @@ namespace Imms.Abstract {
 		public static bool operator ==(AbstractSequential<TElem, TList> a, AbstractSequential<TElem, TList> b) {
 			var boiler = EqualityHelper.BoilerEquality(a, b);
 			if (boiler.IsSome) return boiler.Value;
-			return a.Equals(b);
+			return 
+				
+				a.Equals(b);
 		}
 
 		/// <summary>

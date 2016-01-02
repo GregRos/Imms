@@ -1,3 +1,4 @@
+///Contains collection builders -- computation expressions that allow you to construct collections of different kinds. Auto-opened.
 [<AutoOpen>]
 module Imms.FSharp.Builders
 open Imms

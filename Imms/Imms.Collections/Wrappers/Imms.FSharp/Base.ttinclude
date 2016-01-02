@@ -10,6 +10,7 @@
 	var typeName = TypeName ?? "ImmList<T>";
 	var elementName = ElementName ?? "T";
 #>
+///Returns true if the specified collection is empty.
 let isEmpty (collection : <#=typeName#>) = collection.IsEmpty
 
 ///Returns the length of the collection. O(1)

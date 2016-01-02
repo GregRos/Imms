@@ -10,6 +10,5 @@ let main argv =
             for i in 0 .. 10 do yield Kvp(i,i)
         }
 
-    
     printfn "%A" argv
     0 // return an integer exit code
