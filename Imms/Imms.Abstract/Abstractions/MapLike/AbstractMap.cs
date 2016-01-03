@@ -243,6 +243,7 @@ namespace Imms.Abstract {
 		public TMap Join<TValue2>(IEnumerable<KeyValuePair<TKey, TValue2>> other,
 			Func<TKey, TValue, TValue2, TValue> selector) {
 			other.CheckNotNull("other");
+			selector.CheckNotNull("selector");
 			var map = other as TMap;
 			if (map != null && IsCompatibleWith(map)) return Join(map, (Func<TKey, TValue, TValue, TValue>) (object) selector);
 			return Join_Unchecked(other, selector);

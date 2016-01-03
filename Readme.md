@@ -1,7 +1,7 @@
 # Imms
 ---
 
-**Imms** is a library of [persistent](http://en.wikipedia.org/wiki/Persistent_data_structure), and [immutable](http://en.wikipedia.org/wiki/Immutable_object) collections for the .NET framework. It is available on [NuGet](https://www.nuget.org/packages/**Imms**/).
+**Imms** is a library of [persistent](http://en.wikipedia.org/wiki/Persistent_data_structure), and [immutable](http://en.wikipedia.org/wiki/Immutable_object) collections for the .NET framework. It is available on [NuGet](https://www.nuget.org/packages/Imms/). The F# integration library is available [here](https://www.nuget.org/packages/Imms.FSharp).
 
 However, **Imms** has several distinguishing features that make it different from pretty much any other library of this sort that has been released for .NET so far.
 
@@ -9,7 +9,7 @@ However, **Imms** has several distinguishing features that make it different fro
   2. *Functionality:* **Imms** collections provide more inherent functionality than any collection of a similar kind.
   3. *LINQ interface:* **Imms** collections support true collection-based operations through LINQ syntax. For example, they implement a `Select` statement that returns a collection of the same kind.
   5. *F# Integration*: **Imms** collections are integrated with F# in the assembly `Imms.FSharp`, which provides extension methods, module bindings, collection builders (computation expressions), and active patterns for working with the collections. 
-  6. *Permissive License:* Available under the [MIT license](https://github.com/GregRos/**Imms**/blob/master/license.md).
+  6. *Permissive License:* Available under the [MIT license](https://github.com/GregRos/Imms/blob/master/license.md).
   7. *Zero dependencies*: **Imms** assemblies have zero dependencies.
 
 **Note:** **Imms** collections can't be called *purely functional* because they involve mutations behind the scenes. However, no user-visible instance is ever mutated.
