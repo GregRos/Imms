@@ -13,7 +13,7 @@ Junk
 *.sln.docstates
 [Hh]istory/
 # Build results
-
+*.nupkg
 [Dd]ebug/
 [Rr]elease/
 x64/
