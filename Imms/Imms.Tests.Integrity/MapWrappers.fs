@@ -42,6 +42,7 @@ type MapWrapper<'k when 'k : comparison>(name : string) =
     abstract ContainsKey : 'k -> bool
     abstract MaxItem : 'k * 'k
     abstract MinItem : 'k * 'k
+    abstract ByArbitraryOrder : int -> Kvp<'k,'k>
     abstract IsOrdered : bool
     abstract IsEmpty : bool
     abstract RemoveRange : seq<'k> -> MapWrapper<'k>
@@ -52,15 +53,50 @@ type MapWrapper<'k when 'k : comparison>(name : string) =
     abstract Difference : (Kvp<'k,'k> seq) -> MapWrapper<'k>
     member x.Keys = x |> Seq.map (Kvp.ToTuple >> fst)
     member x.Values = x |> Seq.map (Kvp.ToTuple >> snd)
+    default x.ByArbitraryOrder i = x.ByOrder i
     default x.ByOrder _ = raise <|  OperationNotImplemented("ByOrder")
     default x.MaxItem = raise <|  OperationNotImplemented("MaxItem")
     default x.MinItem = raise <|  OperationNotImplemented("MinItem")
-    default x.Merge (_,_) = raise <|  OperationNotImplemented("Union")
     default x.TryGet k = if x.ContainsKey k then Some <| x.Get k else None
-    default x.Join (_,_) = raise <|  OperationNotImplemented("Intersect")
-    default x.Except(_,_) = raise <|  OperationNotImplemented("Except")
     default x.Difference _ = raise <|  OperationNotImplemented("Difference")
     default x.RemoveRange _ = raise <|  OperationNotImplemented("RemoveRange")
+    default x.Merge (other, f) =
+        let mutable working = x :> MapWrapper<_>
+        let f = f.Or(fun k v1 v2 -> v2)
+        for Kvp(k,v) in other do
+            let mutable v = v
+            let myV = working.TryGet k
+            if myV.IsSome then
+                v <- f k (myV.Value) v
+            working <- working.Set(k, v)
+        working
+    default x.Except(other,f) =
+        let f = f.Or(fun k v1 v2 -> None)
+        let mutable working = x
+        for Kvp(k,v) in other do
+            let myVal = working.TryGet(k)
+            if myVal.IsSome then
+                let newVal = f k (myVal.Value) v
+                if newVal.IsSome then
+                    working <-  working.Set(k,newVal.Value)
+                else
+                    working <- working.Remove k
+        working
+    default x.Join (other, f) =
+        let mutable tally = x.Empty
+        let f = f.Or (fun k v1 v2 -> v2)
+        for Kvp(k,v) in other do
+            let mutable v = v
+            let mutable add = false
+            if tally.ContainsKey k then
+                v <- f k (tally.Get k) v
+                add <- true
+            elif x.ContainsKey k then
+                v <- f k (x.Get k) v
+                add <- true
+            if add then
+                tally <- tally.Set(k,v)
+        tally
     override x.Equals other = 
         match other with
         | :? MapWrapper<'k> as other -> 
@@ -78,31 +114,36 @@ type MapWrapper<'k when 'k : comparison>(name : string) =
 
     override x.GetHashCode() = failwith "Do not call this method"
 
-type MapReferenceWrapper<'k when 'k : comparison>(Inner : Map<'k, 'k>, count : int) = 
+type MapReferenceWrapper<'k when 'k : comparison>(Inner : Map<'k, 'k>, Ordering : ImmOrderedMap<'k, 'k>) = 
     inherit MapWrapper<'k>("FSharpMap")
-    static let wrap n x = MapReferenceWrapper<'k>(x, n) :> MapWrapper<'k>
-    static let wrapL (x : Map<'k,'k>) = x |> wrap (x.Count)
+    static let wrap ord x  = MapReferenceWrapper<'k>(x, ord) :> MapWrapper<'k>
+    static let wrapL (x : Map<'k,'k>) = x |> wrap (x |> ImmOrderedMap.ofKvpSeq)
     let min = lazy (Inner |> Seq.head |> Kvp.ToTuple)
     let max = lazy (Inner |> Seq.last |> Kvp.ToTuple)
+    let len = lazy (Inner.Count)
     member val Inner = Inner
     override x.GetEnumerator() = (Inner :>_ seq).GetEnumerator()
     override x.Add(k,v) = 
-        if x.ContainsKey k then raise <| Errors.Key_exists(k) else Inner.Add(k,v) |> wrap (count + 1)
+        if x.ContainsKey k then raise <| Errors.Key_exists(k) else Inner.Add(k,v) |> wrap (Ordering.Add(k,v))
     override x.Remove k = 
-        if x.ContainsKey k then Inner.Remove(k) |> wrap (count - 1) else Inner.Remove(k) |> wrap count
+        Inner.Remove(k) |> wrap (Ordering.Remove k)
     override x.ContainsKey k = Inner.ContainsKey(k)
+    override x.ByArbitraryOrder i = Ordering.ByOrder(i)
     override x.EmptySet = ReferenceSetWrapper<'k>.FromSeq [] 
     override x.SetRange kvps =  
         let mutable mp = x.Inner
-        for Kvp(item) in kvps do
-            mp <- mp.Add item
-        mp |> wrap (mp.Count)
+        for item in kvps do
+            if mp.ContainsKey(item.Key) then
+                mp <- mp.Remove(item.Key).Add(item.Key, item.Value)
+            else
+                mp <- mp.Add(item.Key, item.Value)
+        mp |> wrap (Ordering.SetRange (kvps |> Seq.disableIterateOnce))
     override x.MinItem = min.Value
     override x.MapEquals other = 
         let other = other |> x.Empty.AddRange
         if other.Length <> x.Length then false
         else 
-            x |> Seq.forall (fun (Kvp(k,v)) -> obj.Equals(other.Get(k), v))
+            x |> Seq.forall (fun (Kvp(k,v)) -> other.ContainsKey(k) && obj.Equals(other.Get(k), v))
                 
     override x.SelfTest() = true
     override x.IsOrdered = true
@@ -113,53 +154,15 @@ type MapReferenceWrapper<'k when 'k : comparison>(Inner : Map<'k, 'k>, count : i
         for Kvp(k,v) in vs do
             mp <- mp.Add(k,v)
         mp
-    override x.Empty = Map.empty |> wrap 0
+    override x.Empty = Map.empty |> wrap (ImmOrderedMap.empty)
     override x.Get k = Inner.[k]
     override x.Set(k,v) = 
-        if x.ContainsKey k then Inner.Add(k, v) |> wrap (count) else Inner.Add(k,v) |> wrap (count + 1)
-
-    override x.Merge (other, f) =
-        let mutable working = x :> MapWrapper<_>
-        let f = f.Or(fun k v1 v2 -> v2)
-        for Kvp(k,v) in other do
-            let mutable v = v
-            let myV = working.TryGet k
-            if working.ContainsKey k then
-                v <- f k (myV.Value) v
-            working <- working.Set(k, v)
-        working
-
-    override x.Except(other,f) =
-        let f = f.Or(fun k v1 v2 -> None)
-        let mutable working = x.Inner
-        for Kvp(k,v) in other do
-            let myVal = working.TryFind k
-            if myVal.IsSome then
-                let newVal = f k (myVal.Value) v
-                if newVal.IsSome then
-                    working <-  working.Add(k,newVal.Value)
-                else
-                    working <- working.Remove k
-        working |> wrapL
+        if Inner.ContainsKey k then
+            Inner.Remove(k).Add(k, v) |> wrap (Ordering.Set(k, v))
+        else
+            Inner.Add(k, v) |> wrap (Ordering.Set(k, v))
 
     static member FromSeq s = s |> Seq.map (Kvp.ToTuple) |> Map.ofSeq |> wrapL
-
-    override x.Join (other, f) =
-        let mutable tally = x.Empty
-        let f = f.Or (fun k v1 v2 -> v2)
-        for Kvp(k,v) in other do
-            let mutable v = v
-            let mutable add = false
-            if tally.ContainsKey k then
-                v <- f k (tally.Get k) v
-                add <- true
-            elif x.ContainsKey k then
-                v <- f k (x.Get k) v
-                add <- true
-            if add then
-                tally <- tally.Set(k,v)
-        tally
-
     override x.Difference other = x.Except(other, None).AddRange(MapReferenceWrapper.FromSeq(other).Except(x, None))
     override x.RemoveRange ks = 
         let mutable x = x.Inner
@@ -167,7 +170,7 @@ type MapReferenceWrapper<'k when 'k : comparison>(Inner : Map<'k, 'k>, count : i
             x <- x.Remove item
         x |> wrapL
     override x.IsEmpty = Inner.IsEmpty
-    override x.Length = count
+    override x.Length = len.Value
     override x.ByOrder i = x |> Seq.nth i
     override x.All f = Inner |> Seq.forall f
     override x.Any f = Inner |> Seq.exists f
@@ -176,6 +179,7 @@ type MapReferenceWrapper<'k when 'k : comparison>(Inner : Map<'k, 'k>, count : i
     override x.Find f = Inner |> Seq.tryFind f
     override x.Fold initial f = Inner |> Seq.fold f initial
     override x.Reduce f = Inner |> Seq.reduce f
+   
     
 type ImmOrderedMapWrapper<'k when 'k : comparison>(Inner : ImmOrderedMap<'k, 'k>) =
     inherit MapWrapper<'k>("ImmOrderedMap")
@@ -234,9 +238,9 @@ type ImmOrderedMapWrapper<'k when 'k : comparison>(Inner : ImmOrderedMap<'k, 'k>
     static member FromSeq s = 
         ImmOrderedMapWrapper(ImmOrderedMap.ofKvpSeqWith Cmp.Default s) :> MapWrapper<_>
 
-type ImmMapWrapper<'k when 'k : comparison>(Inner : ImmMap<'k,'k>) =
+type ImmMapWrapper<'k when 'k : comparison>(Inner : ImmMap<'k,'k>, Ordering : ImmOrderedMap<'k, 'k>) =
     inherit MapWrapper<'k>("ImmMap")
-    static let wrap x = ImmMapWrapper<'k>(x) :> MapWrapper<'k>
+    static let wrap ord x  = ImmMapWrapper<'k>(x, ord) :> MapWrapper<'k>
     static let unwrap (xs : Kvp<'k,'k> seq) =
         match xs with
         | :? ImmMapWrapper<'k> as wrapped -> wrapped.Inner :> _ seq
@@ -247,25 +251,33 @@ type ImmMapWrapper<'k when 'k : comparison>(Inner : ImmMap<'k,'k>) =
         | _ -> xs
     member val public Inner = Inner
     override x.GetEnumerator() = (Inner :> _ seq).GetEnumerator()
-    override x.Add(k,v) = Inner.Add(k,v) |> wrap
-    override x.Remove k = Inner.Remove k |> wrap
+    override x.Add(k,v) = Inner.Add(k,v) |> wrap (Ordering.Add(k,v))
+    override x.Remove k = Inner.Remove k |> wrap (Ordering.Remove k)
     override x.IsOrdered = false
     override x.EmptySet = ImmSetWrapper<'k>.FromSeq []
     override x.MapEquals other = Inner.MapEquals(other)
-    override x.SetRange vs = Inner.SetRange (vs |> unwrap) |> wrap
-    override x.AddRange vs = Inner.AddRange (vs |> unwrap) |> wrap
+    override x.SetRange vs = Inner.SetRange (vs |> unwrap) |> wrap (Ordering.SetRange(vs |> Seq.disableIterateOnce))
+    override x.AddRange vs = Inner.AddRange (vs |> unwrap) |> wrap (Ordering.AddRange(vs |> Seq.disableIterateOnce))
     override x.SelfTest() = 
         x |> Seq.distinctBy (fun y -> y.Key) |> Seq.smartLength = x.Length
     override x.ContainsKey k = Inner.ContainsKey(k)
-    override x.Empty = ImmMap.empty |> wrap
+    override x.Empty = ImmMap.empty |> wrap (ImmOrderedMap.empty)
     override x.Get k = Inner.[k]
-    override x.Set(k,v) = Inner.Set(k,v) |> wrap
-    override x.Merge(other, f) = Inner.Merge(other |> unwrap, f.Map toFunc3 |> Option.asNull) |> wrap
-    override x.Join(other, f) = Inner.Join(other |> unwrap, f.Map toFunc3 |> Option.asNull) |> wrap
-    override x.Except(other,f) = Inner.Subtract(other |> unwrap, f.Map(Fun.compose3 toOption >> toFunc3).Or(null)) |> wrap
-    override x.Difference other = Inner.Difference(other |> unwrap) |> wrap
+    override x.Set(k,v) = Inner.Set(k,v) |> wrap (Ordering.Set(k,v))
+    override x.ByArbitraryOrder i = Ordering.ByOrder(i)
+    override x.Merge(other, f : _ option) = 
+        let f = f.Map toFunc3 |> Option.asNull
+        Inner.Merge(other |> unwrap, f) |> wrap (Ordering.Merge(other, null))
+    override x.Join(other, f) = 
+        let f = f.Map toFunc3 |> Option.asNull
+        let f2 = (fun k v1 v2 -> v2) |> toFunc3
+        Inner.Join(other |> unwrap, f) |> wrap (Ordering.Join(other |> Seq.disableIterateOnce, f2))
+    override x.Except(other,f) = 
+        let f = f.Map(Fun.compose3 toOption >> toFunc3) |> Option.asNull
+        Inner.Subtract(other |> unwrap, f)|> wrap (Ordering.Subtract(other |> Seq.disableIterateOnce, null))
+    override x.Difference other = Inner.Difference(other |> unwrap) |> wrap (Ordering.Difference(other))
     override x.RemoveRange vs = 
-        Inner.RemoveRange (vs |> unwrapSet) |> wrap
+        Inner.RemoveRange (vs |> unwrapSet) |> wrap (Ordering.RemoveRange(vs |> Seq.disableIterateOnce))
     override x.Length = Inner.Length
     override x.IsEmpty = Inner.IsEmpty
     override x.All f = Inner.All f
@@ -275,7 +287,7 @@ type ImmMapWrapper<'k when 'k : comparison>(Inner : ImmMap<'k,'k>) =
     override x.Find f = Inner.Find f |> fromOption
     override x.Fold initial f = Inner.Aggregate(initial, toFunc2 f)
     override x.Reduce f = Inner |> ImmMap.reduce f
-    static member FromSeq s = ImmMapWrapper(ImmMap.ofKvpSeq(s))  :> MapWrapper<_>
+    static member FromSeq s = ImmMapWrapper(ImmMap.ofKvpSeq(s), ImmOrderedMap.ofKvpSeq(s))  :> MapWrapper<_>
 
 type MapWrapper<'k when 'k : comparison> with
     member x.assert_keyExists k  =
@@ -344,26 +356,20 @@ type MapWrapper<'k when 'k : comparison> with
         next
 
     member x.U_except (f : _ option) other  =
+        
         let shared = other |> Seq.keys |> Seq.countWhere (x.ContainsKey)
-        let count = ref 0
-        let result =  x.Except(other |> Seq.canEnsureIterateOnce, f.Map(countCalls_3 count))
-        if f.IsSome then assert_eq(shared,!count)
-        assert_eq(result.Length, shared)
+        let result =  x.Except(other |> Seq.canEnsureIterateOnce, f)
         result
 
     member x.U_merge (f : _ option) other  =
-        let shared = other |> Seq.countWhere (fun (Kvp(k,v)) -> x.ContainsKey k)
-        let count = ref 0
-        let result = x.Merge(other |> Seq.canEnsureIterateOnce,f.Map (countCalls_3 count))
-        if f.IsSome then assert_eq(!count,shared)
-        assert_eq(result.Length, shared)
+        let dif = other |> Seq.countWhere (fun (Kvp(k,v)) -> not <| x.ContainsKey k)
+        let result = x.Merge(other |> Seq.canEnsureIterateOnce,f)
+        assert_eq(result.Length, dif + x.Length)
         result
 
     member x.U_join (f : _ option) other  =
         let shared = other |> Seq.keys |> Seq.countWhere (x.ContainsKey)
-        let count = ref 0 
-        let result = x.Join(other |> Seq.canEnsureIterateOnce,f.Map (countCalls_3 count))
-        if f.IsSome then assert_eq(!count, shared)
+        let result = x.Join(other |> Seq.canEnsureIterateOnce,f)
         assert_eq(result.Length, shared)
         result
 

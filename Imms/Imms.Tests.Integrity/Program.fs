@@ -51,8 +51,8 @@ let seqTests initial parameter =
     tests
 
 let setTests initial parameter dataSet= 
-    let generator = Seqs.distinctInts(1, 20) |> Seq.take initial |> Seq.toArray
-    let gen2 = Seqs.distinctInts(1, 20) |> Seq.take dataSet |> Seq.toArray
+    let generator = Seqs.distinctInts(1, 14) |> Seq.take initial |> Seq.toArray
+    let gen2 = Seqs.distinctInts(1, 14) |> Seq.take dataSet |> Seq.toArray
     let x = SetTests(gen2)
     let targets = [Target.Imms.Set generator; Target.Imms.OrderedSet generator]
     let reference = Target.Sys.OrderedSet generator
@@ -63,13 +63,13 @@ let setTests initial parameter dataSet=
     tests
 
 let mapTests initial parameter dataSet = 
-    let generator = Seqs.distinctInts(1, 20) |> Seq.take initial |> Seq.map (fun x -> Kvp(x,x)) |> Seq.toArray
-    let gen2 = Seqs.distinctInts(1, 20) |> Seq.take dataSet |>  Seq.toArray
+    let generator = Seqs.distinctInts(1, 14) |> Seq.take initial |> Seq.map (fun x -> Kvp(x,x)) |> Seq.toArray
+    let gen2 = Seqs.distinctInts(1, 14) |> Seq.take dataSet |>  Seq.toArray
     let x = MapTests(gen2)
     let targets = [Target.Imms.Map generator; Target.Imms.OrderedMap generator]
     let reference = Target.Sys.OrderedMap generator
     let tests = 
-        [x.Add; x.Remove; x.Add_range; x.Remove_range; x.Except; x.Merge; x.Join; x.Difference; x.Add_remove; x.Find]
+        [x.Add; x.Remove; x.Add_range; x.Remove_range; x.Merge; x.Gen_disjoint;x.Except; x.Join; x.Difference; x.Add_remove; x.Find]
         |> List.apply1 parameter
         |> Test.bindAll reference targets
     tests
@@ -79,7 +79,6 @@ let g a b = 1
 
 [<EntryPoint>]
 let main argv = 
-
     let fl = ImmList<_>.Empty <+ 1
     let s = fl.Select(fun x -> x + 1)
     let dsf = s.First
@@ -90,10 +89,10 @@ let main argv =
     let r = Random()
     let mutable tests = []
     for i = 0 to 0 do
-        let initial, param, ds = r.Next(0, 1000), r.Next(100, 1000), r.Next( 30000, 40000)
+        let initial, param, ds = r.Next(100, 500), r.Next(100, 500), r.Next( 10000, 15000)
         printfn "Initial: %d, Param: %d, ds: %d" initial param ds
         tests <- allTests initial param ds @ tests
-    let tests = tests |> List.filter (fun t -> t.Test.Kind = SetLike)
+    let tests = tests// |> List.filter (fun t -> t.Test.Kind = MapLike && t.Test.Name.Contains("Join"))
     tests |> Test.runAll writer |> Report.byTest writer 
     Console.Read() |> ignore
     fs.Flush()

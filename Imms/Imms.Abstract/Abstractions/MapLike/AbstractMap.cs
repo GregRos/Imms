@@ -243,7 +243,6 @@ namespace Imms.Abstract {
 		public TMap Join<TValue2>(IEnumerable<KeyValuePair<TKey, TValue2>> other,
 			Func<TKey, TValue, TValue2, TValue> selector) {
 			other.CheckNotNull("other");
-			selector.CheckNotNull("selector");
 			var map = other as TMap;
 			if (map != null && IsCompatibleWith(map)) return Join(map, (Func<TKey, TValue, TValue, TValue>) (object) selector);
 			return Join_Unchecked(other, selector);
@@ -454,10 +453,13 @@ namespace Imms.Abstract {
 			other.CheckNotNull("other");
 			using (var builder = BuilderFrom(this)) {
 				other.ForEach(item => {
-					if (collision == null) builder.Set(item.Key, item.Value);
+					if (collision == null) {
+						builder.Set(item.Key, item.Value);
+					}
 					else {
-						var myElement = builder.TryGetKvp(item.Key).Map(x => x.Value);
-						builder.Set(item.Key, myElement.IsSome ? collision(item.Key, myElement.Value, item.Value) : item.Value);
+						var myElement = builder.TryGetKvp(item.Key);
+						var value = myElement.IsSome ? collision(myElement.Value.Key, myElement.Value.Value, item.Value) : item.Value;
+						builder.Set(item.Key, value);
 					}
 				});
 				return builder.Produce();

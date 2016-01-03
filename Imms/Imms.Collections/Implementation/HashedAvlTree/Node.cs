@@ -586,7 +586,8 @@ namespace Imms.Implementation {
 				while (!cur.IsEmpty) {
 					if (hash < cur.Hash) {
 						cur = cur.Left;
-					} else if (hash > cur.Hash) cur = cur.Right;
+					}
+					else if (hash > cur.Hash) cur = cur.Right;
 					else return cur.Bucket.FindKvp(key);
 				}
 				return Optional.None;

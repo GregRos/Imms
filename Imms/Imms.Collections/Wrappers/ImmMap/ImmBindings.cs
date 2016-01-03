@@ -26,14 +26,19 @@ namespace Imms {
 				_inner = node;
 				_equality = equality;
 
-				_lineage = Lineage.Mutable();
+				_lineage = GetNewLineage();
+			}
+
+			private static Lineage GetNewLineage() {
+
+				return Lineage.Immutable;
 			}
 
 			public Builder(ImmMap<TKey, TValue> map)
 				: this(map._root, map._equality) {}
 
 			public ImmMap<TKey, TValue> Produce() {
-				_lineage = Lineage.Mutable();
+				_lineage = GetNewLineage();
 				return _inner.WrapMap(_equality);
 			}
 
@@ -75,7 +80,7 @@ namespace Imms {
 			}
 
 			public void Dispose() {
-				_lineage = Lineage.Mutable();
+				_lineage = GetNewLineage();
 			}
 		}
 	}

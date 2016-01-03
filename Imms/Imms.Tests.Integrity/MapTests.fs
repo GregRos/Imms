@@ -18,7 +18,9 @@ type MapTests<'e when 'e : comparison>(items : 'e array, ?seed : int) =
         | Some v -> item, v
         | None -> rnd_kvp' (mx - 1) r s
     
-    let rnd_kvp r s = rnd_kvp' 10 r s
+    let rnd_kvp (r : Random) (s : MapWrapper<_>) = 
+        let ix = r.Next(0, s.Length)
+        s.ByArbitraryOrder ix |> Kvp.ToTuple
          
     member private x.get_kvp_slice (n : int) = 
         let r = Random(seed)
@@ -57,10 +59,6 @@ type MapTests<'e when 'e : comparison>(items : 'e array, ?seed : int) =
     member private x.gen_equal_keys_dif_values n (map:_ MapWrapper) =
         let r = Random(seed)
         let mutable next = map
-        for i = 0 to n do
-            let k, v = next |> rnd_kvp r
-            let v = items.[r.Next(0,items.Length)]
-            next <- next.U_add k v
         next
         
     member private x.add n (map :_ MapWrapper) =
@@ -80,7 +78,7 @@ type MapTests<'e when 'e : comparison>(items : 'e array, ?seed : int) =
             let k = items.[rnd()]
             map <- map.U_remove k
 
-        for i = 0 to n do
+        for i = 0 to min map.Length n do
             let k,v = map |> rnd_kvp r
             map <- map.U_remove k
         map
@@ -138,7 +136,7 @@ type MapTests<'e when 'e : comparison>(items : 'e array, ?seed : int) =
         let n' = n |> Math.intSqrt
         let tests() = MapTests(items, r.Next())
         let mutable results = []
-        let merge k v1 v2 = if r.Next(0,2) = 0 then v1 else v2
+        let merge k v1 v2 =  if r.Next(0,2) = 0 then v1 else v2
         for i = 0 to n' do
             let t = map
             let fs = tests().add, tests().remove, tests().gen_disjoint, tests().gen_equal_keys_dif_values, tests().gen_different
@@ -234,6 +232,7 @@ type MapTests<'e when 'e : comparison>(items : 'e array, ?seed : int) =
     member x.Difference iters = create_test iters "Difference" (x.difference iters >> List.cast)
     member x.Add_remove iters = create_test iters "Add, Remove" (x.add_remove iters >> toList1 >> List.cast)
     member x.Find iters = create_test iters "Find" (x.find iters >> toList1 >> List.cast)
+    member x.Gen_disjoint iters = create_test iters "GenDisjoint" (x.gen_equal_keys_dif_values iters >> toList1 >> List.cast)
 
 
 

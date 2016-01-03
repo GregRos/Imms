@@ -24,6 +24,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FSharp", "FSharp", "{2797B070-F9A5-4644-B542-94017868B619}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Main", "Main", "{02A02FCE-0EB1-411C-A61D-9C564A41A2F5}"
+	ProjectSection(SolutionItems) = preProject
+		Imms.Abstract\Properties\ImmsInfo.cs = Imms.Abstract\Properties\ImmsInfo.cs
+	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ExtraFunctional", "ExtraFunctional\ExtraFunctional\ExtraFunctional.fsproj", "{D0648CE4-2886-4E09-964C-C4E675DDA3C3}"
 EndProject

@@ -49,13 +49,6 @@ namespace Imms {
 			return _root.GetEnumerator();
 		}
 
-		internal KeyValuePair<TKey, TValue> ByArbitraryOrder(int index)
-		{
-			index.CheckIsBetween("index", -_root.Count, _root.Count - 1);
-			index = index < 0 ? index + _root.Count : index;
-			return _root.ByArbitraryOrder(index).AsKvp;
-		}
-
 		protected override Optional<KeyValuePair<TKey, TValue>> TryGetKvp(TKey key) {
 			return _root.Root_FindKvp(key);
 		}

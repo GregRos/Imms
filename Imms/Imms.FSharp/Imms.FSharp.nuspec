@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Imms.FSharp</id>
-    <version>0.5.0</version>
+    <version>0.5.1</version>
     <title>Imms.FSharp</title>
     <authors>Gregory Rosenbaum</authors>
     <owners>Gregory Rosenbaum</owners>
@@ -22,7 +22,7 @@
     <copyright>Copyright 2016</copyright>
     <tags>collection collections fsharp immutable persistent imms imm functional deque vector map dictionary list queue stack performance set</tags>
     <dependencies>
-      <dependency id="Imms" version="0.5.0"/>
+      <dependency id="Imms" version="0.5.1"/>
       <dependency id="FSharp.Core" version="3.1.2.1"/>
     </dependencies>
 

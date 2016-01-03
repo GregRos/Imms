@@ -140,9 +140,12 @@ type SetTests<'e when 'e : comparison>(items : 'e array,  ?seed : int) =
 
         while reduced >= 0 do
             let v = items.[rnd()]
+            if (float (s.Length) / float (items.Length)) > 0.5 then
+                reduced <- 0
             if (s.Contains v || t.Contains v) |> not then 
                 t <- t.U_add v
                 reduced <- reduced - 1
+
         t
 
     member private x.set_relation (n : int) (s : SetWrapper<_>) =

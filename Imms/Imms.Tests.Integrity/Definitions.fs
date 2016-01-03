@@ -324,12 +324,9 @@ type Test<'col when 'col :> TargetMetadata and 'col : equality>(Iterations : int
             with
             | OperationNotImplemented name -> NotImplemented name
             | AssertionFailed _ & ex  -> 
-                raise ex
+                //raise ex
                 FailedAssertion (ex :?> AssertionFailed)
-            | ex -> 
-                reraise()
-                Debugger.Break()
-                Error ex
+
         output
 
 type TestResult = 
