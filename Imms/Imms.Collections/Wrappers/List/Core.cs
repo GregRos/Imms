@@ -150,11 +150,14 @@ namespace Imms {
 		}
 
 		/// <summary>
-		///     Adds a sequence of items to the end of the list.
+		///     Adds a sequence of items to the end of the list. 
 		/// </summary>
-		/// <param name="items"> The sequence. </param>
+		/// <param name="items"> The sequence. This method is O(logn) if the sequence is also <see cref="ImmList{T}"/>.</param>
 		/// <returns> </returns>
 		/// <exception cref="ArgumentNullException">Thrown if the argument is null.</exception>
+		/// <remarks>
+		///		This method adds a sequence of elements to the end of the list. 
+		/// </remarks>
 		public ImmList<T> AddLastRange(IEnumerable<T> items) {
 			items.CheckNotNull("items");
 			var list = items as ImmList<T>;
@@ -174,6 +177,7 @@ namespace Imms {
 		/// <returns> </returns>
 		/// <exception cref="InvalidOperationException">Thrown if the list is empty.</exception>
 		public ImmList<T> RemoveFirst() {
+			this.CheckNotEmpty();
 			if (Root.IsEmpty) throw Errors.Is_empty;
 			var ret = Root.RemoveFirst(Lineage.Immutable).Wrap();
 #if ASSERTS
@@ -189,7 +193,7 @@ namespace Imms {
 		/// <returns> </returns>
 		/// <exception cref="InvalidOperationException">Thrown if the list is empty.</exception>
 		public ImmList<T> RemoveLast() {
-			if (Root.IsEmpty) throw Errors.Is_empty;
+			this.CheckNotEmpty();
 			var ret = Root.RemoveLast(Lineage.Immutable).Wrap();
 #if ASSERTS
 			if (ret.Root.Measure > 0) ret.Last.AssertEqual(this[-2]);
@@ -217,17 +221,6 @@ namespace Imms {
 			ret.Root.Measure.AssertEqual(Root.Measure + 1);
 #endif
 			return ret;
-		}
-
-		/// <summary>
-		///     Returns a slice from the first index, and consisting of the specified number of elements.
-		/// </summary>
-		/// <param name="count"></param>
-		/// <returns></returns>
-		public override ImmList<T> Take(int count) {
-			count.CheckIsBetween("count", 0);
-			if (count >= Root.Measure) return this;
-			return count == 0 ? empty : GetRange(0, count);
 		}
 
 		/// <summary>
@@ -328,25 +321,41 @@ namespace Imms {
 			return ret;
 		}
 
-		protected override ImmList<T> GetRange(int start, int count) {
-			start.CheckIsBetween("start", 0, Root.Measure-1);
-			(start + count).CheckIsBetween("count", 0, Root.Measure);
+		/// <summary>
+		///     Returns a range of elements. Doesn't support negative indexing.
+		/// </summary>
+		/// <param name="from"></param>
+		/// <param name="count"></param>
+		/// <returns></returns>
+		protected override ImmList<T> GetRange(int @from, int count) {
+			@from.CheckIsBetween("start", 0, Root.Measure-1);
+			(@from + count).CheckIsBetween("count", 0, Root.Measure);
 			if (count == 0) return empty;
 			if (count == 1) {
-				var res = Root[start];
+				var res = Root[@from];
 				return EmptyFTree.AddLast(res, Lineage.Immutable).Wrap();
 			}
 			FingerTree<T>.FTree<Leaf<T>> first, last;
-			Root.Split(start, out first, out last, Lineage.Immutable);
+			Root.Split(@from, out first, out last, Lineage.Immutable);
 			last.Split(count, out first, out last, Lineage.Immutable);
 			return first.Wrap();
 		}
 
+		/// <summary>
+		///     Applies the specified delegate on every item in the collection, from first to last.
+		/// </summary>
+		/// <param name="action"> The action. </param>
+		/// <exception cref="ArgumentNullException">Thrown if the argument null.</exception>
 		public override void ForEach(Action<T> action) {
 			action.CheckNotNull("action");
 			Root.Iter(leaf => action(leaf.Value));
 		}
 
+		/// <summary>
+		///     Applies the specified delegate on every item in the collection, from last to first.
+		/// </summary>
+		/// <param name="action"> The action. </param>
+		/// <exception cref="ArgumentNullException">Thrown if the delegate is null.</exception>
 		public override void ForEachBack(Action<T> action) {
 			action.CheckNotNull("action");
 			Root.IterBack(leaf => action(leaf.Value));

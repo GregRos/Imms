@@ -154,6 +154,10 @@ namespace Imms {
 			return seq is IAnyIterable<T> || seq is T[] || seq is List<T>;
 		}
 
+		internal static bool IsEmpty<T>(this IAnyIterable<T> seq) {
+			return seq.Length == 0;
+		}
+
 		internal static bool ForEachWhile<TElem>(this IEnumerable<TElem> seq, Func<TElem, bool> act) {
 			var elems = seq as IAnyIterable<TElem>;
 			if (elems != null) {

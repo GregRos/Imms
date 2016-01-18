@@ -102,7 +102,6 @@ namespace Imms.Abstract {
 		///     Returns the first element or None.
 		/// </summary>
 		/// <value> The first element, or None if the collection is empty.</value>
-		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public Optional<TElem> TryFirst {
 			get { return IsEmpty ? Optional.None : Optional.Some(First); }
 		}
@@ -111,7 +110,6 @@ namespace Imms.Abstract {
 		///     Gets the last element or None.
 		/// </summary>
 		/// <value> The last element, or None if the collection is empty. </value>
-		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public Optional<TElem> TryLast {
 			get { return IsEmpty ? Optional.None : Optional.Some(Last); }
 		}
@@ -137,7 +135,6 @@ namespace Imms.Abstract {
 			if (count != 0 || (arrStart != 0 && arrStart != -1)) {
 				arrStart.CheckIsBetween("arrStart", -arr.Length, arr.Length - 1);
 			}
-
 			if (count == 0) {
 				return;
 			}
@@ -429,6 +426,13 @@ namespace Imms.Abstract {
 		}
 
 
+		/// <summary>
+		///     Copies the first several elements (according to order of iteration) of the collection to an array, starting at the
+		///     specified array index.
+		/// </summary>
+		/// <param name="arr">The array to copy to.</param>
+		/// <param name="arrStart">The array index at which to begin copying.</param>
+		/// <param name="count">The number of elements to copy.</param>
 		public sealed override void CopyTo(TElem[] arr, int arrStart, int count) {
 			CopyTo(arr, 0, arrStart, count);
 		}

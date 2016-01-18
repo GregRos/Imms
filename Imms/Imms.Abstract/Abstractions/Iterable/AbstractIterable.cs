@@ -20,6 +20,7 @@ namespace Imms.Abstract {
 		: IEnumerable<TElem>, IBuilderFactory<TBuilder>, IAnyIterable<TElem>
 		where TBuilder : IIterableBuilder<TElem, TIterable>
 		where TIterable : AbstractIterable<TElem, TIterable, TBuilder> {
+
 		/// <summary>
 		///   Filters the collection using the specified predicate.
 		/// </summary>

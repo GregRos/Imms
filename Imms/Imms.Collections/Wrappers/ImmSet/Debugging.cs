@@ -1,16 +1,18 @@
 using System.Diagnostics;
+using Imms.Abstract;
 
 namespace Imms {
 	[DebuggerDisplay("{DebuggerDisplay,nq}")]
-	[DebuggerTypeProxy(typeof (ImmSet<>.SetDebugView))]
+	[DebuggerTypeProxy(typeof (ImmSetDebugView<>))]
 	partial class ImmSet<T> {
-		class SetDebugView {
-			public SetDebugView(ImmSet<T> set) {
-				IterableView = new IterableDebugView(set);
-			}
+	}
 
-			[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-			public IterableDebugView IterableView { get; private set; }
+	class ImmSetDebugView<T> {
+		public ImmSetDebugView(ImmSet<T> set) {
+			IterableView = new IterableDebugView<T>(set);
 		}
+
+		[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+		public IterableDebugView<T> IterableView { get; private set; }
 	}
 }

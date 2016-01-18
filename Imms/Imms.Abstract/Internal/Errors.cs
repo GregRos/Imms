@@ -44,7 +44,7 @@ namespace Imms {
 		public static KeyNotFoundException Key_not_found(object key = null) {
 			var message = key == null
 				? "The key was not found in this dictionary."
-				: string.Format("The key '{0}' was not found in this dictionary.", key);
+				: $"The key '{key}' was not found in this dictionary.";
 			var keyNotFound = new KeyNotFoundException(message);
 			return keyNotFound;
 		}
@@ -58,14 +58,14 @@ namespace Imms {
 			string message = null) {
 				if (lower.HasValue && value < lower.Value)
 				{
-					message = string.Format("Expected in range [{0}, {1}]. More info: {2}", lower.AsOptional().AsString().Or("*"),
-						upper.AsOptional().AsString().Or("*"), message);
+					message =
+						$"Expected in range [{lower.AsOptional().AsString().Or("*")}, {upper.AsOptional().AsString().Or("*")}]. More info: {message}";
 					throw Arg_out_of_range(name, value, message);
 				}
 				if (upper.HasValue && value > upper.Value)
 				{
-					message = string.Format("Expected in range [{0}, {1}]. More info: {2}", lower.AsOptional().AsString().Or("*"),
-						upper.AsOptional().AsString().Or("*"), message);
+					message =
+						$"Expected in range [{lower.AsOptional().AsString().Or("*")}, {upper.AsOptional().AsString().Or("*")}]. More info: {message}";
 					throw Arg_out_of_range(name, value, message);
 				}
 		}
@@ -73,14 +73,18 @@ namespace Imms {
 		public static void CheckIsBetweenT<T>(this T value, string name, Optional<T> lower = default(Optional<T>),
 			Optional<T> upper = default(Optional<T>), string message = null) where T : IComparable<T> {
 			if (lower.IsSome && value.CompareTo(lower.Value) < 0) {
-				message = string.Format("Expected in range [{0}, {1}]. More info: {2}", lower.AsString().Or("*"),
-					upper.AsString().Or("*"), message);
+				message = $"Expected in range [{lower.AsString().Or("*")}, {upper.AsString().Or("*")}]. More info: {message}";
 				throw Arg_out_of_range(name, value, message);
 			}
 			if (upper.IsSome && value.CompareTo(upper.Value) > 0) {
-				message = string.Format("Expected in range [{0}, {1}]. More info: {2}", lower.AsString().Or("*"),
-					upper.AsString().Or("*"), message);
+				message = $"Expected in range [{lower.AsString().Or("*")}, {upper.AsString().Or("*")}]. More info: {message}";
 				throw Arg_out_of_range(name, value, message);
+			}
+		}
+
+		public static void CheckNotEmpty<T>(this IAnyIterable<T> anyIterable) {
+			if (anyIterable.IsEmpty()) {
+				throw Errors.Is_empty;
 			}
 		}
 
