@@ -29,7 +29,7 @@ module Imms =
 
     [<Struct>]
     type OrderedMap<'t when 't :> IComparable<'t>> = 
-        val public inner : ImmOrderedMap<'t, 't>
+        val public inner : ImmSortedMap<'t, 't>
         [<DefaultValueAttribute(false)>]
         val mutable public keys : 't[]
         new (innerp) = {inner = innerp}
@@ -43,7 +43,7 @@ module Imms =
         member  x.get_Item k = x.inner.TryGet(k).Value
         member  x.Keys = x.keys
         static member  FromSeq(s : 't seq) = 
-            let mutable mp = [for item in s -> Kvp.Of(item, item)].ToImmOrderedMap() |> fun x -> OrderedMap(x)
+            let mutable mp = [for item in s -> Kvp.Of(item, item)].ToImmSortedMap() |> fun x -> OrderedMap(x)
             mp.keys <- s |> Seq.toArray
             mp
     [<Struct>]
@@ -74,7 +74,7 @@ module Imms =
             set
 
     type OrderedSet<'t when 't :> IComparable<'t>> = 
-        val public inner : ImmOrderedSet<'t>
+        val public inner : ImmSortedSet<'t>
         [<DefaultValueAttribute>]
         val mutable public keys : 't array
         new (innerp) = {inner = innerp}
@@ -95,7 +95,7 @@ module Imms =
         member  x.IsProperSubset (s : OrderedSet<'t>) = x.inner.IsProperSubsetOf(s.inner)
         member  x.Keys = x.keys
         static member  FromSeq(s : 't seq) = 
-            let mutable set = OrderedSet(s.ToImmOrderedSet())
+            let mutable set = OrderedSet(s.ToImmSortedSet())
             set.keys <- s |> Seq.toArray
             set
 module Sys = 

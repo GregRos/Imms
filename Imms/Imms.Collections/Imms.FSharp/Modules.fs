@@ -99,7 +99,7 @@ module ImmVector =
     ///Returns the index of the last element of the collection that satisfies 'f'
     let findIndex f (collection : ImmVector<'v>) = collection.FindIndex(toFunc1 f) |> fromOption
     
-    ///Returns the empty vector.
+    ///Returns the empty collection.
     let empty<'v> = ImmVector<'v>.Empty
     
     ///Returns a vector consisting of 'value'
@@ -228,7 +228,7 @@ module ImmList =
     ///Returns the index of the last element of the collection that satisfies 'f'
     let findIndex f (collection : ImmList<'v>) = collection.FindIndex(toFunc1 f) |> fromOption
     
-    ///Returns the empty vector.
+    ///Returns the empty collection.
     let empty<'v> = ImmList<'v>.Empty
     
     ///Returns a vector consisting of 'value'
@@ -347,108 +347,108 @@ module ImmSet =
     
     ///Returns true if ImmSet<'k>' is disjoint with (shares no elements with) other.
     let isDisjointWith (other : _ seq) (set : ImmSet<'k>) = set.IsDisjointWith(other)
-///A module for working with ImmOrderedSet collections -- immutable ordered sets.
-module ImmOrderedSet = 
-    ///Returns an empty ImmOrderedSet that uses the default comparer for the type.
-    let empty<'k when 'k : comparison> = ImmOrderedSet<'k>.Empty(null)
-    ///Returns an empty ImmOrderedSet that uses the specified comparer.
-    let emptyWith(cm : ICmp<'elem>) = ImmOrderedSet<'elem>.Empty(cm)
-    ///Constructs an ImmOrderedSet from a sequence, using the default comparer for the type.
-    let ofSeq (vs : 'a seq when 'a : comparison) = ImmOrderedSet.ToImmOrderedSet(vs, null)
-    ///Constructs an ImmOrderedSet from a sequence, using the specified comparer.
-    let ofSeqWith cmp vs = ImmOrderedSet.ToImmOrderedSet(vs, cmp)
+///A module for working with ImmSortedSet collections -- immutable ordered sets.
+module ImmSortedSet = 
+    ///Returns an empty ImmSortedSet that uses the default comparer for the type.
+    let empty<'k when 'k : comparison> = ImmSortedSet<'k>.Empty(null)
+    ///Returns an empty ImmSortedSet that uses the specified comparer.
+    let emptyWith(cm : ICmp<'elem>) = ImmSortedSet<'elem>.Empty(cm)
+    ///Constructs an ImmSortedSet from a sequence, using the default comparer for the type.
+    let ofSeq (vs : 'a seq when 'a : comparison) = ImmSortedSet.ToImmSortedSet(vs, null)
+    ///Constructs an ImmSortedSet from a sequence, using the specified comparer.
+    let ofSeqWith cmp vs = ImmSortedSet.ToImmSortedSet(vs, cmp)
     ///Returns the ith element of the set, by sort order.
-    let byOrder i (set : _ ImmOrderedSet) = set.ByOrder i
+    let byOrder i (set : _ ImmSortedSet) = set.ByOrder i
     ///Returns the minimal element of the set.
-    let min (set : _ ImmOrderedSet) = set.MinItem
+    let min (set : _ ImmSortedSet) = set.MinItem
     ///Returns the maximal element of the set.
-    let max (set : _ ImmOrderedSet) = set.MaxItem
+    let max (set : _ ImmSortedSet) = set.MaxItem
     ///Removes the minimal element of the set.
-    let removeMin (set :_ ImmOrderedSet) = set.RemoveMin()
+    let removeMin (set :_ ImmSortedSet) = set.RemoveMin()
     ///Removes the maximal element of the set.
-    let removeMax (set :_ ImmOrderedSet) = set.RemoveMax()
+    let removeMax (set :_ ImmSortedSet) = set.RemoveMax()
     ///Returns true if the specified collection is empty.
-    let isEmpty (collection : ImmOrderedSet<'k>) = collection.IsEmpty
+    let isEmpty (collection : ImmSortedSet<'k>) = collection.IsEmpty
     
     ///Returns the length of the collection. O(1)
-    let length (collection : ImmOrderedSet<'k>) = collection.Length
+    let length (collection : ImmSortedSet<'k>) = collection.Length
     
     ///Iterates over the collection.
-    let iter f (collection : ImmOrderedSet<'k>) = collection.ForEach(toAction f)  
+    let iter f (collection : ImmSortedSet<'k>) = collection.ForEach(toAction f)  
     
     ///Iterates over the collection with 'f' returns true, stops when it returns 'false'.
-    let iterWhile f (collection : ImmOrderedSet<'k>) = collection.ForEachWhile(toFunc1 f)
+    let iterWhile f (collection : ImmSortedSet<'k>) = collection.ForEachWhile(toFunc1 f)
     
     ///Folds over the collection, in the default iteration order.
-    let fold initial f (collection : ImmOrderedSet<'k>) = collection.Aggregate(initial, toFunc2 f)
+    let fold initial f (collection : ImmSortedSet<'k>) = collection.Aggregate(initial, toFunc2 f)
     
     ///Folds over the collection, starting by applying the function to the first two elements.
-    let reduce f (collection : ImmOrderedSet<'k>) = collection.Aggregate(toFunc2 f)
+    let reduce f (collection : ImmSortedSet<'k>) = collection.Aggregate(toFunc2 f)
     
     ///Returns the single element present in the collection, or throws an exception if there is more than one element, or if there are no elements.
-    let single (collection : ImmOrderedSet<'k>) = collection.Single()
+    let single (collection : ImmSortedSet<'k>) = collection.Single()
     
     ///Converts the specified collection to an array.
-    let toArray (collection : ImmOrderedSet<'k>) = collection.ToArray()
+    let toArray (collection : ImmSortedSet<'k>) = collection.ToArray()
     
     ///Converts the elements of the collection to a string, using the specified separator.
-    let print sep (collection : ImmOrderedSet<'k>)  = collection.Print(sep, sprintf "%A" |> toFunc1)
+    let print sep (collection : ImmSortedSet<'k>)  = collection.Print(sep, sprintf "%A" |> toFunc1)
     
     ///Converts the elements of the collection to a string using the specified function, using the specified separator.
-    let printWith sep format (collection : ImmOrderedSet<'k>) = collection.Print(sep, (sprintf format) |> toFunc1)
+    let printWith sep format (collection : ImmSortedSet<'k>) = collection.Print(sep, (sprintf format) |> toFunc1)
     
     ///Finds an element that satisfies 'f', or None.
-    let find f (collection : ImmOrderedSet<'k>) = collection.Find(toFunc1 f) |> fromOption
+    let find f (collection : ImmSortedSet<'k>) = collection.Find(toFunc1 f) |> fromOption
     
     ///Returns the first element from which the function returns Some, or returns None.
-    let pick f (collection : ImmOrderedSet<'k>) = collection.Pick(f >> toOption |> toFunc1) |> fromOption
+    let pick f (collection : ImmSortedSet<'k>) = collection.Pick(f >> toOption |> toFunc1) |> fromOption
     
     ///Returns true if an element satisfying 'f' exists in the collection.
-    let exists f (collection : ImmOrderedSet<'k>) = collection.Any(toFunc1 f)
+    let exists f (collection : ImmSortedSet<'k>) = collection.Any(toFunc1 f)
     
     ///Returns true if all the elements in the collection satisfies 'f'.
-    let forAll f (collection : ImmOrderedSet<'k>) = collection.All(toFunc1 f)
+    let forAll f (collection : ImmSortedSet<'k>) = collection.All(toFunc1 f)
     
     ///Counts the number of elements satisfying 'f' in the collection.
-    let count f (collection : ImmOrderedSet<'k>) = collection.Count(toFunc1 f)
+    let count f (collection : ImmSortedSet<'k>) = collection.Count(toFunc1 f)
      ///Returns true if the set contains the value.
-    let contains value (set : ImmOrderedSet<'k>) = set.Contains(value)
+    let contains value (set : ImmSortedSet<'k>) = set.Contains(value)
     
     ///Returns the intersection of the two sets.
-    let intersect (other : _ seq) (set : ImmOrderedSet<'k>) = set.Intersect(other)
+    let intersect (other : _ seq) (set : ImmSortedSet<'k>) = set.Intersect(other)
     
     ///Returns the union of the two sets.
-    let union (other : _ seq) (set : ImmOrderedSet<'k>) = set.Union(other)
+    let union (other : _ seq) (set : ImmSortedSet<'k>) = set.Union(other)
     
-    ///Returns ImmOrderedSet<'k>' minus the elements of 'other'.
-    let except (other : _ seq) (set :ImmOrderedSet<'k>) = set.Except(other)
+    ///Returns ImmSortedSet<'k>' minus the elements of 'other'.
+    let except (other : _ seq) (set :ImmSortedSet<'k>) = set.Except(other)
     
-    ///Returns 'other' minus the elements of ImmOrderedSet<'k>'
-    let exceptInverse (other :_ seq) (set : ImmOrderedSet<'k>) = set.ExceptInverse(other)
+    ///Returns 'other' minus the elements of ImmSortedSet<'k>'
+    let exceptInverse (other :_ seq) (set : ImmSortedSet<'k>) = set.ExceptInverse(other)
     
-    ///Returns the symmetric difference between ImmOrderedSet<'k>' and 'other'.
-    let difference (other : _ seq) (set :ImmOrderedSet<'k>) = set.Difference(other)
+    ///Returns the symmetric difference between ImmSortedSet<'k>' and 'other'.
+    let difference (other : _ seq) (set :ImmSortedSet<'k>) = set.Difference(other)
     
     ///Returns the set-theoretic relation (may be more than one) between the two sets.
-    let relates (other : _ seq) (set :ImmOrderedSet<'k>) = set.RelatesTo(other)
+    let relates (other : _ seq) (set :ImmSortedSet<'k>) = set.RelatesTo(other)
     
-    ///Returns true if ImmOrderedSet<'k>' is a subset of 'other'
-    let isSubsetOf (other : _ seq) (set : ImmOrderedSet<'k>) = set.IsSubsetOf(other)
+    ///Returns true if ImmSortedSet<'k>' is a subset of 'other'
+    let isSubsetOf (other : _ seq) (set : ImmSortedSet<'k>) = set.IsSubsetOf(other)
     
-    ///Returns true if ImmOrderedSet<'k>' is a superset of 'other'
-    let isSuperOf (other : _ seq) (set : ImmOrderedSet<'k>) = set.IsSupersetOf(other)
+    ///Returns true if ImmSortedSet<'k>' is a superset of 'other'
+    let isSuperOf (other : _ seq) (set : ImmSortedSet<'k>) = set.IsSupersetOf(other)
     
-    ///Returns true if ImmOrderedSet<'k>' is equal to 'other'
-    let isEqual (other : _ seq) (set : ImmOrderedSet<'k>) = set.SetEquals(other)
+    ///Returns true if ImmSortedSet<'k>' is equal to 'other'
+    let isEqual (other : _ seq) (set : ImmSortedSet<'k>) = set.SetEquals(other)
     
-    ///Returns true if ImmOrderedSet<'k>' is a proper subset of 'other'
-    let isProperSubsetOf (other : _ seq) (set : ImmOrderedSet<'k>) = set.IsProperSubsetOf(other)
+    ///Returns true if ImmSortedSet<'k>' is a proper subset of 'other'
+    let isProperSubsetOf (other : _ seq) (set : ImmSortedSet<'k>) = set.IsProperSubsetOf(other)
     
-    ///Returns true if ImmOrderedSet<'k>' is a proper superset of 'other'
-    let isProperSuperOf (other : _ seq) (set : ImmOrderedSet<'k>) = set.IsProperSupersetOf(other)
+    ///Returns true if ImmSortedSet<'k>' is a proper superset of 'other'
+    let isProperSuperOf (other : _ seq) (set : ImmSortedSet<'k>) = set.IsProperSupersetOf(other)
     
-    ///Returns true if ImmOrderedSet<'k>' is disjoint with (shares no elements with) other.
-    let isDisjointWith (other : _ seq) (set : ImmOrderedSet<'k>) = set.IsDisjointWith(other)
+    ///Returns true if ImmSortedSet<'k>' is disjoint with (shares no elements with) other.
+    let isDisjointWith (other : _ seq) (set : ImmSortedSet<'k>) = set.IsDisjointWith(other)
 ///A module for working with ImmMap collections -- immutable hash-based maps.
 module ImmMap =
     ///Returns an empty ImmMap that uses the specified equality comparer.
@@ -597,163 +597,163 @@ module ImmMap =
     
     ///Returns true if the map contains the specified key.
     let containsKey key (map : ImmMap<'k, 'v>) = map.ContainsKey(key)
-///A module for working with ImmOrderedMap collections -- immutable comparison-based maps.
-module ImmOrderedMap = 
-    ///Returns an empty ImmOrderedMap that uses the default comparer for the type.
-    let empty<'key, 'value when 'key : comparison> = ImmOrderedMap<'key, 'value>.Empty(null)
-    ///Returns an empty ImmOrderedMap that uses the specified comparer.
-    let emptyWith(cm : Cmp<'key>) = ImmOrderedMap<'key,'value>.Empty(cm)
-    ///Constructs an ImmOrderedMap from a sequence of ordered pairs, using the default comparer for the type.
-    let ofPairsSeq (vs : seq<'key * 'value> when 'key : comparison) = ImmOrderedMap.Empty(null) /++ (vs |> Seq.map Kvp)
-    ///Constructs an ImmOrderedMap from a sequence of key-value pairs, using the default comparer for the type.
-    let ofKvpSeq (vs : seq<Kvp<'key,'value>> when 'key : comparison) = ImmOrderedMap.Empty(null) /++ (vs)
-    ///Constructs an ImmOrderedMap from a sequence of key-value pairs, using the specified comparer.
-    let ofKvpSeqWith cmp vs = ImmOrderedMap.ToImmOrderedMap(vs, cmp)
-    ///Constructs an ImmOrderedMap from a sequence of ordered pairs, using the specified comparer.
-    let ofSeqWith cmp (vs : seq<'key * 'value>) = ImmOrderedMap.Empty(cmp).AddRange(vs |> Seq.map Kvp)
+///A module for working with ImmSortedMap collections -- immutable comparison-based maps.
+module ImmSortedMap = 
+    ///Returns an empty ImmSortedMap that uses the default comparer for the type.
+    let empty<'key, 'value when 'key : comparison> = ImmSortedMap<'key, 'value>.Empty(null)
+    ///Returns an empty ImmSortedMap that uses the specified comparer.
+    let emptyWith(cm : Cmp<'key>) = ImmSortedMap<'key,'value>.Empty(cm)
+    ///Constructs an ImmSortedMap from a sequence of ordered pairs, using the default comparer for the type.
+    let ofPairsSeq (vs : seq<'key * 'value> when 'key : comparison) = ImmSortedMap.Empty(null) /++ (vs |> Seq.map Kvp)
+    ///Constructs an ImmSortedMap from a sequence of key-value pairs, using the default comparer for the type.
+    let ofKvpSeq (vs : seq<Kvp<'key,'value>> when 'key : comparison) = ImmSortedMap.Empty(null) /++ (vs)
+    ///Constructs an ImmSortedMap from a sequence of key-value pairs, using the specified comparer.
+    let ofKvpSeqWith cmp vs = ImmSortedMap.ToImmSortedMap(vs, cmp)
+    ///Constructs an ImmSortedMap from a sequence of ordered pairs, using the specified comparer.
+    let ofSeqWith cmp (vs : seq<'key * 'value>) = ImmSortedMap.Empty(cmp).AddRange(vs |> Seq.map Kvp)
     ///Returns the nth element of the map, by sort order.
-    let byOrder n (map : ImmOrderedMap<_,_>) = map.ByOrder n |> Kvp.ToTuple
+    let byOrder n (map : ImmSortedMap<_,_>) = map.ByOrder n |> Kvp.ToTuple
     ///Returns the minimal element of the map.
-    let min (map : ImmOrderedMap<_,_>) = map.MinItem |> Kvp.ToTuple
+    let min (map : ImmSortedMap<_,_>) = map.MinItem |> Kvp.ToTuple
     ///Returns the maximal element of the map.
-    let max (map : ImmOrderedMap<_,_>) = map.MaxItem |> Kvp.ToTuple
+    let max (map : ImmSortedMap<_,_>) = map.MaxItem |> Kvp.ToTuple
     ///Removes the minimal element of the map.
-    let removeMin (map : ImmOrderedMap<_,_>) = map.RemoveMin()
+    let removeMin (map : ImmSortedMap<_,_>) = map.RemoveMin()
     ///Removes the maximal element of the map.
-    let removeMax (map : ImmOrderedMap<_,_>) = map.RemoveMax()
+    let removeMax (map : ImmSortedMap<_,_>) = map.RemoveMax()
     ///Returns true if the specified collection is empty.
-    let isEmpty (collection : ImmOrderedMap<'k, 'v>) = collection.IsEmpty
+    let isEmpty (collection : ImmSortedMap<'k, 'v>) = collection.IsEmpty
     
     ///Returns the length of the collection. O(1)
-    let length (collection : ImmOrderedMap<'k, 'v>) = collection.Length
+    let length (collection : ImmSortedMap<'k, 'v>) = collection.Length
     
     ///Iterates over the collection.
-    let iter f (collection : ImmOrderedMap<'k, 'v>) = collection.ForEach(toAction f)  
+    let iter f (collection : ImmSortedMap<'k, 'v>) = collection.ForEach(toAction f)  
     
     ///Iterates over the collection with 'f' returns true, stops when it returns 'false'.
-    let iterWhile f (collection : ImmOrderedMap<'k, 'v>) = collection.ForEachWhile(toFunc1 f)
+    let iterWhile f (collection : ImmSortedMap<'k, 'v>) = collection.ForEachWhile(toFunc1 f)
     
     ///Folds over the collection, in the default iteration order.
-    let fold initial f (collection : ImmOrderedMap<'k, 'v>) = collection.Aggregate(initial, toFunc2 f)
+    let fold initial f (collection : ImmSortedMap<'k, 'v>) = collection.Aggregate(initial, toFunc2 f)
     
     ///Folds over the collection, starting by applying the function to the first two elements.
-    let reduce f (collection : ImmOrderedMap<'k, 'v>) = collection.Aggregate(toFunc2 f)
+    let reduce f (collection : ImmSortedMap<'k, 'v>) = collection.Aggregate(toFunc2 f)
     
     ///Returns the single element present in the collection, or throws an exception if there is more than one element, or if there are no elements.
-    let single (collection : ImmOrderedMap<'k, 'v>) = collection.Single()
+    let single (collection : ImmSortedMap<'k, 'v>) = collection.Single()
     
     ///Converts the specified collection to an array.
-    let toArray (collection : ImmOrderedMap<'k, 'v>) = collection.ToArray()
+    let toArray (collection : ImmSortedMap<'k, 'v>) = collection.ToArray()
     
     ///Converts the elements of the collection to a string, using the specified separator.
-    let print sep (collection : ImmOrderedMap<'k, 'v>)  = collection.Print(sep, sprintf "%A" |> toFunc1)
+    let print sep (collection : ImmSortedMap<'k, 'v>)  = collection.Print(sep, sprintf "%A" |> toFunc1)
     
     ///Converts the elements of the collection to a string using the specified function, using the specified separator.
-    let printWith sep format (collection : ImmOrderedMap<'k, 'v>) = collection.Print(sep, (sprintf format) |> toFunc1)
+    let printWith sep format (collection : ImmSortedMap<'k, 'v>) = collection.Print(sep, (sprintf format) |> toFunc1)
     
     ///Finds an element that satisfies 'f', or None.
-    let find f (collection : ImmOrderedMap<'k, 'v>) = collection.Find(toFunc1 f) |> fromOption
+    let find f (collection : ImmSortedMap<'k, 'v>) = collection.Find(toFunc1 f) |> fromOption
     
     ///Returns the first element from which the function returns Some, or returns None.
-    let pick f (collection : ImmOrderedMap<'k, 'v>) = collection.Pick(f >> toOption |> toFunc1) |> fromOption
+    let pick f (collection : ImmSortedMap<'k, 'v>) = collection.Pick(f >> toOption |> toFunc1) |> fromOption
     
     ///Returns true if an element satisfying 'f' exists in the collection.
-    let exists f (collection : ImmOrderedMap<'k, 'v>) = collection.Any(toFunc1 f)
+    let exists f (collection : ImmSortedMap<'k, 'v>) = collection.Any(toFunc1 f)
     
     ///Returns true if all the elements in the collection satisfies 'f'.
-    let forAll f (collection : ImmOrderedMap<'k, 'v>) = collection.All(toFunc1 f)
+    let forAll f (collection : ImmSortedMap<'k, 'v>) = collection.All(toFunc1 f)
     
     ///Counts the number of elements satisfying 'f' in the collection.
-    let count f (collection : ImmOrderedMap<'k, 'v>) = collection.Count(toFunc1 f)
+    let count f (collection : ImmSortedMap<'k, 'v>) = collection.Count(toFunc1 f)
     ///Returns true if every key-value pair satisfies the specified predicate.
-    let forAllPairs (f : 'k -> 'v -> bool) (collection : ImmOrderedMap<'k, 'v>) = collection.All(toFunc2 f)
+    let forAllPairs (f : 'k -> 'v -> bool) (collection : ImmSortedMap<'k, 'v>) = collection.All(toFunc2 f)
     
     ///Returns true if any key-value pair satisfies the given predicate.
-    let existsPair f (map : ImmOrderedMap<'k, 'v>) = map.Any(toFunc2 f)
+    let existsPair f (map : ImmSortedMap<'k, 'v>) = map.Any(toFunc2 f)
     
     ///Returns the first pair (in order of iteration) that fulfills the given predicate.
-    let findPair f (map : ImmOrderedMap<'k, 'v>) = map.Find(toFunc2 f)
+    let findPair f (map : ImmSortedMap<'k, 'v>) = map.Find(toFunc2 f)
     
     ///Applies the specified function on every key-value pair, and returns the first result that isn't None.
-    let pickPair (f : 'k -> 'v -> 'out option) (map : ImmOrderedMap<'k, 'v>) = map.Pick((fun a b -> f a b |> toOption) |> toFunc2) |> fromOption
+    let pickPair (f : 'k -> 'v -> 'out option) (map : ImmSortedMap<'k, 'v>) = map.Pick((fun a b -> f a b |> toOption) |> toFunc2) |> fromOption
     
     ///Returns the number of key-value pairs that fulfill the specified predicate.
-    let countPairs (f : 'k -> 'v -> bool) (map : ImmOrderedMap<'k, 'v>) = map.Count(toFunc2 f)
+    let countPairs (f : 'k -> 'v -> bool) (map : ImmSortedMap<'k, 'v>) = map.Count(toFunc2 f)
     
     ///Adds a key-value pair to the map, throwing an exception if the key already exists.
-    let add k v (map : ImmOrderedMap<'k, 'v>) = 
+    let add k v (map : ImmSortedMap<'k, 'v>) = 
         map.Add(k, v)
     
     ///Adds a key-value pair to the map, overwriting the previous value.
-    let set k v (map : ImmOrderedMap<'k, 'v>) =
+    let set k v (map : ImmSortedMap<'k, 'v>) =
         map.Set(k, v)
     
     ///Adds a sequence of key-value pairs (in the form of 2-tuples) to the map, throwing an exception if a key already exists.
-    let addPairs pairs (map : ImmOrderedMap<'k, 'v>) =
+    let addPairs pairs (map : ImmSortedMap<'k, 'v>) =
         map.AddRange(pairs |> Seq.map (Kvp.Of))
     
     ///Adds a sequence of key-value pairs (in the form of KeyValuePairs) to the map, throwing an exception if a key already exists.
-    let addRange kvps (map : ImmOrderedMap<'k, 'v>) =
+    let addRange kvps (map : ImmSortedMap<'k, 'v>) =
         map.AddRange kvps
     
     ///Adds a sequence of key-value pairs to the map (in the form of 2-tuples), overwriting previous information.
-    let setPairs pairs (map : ImmOrderedMap<'k, 'v>) =
+    let setPairs pairs (map : ImmSortedMap<'k, 'v>) =
         map.SetRange(pairs |> Seq.map (Kvp.Of))
     
     ///Adds a sequence of key-value pairs to the map (in the form of KeyValuePairs), overwriting previous information.
-    let setRange kvps (map : ImmOrderedMap<'k, 'v>) =
+    let setRange kvps (map : ImmSortedMap<'k, 'v>) =
         map.SetRange kvps
     
     ///Removes a key from the map.
-    let remove k (map : ImmOrderedMap<'k, 'v>) =
+    let remove k (map : ImmSortedMap<'k, 'v>) =
         map.Remove k
     
     ///Removes a number of keys from the map.
-    let removeRange ks (map : ImmOrderedMap<'k, 'v>) =
+    let removeRange ks (map : ImmSortedMap<'k, 'v>) =
         map.RemoveRange ks
     
     ///Merges this map with the specified sequence of key-value pairs, viewed as another map, using the specified function to resolve collisions.
-    let merge kvps f (map : ImmOrderedMap<'k, 'v>) =
+    let merge kvps f (map : ImmSortedMap<'k, 'v>) =
         map.Merge(kvps, toFunc3 f)
     
     ///Joins this map with a sequence of key-value pairs, viewed as another map, using the specified function to resolve collisions.
-    let join kvps f (map : ImmOrderedMap<'k, 'v>) =
+    let join kvps f (map : ImmSortedMap<'k, 'v>) =
         map.Join(kvps, toFunc3 f)
     
     ///Removes all the keys present in a sequence of key-value pairs, taken as another map. The value type of the map may be different.
-    let minus kvps (map : ImmOrderedMap<'k, 'v>) =
+    let minus kvps (map : ImmSortedMap<'k, 'v>) =
         map.Subtract(kvps)
     
     ///Applies a subtraction function on each key-value pair present in both this map, and the specified other map. If the function returns None, the key is removed.
-    let minusWith kvps f (map : ImmOrderedMap<'k, 'v>) =
+    let minusWith kvps f (map : ImmSortedMap<'k, 'v>) =
         map.Subtract(kvps, (fun a b c -> f a b c |> toOption) |> toFunc3)
     
-    let mapEquals other (map : ImmOrderedMap<'k, 'v>) =
+    let mapEquals other (map : ImmSortedMap<'k, 'v>) =
         map.MapEquals(other)
     
-    let mapEqualsWith (eq : _ IEq) other (map : ImmOrderedMap<'k, 'v>) = 
+    let mapEqualsWith (eq : _ IEq) other (map : ImmSortedMap<'k, 'v>) = 
         map.MapEquals(other, eq)
     
-    let mapEqualsWithCmp (cmp : _ ICmp) other (map : ImmOrderedMap<'k, 'v>) =
+    let mapEqualsWithCmp (cmp : _ ICmp) other (map : ImmSortedMap<'k, 'v>) =
         map.MapEquals(other, cmp)
     
     ///Returns a new map consisting of only those key-value pairs present in exactly one map.
-    let difference kvps (map : ImmOrderedMap<'k, 'v>) =
+    let difference kvps (map : ImmSortedMap<'k, 'v>) =
         map.Difference(kvps)
     
     ///Returns a sequence of keys.
-    let keys (map : ImmOrderedMap<'k, 'v>) = map.Keys
+    let keys (map : ImmSortedMap<'k, 'v>) = map.Keys
     
     ///Returns a sequence of values.
-    let values (map : ImmOrderedMap<'k, 'v>) = map.Values
+    let values (map : ImmSortedMap<'k, 'v>) = map.Values
     
     ///Returns the value with the specified key.
-    let get key (map : ImmOrderedMap<'k, 'v>) = map.[key]
+    let get key (map : ImmSortedMap<'k, 'v>) = map.[key]
     
     ///Returns the value associated with the specified key, or None.
-    let tryGet key (map : ImmOrderedMap<'k, 'v>) = map.TryGet(key) |> fromOption
+    let tryGet key (map : ImmSortedMap<'k, 'v>) = map.TryGet(key) |> fromOption
     
     ///Returns true if the map contains the specified key.
-    let containsKey key (map : ImmOrderedMap<'k, 'v>) = map.ContainsKey(key)
+    let containsKey key (map : ImmSortedMap<'k, 'v>) = map.ContainsKey(key)
     
 

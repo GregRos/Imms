@@ -4,17 +4,17 @@ using Imms.Abstract;
 using Imms.Implementation;
 
 namespace Imms {
-	public partial class ImmOrderedMap<TKey, TValue> {
+	public partial class ImmSortedMap<TKey, TValue> {
 		[EditorBrowsable(EditorBrowsableState.Never)]
-		protected override IMapBuilder<TKey, TValue, ImmOrderedMap<TKey, TValue>> EmptyBuilder {
+		protected override IMapBuilder<TKey, TValue, ImmSortedMap<TKey, TValue>> EmptyBuilder {
 			get { return new Builder(Empty(_comparer)); }
 		}
 
-		protected override bool IsCompatibleWith(ImmOrderedMap<TKey, TValue> other) {
+		protected override bool IsCompatibleWith(ImmSortedMap<TKey, TValue> other) {
 			return _comparer.Equals(other._comparer);
 		}
 
-		class Builder : IMapBuilder<TKey, TValue, ImmOrderedMap<TKey, TValue>> {
+		class Builder : IMapBuilder<TKey, TValue, ImmSortedMap<TKey, TValue>> {
 			readonly IComparer<TKey> _comparer;
 			OrderedAvlTree<TKey, TValue>.Node _inner;
 			Lineage _lineage;
@@ -25,10 +25,10 @@ namespace Imms {
 				_lineage = Lineage.Mutable();
 			}
 
-			public Builder(ImmOrderedMap<TKey, TValue> inner)
+			public Builder(ImmSortedMap<TKey, TValue> inner)
 				: this(inner._root, inner._comparer) {}
 
-			public ImmOrderedMap<TKey, TValue> Produce() {
+			public ImmSortedMap<TKey, TValue> Produce() {
 				_lineage = Lineage.Mutable();
 				return _inner.WrapMap(_comparer);
 			}
@@ -40,7 +40,7 @@ namespace Imms {
 
 			public void AddRange(IEnumerable<KeyValuePair<TKey, TValue>> items) {
 				items.CheckNotNull("items");
-				var map = items as ImmOrderedMap<TKey, TValue>;
+				var map = items as ImmSortedMap<TKey, TValue>;
 				if (map != null && _comparer.Equals(map._comparer)) {
 					_inner = _inner.Union(map._root, null, _lineage);
 				} else {

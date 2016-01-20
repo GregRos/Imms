@@ -5,7 +5,7 @@ namespace Imms {
 	/// <summary>
 	/// Utility methods for ordered map.
 	/// </summary>
-	public static class ImmOrderedMap {
+	public static class ImmSortedMap {
 		/// <summary>
 		/// Converts a sequence of key-value pairs to an ordered map. The keys must be IComparable.
 		/// </summary>
@@ -13,10 +13,10 @@ namespace Imms {
 		/// <typeparam name="TValue"></typeparam>
 		/// <param name="kvps"></param>
 		/// <returns></returns>
-		public static ImmOrderedMap<TKey, TValue> ToImmOrderedMap<TKey, TValue>(
+		public static ImmSortedMap<TKey, TValue> ToImmSortedMap<TKey, TValue>(
 			this IEnumerable<KeyValuePair<TKey, TValue>> kvps)
 			where TKey : IComparable<TKey> {
-			return ImmOrderedMap<TKey, TValue>.Empty(null).AddRange(kvps);
+			return ImmSortedMap<TKey, TValue>.Empty(null).AddRange(kvps);
 		}
 
 		/// <summary>
@@ -27,9 +27,9 @@ namespace Imms {
 		/// <param name="kvps"></param>
 		/// <param name="cmp"></param>
 		/// <returns></returns>
-		public static ImmOrderedMap<TKey, TValue> ToImmOrderedMap<TKey, TValue>(
+		public static ImmSortedMap<TKey, TValue> ToImmSortedMap<TKey, TValue>(
 			this IEnumerable<KeyValuePair<TKey, TValue>> kvps, IComparer<TKey> cmp) {
-			return ImmOrderedMap<TKey, TValue>.Empty(cmp).AddRange(kvps);
+			return ImmSortedMap<TKey, TValue>.Empty(cmp).AddRange(kvps);
 		}
 
 		/// <summary>
@@ -39,8 +39,8 @@ namespace Imms {
 		/// <typeparam name="TValue"></typeparam>
 		/// <param name="comparer"></param>
 		/// <returns></returns>
-		public static ImmOrderedMap<TKey, TValue> CreateOrderedMap<TKey, TValue>(this IComparer<TKey> comparer) {
-			return ImmOrderedMap<TKey, TValue>.Empty(comparer);
+		public static ImmSortedMap<TKey, TValue> CreateOrderedMap<TKey, TValue>(this IComparer<TKey> comparer) {
+			return ImmSortedMap<TKey, TValue>.Empty(comparer);
 		}
 
 		/// <summary>
@@ -49,9 +49,9 @@ namespace Imms {
 		/// <typeparam name="TKey"></typeparam>
 		/// <typeparam name="TValue"></typeparam>
 		/// <returns></returns>
-		public static ImmOrderedMap<TKey, TValue> Empty<TKey, TValue>()
+		public static ImmSortedMap<TKey, TValue> Empty<TKey, TValue>()
 			where TKey : IComparable<TKey> {
-			return ImmOrderedMap<TKey, TValue>.Empty(null);
+			return ImmSortedMap<TKey, TValue>.Empty(null);
 		}
 
 		/// <summary>
@@ -61,8 +61,8 @@ namespace Imms {
 		/// <typeparam name="TValue"></typeparam>
 		/// <param name="cmp"></param>
 		/// <returns></returns>
-		public static ImmOrderedMap<TKey, TValue> Empty<TKey, TValue>(IComparer<TKey> cmp) {
-			return ImmOrderedMap<TKey, TValue>.Empty(cmp);
+		public static ImmSortedMap<TKey, TValue> Empty<TKey, TValue>(IComparer<TKey> cmp) {
+			return ImmSortedMap<TKey, TValue>.Empty(cmp);
 		} 
 
 	}

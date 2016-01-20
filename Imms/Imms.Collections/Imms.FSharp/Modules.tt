@@ -47,29 +47,29 @@ new[] {
 	Tu("TypeName", "ImmSet<'k>"), 
 	Tu("ElementName", "'k")
 },1)#>
-///A module for working with ImmOrderedSet collections -- immutable ordered sets.
-module ImmOrderedSet = 
-	///Returns an empty ImmOrderedSet that uses the default comparer for the type.
-	let empty<'k when 'k : comparison> = ImmOrderedSet<'k>.Empty(null)
-	///Returns an empty ImmOrderedSet that uses the specified comparer.
-	let emptyWith(cm : ICmp<'elem>) = ImmOrderedSet<'elem>.Empty(cm)
-	///Constructs an ImmOrderedSet from a sequence, using the default comparer for the type.
-	let ofSeq (vs : 'a seq when 'a : comparison) = ImmOrderedSet.ToImmOrderedSet(vs, null)
-	///Constructs an ImmOrderedSet from a sequence, using the specified comparer.
-	let ofSeqWith cmp vs = ImmOrderedSet.ToImmOrderedSet(vs, cmp)
+///A module for working with ImmSortedSet collections -- immutable ordered sets.
+module ImmSortedSet = 
+	///Returns an empty ImmSortedSet that uses the default comparer for the type.
+	let empty<'k when 'k : comparison> = ImmSortedSet<'k>.Empty(null)
+	///Returns an empty ImmSortedSet that uses the specified comparer.
+	let emptyWith(cm : ICmp<'elem>) = ImmSortedSet<'elem>.Empty(cm)
+	///Constructs an ImmSortedSet from a sequence, using the default comparer for the type.
+	let ofSeq (vs : 'a seq when 'a : comparison) = ImmSortedSet.ToImmSortedSet(vs, null)
+	///Constructs an ImmSortedSet from a sequence, using the specified comparer.
+	let ofSeqWith cmp vs = ImmSortedSet.ToImmSortedSet(vs, cmp)
 	///Returns the ith element of the set, by sort order.
-	let byOrder i (set : _ ImmOrderedSet) = set.ByOrder i
+	let byOrder i (set : _ ImmSortedSet) = set.ByOrder i
 	///Returns the minimal element of the set.
-	let min (set : _ ImmOrderedSet) = set.MinItem
+	let min (set : _ ImmSortedSet) = set.MinItem
 	///Returns the maximal element of the set.
-	let max (set : _ ImmOrderedSet) = set.MaxItem
+	let max (set : _ ImmSortedSet) = set.MaxItem
 	///Removes the minimal element of the set.
-	let removeMin (set :_ ImmOrderedSet) = set.RemoveMin()
+	let removeMin (set :_ ImmSortedSet) = set.RemoveMin()
 	///Removes the maximal element of the set.
-	let removeMax (set :_ ImmOrderedSet) = set.RemoveMax()
+	let removeMax (set :_ ImmSortedSet) = set.RemoveMax()
 <#=IncludeWithParameters("Set.ttinclude", 
 new[] {
-	Tu("TypeName", "ImmOrderedSet<'k>"), 
+	Tu("TypeName", "ImmSortedSet<'k>"), 
 	Tu("ElementName", "'k")
 },1)#>
 ///A module for working with ImmMap collections -- immutable hash-based maps.
@@ -92,33 +92,33 @@ new[] {
 	Tu("KeyName", "'k"),
 	Tu("ValueName", "'v")
 },1)#>
-///A module for working with ImmOrderedMap collections -- immutable comparison-based maps.
-module ImmOrderedMap = 
-	///Returns an empty ImmOrderedMap that uses the default comparer for the type.
-	let empty<'key, 'value when 'key : comparison> = ImmOrderedMap<'key, 'value>.Empty(null)
-	///Returns an empty ImmOrderedMap that uses the specified comparer.
-	let emptyWith(cm : Cmp<'key>) = ImmOrderedMap<'key,'value>.Empty(cm)
-	///Constructs an ImmOrderedMap from a sequence of ordered pairs, using the default comparer for the type.
-	let ofPairsSeq (vs : seq<'key * 'value> when 'key : comparison) = ImmOrderedMap.Empty(null) /++ (vs |> Seq.map Kvp)
-	///Constructs an ImmOrderedMap from a sequence of key-value pairs, using the default comparer for the type.
-	let ofKvpSeq (vs : seq<Kvp<'key,'value>> when 'key : comparison) = ImmOrderedMap.Empty(null) /++ (vs)
-	///Constructs an ImmOrderedMap from a sequence of key-value pairs, using the specified comparer.
-	let ofKvpSeqWith cmp vs = ImmOrderedMap.ToImmOrderedMap(vs, cmp)
-	///Constructs an ImmOrderedMap from a sequence of ordered pairs, using the specified comparer.
-	let ofSeqWith cmp (vs : seq<'key * 'value>) = ImmOrderedMap.Empty(cmp).AddRange(vs |> Seq.map Kvp)
+///A module for working with ImmSortedMap collections -- immutable comparison-based maps.
+module ImmSortedMap = 
+	///Returns an empty ImmSortedMap that uses the default comparer for the type.
+	let empty<'key, 'value when 'key : comparison> = ImmSortedMap<'key, 'value>.Empty(null)
+	///Returns an empty ImmSortedMap that uses the specified comparer.
+	let emptyWith(cm : Cmp<'key>) = ImmSortedMap<'key,'value>.Empty(cm)
+	///Constructs an ImmSortedMap from a sequence of ordered pairs, using the default comparer for the type.
+	let ofPairsSeq (vs : seq<'key * 'value> when 'key : comparison) = ImmSortedMap.Empty(null) /++ (vs |> Seq.map Kvp)
+	///Constructs an ImmSortedMap from a sequence of key-value pairs, using the default comparer for the type.
+	let ofKvpSeq (vs : seq<Kvp<'key,'value>> when 'key : comparison) = ImmSortedMap.Empty(null) /++ (vs)
+	///Constructs an ImmSortedMap from a sequence of key-value pairs, using the specified comparer.
+	let ofKvpSeqWith cmp vs = ImmSortedMap.ToImmSortedMap(vs, cmp)
+	///Constructs an ImmSortedMap from a sequence of ordered pairs, using the specified comparer.
+	let ofSeqWith cmp (vs : seq<'key * 'value>) = ImmSortedMap.Empty(cmp).AddRange(vs |> Seq.map Kvp)
 	///Returns the nth element of the map, by sort order.
-	let byOrder n (map : ImmOrderedMap<_,_>) = map.ByOrder n |> Kvp.ToTuple
+	let byOrder n (map : ImmSortedMap<_,_>) = map.ByOrder n |> Kvp.ToTuple
 	///Returns the minimal element of the map.
-	let min (map : ImmOrderedMap<_,_>) = map.MinItem |> Kvp.ToTuple
+	let min (map : ImmSortedMap<_,_>) = map.MinItem |> Kvp.ToTuple
 	///Returns the maximal element of the map.
-	let max (map : ImmOrderedMap<_,_>) = map.MaxItem |> Kvp.ToTuple
+	let max (map : ImmSortedMap<_,_>) = map.MaxItem |> Kvp.ToTuple
 	///Removes the minimal element of the map.
-	let removeMin (map : ImmOrderedMap<_,_>) = map.RemoveMin()
+	let removeMin (map : ImmSortedMap<_,_>) = map.RemoveMin()
 	///Removes the maximal element of the map.
-	let removeMax (map : ImmOrderedMap<_,_>) = map.RemoveMax()
+	let removeMax (map : ImmSortedMap<_,_>) = map.RemoveMax()
 <#=IncludeWithParameters("Map.ttinclude", 
 new[] {
-	Tu("TypeName", "ImmOrderedMap<'k, 'v>"), 
+	Tu("TypeName", "ImmSortedMap<'k, 'v>"), 
 	Tu("KeyName", "'k"),
 	Tu("ValueName", "'v")
 },1)#>

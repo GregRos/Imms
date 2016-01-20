@@ -42,6 +42,12 @@ namespace Imms.Implementation {
 			/// <param name="index">The index.</param>
 			/// <param name="count">The count.</param>
 			/// <param name="lin">The lineage.</param>
+			/// <remarks>
+			///	Related:  
+			/// http://cs.stackexchange.com/questions/41081/guessing-the-structure-of-a-finger-tree-from-the-number-of-elements
+			/// <br/>
+			/// Algorithm: https://hackage.haskell.org/package/containers-0.4.0.0/docs/src/Data-Sequence.html#applicativeTree
+			/// </remarks>
 			/// <returns></returns>
 			public static FTree<TChild> Construct(TValue[] arr, ref int index, int count, Lineage lin) {
 				var myChildSize = FastMath.PowN(3, Nesting - 1);
@@ -92,8 +98,8 @@ namespace Imms.Implementation {
 					//and since nextChildSize = myChildSize * 3, then nextDivRem % myChildSize must be within [0,2].
 					//we maintain this invariant by the next if-else block, which makes sure that the 'count' for the next invocation
 					//really is divisible by nextChildSize. At the topmost level, myChildSize is 1, and nextChildSize is 3. 
-					var nextDivRemfixed = nextDivRem % myChildSize;
-					nextDivRemfixed.AssertBetween(0, 2);
+					
+					(nextDivRem % myChildSize).AssertBetween(0, 2);
 #endif
 					if (nextDivRem == 0) {
 						//If nextDivRem is already divisible by nextChildSize, we should preserve this by removing 2*nextChildSize from it.

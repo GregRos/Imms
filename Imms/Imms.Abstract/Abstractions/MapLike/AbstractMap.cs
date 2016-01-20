@@ -9,7 +9,9 @@ using System.Linq;
 #pragma warning disable 279
 
 namespace Imms.Abstract {
-	
+
+	public delegate TOut ValueSelector<in TKey, in TVal1, in TVal2, out TOut>(TKey key1, TVal1 key, TVal2 value);
+
 	public abstract partial class AbstractMap<TKey, TValue, TMap>
 		: AbstractIterable<KeyValuePair<TKey, TValue>, TMap, IMapBuilder<TKey, TValue, TMap>>
 		where TMap : AbstractMap<TKey, TValue, TMap> {
@@ -241,11 +243,11 @@ namespace Imms.Abstract {
 		/// </remarks>
 		/// <returns></returns>
 		public TMap Join<TValue2>(IEnumerable<KeyValuePair<TKey, TValue2>> other,
-			Func<TKey, TValue, TValue2, TValue> selector) {
+			ValueSelector<TKey, TValue, TValue2, TValue> selector) {
 			other.CheckNotNull("other");
 			selector.CheckNotNull("selector");
 			var map = other as TMap;
-			if (map != null && IsCompatibleWith(map)) return Join(map, (Func<TKey, TValue, TValue, TValue>) (object) selector);
+			if (map != null && IsCompatibleWith(map)) return Join(map, (ValueSelector<TKey, TValue, TValue, TValue>) (object) selector);
 			return Join_Unchecked(other, selector);
 		}
 
@@ -260,7 +262,7 @@ namespace Imms.Abstract {
 		/// <param name="other">The other map.</param>
 		/// <param name="collision">The collision resolution function.</param>
 		protected internal virtual TRMap _Join<TValue2, TRMap, TRValue>(TRMap bFactory,
-			IEnumerable<KeyValuePair<TKey, TValue2>> other, Func<TKey, TValue, TValue2, TRValue> collision)
+			IEnumerable<KeyValuePair<TKey, TValue2>> other, ValueSelector<TKey, TValue, TValue2, TRValue> collision)
 			where TRMap : IBuilderFactory<IMapBuilder<TKey, TRValue, TRMap>>  {
 			bFactory.CheckNotNull("bFactory");
 			other.CheckNotNull("other");
@@ -279,7 +281,7 @@ namespace Imms.Abstract {
 		}
 
 		private TMap Join_Unchecked<TValue2>(IEnumerable<KeyValuePair<TKey, TValue2>> other,
-			Func<TKey, TValue, TValue2, TValue> collision) {
+			ValueSelector<TKey, TValue, TValue2, TValue> collision) {
 			using (var builder = EmptyBuilder) {
 				other.ForEach(pair => {
 					var myKvp = builder.TryGetKvp(pair.Key).OrMaybe(TryGetKvp(pair.Key));
@@ -325,20 +327,20 @@ namespace Imms.Abstract {
 		/// that value is used in the return map. If the function returns None, the key is removed from the return map.
 		/// </remarks>
 		public virtual TMap Subtract<TValue2>(IEnumerable<KeyValuePair<TKey, TValue2>> other,
-			Func<TKey, TValue, TValue2, Optional<TValue>> subtraction = null) {
+			ValueSelector<TKey, TValue, TValue2, Optional<TValue>> subtraction = null) {
 			if (subtraction == null && ReferenceEquals(other, this)) {
 				return Empty;
 			}
 			other.CheckNotNull("other");
 
 			var map = other as TMap;
-			if (map != null && IsCompatibleWith(map)) return Subtract(map, (Func<TKey, TValue, TValue, Optional<TValue>>) (object) subtraction);
+			if (map != null && IsCompatibleWith(map)) return Subtract(map, (ValueSelector<TKey, TValue, TValue, Optional<TValue>>) (object) subtraction);
 
 			return Subtract_Unchecked(other, subtraction);
 		}
 
 		TMap Subtract_Unchecked<TValue2>(IEnumerable<KeyValuePair<TKey, TValue2>> other,
-			Func<TKey, TValue, TValue2, Optional<TValue>> subtraction = null) {
+			ValueSelector<TKey, TValue, TValue2, Optional<TValue>> subtraction = null) {
 			other.CheckNotNull("other");
 			using (var builder = BuilderFrom(this)) {
 				var len = Length;
@@ -378,7 +380,7 @@ namespace Imms.Abstract {
 		/// 
 		/// This operation returns all key-value pairs present in either map. If a key is shared between both maps, the collision resolution function is applied to determine the value in the result map.
 		/// </remarks>
-		public virtual TMap Merge(IEnumerable<KeyValuePair<TKey, TValue>> other, Func<TKey, TValue, TValue, TValue> collision = null) {
+		public virtual TMap Merge(IEnumerable<KeyValuePair<TKey, TValue>> other, ValueSelector<TKey, TValue, TValue, TValue> collision = null) {
 			other.CheckNotNull("other");
 			if (collision == null && ReferenceEquals(this, other)) {
 				return this;
@@ -450,7 +452,7 @@ namespace Imms.Abstract {
 		}
 
 		TMap Merge_Unchecked(IEnumerable<KeyValuePair<TKey, TValue>> other,
-			Func<TKey, TValue, TValue, TValue> collision = null) {
+			ValueSelector<TKey, TValue, TValue, TValue> collision = null) {
 			other.CheckNotNull("other");
 			using (var builder = BuilderFrom(this)) {
 				other.ForEach(item => {
@@ -476,7 +478,7 @@ namespace Imms.Abstract {
 		/// <param name="collision">
 		///     Optionally, a collision resolution function. If null, data in the other map overwrites data in the current map.
 		/// </param>
-		protected virtual TMap Merge(TMap other, Func<TKey, TValue, TValue, TValue> collision = null) {
+		protected virtual TMap Merge(TMap other, ValueSelector<TKey, TValue, TValue, TValue> collision = null) {
 			other.CheckNotNull("other");
 			return Merge_Unchecked(other, collision);
 		}
@@ -488,7 +490,7 @@ namespace Imms.Abstract {
 		/// </summary>
 		/// <param name="other">The other.</param>
 		/// <param name="collision">The collision.</param>
-		protected virtual TMap Join(TMap other, Func<TKey, TValue, TValue, TValue> collision = null) {
+		protected virtual TMap Join(TMap other, ValueSelector<TKey, TValue, TValue, TValue> collision = null) {
 			other.CheckNotNull("other");
 			return Join_Unchecked(other, collision);
 		}
@@ -502,7 +504,7 @@ namespace Imms.Abstract {
 		///     A substraction selector that determines the new value (if any) when a collision occurs. If
 		///     null, colliding keys are removed.
 		/// </param>
-		protected virtual TMap Subtract(TMap other, Func<TKey, TValue, TValue, Optional<TValue>> subtraction = null) {
+		protected virtual TMap Subtract(TMap other, ValueSelector<TKey, TValue, TValue, Optional<TValue>> subtraction = null) {
 			other.CheckNotNull("other");
 			return Subtract_Unchecked(other, subtraction);
 		}

@@ -98,7 +98,7 @@ namespace Imms.Abstract {
 		/// <param name="bFactory"> A prototype instance of the resulting collection provider, used as a builder factory. </param>
 		/// <param name="selector"> The selector. </param>
 		/// <returns> </returns>
-		protected virtual TRSeq Select<TElem2, TRSeq>(TRSeq bFactory, Func<TElem, TElem2> selector)
+		protected virtual TRSeq _Select<TElem2, TRSeq>(TRSeq bFactory, Func<TElem, TElem2> selector)
 			where TRSeq : IBuilderFactory<IIterableBuilder<TElem2, TRSeq>> {
 			bFactory.CheckNotNull("bFactory");
 			selector.CheckNotNull("selector");
@@ -266,6 +266,13 @@ namespace Imms.Abstract {
 		}
 
 
+		/// <summary>
+		/// Returns an enumerator that iterates through the collection.
+		/// </summary>
+		/// <returns>
+		/// A <see cref="T:System.Collections.Generic.IEnumerator`1"/> that can be used to iterate through the collection.
+		/// </returns>
+		/// <filterpriority>1</filterpriority>
 		public abstract IEnumerator<TElem> GetEnumerator();
 
 		/// <summary>

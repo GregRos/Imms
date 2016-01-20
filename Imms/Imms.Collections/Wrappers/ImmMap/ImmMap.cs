@@ -78,12 +78,12 @@ namespace Imms {
 		}
 
 		protected override ImmMap<TKey, TValue> Merge(ImmMap<TKey, TValue> other,
-			Func<TKey, TValue, TValue, TValue> collision = null) {
+			ValueSelector<TKey, TValue, TValue, TValue> collision = null) {
 			return _root.Union(other._root, Lineage.Mutable(), collision).WrapMap(_equality);
 		}
 
 		protected override ImmMap<TKey, TValue> Join(ImmMap<TKey, TValue> other,
-			Func<TKey, TValue, TValue, TValue> collision = null) {
+			ValueSelector<TKey, TValue, TValue, TValue> collision = null) {
 			return _root.Intersect(other._root, Lineage.Mutable(), collision).WrapMap(_equality);
 		}
 
@@ -95,7 +95,7 @@ namespace Imms {
 		}
 
 		public override ImmMap<TKey, TValue> Subtract<TValue2>(IEnumerable<KeyValuePair<TKey, TValue2>> other,
-			Func<TKey, TValue, TValue2, Optional<TValue>> subtraction = null) {
+			ValueSelector<TKey, TValue, TValue2, Optional<TValue>> subtraction = null) {
 				other.CheckNotNull("other");
 			var map = other as ImmMap<TKey, TValue2>;
 			if (map != null && _equality.Equals(map._equality)) return Except(map,subtraction);
@@ -103,12 +103,12 @@ namespace Imms {
 		}
 
 		ImmMap<TKey, TValue> Except<TValue2>(ImmMap<TKey, TValue2> other,
-			Func<TKey, TValue, TValue2, Optional<TValue>> subtraction = null) {
+			ValueSelector<TKey, TValue, TValue2, Optional<TValue>> subtraction = null) {
 				other.CheckNotNull("other");
 			return _root.Except(other._root, Lineage.Mutable(), subtraction).WrapMap(_equality);
 		}
 
-		protected override ImmMap<TKey, TValue> Subtract(ImmMap<TKey, TValue> other, Func<TKey, TValue, TValue, Optional<TValue>> subtraction = null) {
+		protected override ImmMap<TKey, TValue> Subtract(ImmMap<TKey, TValue> other, ValueSelector<TKey, TValue, TValue, Optional<TValue>> subtraction = null) {
 			return Except(other, subtraction);
 		}
 

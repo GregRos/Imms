@@ -130,10 +130,10 @@ namespace Imms {
 		/// <returns> </returns>
 		public ImmList<T> AddLast(T item) {
 			var ret = new ImmList<T>(Root.AddLast(item, Lineage.Immutable));
-#if ASSERTS
+
 			ret.Last.AssertEqual(item);
 			ret.Root.Measure.AssertEqual(Root.Measure + 1);
-#endif
+
 			return ret;
 		}
 
@@ -216,10 +216,10 @@ namespace Imms {
 			if (index == 0) return AddFirst(item);
 			var newRoot = Root.Insert(index, item, Lineage.Mutable());
 			var ret = newRoot.Wrap();
-#if ASSERTS
+
 			ret[index].AssertEqual(item);
 			ret.Root.Measure.AssertEqual(Root.Measure + 1);
-#endif
+
 			return ret;
 		}
 
@@ -314,10 +314,10 @@ namespace Imms {
 			if (index == 0) return RemoveFirst().AddFirst(item);
 			if (index == Root.Measure - 1) return RemoveLast().AddLast(item);
 			var ret = Root.Update(index, item, Lineage.Mutable()).Wrap();
-#if ASSERTS
+
 			ret[index].AssertEqual(item);
 			ret.Root.Measure.AssertEqual(Root.Measure);
-#endif
+
 			return ret;
 		}
 

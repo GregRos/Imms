@@ -4,14 +4,14 @@ using Imms.Abstract;
 namespace Imms {
 	[DebuggerDisplay("{DebuggerDisplay,nq}")]
 	[DebuggerTypeProxy(typeof (ImmSortedSetDebugView<>))]
-	partial class ImmOrderedSet<T> {
+	partial class ImmSortedSet<T> {
 
 
 	}
 
 	class ImmSortedSetDebugView<T> {
-		private ImmOrderedSet<T> _inner; 
-		public ImmSortedSetDebugView(ImmOrderedSet<T> set) {
+		private ImmSortedSet<T> _inner; 
+		public ImmSortedSetDebugView(ImmSortedSet<T> set) {
 			_inner = set;
 			zIterableView = new IterableDebugView<T>(set);
 		}

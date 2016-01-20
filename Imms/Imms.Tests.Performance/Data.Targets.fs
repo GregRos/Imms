@@ -13,9 +13,9 @@ module Imms =
     let List (size, s) = data (ImmList.ToImmList) Sequential "Imm" "ImmList"  size s
     let Vector (size, s)= data (ImmVector.ToImmVector) Sequential "Imm" "ImmVector" size s
     let Set (size, s) = data    (Set.FromSeq) SetLike "Imm"  "ImmSet" size s
-    let OrderedSet (size, s) = data (OrderedSet.FromSeq) SetLike "Imm" "ImmOrderedSet" size s
+    let OrderedSet (size, s) = data (OrderedSet.FromSeq) SetLike "Imm" "ImmSortedSet" size s
     let Map (size, s) = data (ImmMap.FromSeq) MapLike "Imm" "ImmMap"  size s
-    let OrderedMap (size, s) = data (OrderedMap.FromSeq) MapLike "Imm" "ImmOrderedMap" size s
+    let OrderedMap (size, s) = data (OrderedMap.FromSeq) MapLike "Imm" "ImmSortedMap" size s
     ///Returns a target binding for a Imms.Vector<int> siz
     
 module internal Sys = 

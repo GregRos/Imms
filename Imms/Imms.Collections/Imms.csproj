@@ -60,12 +60,23 @@
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Publish|AnyCPU'">
+    <OutputPath>bin\Publish\</OutputPath>
+    <DocumentationFile>bin\Release\Imms.xml</DocumentationFile>
+    <Optimize>true</Optimize>
+    <WarningLevel>2</WarningLevel>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <DefineConstants>NUGET</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Implementation\Common\Assertions.cs" Condition="$(DefineConstants.Contains('ASSERTS'))" />
+    <Compile Include="Implementation\Common\Assertions.cs" />
     <Compile Include="Implementation\Common\Marked.cs" />
     <Compile Include="Implementation\FingerTree\Measured.cs" />
     <Compile Include="Implementation\FingerTree\FingerTreeElement.cs" />
@@ -82,13 +93,15 @@
     <Compile Include="Implementation\TrieVector\VectorParent.cs" />
     <Compile Include="Wrappers\Common\ImmList.cs" />
     <Compile Include="Wrappers\Common\ImmMap.cs" />
-    <Compile Include="Wrappers\Common\ImmOrderedMap.cs" />
-    <Compile Include="Wrappers\Common\ImmOrderedSet.cs" />
     <Compile Include="Wrappers\Common\ImmSet.cs" />
+    <Compile Include="Wrappers\Common\ImmSortedMap.cs" />
+    <Compile Include="Wrappers\Common\ImmSortedSet.cs" />
     <Compile Include="Wrappers\Common\ImmVector.cs" />
-    <Compile Include="Wrappers\ImmOrderedSet\Debugging.cs" />
-    <Compile Include="Wrappers\ImmOrderedSet\ImmBindings.cs" />
-    <Compile Include="Wrappers\ImmOrderedSet\ImmOrderedSet.cs" />
+    <Compile Include="Wrappers\ImmSortedMap\Debugging.cs" />
+    <Compile Include="Wrappers\ImmSortedMap\ImmBindings.cs" />
+    <Compile Include="Wrappers\ImmSortedMap\ImmSortedMap.cs" />
+    <Compile Include="Wrappers\ImmSortedSet\Debugging.cs" />
+    <Compile Include="Wrappers\ImmSortedSet\ImmBindings.cs" />
     <Compile Include="Wrappers\Common\Convertion.cs" />
     <Compile Include="Implementation\FingerTree\Compound.cs" />
     <Compile Include="Implementation\FingerTree\Digit.cs" />
@@ -104,6 +117,7 @@
     <Compile Include="Wrappers\ImmSet\Debugging.cs" />
     <Compile Include="Wrappers\ImmSet\ImmBindings.cs" />
     <Compile Include="Wrappers\ImmSet\ImmSet.cs" />
+    <Compile Include="Wrappers\ImmSortedSet\ImmSortedSet.cs" />
     <Compile Include="Wrappers\List\Boilerplate.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -113,9 +127,6 @@
     <Compile Include="Wrappers\List\Debugging.cs" />
     <Compile Include="Wrappers\List\ImmBindings.cs" />
     <Compile Include="Wrappers\ImmMap\ImmMap.cs" />
-    <Compile Include="Wrappers\ImmOrderedMap\Debugging.cs" />
-    <Compile Include="Wrappers\ImmOrderedMap\ImmBindings.cs" />
-    <Compile Include="Wrappers\ImmOrderedMap\ImmOrderedMap.cs" />
     <Compile Include="Wrappers\Templates\ListLikeClass.cs" />
     <Compile Include="Wrappers\Templates\SoItWillCompile.cs" />
     <Compile Include="Wrappers\Vector\Boilerplate.cs">
@@ -161,21 +172,22 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="Implementation\FingerTree\Explanation.md" />
-    <None Include="Wrappers\Imms.FSharp\Base.ttinclude" />
-    <None Include="Wrappers\Imms.FSharp\Helpers.ttinclude" />
-    <None Include="Wrappers\Imms.FSharp\Map.ttinclude" />
-    <None Include="Wrappers\Imms.FSharp\Sequential.ttinclude" />
-    <None Include="Wrappers\Imms.FSharp\Set.ttinclude" />
+    <None Include="Implementation\Notes.md" />
+    <None Include="Imms.FSharp\Base.ttinclude" />
+    <None Include="Imms.FSharp\Helpers.ttinclude" />
+    <None Include="Imms.FSharp\Map.ttinclude" />
+    <None Include="Imms.FSharp\Sequential.ttinclude" />
+    <None Include="Imms.FSharp\Set.ttinclude" />
     <None Include="Wrappers\Templates\Reusable.ttinclude" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Optimizations and Tests.txt" />
-    <Content Include="Wrappers\Imms.FSharp\Modules.fs">
+    <Content Include="Imms.FSharp\Modules.fs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Modules.tt</DependentUpon>
     </Content>
-    <None Include="Wrappers\Imms.FSharp\Modules.tt">
+    <None Include="Imms.FSharp\Modules.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Modules.fs</LastGenOutput>
     </None>
@@ -189,7 +201,7 @@
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="AfterBuild" Condition="'$(Configuration)' == 'Release'">
+  <Target Name="AfterBuild" Condition="$(DefineConstants.Contains('NUGET'))">
     <Exec ContinueOnError="false" WorkingDirectory="$(OutDir)" Command="&quot;$(SolutionDir).nuget\nuget.exe&quot; pack &quot;$(ProjectPath)&quot; -Exclude &quot;*.nlp&quot; -IncludeReferencedProjects -NonInteractive -Verbosity detailed -NoDefaultExcludes -Properties Configuration=&quot;$(Configuration)&quot;;Platform=&quot;$(Platform)&quot;" />
   </Target>
   <PropertyGroup>

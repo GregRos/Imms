@@ -59,7 +59,7 @@ type SetWrapper<'v when 'v : comparison>(name : string) =
         | _ -> failwith "Unexpected equality!"
     override x.GetHashCode() = failwith "Don't call this method"
     
-type ReferenceSetWrapper<'v when 'v : comparison> private (Inner : Set<ComparableKey<'v>>, Ordering : ImmOrderedSet<ComparableKey<'v>>, Comparer : KeySemantics<'v>) = 
+type ReferenceSetWrapper<'v when 'v : comparison> private (Inner : Set<ComparableKey<'v>>, Ordering : ImmSortedSet<ComparableKey<'v>>, Comparer : KeySemantics<'v>) = 
     inherit SetWrapper<'v>("FSharpSet")    
     static let wrap cmp ord x  = ReferenceSetWrapper<'v>(x, ord, cmp) :> SetWrapper<'v>
     static let unwrapKey (x : ComparableKey<_>) = x.Value
@@ -78,9 +78,9 @@ type ReferenceSetWrapper<'v when 'v : comparison> private (Inner : Set<Comparabl
     override x.Contains v = Inner.Contains (wrapKey v)
     override x.Length = Inner.Count
     override x.SelfTest() = true
-    override x.Empty = Set.empty |> wrapInst (ImmOrderedSet.empty)
+    override x.Empty = Set.empty |> wrapInst (ImmSortedSet.empty)
     override x.IsEmpty = Inner.IsEmpty
-    override x.EmptyWith cmp = ReferenceSetWrapper(Set.empty, ImmOrderedSet.empty, cmp) :> _
+    override x.EmptyWith cmp = ReferenceSetWrapper(Set.empty, ImmSortedSet.empty, cmp) :> _
     override x.IsOrdered = true
     override x.Union st = 
         match st with
@@ -151,16 +151,16 @@ type ReferenceSetWrapper<'v when 'v : comparison> private (Inner : Set<Comparabl
 
     static member FromSeqWith (cmp : KeySemantics<_>) s  = 
         let arr = s |> Seq.map (cmp.Wrap) |> Seq.toArray
-        arr  |> Set.ofSeq |> wrap cmp (arr |> Seq.disableIterateOnce |> ImmOrderedSet.ofSeq) 
+        arr  |> Set.ofSeq |> wrap cmp (arr |> Seq.disableIterateOnce |> ImmSortedSet.ofSeq) 
         
     static member FromSeq s  = 
         let dSemantics = defaultKeySemantics
         let arr = s |> Seq.map (dSemantics.Wrap) |> Seq.toArray
-        arr |> Set.ofSeq |> wrap (defaultKeySemantics) (arr |> Seq.disableIterateOnce |> ImmOrderedSet.ofSeq) 
+        arr |> Set.ofSeq |> wrap (defaultKeySemantics) (arr |> Seq.disableIterateOnce |> ImmSortedSet.ofSeq) 
 
 
 
-type ImmSetWrapper<'v when 'v : comparison>(Inner : ImmSet<'v>, Ordering : ImmOrderedSet<'v>) = 
+type ImmSetWrapper<'v when 'v : comparison>(Inner : ImmSet<'v>, Ordering : ImmSortedSet<'v>) = 
     inherit SetWrapper<'v>("ImmSet")
     static let wrap ord x  = ImmSetWrapper<'v>(x, ord) :> SetWrapper<'v>
     let unwrap (vs : 'v seq) = 
@@ -174,8 +174,8 @@ type ImmSetWrapper<'v when 'v : comparison>(Inner : ImmSet<'v>, Ordering : ImmOr
     override x.Remove v = Inner.Remove v |> wrap (Ordering.Remove v)
     override x.Contains v = Inner.Contains v
     override x.Length = Inner.Length
-    override x.EmptyWith eq = ImmSet.emptyWith eq |> wrap (ImmOrderedSet.emptyWith eq)
-    override x.Empty = ImmSet.empty|> wrap (ImmOrderedSet.empty)
+    override x.EmptyWith eq = ImmSet.emptyWith eq |> wrap (ImmSortedSet.emptyWith eq)
+    override x.Empty = ImmSet.empty|> wrap (ImmSortedSet.empty)
     override x.ByArbitraryOrder i = Ordering.ByOrder i
     override x.SelfTest() = 
         let distinctCount = x |> Seq.distinct |> Seq.smartLength
@@ -211,17 +211,17 @@ type ImmSetWrapper<'v when 'v : comparison>(Inner : ImmSet<'v>, Ordering : ImmOr
     override x.IsDisjointWith vs = vs |> unwrap |> Inner.IsDisjointWith
     override x.RelatesTo vs = vs |> unwrap |> Inner.RelatesTo
     override x.SetEquals vs = vs |> unwrap |> Inner.SetEquals
-    static member FromSeqWith cmp s = ImmSet.ofSeqWith cmp s |> wrap (s |> Seq.disableIterateOnce |> ImmOrderedSet.ofSeqWith cmp)
+    static member FromSeqWith cmp s = ImmSet.ofSeqWith cmp s |> wrap (s |> Seq.disableIterateOnce |> ImmSortedSet.ofSeqWith cmp)
     static member FromSeq s = 
-        ImmSet.ofSeq(s) |> wrap (ImmOrderedSet.ofSeq (s |> Seq.disableIterateOnce))
+        ImmSet.ofSeq(s) |> wrap (ImmSortedSet.ofSeq (s |> Seq.disableIterateOnce))
     
 
-type ImmOrderedSetWrapper<'v when 'v : comparison>(Inner : ImmOrderedSet<'v>) = 
-    inherit SetWrapper<'v>("ImmOrderedSet")
-    static let wrap x = ImmOrderedSetWrapper<'v>(x) :> SetWrapper<'v>
+type ImmSortedSetWrapper<'v when 'v : comparison>(Inner : ImmSortedSet<'v>) = 
+    inherit SetWrapper<'v>("ImmSortedSet")
+    static let wrap x = ImmSortedSetWrapper<'v>(x) :> SetWrapper<'v>
     let unwrap (vs : 'v seq) = 
         match vs with
-        | :? ImmOrderedSetWrapper<'v> as wrapped -> wrapped.Inner :> _ seq
+        | :? ImmSortedSetWrapper<'v> as wrapped -> wrapped.Inner :> _ seq
         | sq -> sq
     member val Inner = Inner
     override x.GetEnumerator() = (Inner :> seq<_>).GetEnumerator()
@@ -230,7 +230,7 @@ type ImmOrderedSetWrapper<'v when 'v : comparison>(Inner : ImmOrderedSet<'v>) =
     override x.Contains v = Inner.Contains v
     override x.IsOrdered = true
     override x.Length = Inner.Length
-    override x.Empty = ImmOrderedSet.empty|> wrap
+    override x.Empty = ImmSortedSet.empty|> wrap
     override x.IsEmpty = Inner.IsEmpty
     override x.SelfTest() =     
         let mutable i = 0
@@ -244,7 +244,7 @@ type ImmOrderedSetWrapper<'v when 'v : comparison>(Inner : ImmOrderedSet<'v>) =
                 i <- i + 1
             okay
     override x.Union other = other |> unwrap |> Inner.Union |> wrap
-    override x.EmptyWith cmp = ImmOrderedSet.emptyWith cmp |> wrap
+    override x.EmptyWith cmp = ImmSortedSet.emptyWith cmp |> wrap
     override x.Intersect other = other |> unwrap |> Inner.Intersect |> wrap
     override x.Except other = other |> unwrap |> Inner.Except |> wrap
     override x.Difference other = other |> unwrap |> Inner.Difference |> wrap
@@ -259,15 +259,15 @@ type ImmOrderedSetWrapper<'v when 'v : comparison>(Inner : ImmOrderedSet<'v>) =
     override x.MinItem = Inner.MinItem
     override x.MaxItem = Inner.MaxItem
     override x.ByOrder i= Inner.ByOrder i
-    override x.All f = Inner |> ImmOrderedSet.forAll f
-    override x.Any f = Inner |> ImmOrderedSet.exists f
-    override x.Count f = Inner |> ImmOrderedSet.count f
-    override x.Pick f = Inner |> ImmOrderedSet.pick f
-    override x.Find f = Inner |> ImmOrderedSet.find f
-    override x.Fold initial f = Inner |> ImmOrderedSet.fold initial f
-    override x.Reduce f = Inner |> ImmOrderedSet.reduce f
-    static member FromSeq s = ImmOrderedSet.ofSeq s |> wrap
-    static member FromSeqWith cmp s = ImmOrderedSet.ofSeqWith cmp s |> wrap
+    override x.All f = Inner |> ImmSortedSet.forAll f
+    override x.Any f = Inner |> ImmSortedSet.exists f
+    override x.Count f = Inner |> ImmSortedSet.count f
+    override x.Pick f = Inner |> ImmSortedSet.pick f
+    override x.Find f = Inner |> ImmSortedSet.find f
+    override x.Fold initial f = Inner |> ImmSortedSet.fold initial f
+    override x.Reduce f = Inner |> ImmSortedSet.reduce f
+    static member FromSeq s = ImmSortedSet.ofSeq s |> wrap
+    static member FromSeqWith cmp s = ImmSortedSet.ofSeqWith cmp s |> wrap
 
 type SetWrapper<'v when 'v : comparison> with
     member x.U_add v =

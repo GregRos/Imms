@@ -96,6 +96,7 @@ namespace Imms {
 			items.CheckNotNull("items");
 			index = index < 0 ? index + Root.Length + 1: index;
 			if (index == 0) return AddFirstRange(items);
+			var var = 4;
 			if (index == Length) return AddLastRange(items);
 #if ASSERTS
 			var oldLast = Last;

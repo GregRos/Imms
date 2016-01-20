@@ -36,19 +36,18 @@ namespace Imms.Implementation {
 
 				public Compound(Digit leftDigit, FTree<Digit> deepTree, Digit rightDigit, Lineage lineage)
 					: base(leftDigit.Measure + deepTree.Measure + rightDigit.Measure, TreeType.Compound, lineage, 3) {
-#if ASSERTS
+
 					leftDigit.AssertNotNull();
 					deepTree.AssertNotNull();
 					rightDigit.AssertNotNull();
-#endif
 					_mutate(leftDigit, deepTree, rightDigit);
 				}
 
 				public override Leaf<TValue> this[int index] {
 					get {
-#if ASSERTS
+
 						index.AssertEqual(i => i < Measure);
-#endif
+
 						var m1 = LeftDigit.Measure;
 						var m2 = DeepTree.Measure + m1;
 

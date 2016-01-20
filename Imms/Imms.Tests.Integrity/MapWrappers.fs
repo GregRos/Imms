@@ -114,10 +114,10 @@ type MapWrapper<'k when 'k : comparison>(name : string) =
 
     override x.GetHashCode() = failwith "Do not call this method"
 
-type MapReferenceWrapper<'k when 'k : comparison>(Inner : Map<'k, 'k>, Ordering : ImmOrderedMap<'k, 'k>) = 
+type MapReferenceWrapper<'k when 'k : comparison>(Inner : Map<'k, 'k>, Ordering : ImmSortedMap<'k, 'k>) = 
     inherit MapWrapper<'k>("FSharpMap")
     static let wrap ord x  = MapReferenceWrapper<'k>(x, ord) :> MapWrapper<'k>
-    static let wrapL (x : Map<'k,'k>) = x |> wrap (x |> ImmOrderedMap.ofKvpSeq)
+    static let wrapL (x : Map<'k,'k>) = x |> wrap (x |> ImmSortedMap.ofKvpSeq)
     let min = lazy (Inner |> Seq.head |> Kvp.ToTuple)
     let max = lazy (Inner |> Seq.last |> Kvp.ToTuple)
     let len = lazy (Inner.Count)
@@ -154,7 +154,7 @@ type MapReferenceWrapper<'k when 'k : comparison>(Inner : Map<'k, 'k>, Ordering 
         for Kvp(k,v) in vs do
             mp <- mp.Add(k,v)
         mp
-    override x.Empty = Map.empty |> wrap (ImmOrderedMap.empty)
+    override x.Empty = Map.empty |> wrap (ImmSortedMap.empty)
     override x.Get k = Inner.[k]
     override x.Set(k,v) = 
         if Inner.ContainsKey k then
@@ -181,16 +181,16 @@ type MapReferenceWrapper<'k when 'k : comparison>(Inner : Map<'k, 'k>, Ordering 
     override x.Reduce f = Inner |> Seq.reduce f
    
     
-type ImmOrderedMapWrapper<'k when 'k : comparison>(Inner : ImmOrderedMap<'k, 'k>) =
-    inherit MapWrapper<'k>("ImmOrderedMap")
-    static let wrap x = ImmOrderedMapWrapper<'k>(x) :> MapWrapper<'k>
+type ImmSortedMapWrapper<'k when 'k : comparison>(Inner : ImmSortedMap<'k, 'k>) =
+    inherit MapWrapper<'k>("ImmSortedMap")
+    static let wrap x = ImmSortedMapWrapper<'k>(x) :> MapWrapper<'k>
     let unwrap (y : Kvp<'k,'k> seq) = 
         match y with
-        | :? ImmOrderedMapWrapper<'k> as map -> map.Inner :> _ seq
+        | :? ImmSortedMapWrapper<'k> as map -> map.Inner :> _ seq
         | _ -> y
     let unwrapSet (y : 'k seq) =
         match y with
-        | :? ImmOrderedSetWrapper<'k> as set -> set.Inner :> _ seq
+        | :? ImmSortedSetWrapper<'k> as set -> set.Inner :> _ seq
         | _ -> y
     member val public Inner =
          Inner
@@ -201,8 +201,8 @@ type ImmOrderedMapWrapper<'k when 'k : comparison>(Inner : ImmOrderedMap<'k, 'k>
     override x.AddRange vs = Inner.AddRange (vs |> unwrap) |> wrap
     override x.IsOrdered = true
     override x.SetRange vs= Inner.SetRange (vs |> unwrap) |> wrap
-    override x.Empty = ImmOrderedMap.emptyWith (Cmp.Default) |> wrap
-    override x.EmptySet = ImmOrderedSetWrapper<'k>.FromSeq []
+    override x.Empty = ImmSortedMap.emptyWith (Cmp.Default) |> wrap
+    override x.EmptySet = ImmSortedSetWrapper<'k>.FromSeq []
     override x.MapEquals other = Inner.MapEquals(other)
     override x.Get k = Inner.[k]
     override x.SelfTest() = 
@@ -231,14 +231,14 @@ type ImmOrderedMapWrapper<'k when 'k : comparison>(Inner : ImmOrderedMap<'k, 'k>
     override x.All f = Inner.All f
     override x.Any f = Inner.Any f
     override x.Count f = Inner.Count f
-    override x.Pick f = Inner |> ImmOrderedMap.pick f
+    override x.Pick f = Inner |> ImmSortedMap.pick f
     override x.Find f = Inner.Find f |> fromOption
-    override x.Fold initial f = Inner |> ImmOrderedMap.fold initial f
-    override x.Reduce f = Inner |> ImmOrderedMap.reduce f
+    override x.Fold initial f = Inner |> ImmSortedMap.fold initial f
+    override x.Reduce f = Inner |> ImmSortedMap.reduce f
     static member FromSeq s = 
-        ImmOrderedMapWrapper(ImmOrderedMap.ofKvpSeqWith Cmp.Default s) :> MapWrapper<_>
+        ImmSortedMapWrapper(ImmSortedMap.ofKvpSeqWith Cmp.Default s) :> MapWrapper<_>
 
-type ImmMapWrapper<'k when 'k : comparison>(Inner : ImmMap<'k,'k>, Ordering : ImmOrderedMap<'k, 'k>) =
+type ImmMapWrapper<'k when 'k : comparison>(Inner : ImmMap<'k,'k>, Ordering : ImmSortedMap<'k, 'k>) =
     inherit MapWrapper<'k>("ImmMap")
     static let wrap ord x  = ImmMapWrapper<'k>(x, ord) :> MapWrapper<'k>
     static let unwrap (xs : Kvp<'k,'k> seq) =
@@ -261,7 +261,7 @@ type ImmMapWrapper<'k when 'k : comparison>(Inner : ImmMap<'k,'k>, Ordering : Im
     override x.SelfTest() = 
         x |> Seq.distinctBy (fun y -> y.Key) |> Seq.smartLength = x.Length
     override x.ContainsKey k = Inner.ContainsKey(k)
-    override x.Empty = ImmMap.empty |> wrap (ImmOrderedMap.empty)
+    override x.Empty = ImmMap.empty |> wrap (ImmSortedMap.empty)
     override x.Get k = Inner.[k]
     override x.Set(k,v) = Inner.Set(k,v) |> wrap (Ordering.Set(k,v))
     override x.ByArbitraryOrder i = Ordering.ByOrder(i)
@@ -287,7 +287,7 @@ type ImmMapWrapper<'k when 'k : comparison>(Inner : ImmMap<'k,'k>, Ordering : Im
     override x.Find f = Inner.Find f |> fromOption
     override x.Fold initial f = Inner.Aggregate(initial, toFunc2 f)
     override x.Reduce f = Inner |> ImmMap.reduce f
-    static member FromSeq s = ImmMapWrapper(ImmMap.ofKvpSeq(s), ImmOrderedMap.ofKvpSeq(s))  :> MapWrapper<_>
+    static member FromSeq s = ImmMapWrapper(ImmMap.ofKvpSeq(s), ImmSortedMap.ofKvpSeq(s))  :> MapWrapper<_>
 
 type MapWrapper<'k when 'k : comparison> with
     member x.assert_keyExists k  =

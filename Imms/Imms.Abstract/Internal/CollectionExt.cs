@@ -47,7 +47,7 @@ namespace Imms {
 
 		/// <summary>
 		///     Converts a sequence to an array efficiently. The array may be longer than the sequence. The final elements will be
-		///     uninitialized.<br />
+		///     their defualt values.<br />
 		///     The length of the sequence is returned in the  output parameter. <br />
 		///     It is extremely unsafe to modify the array!!!!
 		/// </summary>

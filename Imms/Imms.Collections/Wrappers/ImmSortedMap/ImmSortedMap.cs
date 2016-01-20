@@ -9,16 +9,16 @@ namespace Imms {
 	/// </summary>
 	/// <typeparam name="TKey"></typeparam>
 	/// <typeparam name="TValue"></typeparam>
-	public sealed partial class ImmOrderedMap<TKey, TValue> : AbstractMap<TKey, TValue, ImmOrderedMap<TKey, TValue>> {
+	public sealed partial class ImmSortedMap<TKey, TValue> : AbstractMap<TKey, TValue, ImmSortedMap<TKey, TValue>> {
 		private readonly IComparer<TKey> _comparer;
 		private readonly OrderedAvlTree<TKey, TValue>.Node _root;
 
-		internal ImmOrderedMap(OrderedAvlTree<TKey, TValue>.Node root, IComparer<TKey> comparer) {
+		internal ImmSortedMap(OrderedAvlTree<TKey, TValue>.Node root, IComparer<TKey> comparer) {
 			_root = root;
 			_comparer = comparer;
 		}
 
-		protected override ImmOrderedMap<TKey, TValue> UnderlyingCollection
+		protected override ImmSortedMap<TKey, TValue> UnderlyingCollection
 		{
 			get { return this; }
 		}
@@ -26,6 +26,9 @@ namespace Imms {
 			get { return _root.IsEmpty; }
 		}
 
+		/// <summary>
+		///     Returns the number of elements in the collection.
+		/// </summary>
 		public override int Length {
 			get { return _root.Count; }
 		}
@@ -51,9 +54,21 @@ namespace Imms {
 			}
 		}
 
-		public override ImmOrderedMap<TKey, TValue> Merge(IEnumerable<KeyValuePair<TKey, TValue>> other, Func<TKey, TValue, TValue, TValue> collision = null) {
+		/// <summary>
+		///     Merges the two maps, applying the selector function for keys appearing in both maps.
+		/// </summary>
+		/// <param name="other">The other.</param>
+		/// <param name="collision">
+		///     The collision resolution function. If null, the values in the other map overwrite the values in this map.
+		/// </param>
+		/// <remarks>
+		/// The merge operation is analogous to a union operation over sets. 
+		/// 
+		/// This operation returns all key-value pairs present in either map. If a key is shared between both maps, the collision resolution function is applied to determine the value in the result map.
+		/// </remarks>
+		public override ImmSortedMap<TKey, TValue> Merge(IEnumerable<KeyValuePair<TKey, TValue>> other, Func<TKey, TValue, TValue, TValue> collision = null) {
 			other.CheckNotNull("other");
-			var map = other as ImmOrderedMap<TKey, TValue>;
+			var map = other as ImmSortedMap<TKey, TValue>;
 			if (map != null && IsCompatibleWith(map)) return Merge(map, collision);
 			int len;
 			var arr = other.ToArrayFast(out len);
@@ -67,12 +82,12 @@ namespace Imms {
 		}
 
 		/// <summary>
-		/// Returns an empty <see cref="ImmOrderedMap{TKey,TValue}"/> using the specified comparer.
+		/// Returns an empty <see cref="ImmSortedMap{TKey,TValue}"/> using the specified comparer.
 		/// </summary>
 		/// <param name="comparer"></param>
 		/// <returns></returns>
-		public new static ImmOrderedMap<TKey, TValue> Empty(IComparer<TKey> comparer) {
-			return new ImmOrderedMap<TKey, TValue>(OrderedAvlTree<TKey, TValue>.Node.Empty,
+		public new static ImmSortedMap<TKey, TValue> Empty(IComparer<TKey> comparer) {
+			return new ImmSortedMap<TKey, TValue>(OrderedAvlTree<TKey, TValue>.Node.Empty,
 				comparer ?? FastComparer<TKey>.Default);
 		}
 
@@ -93,38 +108,38 @@ namespace Imms {
 			return _root.ForEachWhile((k, v) => function(Kvp.Of(k, v)));
 		}
 
-		protected override ImmOrderedMap<TKey, TValue> Merge(ImmOrderedMap<TKey, TValue> other,
+		protected override ImmSortedMap<TKey, TValue> Merge(ImmSortedMap<TKey, TValue> other,
 			Func<TKey, TValue, TValue, TValue> collision = null) {
 			return _root.Union(other._root, collision, Lineage.Mutable()).WrapMap(_comparer);
 		}
 
-		protected override ImmOrderedMap<TKey, TValue> Join(ImmOrderedMap<TKey, TValue> other,
-			Func<TKey, TValue, TValue, TValue> collision = null) {
-			return _root.Intersect(other._root, Lineage.Mutable(), collision).WrapMap(_comparer);
+		protected override ImmSortedMap<TKey, TValue> Join(ImmSortedMap<TKey, TValue> other,
+			ValueSelector<TKey, TValue, TValue, TValue> collision = null) {
+			return _root.Intersect(other._root, Lineage.Mutable(), collision != null ? collision.Invoke : null).WrapMap(_comparer);
 		}
 
-		protected override ImmOrderedMap<TKey, TValue> Difference(ImmOrderedMap<TKey, TValue> other) {
+		protected override ImmSortedMap<TKey, TValue> Difference(ImmSortedMap<TKey, TValue> other) {
 			return _root.SymDifference(other._root, Lineage.Mutable()).WrapMap(_comparer);
 		}
 
-		public override ImmOrderedMap<TKey, TValue> RemoveRange(IEnumerable<TKey> keys) {
+		public override ImmSortedMap<TKey, TValue> RemoveRange(IEnumerable<TKey> keys) {
 			keys.CheckNotNull("keys");
-			var set = keys as ImmOrderedSet<TKey>;
+			var set = keys as ImmSortedSet<TKey>;
 			if (set != null && _comparer.Equals(set.Comparer)) return _root.Except(set.Root, Lineage.Mutable()).WrapMap(_comparer);
 			return base.RemoveRange(keys);
 		}
 
-		public override ImmOrderedMap<TKey, TValue> Subtract<TValue2>(IEnumerable<KeyValuePair<TKey, TValue2>> other,
+		public override ImmSortedMap<TKey, TValue> Subtract<TValue2>(IEnumerable<KeyValuePair<TKey, TValue2>> other,
 			Func<TKey, TValue, TValue2, Optional<TValue>> subtraction = null) {
 			other.CheckNotNull("other");
-			var map = other as ImmOrderedMap<TKey, TValue2>;
+			var map = other as ImmSortedMap<TKey, TValue2>;
 			if (map != null && _comparer.Equals(map._comparer)) {
 				return _root.Except(map._root, Lineage.Mutable(), subtraction).WrapMap(_comparer);
 			}
 			return base.Subtract(other, subtraction);
 		}
 
-		protected override ImmOrderedMap<TKey, TValue> Subtract(ImmOrderedMap<TKey, TValue> other, Func<TKey, TValue, TValue, Optional<TValue>> subtraction = null) {
+		protected override ImmSortedMap<TKey, TValue> Subtract(ImmSortedMap<TKey, TValue> other, Func<TKey, TValue, TValue, Optional<TValue>> subtraction = null) {
 			return _root.Except(other._root, Lineage.Mutable(), subtraction).WrapMap(_comparer);
 		}
 
@@ -140,7 +155,7 @@ namespace Imms {
 			return Kvp.Of(opt.Key, opt.Value);
 		}
 
-		public override ImmOrderedMap<TKey, TValue> Remove(TKey key) {
+		public override ImmSortedMap<TKey, TValue> Remove(TKey key) {
 			var removed = _root.AvlRemove(key, Lineage.Mutable());
 			if (removed == null) return this;
 			return removed.WrapMap(_comparer);
@@ -150,7 +165,7 @@ namespace Imms {
 		/// Removes the maximal key-value pair from this map.
 		/// </summary>
 		/// <returns></returns>
-		public ImmOrderedMap<TKey, TValue> RemoveMax() {
+		public ImmSortedMap<TKey, TValue> RemoveMax() {
 			if (_root.IsEmpty) throw Errors.Is_empty;
 			return _root.RemoveMax(Lineage.Mutable()).WrapMap(_comparer);
 		}
@@ -159,12 +174,12 @@ namespace Imms {
 		/// removes the minimal key-value pair from this map.
 		/// </summary>
 		/// <returns></returns>
-		public ImmOrderedMap<TKey, TValue> RemoveMin() {
+		public ImmSortedMap<TKey, TValue> RemoveMin() {
 			if (_root.IsEmpty) throw Errors.Is_empty;
 			return _root.RemoveMin(Lineage.Mutable()).WrapMap(_comparer);
 		}
 
-		protected override ImmOrderedMap<TKey, TValue> Set(TKey key, TValue value, OverwriteBehavior behavior) {
+		protected override ImmSortedMap<TKey, TValue> Set(TKey key, TValue value, OverwriteBehavior behavior) {
 			var ret = _root.Root_Add(key, value, _comparer, behavior == OverwriteBehavior.Overwrite, Lineage.Mutable());
 			if (ret == null && behavior == OverwriteBehavior.Throw) throw Errors.Key_exists(key);
 			if (ret == null) return null;

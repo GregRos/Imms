@@ -3,21 +3,21 @@ using Imms.Abstract;
 using Imms.Implementation;
 
 namespace Imms {
-	public partial class ImmOrderedSet<T> {
-		protected override ISetBuilder<T, ImmOrderedSet<T>> EmptyBuilder {
+	public partial class ImmSortedSet<T> {
+		protected override ISetBuilder<T, ImmSortedSet<T>> EmptyBuilder {
 			get { return new Builder(Comparer, OrderedAvlTree<T, bool>.Node.Empty); }
 		}
 
-		protected override ISetBuilder<T, ImmOrderedSet<T>> BuilderFrom(ImmOrderedSet<T> collection) {
+		protected override ISetBuilder<T, ImmSortedSet<T>> BuilderFrom(ImmSortedSet<T> collection) {
 			return new Builder(Comparer, collection.Root);
 		}
 
 
-		protected override bool IsCompatibleWith(ImmOrderedSet<T> other) {
+		protected override bool IsCompatibleWith(ImmSortedSet<T> other) {
 			return Comparer.Equals(other.Comparer);
 		}
 
-		sealed class Builder : ISetBuilder<T, ImmOrderedSet<T>> {
+		sealed class Builder : ISetBuilder<T, ImmSortedSet<T>> {
 			readonly IComparer<T> _comparer;
 			OrderedAvlTree<T, bool>.Node _inner;
 			Lineage _lineage;
@@ -28,7 +28,7 @@ namespace Imms {
 				_lineage = Lineage.Mutable();
 			}
 
-			public ImmOrderedSet<T> Produce() {
+			public ImmSortedSet<T> Produce() {
 				_lineage = Lineage.Mutable();
 				return _inner.Wrap(_comparer);
 			}
@@ -44,7 +44,7 @@ namespace Imms {
 
 			public void AddRange(IEnumerable<T> items) {
 				items.CheckNotNull("items");
-				var set = items as ImmOrderedSet<T>;
+				var set = items as ImmSortedSet<T>;
 				if (set != null && _comparer.Equals(set.Comparer)) {
 					_inner = _inner.Union(set.Root, null, _lineage);
 				} else {

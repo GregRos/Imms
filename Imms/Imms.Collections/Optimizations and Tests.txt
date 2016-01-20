@@ -15,7 +15,7 @@
 
 #+ Iteration
 	*	Collections support a number of forms of iteration. All iteration occurs sequentially, according to the sequence defined by the collection. The order of iteration is the same when using ForEach as when using an IEnumerator, and the same collection instance always has the same order of iteration.
-	*	The collections `ImmList, ImmVector, ImmOrderedSet, ImmOrderedMap` are sequential collections. Two such collections are structurally equal if and only if they are sequentially equal. However, the collections `ImmMap, ImmSet` aren't sequential, and iteration order has no meaning. While the order is always the same on the same instance, two collections may be structurally equal without being sequentially equal, and the same sequence of operations on sequentially equal collections may produce sequentially different collections.
+	*	The collections `ImmList, ImmVector, ImmSortedSet, ImmSortedMap` are sequential collections. Two such collections are structurally equal if and only if they are sequentially equal. However, the collections `ImmMap, ImmSet` aren't sequential, and iteration order has no meaning. While the order is always the same on the same instance, two collections may be structurally equal without being sequentially equal, and the same sequence of operations on sequentially equal collections may produce sequentially different collections.
 		This is why reference-based testing doesn't generally work on iteration-based methods, such as `ForEach`, `All`, `Any`, `Find`, etc. Such methods should be compared to the equivalent naive implemnetation used by e.g. `Seq.exists`, `Seq.forall`, etc.
 	
 	*	Tests for iteration methods that accept a function should check against a naive implementation, such as `Seq.reduce`, `Seq.fold`, etc.

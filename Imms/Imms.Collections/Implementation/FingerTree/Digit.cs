@@ -88,10 +88,11 @@ namespace Imms.Implementation {
 
 				public Digit(TChild one, TChild two, TChild three, TChild four, Lineage lineage)
 					: base(one.Measure + two.Measure + three.Measure + four.Measure, lineage, 4, ExampleChild.Nesting + 1) {
-#if ASSERTS
+
 					AssertEx.AssertAreNotNull(one, two, three, four);
-					new[] { one.IsFragment, two.IsFragment, three.IsFragment, four.IsFragment }.Any(x => x).AssertFalse();
-#endif
+					AssertEx.AssertFalse(new[] { one.IsFragment, two.IsFragment, three.IsFragment, four.IsFragment }.Any(x => x));
+				
+
 					First = one;
 					Second = two;
 					Third = three;

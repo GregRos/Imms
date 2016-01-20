@@ -21,7 +21,7 @@ namespace Imms
 		/// <param name="selector">The selector.</param>
 		/// <returns></returns>
 		public ImmList<TRElem> Select<TRElem>(Func<T, TRElem> selector) {
-			return base.Select(GetPrototype<TRElem>(), selector);
+			return base._Select(GetPrototype<TRElem>(), selector);
 		}
 	
 		/// <summary>

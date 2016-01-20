@@ -6,8 +6,8 @@ Firstly, I use a lot of imperative constructs and some safe mutation behind the 
 
 Secondly, the structure of the finger tree is somewhat different.
 
-1. The original version had a `Tree`, a `Digit (1/2/3/4)`, and `Node2/Node3` (as well as, possibly, a `Leaf`). This one just has a `Tree`, `Digit`, and `Leaf`. `Digit` is used for nodes as well as digits.
-2. In order to allow other optimizations, there is a single `Digit` object with 4 fields (some of which may be empty), rather than different digit objects for each digit type. The rule of the finger tree is still obeyed for addition/removal from the ends: only `Digit` objects containing 2 or 3 elements may be found inside the deeper tree as elements. Insertion in the middle breaks this rule somewhat, allowing digits in the middle to have 4 elements.
+1. The original version had a `Tree`, a `Digit (1/2/3/4)`, and `Node2/Node3` (as well as, possibly, a `Leaf`). This one just has a `Tree`, `Digit`, and `Leaf`. `Digit` is used for nodes as well as digits. This removes some of the allocation overhead.
+2. In order to allow other optimizations, there is a single `Digit` object with 4 fields (some of which may be empty), rather than different digit objects for each digit type. The rule of the finger tree is still obeyed for addition/removal from the ends: only `Digit` objects containing 2 or 3 elements may be found inside the deeper tree as elements. Insertion in the middle breaks this rule somewhat, allowing digits in the middle to have 4 elements, but this does not worsen the complexity or performance.
 3. In the original finger tree, `Tree` has three cases: `Empty`, `Single v`, and `Deep` where `Single v` contains a single element. In this version, `Single` contains one digit instead, which itself may contain from 1 to 4 elements. The original reason behind this was simply a misunderstanding, but it actually makes some algorithms simpler, like split and concat.
 
 As is the case with many implementations, this one is specialized for sequences, rather than using arbitrary measures. You could transform the code so the measure is a `max` measure instead, for a priority queue, but you'd have to do it rather carefully, as the data structure wasn't written for this directly in mind.
@@ -45,10 +45,15 @@ A big problem of my earlier FingerTree implementations and FingerTree implementa
             yield! iterateDigit right
     }
 
-Now, this obviously works, but the problem is that each `yield!` call involves allocating a new object! And there is no benefit to this additional cost, as the process is still mutable.
+Now, this obviously works, but the problem is that each `yield!` call involves allocating a new object. And there is no benefit to this additional cost, as the process is still mutable.
 
 The problem with iterating over the FTree using any other way, is that as we go deeper into the tree, type information becomes very complicated and impossible to abstract over. 
 
 So basically, we hide all of that type information behind `FingerTreeElement`. We simply treat every finger tree node (which includes an FTree) as a node in a tree with some number of children.
 For example, a Compound FTree has 3 children (some of which may be empty), a Single has 1 child and a Digit has 1-4 children.
  We iterate over the tree using a stack (an array list, not a linked list) by iterating over every child of every node, ignoring the node's actual type. The HasValue property tells if a given node has a value (i.e. is a leaf) or not. We only try to get the values of nodes that have them.
+
+### Insertion & Removal
+This finger tree has custom algorithms for insertion and removal in the middle which perform several times faster than naive algorithms (by "naive" I mean, efficient split followed by Add, followed by efficient concat).
+
+However, they are obviously still O(logn), but they are optimal in terms of allocations performed.

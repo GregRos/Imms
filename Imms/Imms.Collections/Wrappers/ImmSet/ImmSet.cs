@@ -27,10 +27,16 @@ namespace Imms {
 			get { return Root.CollisionMetric; }
 		}
 
+		/// <summary>
+		///     Returns the number of elements in the collection.
+		/// </summary>
 		public override int Length {
 			get { return Root.Count; }
 		}
 
+		/// <summary>
+		///     Returns true if the collection is empty.
+		/// </summary>
 		public override bool IsEmpty {
 			get { return Root.IsEmpty; }
 		}
@@ -44,12 +50,22 @@ namespace Imms {
 			return new ImmSet<T>(HashedAvlTree<T, bool>.Node.Empty, eq ?? FastEquality<T>.Default);
 		}
 
+		/// <summary>
+		/// Adds a new item to the set, or does nothing if the item already exists.
+		/// </summary>
+		/// <param name="item">The item to add.</param>
+		/// <returns></returns>
 		public override ImmSet<T> Add(T item) {
 			var res = Root.Root_Add(item, true, Lineage.Mutable(), EqualityComparer, false);
 			if (res == null) return this;
 			return res.Wrap(EqualityComparer);
 		}
 
+		/// <summary>
+		/// Removes an item from the set, or does nothing if the item does not exist.
+		/// </summary>
+		/// <param name="item">The item to remove.</param>
+		/// <returns></returns>
 		public override ImmSet<T> Remove(T item) {
 			var ret = Root.Root_Remove(item, Lineage.Mutable());
 			if (ret == null) return this;
@@ -61,6 +77,11 @@ namespace Imms {
 			return kvp.IsSome ? kvp.Value.Key.AsOptional() : Optional.None;
 		}
 
+		/// <summary>
+		///     Returns true if the item is contained in the set.
+		/// </summary>
+		/// <param name="item"></param>
+		/// <returns></returns>
 		public override bool Contains(T item) {
 			return Root.Root_Contains(item);
 		}
@@ -99,11 +120,24 @@ namespace Imms {
 			return Root.IsSupersetOf(other.Root);
 		}
 
+		/// <summary>
+		///     Applies the specified function on every item in the collection, from last to first, and stops when the function returns false.
+		/// </summary>
+		/// <param name="function"> The function. </param>
+		/// <returns> </returns>
+		/// <exception cref="ArgumentNullException">Thrown if the argument null.</exception>
 		public override bool ForEachWhile(Func<T, bool> function) {
 			function.CheckNotNull("function");
 			return Root.ForEachWhile((k, v) => function(k));
 		}
 
+		/// <summary>
+		/// Returns an enumerator that iterates through the collection.
+		/// </summary>
+		/// <returns>
+		/// A <see cref="T:System.Collections.Generic.IEnumerator`1"/> that can be used to iterate through the collection.
+		/// </returns>
+		/// <filterpriority>1</filterpriority>
 		public override IEnumerator<T> GetEnumerator() {
 			foreach (var item in Root) yield return item.Key;
 		}

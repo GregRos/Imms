@@ -24,9 +24,9 @@ namespace Imms.Implementation {
 		public bool MoveNext() {
 			//_past.Push(_current);
 			var top = _future.Peek();
-#if ASSERTS
+
 			AssertEx.AssertTrue(top.Object.ChildCount > 0 || top.Object.IsLeaf || _future.Count == 1); //only possible if tree is empty
-#endif
+
 			while (top.Mark >= top.Object.ChildCount - 1) {
 				_future.Pop();
 				//_past.Push(top.Object);
@@ -41,11 +41,11 @@ namespace Imms.Implementation {
 				return true;
 			}
 			if (nextObj.ChildCount == 0) {
-#if ASSERTS
-	//this can only happen if we're in Compound(Digit, Empty, Digit).
+
+				//this can only happen if we're in Compound(Digit, Empty, Digit).
 				obj.ChildCount.AssertEqual(3);
 				top.Mark.AssertEqual(0);
-#endif
+
 				top.SetMark(2);
 				nextObj = obj.GetChild(2);
 			} else top.SetMark(top.Mark + 1);

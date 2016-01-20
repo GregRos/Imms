@@ -8,11 +8,11 @@ namespace Imms {
 	/// Immutable and persistent ordered set. Uses comparison semantics, and allows looking up items by sort order.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public sealed partial class ImmOrderedSet<T> : AbstractSet<T, ImmOrderedSet<T>> {
+	public sealed partial class ImmSortedSet<T> : AbstractSet<T, ImmSortedSet<T>> {
 		internal readonly IComparer<T> Comparer;
 		internal readonly OrderedAvlTree<T, bool>.Node Root;
 
-		internal ImmOrderedSet(OrderedAvlTree<T, bool>.Node root, IComparer<T> comparer) {
+		internal ImmSortedSet(OrderedAvlTree<T, bool>.Node root, IComparer<T> comparer) {
 			Root = root;
 			Comparer = comparer;
 		}
@@ -46,23 +46,23 @@ namespace Imms {
 			get { return Root.IsEmpty; }
 		}
 
-		protected override ImmOrderedSet<T> UnderlyingCollection
+		protected override ImmSortedSet<T> UnderlyingCollection
 		{
 			get { return this; }
 		}
 
 		/// <summary>
-		/// Returns an empty <see cref="ImmOrderedSet{T}"/> using the specified comparer.
+		/// Returns an empty <see cref="ImmSortedSet{T}"/> using the specified comparer.
 		/// </summary>
 		/// <param name="cm"></param>
 		/// <returns></returns>
-		public new static ImmOrderedSet<T> Empty(IComparer<T> cm) {
-			return new ImmOrderedSet<T>(OrderedAvlTree<T, bool>.Node.Empty, cm ?? FastComparer<T>.Default);
+		public new static ImmSortedSet<T> Empty(IComparer<T> cm) {
+			return new ImmSortedSet<T>(OrderedAvlTree<T, bool>.Node.Empty, cm ?? FastComparer<T>.Default);
 		}
 
-		public override ImmOrderedSet<T> Union(IEnumerable<T> other) {
+		public override ImmSortedSet<T> Union(IEnumerable<T> other) {
 			other.CheckNotNull("other");
-			var set = other as ImmOrderedSet<T>;
+			var set = other as ImmSortedSet<T>;
 			if (set != null && IsCompatibleWith(set)) return Union(set);
 			//this trick can't really be repeated with a non-ordered set...
 			//or least I haven't figured it out yet. Basically, converts the sequence into an array, sorts it on its own
@@ -78,13 +78,13 @@ namespace Imms {
 			return newRoot.Wrap(Comparer);
 		}
 
-		public override ImmOrderedSet<T> Add(T item) {
+		public override ImmSortedSet<T> Add(T item) {
 			var ret = Root.Root_Add(item, true, Comparer, false, Lineage.Mutable());
 			if (ret == null) return this;
 			return ret.Wrap(Comparer);
 		}
 
-		public override ImmOrderedSet<T> Remove(T item) {
+		public override ImmSortedSet<T> Remove(T item) {
 			var ret = Root.AvlRemove(item, Lineage.Mutable());
 			if (ret == null) return this;
 			return ret.Wrap(Comparer);
@@ -99,27 +99,27 @@ namespace Imms {
 			return Root.Contains(item);
 		}
 
-		protected override ImmOrderedSet<T> Difference(ImmOrderedSet<T> other) {
+		protected override ImmSortedSet<T> Difference(ImmSortedSet<T> other) {
 			return Root.SymDifference(other.Root, Lineage.Mutable()).Wrap(Comparer);
 		}
 
-		protected override ImmOrderedSet<T> Except(ImmOrderedSet<T> other) {
+		protected override ImmSortedSet<T> Except(ImmSortedSet<T> other) {
 			return Root.Except(other.Root, Lineage.Mutable()).Wrap(Comparer);
 		}
 
-		protected override ImmOrderedSet<T> Union(ImmOrderedSet<T> other) {
+		protected override ImmSortedSet<T> Union(ImmSortedSet<T> other) {
 			return Root.Union(other.Root, null, Lineage.Mutable()).Wrap(Comparer);
 		}
 
-		protected override ImmOrderedSet<T> Intersect(ImmOrderedSet<T> other) {
+		protected override ImmSortedSet<T> Intersect(ImmSortedSet<T> other) {
 			return Root.Intersect(other.Root, Lineage.Mutable(), null).Wrap(Comparer);
 		}
 
-		protected override bool IsDisjointWith(ImmOrderedSet<T> other) {
+		protected override bool IsDisjointWith(ImmSortedSet<T> other) {
 			return Root.IsDisjoint(other.Root);
 		}
 
-		protected override bool IsSupersetOf(ImmOrderedSet<T> other) {
+		protected override bool IsSupersetOf(ImmSortedSet<T> other) {
 			return Root.IsSupersetOf(other.Root);
 		}
 
@@ -132,7 +132,7 @@ namespace Imms {
 		/// Removes the maximal element from the set.
 		/// </summary>
 		/// <returns></returns>
-		public ImmOrderedSet<T> RemoveMax() {
+		public ImmSortedSet<T> RemoveMax() {
 			if (Root.IsEmpty) throw Errors.Is_empty;
 			return Root.RemoveMax(Lineage.Mutable()).Wrap(Comparer);
 		}
@@ -152,7 +152,7 @@ namespace Imms {
 		/// Removes the minimal element from this set.
 		/// </summary>
 		/// <returns></returns>
-		public ImmOrderedSet<T> RemoveMin() {
+		public ImmSortedSet<T> RemoveMin() {
 			return Root.RemoveMin(Lineage.Mutable()).Wrap(Comparer);
 		}
 
@@ -160,7 +160,7 @@ namespace Imms {
 			foreach (var item in Root) yield return item.Key;
 		}
 
-		protected override SetRelation RelatesTo(ImmOrderedSet<T> other) {
+		protected override SetRelation RelatesTo(ImmSortedSet<T> other) {
 			return Root.Relation(other.Root);
 		}
 	}

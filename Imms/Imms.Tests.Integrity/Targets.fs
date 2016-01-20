@@ -9,9 +9,9 @@ module Imms =
     let List n = ImmListWrapper<_>.FromSeq (lst n)
     let Vector n= ImmVectorWrapper<_>.FromSeq (lst n)
     let Set = ImmSetWrapper<_>.FromSeq 
-    let OrderedSet = ImmOrderedSetWrapper<_>.FromSeq 
+    let OrderedSet = ImmSortedSetWrapper<_>.FromSeq 
     let Map s = ImmMapWrapper<_>.FromSeq s
-    let OrderedMap s = ImmOrderedMapWrapper<_>.FromSeq s
+    let OrderedMap s = ImmSortedMapWrapper<_>.FromSeq s
 
 module Sys = 
     let List n= SeqReferenceWrapper<_>.FromSeq (lst n)

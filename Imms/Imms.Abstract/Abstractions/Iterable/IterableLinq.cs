@@ -51,7 +51,7 @@ namespace Imms.Abstract {
 		protected virtual TOIter _Cast<TOut, TOIter>(TOIter bFactory)
 			where TOIter : IBuilderFactory<IIterableBuilder<TOut, TOIter>>
 		{
-			return Select(bFactory, (v) => (TOut) (object) v);
+			return _Select(bFactory, (v) => (TOut) (object) v);
 		}
 
 		/// <summary>

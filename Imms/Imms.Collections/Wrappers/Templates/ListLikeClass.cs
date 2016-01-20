@@ -17,7 +17,7 @@ partial class __ListLikeClass__<T> : AbstractSequential<T, __ListLikeClass__<T>>
 	/// <param name="selector">The selector.</param>
 	/// <returns></returns>
 	public __ListLikeClass__<TRElem> Select<TRElem>(Func<T, TRElem> selector) {
-		return base.Select(GetPrototype<TRElem>(), selector);
+		return base._Select(GetPrototype<TRElem>(), selector);
 	}
 
 	/// <summary>

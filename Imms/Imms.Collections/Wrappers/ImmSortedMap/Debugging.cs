@@ -5,16 +5,16 @@ using Imms.Abstract;
 namespace Imms {
 	[DebuggerDisplay("{DebuggerDisplay,nq}")]
 	[DebuggerTypeProxy(typeof (ImmSortedMapDebugView<,>))]
-	partial class ImmOrderedMap<TKey, TValue> {
+	partial class ImmSortedMap<TKey, TValue> {
 
-		protected override IMapBuilder<TKey, TValue, ImmOrderedMap<TKey, TValue>> BuilderFrom(ImmOrderedMap<TKey, TValue> collection) {
+		protected override IMapBuilder<TKey, TValue, ImmSortedMap<TKey, TValue>> BuilderFrom(ImmSortedMap<TKey, TValue> collection) {
 			return new Builder(collection);
 		}
 	}
 
 	class ImmSortedMapDebugView<TKey, TValue> {
-		private ImmOrderedMap<TKey, TValue> _inner;
-		public ImmSortedMapDebugView(ImmOrderedMap<TKey, TValue> map) {
+		private ImmSortedMap<TKey, TValue> _inner;
+		public ImmSortedMapDebugView(ImmSortedMap<TKey, TValue> map) {
 			_inner = map;
 			zIterableView = new IterableDebugView<KeyValuePair<TKey, TValue>> (map);
 		}
