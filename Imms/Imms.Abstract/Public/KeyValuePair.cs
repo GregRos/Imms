@@ -40,6 +40,5 @@ namespace Imms {
 		public static Tuple<TKey, TValue> ToTuple<TKey, TValue>(KeyValuePair<TKey, TValue> pair) {
 			return Tuple.Create(pair.Key, pair.Value);
 		}
-
 	}
 }

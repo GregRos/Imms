@@ -57,9 +57,9 @@ namespace Imms {
 			return _root.Root_Find(key);
 		}
 
-		protected override ImmMap<TKey, TValue> Set(TKey k, TValue v, OverwriteBehavior behavior) {
-			var r = _root.Root_Add(k, v, Lineage.Mutable(), _equality, behavior == OverwriteBehavior.Overwrite);
-			if (r == null && behavior == OverwriteBehavior.Throw) throw Errors.Key_exists(k);
+		protected override ImmMap<TKey, TValue> Set(TKey k, TValue v, bool overwrite) {
+			var r = _root.Root_Add(k, v, Lineage.Mutable(), _equality, overwrite);
+			if (r == null && !overwrite) throw Errors.Key_exists(k);
 			if (r == null) return this;
 			return r.WrapMap(_equality);
 		}

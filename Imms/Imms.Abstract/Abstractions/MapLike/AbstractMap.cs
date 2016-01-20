@@ -10,25 +10,12 @@ using System.Linq;
 
 namespace Imms.Abstract {
 
-	public delegate TOut ValueSelector<in TKey, in TVal1, in TVal2, out TOut>(TKey key1, TVal1 key, TVal2 value);
+
 
 	public abstract partial class AbstractMap<TKey, TValue, TMap>
 		: AbstractIterable<KeyValuePair<TKey, TValue>, TMap, IMapBuilder<TKey, TValue, TMap>>
 		where TMap : AbstractMap<TKey, TValue, TMap> {
 
-		/// <summary>
-		/// Indicates the behavior that should be used when a KVP already exists in the map.
-		/// </summary>
-		protected enum OverwriteBehavior {
-			/// <summary>
-			/// The existing value should be overwritten.
-			/// </summary>
-			Overwrite,
-			/// <summary>
-			/// An exception should be thrown.
-			/// </summary>
-			Throw
-		}
 
 		/// <summary>
 		///     The keys contained in this map.
@@ -113,7 +100,7 @@ namespace Imms.Abstract {
 		/// <summary>
 		/// Determines whether this map is equal to a sequence of key-value pairs. Maps are equal if they contain the same keys, and if the values associated with them are also equal.
 		/// </summary>
-		/// <param name="other">The sequence of key-value pairs, taken to be a map.</param>
+		/// <param name="other">A sequence of key-value pairs. This operation is much faster if it's a map compatible with this one.</param>
 		/// <param name="comparer">A comparer for determining the equality of values.</param>
 		/// <returns></returns>
 		public bool MapEquals(IEnumerable<KeyValuePair<TKey, TValue>> other, IComparer<TValue> comparer) {
@@ -124,7 +111,7 @@ namespace Imms.Abstract {
 		/// <summary>
 		/// Determines whether this map is equal to a sequence of key-value pairs. Maps are equal if they contain the same keys, and if the values associated with them are also equal.
 		/// </summary>
-		/// <param name="other">The sequence of key-value pairs.</param>
+		/// <param name="other">A sequence of key-value pairs. This operation is much faster if it's a map compatible with this one.</param>
 		/// <param name="equality">A function for determining equality between values.</param>
 		/// <returns></returns>
 		public virtual bool MapEquals(IEnumerable<KeyValuePair<TKey, TValue>> other, Func<TValue, TValue, bool> equality) {
@@ -232,7 +219,7 @@ namespace Imms.Abstract {
 		///     Joins this map with another map by key, returning a map consisting of the keys present in both maps, the value of each such key being determined by the specified collision resolution function.
 		/// </summary>
 		/// <typeparam name="TValue2">The type of value of the second map.</typeparam>
-		/// <param name="other">The other map.</param>
+		/// <param name="other">A sequence of key-value pairs. This operation is much faster if it's a map compatible with this one.</param>
 		/// <param name="selector">The function that determines the value associated with each key in the new map.</param>
 		/// <remarks>
 		/// A map join operation is an operation over maps of key-value pairs, which is analogous to an intersection operation over sets.
@@ -298,7 +285,7 @@ namespace Imms.Abstract {
 		/// <summary>
 		/// Removes several keys from this key-value map.
 		/// </summary>
-		/// <param name="keys">The keys to remove. </param>
+		/// <param name="keys">A sequence of keys to remove. Can be much faster if it's a set compatible with this map.</param>
 		/// <returns></returns>
 		public virtual TMap RemoveRange(IEnumerable<TKey> keys) {
 			keys.CheckNotNull("other");
@@ -318,7 +305,7 @@ namespace Imms.Abstract {
 		/// <summary>
 		///     Subtracts the key-value pairs in the specified map from this one, applying the subtraction function on each key shared between the maps.
 		/// </summary>
-		/// <param name="other">The other map.</param>
+		/// <param name="other">A sequence of key-value pairs. This operation is much faster if it's a map compatible with this one.</param>
 		/// <param name="subtraction">Optionally, a subtraction function that generates the value in the resulting key-value map. Otherwise, key-value pairs are always removed.</param>
 		/// <remarks>
 		///	Subtraction over maps is anaologous to Except over sets. 
@@ -371,7 +358,7 @@ namespace Imms.Abstract {
 		/// <summary>
 		///     Merges the two maps, applying the selector function for keys appearing in both maps.
 		/// </summary>
-		/// <param name="other">The other.</param>
+		/// <param name="other">A sequence of key-value pairs. This operation is much faster if it's a map compatible with this one.</param>
 		/// <param name="collision">
 		///     The collision resolution function. If null, the values in the other map overwrite the values in this map.
 		/// </param>
@@ -395,9 +382,9 @@ namespace Imms.Abstract {
 		/// </summary>
 		/// <param name="key">The key to add.</param>
 		/// <param name="value">The value to add.</param>
-		/// <param name="behavior">The overwrite behavior requested.</param>
+		/// <param name="overwrite">Whether the operation is allowed to overwrite.</param>
 		/// <returns></returns>
-		protected abstract TMap Set(TKey key, TValue value, OverwriteBehavior behavior);
+		protected abstract TMap Set(TKey key, TValue value, bool overwrite);
 
 		/// <summary>
 		/// Adds a new key-value pair to the map, overwriting any previous value.
@@ -406,7 +393,7 @@ namespace Imms.Abstract {
 		/// <param name="value">The value to add.</param>
 		/// <returns></returns>
 		public TMap Set(TKey key, TValue value) {
-			return Set(key, value, OverwriteBehavior.Overwrite);
+			return Set(key, value, true);
 		}
 
 		/// <summary>
@@ -416,7 +403,7 @@ namespace Imms.Abstract {
 		/// <param name="value">The value to add.</param>
 		/// <returns></returns>
 		public TMap Add(TKey key, TValue value) {
-			return Set(key, value, OverwriteBehavior.Throw);
+			return Set(key, value, false);
 		}
 
 		/// <summary>
@@ -429,7 +416,7 @@ namespace Imms.Abstract {
 		/// <summary>
 		///     Adds a sequence of key-value pairs to the map, throwing an exception on collision.
 		/// </summary>
-		/// <param name="other"></param>
+		/// <param name="other">A sequence of key-value pairs. This operation is much faster if it's a map compatible with this one.</param>
 		/// <returns></returns>
 		/// <exception cref="ArgumentException">
 		///     Thrown if the map already contains one of the keys, or if there are duplicate keys
@@ -443,7 +430,7 @@ namespace Imms.Abstract {
 		/// <summary>
 		///     Adds a sequence of key-value pairs to the map, overwriting old data on collision.
 		/// </summary>
-		/// <param name="other"></param>
+		/// <param name="other">A sequence of key-value pairs. This operation is much faster if it's a map compatible with this one.</param>
 		/// <returns></returns>
 		/// <exception cref="ArgumentException"></exception>
 		public TMap SetRange(IEnumerable<KeyValuePair<TKey, TValue>> other) {
@@ -522,7 +509,7 @@ namespace Imms.Abstract {
 		/// <summary>
 		///     Returns a map consisting of all the key-value pairs where the key is contained in exactly one map.
 		/// </summary>
-		/// <param name="other">The a sequence of key-value pairs, understood to be a map..</param>
+		/// <param name="other">A sequence of key-value pairs. This operation is much faster if it's a map compatible with this one.</param>
 		/// <returns></returns>
 		public virtual TMap Difference(IEnumerable<KeyValuePair<TKey, TValue>> other) {
 			other.CheckNotNull("other");
@@ -552,6 +539,4 @@ namespace Imms.Abstract {
 		}
 
 	}
-
-
 }

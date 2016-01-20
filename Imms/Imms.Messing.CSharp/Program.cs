@@ -9,7 +9,8 @@ namespace Imms.Messing.CSharp {
 		static void Main(string[] args) {
 			var list1 = ImmList.FromItems(1, 2, 3);
 			var s = ImmMap.Empty<int, int>();
-			s.Merge()
+			s.Merge(s, (key, value1, value2) => key);
+			
 		}
 	}
 }

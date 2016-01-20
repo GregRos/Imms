@@ -66,7 +66,7 @@ namespace Imms {
 		/// 
 		/// This operation returns all key-value pairs present in either map. If a key is shared between both maps, the collision resolution function is applied to determine the value in the result map.
 		/// </remarks>
-		public override ImmSortedMap<TKey, TValue> Merge(IEnumerable<KeyValuePair<TKey, TValue>> other, Func<TKey, TValue, TValue, TValue> collision = null) {
+		public override ImmSortedMap<TKey, TValue> Merge(IEnumerable<KeyValuePair<TKey, TValue>> other, ValueSelector<TKey, TValue, TValue, TValue> collision = null) {
 			other.CheckNotNull("other");
 			var map = other as ImmSortedMap<TKey, TValue>;
 			if (map != null && IsCompatibleWith(map)) return Merge(map, collision);
@@ -109,13 +109,13 @@ namespace Imms {
 		}
 
 		protected override ImmSortedMap<TKey, TValue> Merge(ImmSortedMap<TKey, TValue> other,
-			Func<TKey, TValue, TValue, TValue> collision = null) {
+			ValueSelector<TKey, TValue, TValue, TValue> collision = null) {
 			return _root.Union(other._root, collision, Lineage.Mutable()).WrapMap(_comparer);
 		}
 
 		protected override ImmSortedMap<TKey, TValue> Join(ImmSortedMap<TKey, TValue> other,
 			ValueSelector<TKey, TValue, TValue, TValue> collision = null) {
-			return _root.Intersect(other._root, Lineage.Mutable(), collision != null ? collision.Invoke : null).WrapMap(_comparer);
+			return _root.Intersect(other._root, Lineage.Mutable(), collision).WrapMap(_comparer);
 		}
 
 		protected override ImmSortedMap<TKey, TValue> Difference(ImmSortedMap<TKey, TValue> other) {
@@ -130,7 +130,7 @@ namespace Imms {
 		}
 
 		public override ImmSortedMap<TKey, TValue> Subtract<TValue2>(IEnumerable<KeyValuePair<TKey, TValue2>> other,
-			Func<TKey, TValue, TValue2, Optional<TValue>> subtraction = null) {
+			ValueSelector<TKey, TValue, TValue2, Optional<TValue>> subtraction = null) {
 			other.CheckNotNull("other");
 			var map = other as ImmSortedMap<TKey, TValue2>;
 			if (map != null && _comparer.Equals(map._comparer)) {
@@ -139,7 +139,7 @@ namespace Imms {
 			return base.Subtract(other, subtraction);
 		}
 
-		protected override ImmSortedMap<TKey, TValue> Subtract(ImmSortedMap<TKey, TValue> other, Func<TKey, TValue, TValue, Optional<TValue>> subtraction = null) {
+		protected override ImmSortedMap<TKey, TValue> Subtract(ImmSortedMap<TKey, TValue> other, ValueSelector<TKey, TValue, TValue, Optional<TValue>> subtraction = null) {
 			return _root.Except(other._root, Lineage.Mutable(), subtraction).WrapMap(_comparer);
 		}
 
@@ -179,10 +179,10 @@ namespace Imms {
 			return _root.RemoveMin(Lineage.Mutable()).WrapMap(_comparer);
 		}
 
-		protected override ImmSortedMap<TKey, TValue> Set(TKey key, TValue value, OverwriteBehavior behavior) {
-			var ret = _root.Root_Add(key, value, _comparer, behavior == OverwriteBehavior.Overwrite, Lineage.Mutable());
-			if (ret == null && behavior == OverwriteBehavior.Throw) throw Errors.Key_exists(key);
-			if (ret == null) return null;
+		protected override ImmSortedMap<TKey, TValue> Set(TKey key, TValue value, bool overwrite) {
+			var ret = _root.Root_Add(key, value, _comparer, overwrite, Lineage.Mutable());
+			if (ret == null && !overwrite) throw Errors.Key_exists(key);
+			if (ret == null) return this;
 			return ret.WrapMap(_comparer);
 		}
 	}

@@ -15,8 +15,6 @@ namespace Imms.Abstract {
 	: IDictionary<TKey, TValue>
 	{
 
-
-
 		bool IDictionary<TKey, TValue>.Remove(TKey key) {
 			throw Errors.Collection_readonly;
 		}

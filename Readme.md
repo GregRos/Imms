@@ -37,7 +37,7 @@ Sets store collections of unique elements. An example of a set is `HashSet<T>`.
 **Imms** provides the following set collections:
 
   1. **ImmSet**, which is an equality-based set that uses hashing, similarly to `HashSet` (except that it is immutable, of course).
-  2. **ImmOrderedSet**, which is a comparison-based set that stores elements in order. Supports additional operations, such as retrieval by sort order index.
+  2. **ImmSortedSet**, which is a comparison-based set that stores elements in order. Supports additional operations, such as retrieval by sort order index.
 
 Both sets support the following various set-theoretic operations. These operations accept an `IEnumerable<T>`, but are actually significantly faster when the input collection is of the same type and uses the same membership semantics. The sets support the following:
 
@@ -52,7 +52,7 @@ Maps store key-value pairs and allow for fast retrieval by the key. They are als
 **Imms** provides the following map collections:
 
 1. **ImmMap**, which is equality-based and uses hashing, similarly to `Dictionary<,>` (except that it is immutable).
-2. **ImmOrderedMap**, which is ordered by the key. Provides additional operations, such as retrieval by sort order index.
+2. **ImmSortedMap**, which is ordered by the key. Provides additional operations, such as retrieval by sort order index.
 
 Both maps support set-theoretic operations extended to maps. These operations `IEnumerable<T>`, but are actually significantly faster when the input collection is of the same type and uses the same key semantics. The maps support the following:
 
@@ -84,7 +84,7 @@ Remember that these collections use special algorithms for operations such as `I
 
 To avoid dangerous and hard to track bugs, **Imms** collections only use the special algorithms if both collections use the same equi/comp handler. This is determined by calling `.Equals`. For this reason, if you plan to use a custom handler, you should either:
 
-1. Make sure to use the same handler instance for all **Imms** collections that use that handler. This pattern is made more convenient by extension methods on handlers that lets you use them as 'factories' of collections. An example is `IComparer<T>.CreateOrderedSet`.
+1. Make sure to use the same handler instance for all **Imms** collections that use that handler. This pattern is made more convenient by extension methods on handlers that lets you use them as 'factories' of collections. An example is `IComparer<T>.CreateSortedSet`.
 2. Override `.Equals` on your custom handler to support functional equality.
 
 If **Imms** decides that the comparison handlers are different, a generic implementation will be used, which can be significantly slower. That is to say, the implementation is as slow as what some other collection libraries use. ◕‿◕

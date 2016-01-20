@@ -218,9 +218,9 @@ type ImmSortedMapWrapper<'k when 'k : comparison>(Inner : ImmSortedMap<'k, 'k>) 
             okay
     override x.Set(k,v) = Inner.Set(k,v) |> wrap
     override x.Merge(other, f) =
-        Inner.Merge(other |> unwrap, f.Map toFunc3 |> Option.asNull) |> wrap
-    override x.Join(other, f) = Inner.Join(other |> unwrap, f.Map toFunc3 |> Option.asNull) |> wrap
-    override x.Except(other,f) = Inner.Subtract(other |> unwrap, f.Map(Fun.compose3 toOption >> toFunc3).Or(null)) |> wrap
+        Inner.Merge(other |> unwrap, f.Map toValSelector |> Option.asNull) |> wrap
+    override x.Join(other, f) = Inner.Join(other |> unwrap, f.Map toValSelector |> Option.asNull) |> wrap
+    override x.Except(other,f) = Inner.Subtract(other |> unwrap, f.Map(Fun.compose3 toOption >> toValSelector).Or(null)) |> wrap
     override x.Difference other = Inner.Difference(other |> unwrap) |> wrap
     override x.RemoveRange vs = Inner.RemoveRange (vs |> unwrapSet) |> wrap
     override x.Length = Inner.Length
@@ -266,14 +266,14 @@ type ImmMapWrapper<'k when 'k : comparison>(Inner : ImmMap<'k,'k>, Ordering : Im
     override x.Set(k,v) = Inner.Set(k,v) |> wrap (Ordering.Set(k,v))
     override x.ByArbitraryOrder i = Ordering.ByOrder(i)
     override x.Merge(other, f : _ option) = 
-        let f = f.Map toFunc3 |> Option.asNull
+        let f = f.Map toValSelector |> Option.asNull
         Inner.Merge(other |> unwrap, f) |> wrap (Ordering.Merge(other, null))
     override x.Join(other, f) = 
-        let f = f.Map toFunc3 |> Option.asNull
-        let f2 = (fun k v1 v2 -> v2) |> toFunc3
+        let f = f.Map toValSelector |> Option.asNull
+        let f2 = (fun k v1 v2 -> v2) |> toValSelector
         Inner.Join(other |> unwrap, f) |> wrap (Ordering.Join(other |> Seq.disableIterateOnce, f2))
     override x.Except(other,f) = 
-        let f = f.Map(Fun.compose3 toOption >> toFunc3) |> Option.asNull
+        let f = f.Map(Fun.compose3 toOption >> toValSelector) |> Option.asNull
         Inner.Subtract(other |> unwrap, f)|> wrap (Ordering.Subtract(other |> Seq.disableIterateOnce, null))
     override x.Difference other = Inner.Difference(other |> unwrap) |> wrap (Ordering.Difference(other))
     override x.RemoveRange vs = 

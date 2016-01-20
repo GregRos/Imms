@@ -68,13 +68,13 @@
     <Compile Include="Compatibility.fs" />
     <Compile Include="Generic Operators.fs" />
     <Compile Include="Operators.fs" />
+    <Compile Include="..\Imms.Collections\Imms.FSharp\Modules.fs">
+      <Link>Modules.fs</Link>
+    </Compile>
     <Compile Include="Patterns.fs" />
     <Compile Include="BuilderTypes.fs" />
     <Compile Include="Builders.fs" />
     <None Include="App.config" />
-    <Compile Include="..\Imms.Collections\Wrappers\Imms.FSharp\Modules.fs">
-      <Link>Modules.fs</Link>
-    </Compile>
     <Content Include="packages.config" />
     <None Include="Imms.FSharp.nuspec">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

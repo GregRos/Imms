@@ -556,11 +556,11 @@ module ImmMap =
     
     ///Merges this map with the specified sequence of key-value pairs, viewed as another map, using the specified function to resolve collisions.
     let merge kvps f (map : ImmMap<'k, 'v>) =
-        map.Merge(kvps, toFunc3 f)
+        map.Merge(kvps, toValSelector f)
     
     ///Joins this map with a sequence of key-value pairs, viewed as another map, using the specified function to resolve collisions.
     let join kvps f (map : ImmMap<'k, 'v>) =
-        map.Join(kvps, toFunc3 f)
+        map.Join(kvps, toValSelector f)
     
     ///Removes all the keys present in a sequence of key-value pairs, taken as another map. The value type of the map may be different.
     let minus kvps (map : ImmMap<'k, 'v>) =
@@ -568,7 +568,7 @@ module ImmMap =
     
     ///Applies a subtraction function on each key-value pair present in both this map, and the specified other map. If the function returns None, the key is removed.
     let minusWith kvps f (map : ImmMap<'k, 'v>) =
-        map.Subtract(kvps, (fun a b c -> f a b c |> toOption) |> toFunc3)
+        map.Subtract(kvps, (fun a b c -> f a b c |> toOption) |> toValSelector)
     
     let mapEquals other (map : ImmMap<'k, 'v>) =
         map.MapEquals(other)
@@ -714,11 +714,11 @@ module ImmSortedMap =
     
     ///Merges this map with the specified sequence of key-value pairs, viewed as another map, using the specified function to resolve collisions.
     let merge kvps f (map : ImmSortedMap<'k, 'v>) =
-        map.Merge(kvps, toFunc3 f)
+        map.Merge(kvps, toValSelector f)
     
     ///Joins this map with a sequence of key-value pairs, viewed as another map, using the specified function to resolve collisions.
     let join kvps f (map : ImmSortedMap<'k, 'v>) =
-        map.Join(kvps, toFunc3 f)
+        map.Join(kvps, toValSelector f)
     
     ///Removes all the keys present in a sequence of key-value pairs, taken as another map. The value type of the map may be different.
     let minus kvps (map : ImmSortedMap<'k, 'v>) =
@@ -726,7 +726,7 @@ module ImmSortedMap =
     
     ///Applies a subtraction function on each key-value pair present in both this map, and the specified other map. If the function returns None, the key is removed.
     let minusWith kvps f (map : ImmSortedMap<'k, 'v>) =
-        map.Subtract(kvps, (fun a b c -> f a b c |> toOption) |> toFunc3)
+        map.Subtract(kvps, (fun a b c -> f a b c |> toOption) |> toValSelector)
     
     let mapEquals other (map : ImmSortedMap<'k, 'v>) =
         map.MapEquals(other)

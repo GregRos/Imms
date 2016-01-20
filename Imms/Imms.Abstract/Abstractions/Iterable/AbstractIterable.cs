@@ -220,7 +220,7 @@ namespace Imms.Abstract {
 				builder.Append(printFunc == null ? item.ToString() : printFunc(item));
 				isFirst = false;
 			});
-			return string.Format("{{{0}}}", builder.ToString());
+			return $"{{{builder}}}";
 		}
 
 		/// <summary>

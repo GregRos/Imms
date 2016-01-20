@@ -88,8 +88,8 @@ namespace Imms {
 		/// <summary>
 		/// Inserts a sequence of elements at the specified index.
 		/// </summary>
-		/// <param name="index"></param>
-		/// <param name="items"></param>
+		/// <param name="index">The index at which to insert. The element at this index is pushed forward.</param>
+		/// <param name="items">The items to insert. Faster if an array or a known collection type.</param>
 		/// <returns></returns>
 		public ImmVector<T> InsertRange(int index, IEnumerable<T> items) {
 			index.CheckIsBetween("index", -Root.Length-1, Root.Length);
@@ -239,7 +239,7 @@ namespace Imms {
 		/// <summary>
 		///     Adds a sequence of items to the end of the collection.
 		/// </summary>
-		/// <param name="items">A sequence of items to add.</param>
+		/// <param name="items">A sequence of items to add. Faster if the sequence is an array or a known collection type.</param>
 		/// <exception cref="ArgumentNullException">Thrown if the argument is null.</exception>
 		/// <exception cref="InvalidOperationException">Thrown if the collection exceeds its capacity.</exception>
 		/// <remarks>This member performs a lot better when the specified sequence is an array.</remarks>
@@ -270,9 +270,9 @@ namespace Imms {
 		}
 
 		/// <summary>
-		///     Adds a sequence of elements to the beginning of the collection. Isn't optimized.
+		///     Adds a sequence of elements to the beginning of the collection.
 		/// </summary>
-		/// <param name="items">The sequence.</param>
+		/// <param name="items">The sequence. Faster if the sequence is also a vector, an array, or a known collection type.</param>
 		/// <exception cref="ArgumentNullException">Thrown if the sequence is null.</exception>
 		/// <exception cref="InvalidOperationException">Thrown if the collection exceeds its capacity.</exception>
 		/// <returns></returns>

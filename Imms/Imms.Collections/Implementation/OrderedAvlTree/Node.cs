@@ -560,7 +560,7 @@ namespace Imms.Implementation {
 			/// <param name="subtraction"></param>
 			/// <returns></returns>
 			public Node Except<TValue2>(OrderedAvlTree<TKey, TValue2>.Node other, Lineage lin,
-				Func<TKey, TValue, TValue2, Optional<TValue>> subtraction = null) {
+				ValueSelector<TKey, TValue, TValue2, Optional<TValue>> subtraction = null) {
 				if (IsEmpty || other.IsEmpty) return this;
 				Node thisLesser, thisGreater;
 				Node centralNode;
@@ -624,7 +624,7 @@ namespace Imms.Implementation {
 			/// <param name="collision"></param>
 			/// <param name="lin"></param>
 			/// <returns></returns>
-			public Node Union(Node b, Func<TKey, TValue, TValue, TValue> collision, Lineage lin) {
+			public Node Union(Node b, ValueSelector<TKey, TValue, TValue, TValue> collision, Lineage lin) {
 				if (IsEmpty) return b;
 				if (b.IsEmpty) return this;
 #if ASSERTS
@@ -764,7 +764,7 @@ namespace Imms.Implementation {
 			/// <param name="lineage"></param>
 			/// <param name="collision"></param>
 			/// <returns></returns>
-			public Node Intersect(Node other, Lineage lineage, Func<TKey, TValue, TValue, TValue> collision = null) {
+			public Node Intersect(Node other, Lineage lineage, ValueSelector<TKey, TValue, TValue, TValue> collision = null) {
 				var intersection = IntersectElements(other);
 				var list = new List<KeyValuePair<TKey, TValue>>();
 				foreach (var pair in intersection) {

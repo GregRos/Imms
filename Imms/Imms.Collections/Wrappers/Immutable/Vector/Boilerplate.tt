@@ -1,6 +1,6 @@
 <#@ template debug="true" hostSpecific="true" #>
 <#@ output extension=".cs" #>
-<#@ include file="$(ProjectDir)Wrappers\Templates\Reusable.ttinclude" #>
+<#@ include file="$(ProjectDir)Wrappers\Immutable\Templates\Reusable.ttinclude" #>
 
 namespace Imms
 {

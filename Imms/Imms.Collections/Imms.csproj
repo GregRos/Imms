@@ -91,18 +91,18 @@
     <Compile Include="Implementation\TrieVector\VectorLeaf.cs" />
     <Compile Include="Implementation\TrieVector\VectorNode.cs" />
     <Compile Include="Implementation\TrieVector\VectorParent.cs" />
-    <Compile Include="Wrappers\Common\ImmList.cs" />
-    <Compile Include="Wrappers\Common\ImmMap.cs" />
-    <Compile Include="Wrappers\Common\ImmSet.cs" />
-    <Compile Include="Wrappers\Common\ImmSortedMap.cs" />
-    <Compile Include="Wrappers\Common\ImmSortedSet.cs" />
-    <Compile Include="Wrappers\Common\ImmVector.cs" />
-    <Compile Include="Wrappers\ImmSortedMap\Debugging.cs" />
-    <Compile Include="Wrappers\ImmSortedMap\ImmBindings.cs" />
-    <Compile Include="Wrappers\ImmSortedMap\ImmSortedMap.cs" />
-    <Compile Include="Wrappers\ImmSortedSet\Debugging.cs" />
-    <Compile Include="Wrappers\ImmSortedSet\ImmBindings.cs" />
-    <Compile Include="Wrappers\Common\Convertion.cs" />
+    <Compile Include="Wrappers\Immutable\Common\ImmList.cs" />
+    <Compile Include="Wrappers\Immutable\Common\ImmMap.cs" />
+    <Compile Include="Wrappers\Immutable\Common\ImmSet.cs" />
+    <Compile Include="Wrappers\Immutable\Common\ImmSortedMap.cs" />
+    <Compile Include="Wrappers\Immutable\Common\ImmSortedSet.cs" />
+    <Compile Include="Wrappers\Immutable\Common\ImmVector.cs" />
+    <Compile Include="Wrappers\Immutable\ImmSortedMap\Debugging.cs" />
+    <Compile Include="Wrappers\Immutable\ImmSortedMap\ImmBindings.cs" />
+    <Compile Include="Wrappers\Immutable\ImmSortedMap\ImmSortedMap.cs" />
+    <Compile Include="Wrappers\Immutable\ImmSortedSet\Debugging.cs" />
+    <Compile Include="Wrappers\Immutable\ImmSortedSet\ImmBindings.cs" />
+    <Compile Include="Wrappers\Immutable\Common\Convertion.cs" />
     <Compile Include="Implementation\FingerTree\Compound.cs" />
     <Compile Include="Implementation\FingerTree\Digit.cs" />
     <Compile Include="Implementation\FingerTree\Empty.cs" />
@@ -112,33 +112,34 @@
     <Compile Include="Implementation\FingerTree\TreeType.cs" />
     <Compile Include="Implementation\FingerTree\Leaf.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Wrappers\ImmMap\Debugging.cs" />
-    <Compile Include="Wrappers\ImmMap\ImmBindings.cs" />
-    <Compile Include="Wrappers\ImmSet\Debugging.cs" />
-    <Compile Include="Wrappers\ImmSet\ImmBindings.cs" />
-    <Compile Include="Wrappers\ImmSet\ImmSet.cs" />
-    <Compile Include="Wrappers\ImmSortedSet\ImmSortedSet.cs" />
-    <Compile Include="Wrappers\List\Boilerplate.cs">
+    <Compile Include="Wrappers\Immutable\ImmMap\Debugging.cs" />
+    <Compile Include="Wrappers\Immutable\ImmMap\ImmBindings.cs" />
+    <Compile Include="Wrappers\Immutable\ImmSet\Debugging.cs" />
+    <Compile Include="Wrappers\Immutable\ImmSet\ImmBindings.cs" />
+    <Compile Include="Wrappers\Immutable\ImmSet\ImmSet.cs" />
+    <Compile Include="Wrappers\Immutable\ImmSortedSet\ImmSortedSet.cs" />
+    <Compile Include="Wrappers\Immutable\List\Boilerplate.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Boilerplate.tt</DependentUpon>
     </Compile>
-    <Compile Include="Wrappers\List\Core.cs" />
-    <Compile Include="Wrappers\List\Debugging.cs" />
-    <Compile Include="Wrappers\List\ImmBindings.cs" />
-    <Compile Include="Wrappers\ImmMap\ImmMap.cs" />
-    <Compile Include="Wrappers\Templates\ListLikeClass.cs" />
-    <Compile Include="Wrappers\Templates\SoItWillCompile.cs" />
-    <Compile Include="Wrappers\Vector\Boilerplate.cs">
+    <Compile Include="Wrappers\Immutable\List\Core.cs" />
+    <Compile Include="Wrappers\Immutable\List\Debugging.cs" />
+    <Compile Include="Wrappers\Immutable\List\ImmBindings.cs" />
+    <Compile Include="Wrappers\Immutable\ImmMap\ImmMap.cs" />
+    <Compile Include="Wrappers\Immutable\Templates\ListLikeClass.cs" />
+    <Compile Include="Wrappers\Immutable\Templates\SoItWillCompile.cs" />
+    <Compile Include="Wrappers\Immutable\Vector\Boilerplate.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Boilerplate.tt</DependentUpon>
     </Compile>
-    <Compile Include="Wrappers\Vector\ImmBindings.cs" />
+    <Compile Include="Wrappers\Immutable\Vector\ImmBindings.cs" />
     <Compile Include="Implementation\TrieVector\ImplementationHooks.cs" />
-    <Compile Include="Wrappers\List\Iteration.cs" />
-    <Compile Include="Wrappers\Vector\Debugging.cs" />
-    <Compile Include="Wrappers\Vector\ImmVector.cs" />
+    <Compile Include="Wrappers\Immutable\List\Iteration.cs" />
+    <Compile Include="Wrappers\Immutable\Vector\Debugging.cs" />
+    <Compile Include="Wrappers\Immutable\Vector\ImmVector.cs" />
+    <Compile Include="Wrappers\Experimental\HistoryList.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">
@@ -178,7 +179,7 @@
     <None Include="Imms.FSharp\Map.ttinclude" />
     <None Include="Imms.FSharp\Sequential.ttinclude" />
     <None Include="Imms.FSharp\Set.ttinclude" />
-    <None Include="Wrappers\Templates\Reusable.ttinclude" />
+    <None Include="Wrappers\Immutable\Templates\Reusable.ttinclude" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Optimizations and Tests.txt" />
@@ -191,15 +192,16 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Modules.fs</LastGenOutput>
     </None>
-    <None Include="Wrappers\List\Boilerplate.tt">
+    <None Include="Wrappers\Immutable\List\Boilerplate.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Boilerplate.cs</LastGenOutput>
     </None>
-    <Content Include="Wrappers\Vector\Boilerplate.tt">
+    <Content Include="Wrappers\Immutable\Vector\Boilerplate.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Boilerplate.cs</LastGenOutput>
     </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild" Condition="$(DefineConstants.Contains('NUGET'))">
     <Exec ContinueOnError="false" WorkingDirectory="$(OutDir)" Command="&quot;$(SolutionDir).nuget\nuget.exe&quot; pack &quot;$(ProjectPath)&quot; -Exclude &quot;*.nlp&quot; -IncludeReferencedProjects -NonInteractive -Verbosity detailed -NoDefaultExcludes -Properties Configuration=&quot;$(Configuration)&quot;;Platform=&quot;$(Platform)&quot;" />

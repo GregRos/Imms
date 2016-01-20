@@ -360,7 +360,7 @@ namespace Imms.Implementation {
 			}
 
 			public Node Except<TValue2>(HashedAvlTree<TKey, TValue2>.Node other, Lineage lin,
-				Func<TKey, TValue, TValue2, Optional<TValue>> subtraction = null) {
+				ValueSelector<TKey, TValue, TValue2, Optional<TValue>> subtraction = null) {
 				if (IsEmpty || other.IsEmpty) return this;
 				if (ReferenceEquals(this, other) && subtraction == null) {
 					return Empty;
@@ -445,7 +445,7 @@ namespace Imms.Implementation {
 				return ret;
 			}
 
-			public Node Union(Node b, Lineage lin, Func<TKey, TValue, TValue, TValue> collision = null) {
+			public Node Union(Node b, Lineage lin, ValueSelector<TKey, TValue, TValue, TValue> collision = null) {
 				if (IsEmpty) return b;
 				if (b.IsEmpty) return this;
 				if (ReferenceEquals(this, b) && collision == null) {
@@ -526,7 +526,7 @@ namespace Imms.Implementation {
 				return ret;
 			}
 
-			public Node Intersect(Node other, Lineage lineage, Func<TKey, TValue, TValue, TValue> collision = null) {
+			public Node Intersect(Node other, Lineage lineage, ValueSelector<TKey, TValue, TValue, TValue> collision = null) {
 
 				var intersection = IntersectElements(other);
 				var list = new List<StructTuple<int, Bucket>>();

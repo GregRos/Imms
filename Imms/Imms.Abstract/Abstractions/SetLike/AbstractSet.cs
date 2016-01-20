@@ -45,10 +45,10 @@ namespace Imms.Abstract {
 		}
 
 		/// <summary>
-		///     Returns the set-theoretic relation between this set and another set. This member is optimized depending on the
+		///     Returns the set-theoretic relation between this set and a sequence of elements. This member is optimized depending on the
 		///     actual type of the input.
 		/// </summary>
-		/// <param name="other">The input sequence, treated as a set.</param>
+		/// <param name="other">A sequence of values. This operation is much faster if it's a set compatible with this one.</param>
 		/// <returns></returns>
 		public SetRelation RelatesTo(IEnumerable<TElem> other) {
 			other.CheckNotNull("other");
@@ -98,9 +98,9 @@ namespace Imms.Abstract {
 		protected abstract Optional<TElem> TryGet(TElem item);
 
 		/// <summary>
-		///     Returns if this set is equal to another set. This member is optimized based on the actual type of the input.
+		///     Returns if this set is set equal to a sequence of elements (using the current set's membership semantics).
 		/// </summary>
-		/// <param name="other">The other set.</param>
+		/// <param name="other">A sequence of values. This operation is much faster if it's a set compatible with this one.</param>
 		/// <returns></returns>
 		public virtual bool SetEquals(IEnumerable<TElem> other) {
 			other.CheckNotNull("other");
@@ -117,9 +117,9 @@ namespace Imms.Abstract {
 		}
 
 		/// <summary>
-		/// Returns true if this set is a superset of the other set.
+		/// Returns true if this set is a superset of a sequence of elements. Uses the current set's membership semantics.
 		/// </summary>
-		/// <param name="other">The other set.</param>
+		/// <param name="other">A sequence of values. This operation is much faster if it's a set compatible with this one.</param>
 		/// <returns></returns>
 		public bool IsSupersetOf(IEnumerable<TElem> other) {
 			other.CheckNotNull("other");
@@ -131,9 +131,9 @@ namespace Imms.Abstract {
 		}
 
 		/// <summary>
-		/// Returns true if this set is a proper superset of the other set.
+		/// Returns true if this set is a proper superset of the other set. 
 		/// </summary>
-		/// <param name="other">The other set.</param>
+		/// <param name="other">A sequence of values. This operation is much faster if it's a set compatible with this one.</param>
 		/// <returns></returns>
 		public bool IsProperSupersetOf(IEnumerable<TElem> other) {
 			other.CheckNotNull("other");
@@ -148,7 +148,7 @@ namespace Imms.Abstract {
 		/// <summary>
 		/// Returns true if this set is a proper subset of the other set.
 		/// </summary>
-		/// <param name="other">The other set.</param>
+		/// <param name="other">A sequence of values. This operation is much faster if it's a set compatible with this one.</param>
 		/// <returns></returns>
 		public bool IsProperSubsetOf(IEnumerable<TElem> other) {
 			other.CheckNotNull("other");
@@ -167,7 +167,7 @@ namespace Imms.Abstract {
 		/// <summary>
 		/// Returns true if this set is a subset of the other set.
 		/// </summary>
-		/// <param name="other">The other set.</param>
+		/// <param name="other">A sequence of values. This operation is much faster if it's a set compatible with this one.</param>
 		/// <returns></returns>
 		public bool IsSubsetOf(IEnumerable<TElem> other) {
 			other.CheckNotNull("other");
@@ -198,7 +198,7 @@ namespace Imms.Abstract {
 		/// <summary>
 		///     Applies a symmetric difference/XOR between a set, and a set-like collection.
 		/// </summary>
-		/// <param name="other"></param>
+		/// <param name="other">A sequence of values. This operation is much faster if it's a set compatible with this one.</param>
 		/// <returns></returns>
 		public virtual TSet Difference(IEnumerable<TElem> other) {
 			other.CheckNotNull("other");
@@ -214,7 +214,7 @@ namespace Imms.Abstract {
 		/// <summary>
 		///     Applies an inverse except operation, essentially other - this.
 		/// </summary>
-		/// <param name="other">The other collection, taken to be a set.</param>
+		/// <param name="other">A sequence of values. This operation is much faster if it's a set compatible with this one.</param>
 		/// <returns></returns>
 		public TSet ExceptInverse(IEnumerable<TElem> other) {
 			other.CheckNotNull("other");
@@ -251,7 +251,7 @@ namespace Imms.Abstract {
 		/// <summary>
 		///     Performs the set-theoretic Except operation (non-symmetric difference) with the other collection.
 		/// </summary>
-		/// <param name="other"></param>
+		/// <param name="other">A sequence of values. This operation is much faster if it's a set compatible with this one.</param>
 		/// <returns></returns>
 		public virtual TSet Except(IEnumerable<TElem> other) {
 			other.CheckNotNull("other");
@@ -277,7 +277,7 @@ namespace Imms.Abstract {
 		/// <summary>
 		///     Applies the set-theoretic Intersect operation.
 		/// </summary>
-		/// <param name="other"></param>
+		/// <param name="other">A sequence of values. This operation is much faster if it's a set compatible with this one.</param>
 		/// <returns></returns>
 		public virtual TSet Intersect(IEnumerable<TElem> other) {
 			other.CheckNotNull("other");
@@ -400,7 +400,7 @@ namespace Imms.Abstract {
 		/// <summary>
 		///     Returns the set-theoretic union between this set and a set-like collection.
 		/// </summary>
-		/// <param name="other"></param>
+		/// <param name="other">A sequence of values. This operation is much faster if it's a set compatible with this one.</param>
 		/// <returns></returns>
 		public virtual TSet Union(IEnumerable<TElem> other) {
 			other.CheckNotNull("other");

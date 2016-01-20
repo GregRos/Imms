@@ -99,6 +99,7 @@
     <Compile Include="Public\KeyValuePair.cs" />
     <Compile Include="Public\Optional.cs" />
     <Compile Include="Public\SetRelation.cs" />
+    <Compile Include="Public\ValueSelector.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">

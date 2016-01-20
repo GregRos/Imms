@@ -65,7 +65,6 @@ namespace Imms {
 			// That said, it can be slow for small collections.
 			if (items == null) throw Errors.Argument_null("items");
 
-
 			T[] arr;
 			var array = items as T[];
 			if (array != null) {

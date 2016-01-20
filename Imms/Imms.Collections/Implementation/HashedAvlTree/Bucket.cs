@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Imms.Abstract;
 
 namespace Imms.Implementation {
 
@@ -120,7 +121,8 @@ namespace Imms.Implementation {
 			}
 
 			public Bucket Except<TValue2>(HashedAvlTree<TKey, TValue2>.Bucket other, Lineage lineage,
-				Func<TKey, TValue, TValue2, Optional<TValue>> subtraction = null) {
+				ValueSelector<TKey, TValue, TValue2, Optional<TValue>> subtraction = null) {
+				
 				var newBucket = Empty;
 				foreach (var item in Items) {
 					var findOther = other.Find(item.Key);
@@ -133,7 +135,7 @@ namespace Imms.Implementation {
 				return newBucket;
 			}
 
-			public Bucket Union(Bucket other, Func<TKey, TValue, TValue, TValue> collision, Lineage lineage) {
+			public Bucket Union(Bucket other, ValueSelector<TKey, TValue, TValue, TValue> collision, Lineage lineage) {
 				var newBucket = Empty;
 				foreach (var item in Items) {
 					var findOther = other.Find(item.Key);
@@ -150,7 +152,7 @@ namespace Imms.Implementation {
 				return newBucket;
 			}
 
-			public Bucket Intersect(Bucket other, Lineage lineage, Func<TKey, TValue, TValue, TValue> collision = null) {
+			public Bucket Intersect(Bucket other, Lineage lineage, ValueSelector<TKey, TValue, TValue, TValue> collision = null) {
 
 				var newBucket = Empty;
 				foreach (var item in Items) {

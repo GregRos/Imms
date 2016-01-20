@@ -65,7 +65,7 @@ namespace Imms {
 		public bool IsNone {
 			get { return !_isSome; }
 		}
-
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		string DebuggerDisplay {
 			get {
 				if (IsSome) return string.Format("Some of {0}: {1}", typeof (T).PrettyName(), Value);
@@ -306,7 +306,7 @@ namespace Imms {
 		///     A string that represents this optional value.
 		/// </returns>
 		public override string ToString() {
-			return IsSome ? Value.ToString() : string.Format("{{None<{0}>}}", typeof (T).PrettyName());
+			return IsSome ? Value.ToString() : $"{{None<{typeof (T).PrettyName()}>}}";
 		}
 	}
 

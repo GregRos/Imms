@@ -108,7 +108,7 @@ namespace Imms {
 		/// <summary>
 		///     Joins the specified sequence or list to the beginning of this list.
 		/// </summary>
-		/// <param name="items"> The items to add. </param>
+		/// <param name="items"> The items to add. Very fast if the sequence is also an <see cref="ImmList{T}"/>.</param>
 		/// <returns> </returns>
 		/// <exception cref="ArgumentNullException">Thrown if the argument is null.</exception>
 		public ImmList<T> AddFirstRange(IEnumerable<T> items) {
@@ -152,7 +152,7 @@ namespace Imms {
 		/// <summary>
 		///     Adds a sequence of items to the end of the list. 
 		/// </summary>
-		/// <param name="items"> The sequence. This method is O(logn) if the sequence is also <see cref="ImmList{T}"/>.</param>
+		/// <param name="items"> The sequence. Very fast if it is also an <see cref="ImmList{T}"/>.</param>
 		/// <returns> </returns>
 		/// <exception cref="ArgumentNullException">Thrown if the argument is null.</exception>
 		/// <remarks>
@@ -205,7 +205,7 @@ namespace Imms {
 		/// <summary>
 		///     Inserts an item at the specified index, pushing the element at the index forward.
 		/// </summary>
-		/// <param name="index"> The index before which to insert the item. May be negative. </param>
+		/// <param name="index"> The index before which to insert the item.  </param>
 		/// <param name="item"> The item to insert. </param>
 		/// <returns> </returns>
 		/// <exception cref="ArgumentOutOfRangeException">Thrown if the index doesn't exist.</exception>
@@ -250,7 +250,7 @@ namespace Imms {
 		///     Inserts a sequence at the specified index, pushing the element at the index forward.
 		/// </summary>
 		/// <param name="index"> The index. </param>
-		/// <param name="items"> The sequence of items to insert. </param>
+		/// <param name="items"> The sequence of items to insert. Very fast if the sequence is also an <see cref="ImmList{T}"/>.</param>
 		/// <returns> </returns>
 		/// <exception cref="ArgumentOutOfRangeException">Thrown if the index doesn't exist.</exception>
 		/// <exception cref="ArgumentNullException">Thrown if the IEnumerable is null.</exception>
