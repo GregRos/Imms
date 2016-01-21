@@ -26,7 +26,7 @@ namespace Imms.Abstract {
 			IComparer<TKey> comparer;
 			if (t == typeof (string)) comparer = (IComparer<TKey>) Comparers.CreateComparer<string>(String.CompareOrdinal);
 			else comparer = Comparer<TKey>.Default;
-			return comparer.AsOptional();
+			return comparer.AsSome();
 		}
 	}
 }

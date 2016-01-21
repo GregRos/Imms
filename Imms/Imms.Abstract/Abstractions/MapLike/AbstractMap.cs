@@ -56,7 +56,7 @@ namespace Imms.Abstract {
 		/// <returns></returns>
 		public virtual Optional<TValue> TryGet(TKey key) {
 			var result = TryGetKvp(key);
-			return result.IsNone ? Optional.None : result.Value.Value.AsOptional();
+			return result.IsNone ? Optional.None : result.Value.Value.AsSome();
 		}
 
 		/// <summary>
@@ -233,6 +233,7 @@ namespace Imms.Abstract {
 			ValueSelector<TKey, TValue, TValue2, TValue> selector) {
 			other.CheckNotNull("other");
 			selector.CheckNotNull("selector");
+			//NOTE: other can be TMap when TValue = TValue2.
 			var map = other as TMap;
 			if (map != null && IsCompatibleWith(map)) return Join(map, (ValueSelector<TKey, TValue, TValue, TValue>) (object) selector);
 			return Join_Unchecked(other, selector);
@@ -320,6 +321,7 @@ namespace Imms.Abstract {
 			}
 			other.CheckNotNull("other");
 
+			//NOTE: other can be a TMap when TValue2 = TValue! ReSharper can't seem to understand this...
 			var map = other as TMap;
 			if (map != null && IsCompatibleWith(map)) return Subtract(map, (ValueSelector<TKey, TValue, TValue, Optional<TValue>>) (object) subtraction);
 

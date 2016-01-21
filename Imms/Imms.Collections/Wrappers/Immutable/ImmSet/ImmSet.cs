@@ -74,7 +74,7 @@ namespace Imms {
 
 		protected override Optional<T> TryGet(T item) {
 			var kvp = Root.Root_FindKvp(item);
-			return kvp.IsSome ? kvp.Value.Key.AsOptional() : Optional.None;
+			return kvp.IsSome ? kvp.Value.Key.AsSome() : Optional.None;
 		}
 
 		/// <summary>

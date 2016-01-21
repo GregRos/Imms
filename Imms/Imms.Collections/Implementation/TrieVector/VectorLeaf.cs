@@ -176,7 +176,7 @@ namespace Imms.Implementation {
 
 			public override Node Take(int index, Lineage lineage) {
 #if ASSERTS
-				var expectedLast = index < Length ? this[index].AsOptional() : Optional.None;
+				var expectedLast = index < Length ? this[index].AsSome() : Optional.None;
 #endif
 				var bits = index & MyBlock;
 				var newArr = Arr.Resize(bits + 1);

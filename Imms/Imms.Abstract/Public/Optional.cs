@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime;
 using Imms.Abstract;
-#pragma warning disable 618
+#pragma warning disable 618 //Obsolete warning about AnyNone
 
 namespace Imms {
 
@@ -128,8 +129,6 @@ namespace Imms {
 			return IsSome && Eq.Equals(Value, other);
 		}
 
-
-
 		/// <summary>
 		///     A None-coalescing operator, similar to the ?? null-coalescing operator. Returns the underlying value, or the specified default value if none exists.
 		/// </summary>
@@ -141,7 +140,7 @@ namespace Imms {
 		}
 
 		/// <summary>
-		///     Converts the Option.None token to a proper optional value of type <typeparamref name="T"/>, indicating a missing value.
+		///     Converts the <see cref="AnyNone"/> token to a proper optional value of type <typeparamref name="T"/>, indicating a missing value.
 		/// </summary>
 		/// <param name="none">The none token.</param>
 		public static implicit operator Optional<T>(AnyNone none) {
@@ -256,7 +255,7 @@ namespace Imms {
 		/// <typeparam name="TOut">The type to cast to.</typeparam>
 		/// <exception cref="InvalidCastException">Thrown if the conversion fails.</exception>
  		public Optional<TOut> Cast<TOut>() {
-			return IsNone ? Optional.None : ((TOut) (object) Value).AsOptional();
+			return IsNone ? Optional.None : ((TOut) (object) Value).AsSome();
 		}
 
 		/// <summary>
@@ -265,7 +264,7 @@ namespace Imms {
 		/// <typeparam name="TOut"></typeparam>
 		/// <returns></returns>
 		public Optional<TOut> As<TOut>() {
-			return IsSome && Value is TOut ? ((TOut) (object) Value).AsOptional() : Optional.None;
+			return IsSome && Value is TOut ? ((TOut) (object) Value).AsSome() : Optional.None;
 		}
 
 		/// <summary>
@@ -310,41 +309,13 @@ namespace Imms {
 		}
 	}
 
-	/// <summary>
-	///     Static class with utility and extension methods for optional values.
-	/// </summary>
 	public static class Optional {
+
 		/// <summary>
 		///     Returns a special token that can be implicitly converted to a None optional value instance of any type.
 		/// </summary>
 		public static AnyNone None {
 			get { return AnyNone.Instance; }
-		}
-
-		/// <summary>
-		///     Returns an optional value instance wrapping the specified value.
-		/// </summary>
-		/// <typeparam name="TOut">The type of the value.</typeparam>
-		/// <param name="x">The value to wrap.</param>
-		/// <returns></returns>
-		internal static Optional<TOut> AsOptional<TOut>(this TOut x) {
-			return Some(x);
-		}
-
-		internal static Optional<TOut> AsOptional<TOut>(this TOut? x)
-		where TOut : struct {
-			return x.HasValue ? x.Value.AsOptional() : None;
-		}
-
-		/// <summary>
-		///     Converts a nullable value to an optional value. A null value is converted to a None value.
-		/// </summary>
-		/// <param name="value">The nullable value to convert.</param>
-		/// <typeparam name="T">The type to convert. Must be a value type.</typeparam>
-		/// <returns></returns>
-		public static Optional<T> OfNullable<T>(T? value)
-			where T : struct {
-			return value.HasValue ? Some(value.Value) : None;
 		}
 
 		/// <summary>
@@ -364,6 +335,55 @@ namespace Imms {
 		/// <returns></returns>
 		public static Optional<T> Some<T>(T value) {
 			return Optional<T>.Some(value);
+		}
+	}
+
+	/// <summary>
+	///     Static class with utility and extension methods for optional values.
+	/// </summary>
+	public static class OptionalExt {
+		/// <summary>
+		///     Returns an optional value instance wrapping the specified value.
+		/// </summary>
+		/// <typeparam name="T">The type of the value.</typeparam>
+		/// <param name="x">The value to wrap.</param>
+		/// <returns></returns>
+		internal static Optional<T> AsSome<T>(this T x) {
+			return Optional.Some(x);
+		}
+		
+		/// <summary>
+		/// Converts the specified nullable value to an optional value. Null is represented as None.
+		/// </summary>
+		/// <typeparam name="T">The type of the value.</typeparam>
+		/// <param name="x">The value.</param>
+		/// <returns></returns>
+		internal static Optional<T> AsOptional<T>(this T? x)
+		where T : struct {
+			return x.HasValue ? x.Value.AsSome() : Optional.None;
+		}
+
+		/// <summary>
+		/// Converts the specified value to an optional type. Null is represented as None.
+		/// </summary>
+		/// <typeparam name="T">The type of the value.</typeparam>
+		/// <param name="x">The value.</param>
+		/// <returns></returns>
+		public static Optional<T> AsOptional<T>(this T x) {
+			return x == null ? Optional<T>.None : x.AsSome();
+		}
+
+
+
+		/// <summary>
+		///     Converts a nullable value to an optional value. A null value is converted to a None value.
+		/// </summary>
+		/// <param name="value">The nullable value to convert.</param>
+		/// <typeparam name="T">The type to convert. Must be a value type.</typeparam>
+		/// <returns></returns>
+		public static Optional<T> OfNullable<T>(T? value)
+			where T : struct {
+			return value.HasValue ? Optional.Some(value.Value) : Optional.None;
 		}
 
 		/// <summary>
@@ -387,11 +407,11 @@ namespace Imms {
 		/// <param name="f">The function to apply, returning an optional value of a potentially different type.</param>
 		/// <returns></returns>
 		public static Optional<TOut> Bind<T, TOut>(this Optional<T> self, Func<T, Optional<TOut>> f) {
-			return self.IsNone ? NoneOf<TOut>() : f(self.Value);
+			return self.IsNone ? Optional.NoneOf<TOut>() : f(self.Value);
 		}
 
 		/// <summary>
-		///     Applies the specified function on the underlying value, if one exists, and wraps the result in an optional value. Otherwise, returns None.
+		///     Applies the specified function on the underlying value, if one exists, and wraps the result in an optional value. Otherwise, returns None. Similar to the conditional access ?. operator.
 		/// </summary>
 		/// <typeparam name="T">The type of the input optional value.</typeparam>
 		/// <typeparam name="TOut">The type of the output optional value.</typeparam>
@@ -399,7 +419,7 @@ namespace Imms {
 		/// <param name="f">The function to apply.</param>
 		/// <returns></returns>
 		public static Optional<TOut> Map<T, TOut>(this Optional<T> self, Func<T, TOut> f) {
-			return self.IsNone ? NoneOf<TOut>() : f(self.Value).AsOptional();
+			return self.IsNone ? Optional.NoneOf<TOut>() : f(self.Value).AsSome();
 		}
 
 		/// <summary>

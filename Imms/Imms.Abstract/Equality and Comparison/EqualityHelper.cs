@@ -29,7 +29,7 @@ namespace Imms.Abstract {
 			IEnumerable<KeyValuePair<TKey, TValue>> map) {
 			if (map is IDictionary<TKey, TValue>) {
 				var asDict = map as IDictionary<TKey, TValue>;
-				return k => asDict.ContainsKey(k) ? asDict[k].AsOptional() : Optional.None;
+				return k => asDict.ContainsKey(k) ? asDict[k].AsSome() : Optional.None;
 			}
 			return null;
 		}

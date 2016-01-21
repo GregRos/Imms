@@ -383,7 +383,7 @@ namespace Imms.Abstract {
 		public TElem AggregateBack(Func<TElem, TElem, TElem> fold) {
 			fold.CheckNotNull("fold");
 			return
-				AggregateBack(Optional.NoneOf<TElem>(), (r, v) => r.IsSome ? fold(r.Value, v).AsOptional() : v.AsOptional())
+				AggregateBack(Optional.NoneOf<TElem>(), (r, v) => r.IsSome ? fold(r.Value, v).AsSome() : v.AsSome())
 					.ValueOrError(Errors.Is_empty);
 		}
 

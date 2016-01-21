@@ -92,7 +92,7 @@ namespace Imms {
 
 		protected override Optional<T> TryGet(T item) {
 			var ret = Root.FindKvp(item);
-			return ret.IsSome ? ret.Value.Key.AsOptional() : Optional.None;
+			return ret.IsSome ? ret.Value.Key.AsSome() : Optional.None;
 		}
 
 		public override bool Contains(T item) {
