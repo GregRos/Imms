@@ -338,58 +338,6 @@ module FSharpx =
         member  x.IsEmpty = x.inner.IsEmpty
         static member  FromSeq(vs : 'a seq) = RanAccList(RanAccList'.ofSeq vs)
 
-(* Sasa collections are buggy and cause problems
-module Sasa = 
-    [<Struct>]
-    type FingerTree<'k> = 
-        val public inner : Sasa.Collections.FingerTree<'k>
-        val public len : int
-        interface seq<'k> with
-            member x.GetEnumerator() = (x.inner :> _ seq).GetEnumerator() :> System.Collections.IEnumerator
-            member x.GetEnumerator() = (x.inner :> _ seq).GetEnumerator():>System.Collections.Generic.IEnumerator<_>
-        new(innerp, lenp) = {inner = innerp; len = lenp}
-        member  x.AddLast v = FingerTree<_>(x.inner.Add(v), x.len + 1)
-        member  x.AddFirst v = FingerTree<_>(x.inner.Push v, x.len + 1)
-        member  x.RemoveLast() = FingerTree<_>(x.inner.Remove().First, x.len - 1)
-        member  x.RemoveFirst() = FingerTree<_>(x.inner.Pop().First, x.len - 1)
-        member  x.AsSeq = x.inner |> seq
-        member  x.IsEmpty = x.inner.IsEmpty
-        member  x.AddLastRange (sq : 'k seq) =
-            match sq with
-            | :? FingerTree<'k> as ft -> FingerTree<_>(x.inner.Concat(ft.inner), x.len + ft.len)
-            | _ -> 
-                let fold (st : Sasa.Collections.FingerTree<'k>) i = st.Add i
-                FingerTree<_>(sq |> Seq.fold fold (x.inner), x.len + (sq |> Seq.length))
-        member  x.AddFirstRange (sq : 'k seq) =
-            match sq with
-            | :? FingerTree<'k> as ft -> ft.AddLastRange x
-            | _ -> 
-                let empty = FingerTree<'k>(Sasa.Collections.FingerTree<'k>(), 0)
-                let empty = empty.AddLastRange sq
-                empty.AddLastRange x
-        static member  FromSeq(vs : 'k seq) = FingerTree<_>(Sasa.Collections.FingerTree.Empty, 0).AddLastRange vs
-
-    [<Struct>]
-    type Vector<'k> = 
-        val public inner : Sasa.Collections.Vector<'k>
-        interface seq<'k> with
-            member x.GetEnumerator() = (x.inner :> _ seq).GetEnumerator() :> System.Collections.IEnumerator
-            member x.GetEnumerator() = (x.inner :> _ seq).GetEnumerator():>System.Collections.Generic.IEnumerator<_>
-        new(innerp) = {inner = innerp}
-        member  x.AddLast v = Vector<_>(x.inner.Add v)
-        member  x.AddLastRange vs = 
-            let mutable v = x.inner
-            for item in vs do
-                v <- v.Add item
-            Vector<_>(v)
-        member  x.get_Item i = x.inner.Item i
-        member  x.Update(i,v) = Vector<_>(x.inner.Set(i, v))
-        member  x.Length = x.inner.Count
-        member  x.AsSeq = x.inner |> seq
-        member  x.IsEmpty = x.inner.Count = 0
-        static member  FromSeq(vs : 'k seq) = Vector<_>(Sasa.Collections.Vector.Empty).AddLastRange vs
-*)        
-                
 module FSharp =
     open System.Collections.Generic
     [<Struct>] 

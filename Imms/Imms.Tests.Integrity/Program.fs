@@ -85,7 +85,7 @@ let main argv =
     let fs = File.OpenWrite("log.txt")
     let writer = Console.Out
     let allTests initial param ds = 
-        seqTests initial param  @ setTests initial param ds @ mapTests initial param ds
+        seqTests initial param // @ setTests initial param ds @ mapTests initial param ds
     let r = Random()
     let mutable tests = []
     for i = 0 to 0 do

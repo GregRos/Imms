@@ -9,6 +9,8 @@ namespace Imms {
 	/// </summary>
 	/// <typeparam name="T">The type of value stored in the list.</typeparam>
 	public sealed partial class ImmVector<T> : AbstractSequential<T, ImmVector<T>> {
+
+		
 		/// <summary>
 		///     The empty
 		/// </summary>
@@ -40,10 +42,17 @@ namespace Imms {
 			get { return empty; }
 		}
 
+		/// <summary>
+		///     Returns the number of elements in the collection.
+		/// </summary>
 		public override int Length {
 			get { return Root.Length; }
 		}
 
+		/// <summary>
+		///     Returns the first element in the collection.
+		/// </summary>
+		/// <exception cref="InvalidOperationException">Thrown if the collection is empty.</exception>
 		public override T First {
 			get {
 				if (Root.Length == 0) throw Errors.Is_empty;
@@ -51,10 +60,16 @@ namespace Imms {
 			}
 		}
 
-		public override bool IsEmpty {
-			get { return Length == 0; }
-		}
+		/// <summary>
+		///     Returns true if the collection is empty.
+		/// </summary>
+		public override bool IsEmpty => Length == 0;
 
+		/// <summary>
+		///     Gets the last element in the collection.
+		/// </summary>
+		/// <value> The last. </value>
+		/// <exception cref="InvalidOperationException">Thrown if the collection is empty.</exception>
 		public override T Last {
 			get {
 				if (Root.Length == 0) throw Errors.Is_empty;
@@ -66,6 +81,13 @@ namespace Imms {
 			return Root.RecursiveTotalLength();
 		}
 
+		/// <summary>
+		///     Returns a new collection without the specified initial number of elements. Returns empty if
+		///     <paramref name="count" /> is equal or greater than Length.
+		/// </summary>
+		/// <param name="count"> The number of elements to skip. </param>
+		/// <exception cref="ArgumentException">Thrown if the argument is smaller than 0.</exception>
+		/// <returns> </returns>
 		public override ImmVector<T> Skip(int count) {
 			count.CheckIsBetween("count", lower:0);
 			if (count >= Length) return Empty;
@@ -75,6 +97,12 @@ namespace Imms {
 			return arr.ToImmVector();
 		}
 
+		/// <summary>
+		///     Returns a range of elements. Doesn't support negative indexing.
+		/// </summary>
+		/// <param name="from"></param>
+		/// <param name="count"></param>
+		/// <returns></returns>
 		protected override ImmVector<T> GetRange(int @from, int count) {
 #if ASSERTS
 			@from.AssertBetween(0, Root.Length - 1);
@@ -96,7 +124,6 @@ namespace Imms {
 			items.CheckNotNull("items");
 			index = index < 0 ? index + Root.Length + 1: index;
 			if (index == 0) return AddFirstRange(items);
-			var var = 4;
 			if (index == Length) return AddLastRange(items);
 #if ASSERTS
 			var oldLast = Last;
@@ -132,6 +159,18 @@ namespace Imms {
 			return ret;
 		}
 
+		/// <summary>
+		///     Copies a range of elements from the collection to the specified array.
+		/// </summary>
+		/// <param name="arr"> The array. </param>
+		/// <param name="myStart"> The index of the collection at which to start copying. May be negative.</param>
+		/// <param name="arrStart">The index of the array at which to start copying. May be negative.</param>
+		/// <param name="count"> The number of items to copy. Must be non-negative.</param>
+		/// <exception cref="ArgumentNullException">Thrown if the array is null.</exception>
+		/// <exception cref="ArgumentOutOfRangeException">
+		///     Thrown if the array isn't long enough, or one of the parameters is
+		///     invalid.
+		/// </exception>
 		public override void CopyTo(T[] arr, int myStart, int arrStart, int count) {
 			arr.CheckNotNull("arr");
 			if (myStart != 0 || count != 0) {
@@ -176,28 +215,50 @@ namespace Imms {
 			return ret;
 		}
 
+		/// <summary>
+		///     Applies the specified function on every item in the collection, from last to first, and stops when the function returns false.
+		/// </summary>
+		/// <param name="function"> The function. </param>
+		/// <returns> </returns>
+		/// <exception cref="ArgumentNullException">Thrown if the argument null.</exception>
 		public override bool ForEachWhile(Func<T, bool> function) {
 			return Root.IterWhile(function);
 		}
 
+		/// <summary>
+		///     Applies the specified delegate on every item in the collection, from last to first, until it returns false.
+		/// </summary>
+		/// <param name="function"> The function. </param>
+		/// <returns> </returns>
+		/// <exception cref="ArgumentNullException">Thrown if the function null.</exception>
 		public override bool ForEachBackWhile(Func<T, bool> function) {
 			return Root.IterBackWhile(function);
 		}
 
+		/// <summary>
+		///     Applies the specified delegate on every item in the collection, from last to first.
+		/// </summary>
+		/// <param name="action"> The action. </param>
+		/// <exception cref="ArgumentNullException">Thrown if the delegate is null.</exception>
 		public override void ForEachBack(Action<T> action) {
 			Root.IterBack(action);
 		}
 
+		/// <summary>
+		///     Applies the specified delegate on every item in the collection, from first to last.
+		/// </summary>
+		/// <param name="action"> The action. </param>
+		/// <exception cref="ArgumentNullException">Thrown if the argument null.</exception>
 		public override void ForEach(Action<T> action) {
 			Root.Iter(action);
 		}
-
+		
 		/// <summary>
 		///     Provided for testing purposes only. Is too inefficient to be used in practice.
 		/// </summary>
 		/// <param name="index"></param>
 		/// <returns></returns>
-		internal ImmVector<T> Remove(int index) {
+		public ImmVector<T> RemoveAt(int index) {
 			index = index < 0 ? index + Length : index;
 			if (index == 0) return Skip(1);
 			if (index == Length - 1) return RemoveLast();
@@ -218,7 +279,7 @@ namespace Imms {
 		/// <param name="index"></param>
 		/// <param name="value"></param>
 		/// <returns></returns>
-		internal ImmVector<T> Insert(int index, T value) {
+		public ImmVector<T> Insert(int index, T value) {
 			index = index < 0 ? index + Length + 1 : index;
 			if (index == Length) return AddLast(value);
 			if (index == 0) return AddFirstRange(new[] { value });
@@ -348,6 +409,13 @@ namespace Imms {
 			get { return this; }
 		}
 
+		/// <summary>
+		///     Returns a subsequence consisting of the specified number of elements. Returns empty if <paramref name="count" /> is
+		///     greater than Length.
+		/// </summary>
+		/// <param name="count"> The number of elements.. </param>
+		/// <exception cref="ArgumentException">Thrown if the argument is smaller than 0.</exception>
+		/// <returns> </returns>
 		public override ImmVector<T> Take(int count) {
 			count.CheckIsBetween("count", lower:0);
 			if (count == 0) return Empty;

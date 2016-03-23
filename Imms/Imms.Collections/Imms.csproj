@@ -51,7 +51,7 @@
     <DefineConstants>
     </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>2</WarningLevel>
+    <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\Imms.xml</DocumentationFile>
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <Prefer32Bit>false</Prefer32Bit>
@@ -127,6 +127,9 @@
     <Compile Include="Wrappers\Immutable\List\Debugging.cs" />
     <Compile Include="Wrappers\Immutable\List\ImmBindings.cs" />
     <Compile Include="Wrappers\Immutable\ImmMap\ImmMap.cs" />
+    <Compile Include="Wrappers\Immutable\Specialized\ImmLazyList.cs" />
+    <Compile Include="Wrappers\Immutable\Specialized\PriorityQueue\ImmBindings.cs" />
+    <Compile Include="Wrappers\Immutable\Specialized\PriorityQueue\ImmPriorityQueue.cs" />
     <Compile Include="Wrappers\Immutable\Templates\ListLikeClass.cs" />
     <Compile Include="Wrappers\Immutable\Templates\SoItWillCompile.cs" />
     <Compile Include="Wrappers\Immutable\Vector\Boilerplate.cs">

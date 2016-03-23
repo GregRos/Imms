@@ -31,9 +31,9 @@ namespace Imms.Tests.Performance
     type GeneratorMeta(Name : string, ElementType : Type) =
         inherit MetaContainer()
         [<IsMeta>]
-        member val Name = Name with get, set
+        member val Name = Name with get
         [<IsMeta>]
-        member val ElementType = ElementType with get, set
+        member val ElementType = ElementType with get
 
     type DataGenerator<'v>(Name : string, inner : 'v seq) =
         inherit GeneratorMeta(Name, typeof<'v>)
@@ -43,42 +43,40 @@ namespace Imms.Tests.Performance
     type DataStructureMeta(Name : string, Count : int, Generator : GeneratorMeta, Kind : StrKind, Library : string) =
         inherit MetaContainer()
         [<IsMeta>]
-        member val Name = Name with get,set
+        member val Name = Name with get
         [<IsMeta>]
-        member val Count = Count with get, set
+        member val Count = Count with get
         [<IsMeta>]
-        member val Generator = Generator with get, set
+        member val Generator = Generator with get
         [<property: IsMeta>]
-        member val Kind = Kind with get, set
+        member val Kind = Kind with get
         [<IsMeta>]
-        member val Library = Library with get,set
+        member val Library = Library with get
 
     type DataStructure<'t> private (Name : string, Kind : StrKind , Count : int, Generator : GeneratorMeta, Library : string, ctor : int -> 't)= 
         inherit DataStructureMeta(Name, Count, Generator, Kind, Library)
-        let cached = lazy(ctor Count)
-        member x.Object = cached.Value
+        let cached = ctor Count
+        member x.Object = cached
         static member Create(name : string, kind : StrKind, count : int, library : string, generator : DataGenerator<'v>, ctor : 'v seq -> 't) =
             let ds = DataStructure(name, kind, count, generator, library,(fun count -> generator.Generate |> Seq.take count |> ctor))
             ds
 
-    type TestMeta(Name : string, Group : string, Iters : int, DataSource : DataStructureMeta option) = 
+    type TestMeta(Name : string,  Iters : int, DataSource : DataStructureMeta option) = 
         inherit MetaContainer()
         [<IsMeta>]
-        member val Name = Name with get,set
+        member val Name = Name with get
         [<IsMeta>]
-        member val Group = Group with get,set
+        member val Iters = Iters with get
         [<IsMeta>]
-        member val Iters = Iters with get,set
-        [<IsMeta>]
-        member val DataSource = DataSource with get,set
+        member val DataSource = DataSource with get
 
 
     type TestInstanceMeta(Test : TestMeta, Target : DataStructureMeta) =
         inherit MetaContainer() 
         [<IsMeta>]
-        member val Test = Test with get,set
+        member val Test = Test with get
         [<IsMeta>]
-        member val Target = Target with get,set
+        member val Target = Target with get
         [<IsMeta>]
         member val Time = Unknown with get,set
 
@@ -88,8 +86,8 @@ namespace Imms.Tests.Performance
 
     ///An unbound test for a specific collection type.
     [<AbstractClass>]
-    type Test<'s>(Name : string, Group : string, Iterations : int, ?DataSource : DataStructureMeta) = 
-        inherit TestMeta(Name, Group, Iterations, DataSource)
+    type Test<'s>(Name : string, Iterations : int, ?DataSource : DataStructureMeta) = 
+        inherit TestMeta(Name, Iterations, DataSource)
         abstract Test : 's -> unit
         member x.Bind (target : DataStructure<'s>) = 
             let test = x.Test
@@ -122,6 +120,35 @@ namespace Imms.Tests.Performance
             let float(min,max) = 
                 let s = seq {while true do yield rnd.Double(min,max)} |> Seq.cache
                 DataGenerator("Floating Point by Length", s) <+. Meta("Range", (min,max))
+
+    type SimpleTest<'s>(Name : string,  Iters : int, test : 's -> unit)= 
+        inherit Test<'s>(Name, Iters)
+        override x.Test s = test s
+
+    type DataSourceTest<'e, 's>
+        (Name : string, Iters : int, Source : DataStructure<'e>, test : 's -> unit) =
+        inherit Test<'s>(Name, Iters, Source)
+        member val DataLoaded = Source.Object
+        member val Iterations = Iters
+        member val Count = Source.Count
+        override x.Test s = test s
+
+    [<AutoOpenAttribute>]
+    module Helpers =
+        let inline Class str = Meta("Class", str)
+        let inline Desc str = Meta("Description", str)
+        let rnd = System.Random()
+        let inline simpleTest(name,iters,test) = 
+            SimpleTest(name, iters, test) <+. Class("") :> Test<_>
+          
+        let inline dataSourceTest(name,iters, dataSource : DataStructure<_>, test) =
+            DataSourceTest(name, iters, dataSource, test) <+. Class("") :> Test<_>
+
+        let mutable PercentileData = Seqs.Numbers.float(0., 1.).Generate |> Seq.take (pown 10 6) |> Seq.toArray
+
+        let refreshPercentile len = 
+            PercentileData <- Seqs.Numbers.float(0., 1.).Generate |> Seq.take (pown 10 6) |> Seq.toArray
+
 
 namespace Imms.Tests.Performance.Data
     open Imms.Tests.Performance

@@ -41,7 +41,7 @@ let present (tests : TestInstanceMeta list) =
                 | Unknown -> "?", 0.0
             labels <- label::labels
             points <- (name, time)::points
-            cls <- test.Test.Group
+            cls <- test.Test?Class
             iters <- test.Test.Iters
         let labels, points = List.zip labels points |> List.sortBy (snd >> snd) |> List.unzip
         let points = points |> List.sortBy (fun (name,v) -> v : float) //|> List.map snd

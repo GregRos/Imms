@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace Imms.Implementation {
 	static partial class TrieVector<TValue> {
+
 		internal sealed class Parent : Node {
 			readonly int _myBlock;
 			readonly int _offs;

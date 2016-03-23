@@ -120,7 +120,7 @@ namespace Imms {
 			var arr = items.ToArrayFast(out len);
 			var index = 0;
 			var tree = FingerTree<T>.FTree<Leaf<T>>.Construct(arr, ref index, len, lineage);
-			return tree.AddLastList(Root, Lineage.Immutable).Wrap();
+			return tree.AddLastList(Root, lineage).Wrap();
 		}
 
 		/// <summary>
@@ -167,8 +167,8 @@ namespace Imms {
 			var arr = items.ToArrayFast(out len);
 			if (len == 0) return this;
 			var index = 0;
-			var tree = FingerTree<T>.FTree<Leaf<T>>.Construct(arr, ref index, len, lineage);
-			return Root.AddLastList(tree, Lineage.Immutable).Wrap();
+			var tree = FingerTree<T>.FTree<Leaf<T>>.Construct(arr, ref index, len, Lineage.Immutable);
+			return tree.AddFirstList(Root, Lineage.Immutable).Wrap();
 		}
 
 		/// <summary>

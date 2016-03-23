@@ -8,11 +8,19 @@ using Imms;
 namespace Imms.Messing.CSharp {
 	class Program {
 		static void Main(string[] args) {
-			
-			var xf = NoneOf<int>();
-			var s = ImmMap.Empty<int, int>();
-			s.Merge(s, (key, value1, value2) => key);
-			
+			var list = ImmList.FromItems(1, 2, 3, 4);
+			var vector = ImmVector.FromItems(1, 2, 3, 4, 5);
+
+			var list2 = list
+				.AddLast(5).AddFirst(0)
+				.AddLastRange(list)
+				.AddFirstRange(list)
+				.Insert(0, 0).Update(0, 5)
+				.RemoveAt(0).InsertRange(2, list)
+				.Select(x => x + 1)
+				.Where(x => x % 2 == 0)
+				.AddFirst(1);
+
 		}
 	}
 }

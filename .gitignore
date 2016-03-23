@@ -11,6 +11,7 @@ Junk
 *.suo
 *.user
 *.sln.docstates
+[Rr]esults/
 [Hh]istory/
 # Build results
 *.nupkg

@@ -852,6 +852,9 @@ module TupleImplementation =
     let inline internal asTupleSameType'(helper : 'helper, tuple : 'tuple) =
         ((^helper or ^tuple) : (static member IsTupleSameType : 'tuple -> 'wrappedTuple) tuple)
 
+    let inline internal asTuncTuple'(helper : 'helper, tuple : 'tuple) =
+        ((^helper or ^tuple) : (static member IsTupleSameType : 'tuple -> 'wrappedTuple) tuple)
+
     let inline internal isTuple(tuple : 'tuple) = 
         asTuple'(helper, tuple)
 

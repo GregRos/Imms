@@ -78,6 +78,7 @@ module TupleImplementation =
 			var funcNames = Fun.Of((int st, int en) => ParamNames(func, st, en));
 			var generalTupleTypeName =
 				Fun.Of((int i) => "Tuple{0}<{1}>".FormatWith(i, mainNames(0, i).SelectFormat("'{0}").Join(", ")));
+
 			var sameTypeTupleName =
 				Fun.Of((int i) => "Tuple{0}<'{1}>".FormatWith(i, main));
 			for (int i = 2; i <= MaxArity; i++) {
@@ -191,6 +192,9 @@ module TupleImplementation =
         ((^helper or ^tuple) : (static member IsTuple : 'tuple -> 'wrappedTuple) tuple) 
 
     let inline internal asTupleSameType'(helper : 'helper, tuple : 'tuple) =
+        ((^helper or ^tuple) : (static member IsTupleSameType : 'tuple -> 'wrappedTuple) tuple)
+
+    let inline internal asTuncTuple'(helper : 'helper, tuple : 'tuple) =
         ((^helper or ^tuple) : (static member IsTupleSameType : 'tuple -> 'wrappedTuple) tuple)
 
     let inline internal isTuple(tuple : 'tuple) = 

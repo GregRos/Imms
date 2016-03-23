@@ -111,6 +111,24 @@ namespace Imms.Implementation {
 				get { return Items; }
 			}
 
+			public Optional<int> IndexOf(TKey key) {
+				var cur = this;
+				var leftOfKey = 0;
+				while (!cur.IsEmpty)
+				{
+					var r = Comparer.Compare(key, cur.Key);
+					if (r < 0) cur = cur.Left;
+					else if (r > 0) {
+						leftOfKey += 1 + cur.Left.Count;
+						cur = cur.Right;
+					} else {
+						leftOfKey += cur.Left.Count;
+						return leftOfKey;
+					}
+				}
+				return Optional.None;
+			}
+
 			public Node Root_Add(TKey k, TValue v, IComparer<TKey> comparer, bool overwrite, Lineage lin) {
 				if (IsEmpty) return new Node(k, v, Empty, Empty, comparer, lin);
 				else return AvlAdd(k, v, lin, overwrite);
@@ -464,6 +482,8 @@ namespace Imms.Implementation {
 #endif
 				return balanced;
 			}
+
+
 
 			/// <summary>
 			///     Splits the tree into a left subtree where all elements are smallest than the pivot, <br />

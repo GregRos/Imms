@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Imms.Abstract {
-	partial class AbstractIterable<TElem, TIterable, TBuilder> {
-		
+namespace Imms.Abstract
+{
+	partial class AbstractIterable<TElem, TIterable, TBuilder>
+	{
+
 		/// <summary>
 		/// (Implementation) Cartesian product between two iterable collections. You can supply a selector to apply on the results. The current instance is the left operand of the product.
 		/// </summary>
@@ -20,23 +22,25 @@ namespace Imms.Abstract {
 		/// </remarks>
 		/// <returns></returns>
 		protected virtual TOIter _Cartesian<TRight, TOut, TOIter>(TOIter bFactory, IEnumerable<TRight> right,
-		                                                           Func<TElem, TRight, TOut> selector)
-			where TOIter : IBuilderFactory<IIterableBuilder<TOut, TOIter>> {
+																   Func<TElem, TRight, TOut> selector)
+			where TOIter : IBuilderFactory<IIterableBuilder<TOut, TOIter>>
+		{
 			bFactory.CheckNotNull("bFactory");
 			right.CheckNotNull("right");
 			selector.CheckNotNull("selector");
-			if (right is IAnyIterable<TElem>) {
-				return _Cartesian(bFactory, (IAnyIterable<TRight>) right, selector);
+			if (right is IAnyIterable<TElem>)
+			{
+				return _Cartesian(bFactory, (IAnyIterable<TRight>)right, selector);
 			}
 			using (var builder = bFactory.EmptyBuilder)
 			{
 				ForEach(x =>
-				        {
-					        foreach (var item in right)
-					        {
-						        builder.Add(selector(x, item));
-					        }
-				        });
+						{
+							foreach (var item in right)
+							{
+								builder.Add(selector(x, item));
+							}
+						});
 				return builder.Produce();
 			}
 		}
@@ -51,7 +55,7 @@ namespace Imms.Abstract {
 		protected virtual TOIter _Cast<TOut, TOIter>(TOIter bFactory)
 			where TOIter : IBuilderFactory<IIterableBuilder<TOut, TOIter>>
 		{
-			return _Select(bFactory, (v) => (TOut) (object) v);
+			return _Select(bFactory, (v) => (TOut)(object)v);
 		}
 
 		/// <summary>
@@ -63,21 +67,23 @@ namespace Imms.Abstract {
 		/// <param name="selector"> The selector. </param>
 		/// <returns> </returns>
 		protected virtual TOutIter _Choose<TOut, TOutIter>(TOutIter bFactory, Func<TElem, Optional<TOut>> selector)
-			where TOutIter : IBuilderFactory<IIterableBuilder<TOut, TOutIter>> {
+			where TOutIter : IBuilderFactory<IIterableBuilder<TOut, TOutIter>>
+		{
 			bFactory.CheckNotNull("bFactory");
 			selector.CheckNotNull("selector");
 			using (var builder = bFactory.EmptyBuilder)
 			{
 				ForEach((v) =>
-				        {
-					        var res = selector(v);
-					        if (res.IsSome) builder.Add(res.Value);
-				        });
+						{
+							var res = selector(v);
+							if (res.IsSome)
+								builder.Add(res.Value);
+						});
 				return builder.Produce();
 			}
 		}
 
-		
+
 		/// <summary>
 		/// (Implementation) The GroupBy operator. Results are returned as a concrete map type, and group elements are stored as an iterator.
 		/// </summary>
@@ -137,14 +143,14 @@ namespace Imms.Abstract {
 		/// <returns></returns>
 		protected virtual TROuterMap _GroupBy<TROuterMap, TRInnerSeq, TElem2, TKey>(
 			TROuterMap mapFactory, TRInnerSeq seqFactory, Func<TElem, TKey> keySelector, Func<TElem, TElem2> valueSelector, IEqualityComparer<TKey> eq)
-			where TROuterMap : IBuilderFactory<IMapBuilder<TKey, TRInnerSeq, TROuterMap>> 
+			where TROuterMap : IBuilderFactory<IMapBuilder<TKey, TRInnerSeq, TROuterMap>>
 			where TRInnerSeq : IBuilderFactory<IIterableBuilder<TElem2, TRInnerSeq>>
 		{
 			return _GroupBy(mapFactory, keySelector, valueSelector, (k, vs) =>
-			                                                       {
-				                                                       var theSeq = seqFactory.ToIterable(vs);
-				                                                       return Kvp.Of(k, theSeq);
-			                                                       }, eq);
+																   {
+																	   var theSeq = seqFactory.ToIterable(vs);
+																	   return Kvp.Of(k, theSeq);
+																   }, eq);
 		}
 
 		/// <summary>
@@ -165,7 +171,8 @@ namespace Imms.Abstract {
 																							Func<TElem, TKey> oKeySelector, Func<TInner, TKey> iKeySelector,
 																							Func<TElem, IEnumerable<TInner>, TOut> rSelector,
 																							IEqualityComparer<TKey> eq = null)
-			where TOutIter : IBuilderFactory<IIterableBuilder<TOut, TOutIter>> {
+			where TOutIter : IBuilderFactory<IIterableBuilder<TOut, TOutIter>>
+		{
 			bFactory.CheckNotNull("bFactory");
 			inner.CheckNotNull("inner");
 			oKeySelector.CheckNotNull("oKeySelector");
@@ -221,13 +228,16 @@ namespace Imms.Abstract {
 				foreach (var item in inner)
 				{
 					var k = iKeySelector(item);
-					if (dict.ContainsKey(k)) dict[k].Add(item);
-					else dict[k] = new List<TInner> { item };
+					if (dict.ContainsKey(k))
+						dict[k].Add(item);
+					else
+						dict[k] = new List<TInner> { item };
 				}
 				ForEach(v =>
 				{
 					var k = oKeySelector(v);
-					if (!dict.ContainsKey(k)) return;
+					if (!dict.ContainsKey(k))
+						return;
 					var ins = dict[k];
 					ins.ForEach(u => builder.Add(rSelector(v, u)));
 				});
@@ -243,7 +253,8 @@ namespace Imms.Abstract {
 		/// <param name="comparer"></param>
 		/// <returns></returns>
 		protected internal virtual TRList _OrderBy<TRList>(TRList bFactory, IComparer<TElem> comparer)
-			where TRList : IBuilderFactory<ISequentialBuilder<TElem, TRList>> {
+			where TRList : IBuilderFactory<ISequentialBuilder<TElem, TRList>>
+		{
 			bFactory.CheckNotNull("bFactory");
 			comparer.CheckNotNull("comparer");
 			var arr = ToArray();
@@ -265,24 +276,25 @@ namespace Imms.Abstract {
 		/// <param name="accumulator"> The accumulator. </param>
 		/// <returns> </returns>
 		protected virtual TRSeq _Scan<TElem2, TRSeq>(TRSeq bFactory,
-		                                            TElem2 initial,
-		                                            Func<TElem2, TElem, TElem2> accumulator)
-			where TRSeq : IBuilderFactory<IIterableBuilder<TElem2, TRSeq>> {
+													TElem2 initial,
+													Func<TElem2, TElem, TElem2> accumulator)
+			where TRSeq : IBuilderFactory<IIterableBuilder<TElem2, TRSeq>>
+		{
 			bFactory.CheckNotNull("bFactory");
 			accumulator.CheckNotNull("accumulator");
 			using (var builder = bFactory.EmptyBuilder)
 			{
 				Aggregate(initial, (r, v) =>
-				                   {
-					                   r = accumulator(r, v);
-					                   builder.Add(r);
-					                   return r;
-				                   });
+								   {
+									   r = accumulator(r, v);
+									   builder.Add(r);
+									   return r;
+								   });
 				return builder.Produce();
 			}
 		}
 
-				/// <summary>
+		/// <summary>
 		/// (Implementation) The SelectMany operation. Returns a concrete collection type.
 		/// </summary>
 		/// <typeparam> The type of the return provider. <name>TRProvider</name> </typeparam>
@@ -293,16 +305,17 @@ namespace Imms.Abstract {
 		/// <returns> </returns>
 		protected virtual TOutIter _SelectMany<TOut, TOutIter>(
 	TOutIter bFactory, Func<TElem, IEnumerable<TOut>> selector)
-			where TOutIter : IBuilderFactory<IIterableBuilder<TOut, TOutIter>> {
+			where TOutIter : IBuilderFactory<IIterableBuilder<TOut, TOutIter>>
+		{
 			bFactory.CheckNotNull("bFactory");
 			selector.CheckNotNull("selector");
 			using (var builder = bFactory.EmptyBuilder)
 			{
 				ForEach(v =>
-				        {
-					        var r = selector(v);
-							  builder.AddRange(r);
-				        });
+						{
+							var r = selector(v);
+							builder.AddRange(r);
+						});
 				return builder.Produce();
 			}
 		}
@@ -318,18 +331,19 @@ namespace Imms.Abstract {
 		/// <param name="rSelector"> </param>
 		/// <returns> </returns>
 		protected virtual TRSeq _SelectMany<TRElem, TRSeq, TElem2>(TRSeq bFactory, Func<TElem, IEnumerable<TElem2>> selector,
-		                                                          Func<TElem, IEnumerable<TElem2>, TRElem> rSelector)
-			where TRSeq : IBuilderFactory<IIterableBuilder<TRElem, TRSeq>> {
+																  Func<TElem, IEnumerable<TElem2>, TRElem> rSelector)
+			where TRSeq : IBuilderFactory<IIterableBuilder<TRElem, TRSeq>>
+		{
 			bFactory.CheckNotNull("bFactory");
 			selector.CheckNotNull("selector");
 			rSelector.CheckNotNull("rSelector");
 			using (var builder = bFactory.EmptyBuilder)
 			{
 				ForEach(v =>
-				        {
-					        var vs = selector(v);
-					        builder.Add(rSelector(v, vs));
-				        });
+						{
+							var vs = selector(v);
+							builder.Add(rSelector(v, vs));
+						});
 				return builder.Produce();
 			}
 		}

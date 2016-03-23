@@ -83,21 +83,21 @@ let  main argv =
     let args = 
         Scripts.AdvancedArgs<_>(
            Simple_Iterations = 10000,
-           Target_Size = 100,
-           DataSource_Size = 10000,
+           Target_Size = 100000,
+           DataSource_Size = 1000,
            Full_Iterations = 1,
            DataSource_Iterations = 3,
-           Generator1 = Seqs.Strings.distinctLetters(1, 10),
-           Generator2 = Seqs.Strings.distinctLetters(1, 10),
+           Generator1 = Seqs.Numbers.length(1, 10),
+           Generator2 =  Seqs.Numbers.length(1, 10),
            RemoveRatio = 0.6
         )
 
     let a = Scripts.sequential args
-    let b = Scripts.setLike args
-    let c = Scripts.mapLike args
-    let tests = a @ b @ c
+   // let b = Scripts.setLike args
+   // let c = Scripts.mapLike args
+    let tests = a // @ b @ c
     
-    let tests = tests// |> List.filter (fun x -> x.Target.Kind = Sequential)
+    let tests = tests |> Seq.take 1 |> Seq.toList // |> List.filter (fun x -> x.Test.Name |> String.containsAny false ["Complex"])
     runTests tests
     0
         

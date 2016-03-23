@@ -1,30 +1,63 @@
 # Imms
 ---
 
-**Imms** is a library of [persistent](http://en.wikipedia.org/wiki/Persistent_data_structure), and [immutable](http://en.wikipedia.org/wiki/Immutable_object) collections for the .NET framework. It is available on [NuGet](https://www.nuget.org/packages/Imms/). The F# integration library is available [here](https://www.nuget.org/packages/Imms.FSharp).
+**Imms** is a library of [persistent](http://en.wikipedia.org/wiki/Persistent_data_structure), and [immutable](http://en.wikipedia.org/wiki/Immutable_object) collections for the .NET framework. 
 
-However, **Imms** has several distinguishing features that make it different from pretty much any other library of this sort that has been released for .NET so far.
+It is available on [NuGet](https://www.nuget.org/packages/Imms/). The F# integration library is available [here](https://www.nuget.org/packages/Imms.FSharp).
 
-  1. *Performance:* **Imms** collections perform very well, usually far better than other collections of the same kind. 
-  2. *Functionality:* **Imms** collections provide more inherent functionality than any collection of a similar kind.
-  3. *LINQ interface:* **Imms** collections support true collection-based operations through LINQ syntax. For example, they implement a `Select` statement that returns a collection of the same kind.
-  5. *F# Integration*: **Imms** collections are integrated with F# in the assembly `Imms.FSharp`, which provides extension methods, module bindings, collection builders (computation expressions), and active patterns for working with the collections. 
-  6. *Permissive License:* Available under the [MIT license](https://github.com/GregRos/Imms/blob/master/license.md).
-  7. *Zero dependencies*: **Imms** assemblies have zero dependencies.
+There are a bunch of similar libraries but, well, Imms is just a lot better than them.
 
-**Note:** **Imms** collections can't be called *purely functional* because they involve mutations behind the scenes. However, no user-visible instance is ever mutated.
+1. **More Functionality:** Imms collections provide more operations than other libraries. A lot of these are unique to immutable collections, such as very fast splitting and concatenation. Others were added for the sake of completeness. For example, maps support key-based joins, ordered sets support slices and retrieval by index, and more.
+
+2. **Higher Performance:** Imms collections typically perform as well or (quite often) a lot better than other collections.
+
+3. **Lots of Documentation:** The public API is largely documented. Every method and type has a informative summary at the very least. There is a lot more that will be done though, especially with exception and performance information.
+
+5. **LINQ Interface:** Imms mostly follows the much more expressive [LINQ API][LINQ API], rather than duplicating the awkward and seldom-used [traditional API][Traditional API] found in the Collections namespace.
+
+4. **High Level of Polish:** Imms collections throw the right exceptions at the right times (no `NullReferenceExceptions` popping up at awkward moments), have a consistent and intuitive API, etc.
+
+5. **F# Integration:** Although Imms itself is written in C# for technical reasons and is primarily targeted for that language, it comes with an optional F# integration library that contains things like module bindings, active patterns, collection builders, and everything else. The test code (exclusively in F#) was written with the aid of this library.
+
+6. **Tons of other things** that don't fit on this list. For example, the library also provides a nifty `Optional` type, structural equality for collections, ... 
+
+[LINQ API]:https://msdn.microsoft.com/en-us/library/system.linq.enumerable(v=vs.100).aspx#memberList
+
+[Traditional API]:https://msdn.microsoft.com/en-us/library/6sh2ey19(v=vs.110).aspx#idMethods
 
 Currently, all library assemblies require .NET Framework 4.0 Client Profile, and all test assemblies require .NET Framework 4.5.1. The F# libraries require F# 3.0.
 
-## Current Status
-The collections are in beta. 
+## What is an Immutable Collection
+It's a collection that cannot be modified, but still support all kinds of operations, such as `Add` and `Remove`. Instead of modifying the collection, operations such as `Add` return a new version of the collection, but with the additional modifications.
+
+They're a lot like .NET strings, where operations such as `Replace` don't modify the string, but return a new string instead.
+
+For that matter, they're also like numbers, where `4 + 1` does not modify the number `4` (which doesn't even make sense), and instead returns a different number with our 'modification' included.
+
+The benefit of immutability is that after `string.Replace`, the original string hasn't been changed. After `4 + 1`, the number `4` also thankfully remains the same (as far as we know).
+
+Writing an immutable and persistent collection is pretty hard. Or it's hard to write an efficient one, at least. You can always make an immutable and persistent array by copying the whole thing every time a modification is made, and the problem there is obvious. But collections in libraries such as `Imms` make use of *structural sharing*, which makes the collections a lot more practical and efficient, and basically means that small operations still take little time.
+
+Really, there is a lot to be said about immutable collections, or immutability in general. And a lot of people have said it, many of them much more interesting to read than I. So here are some links. Most of them don't really concern .NET, because immutability is something that works in every language.
+
+* [Why immutable collections?](https://scott.mn/2014/04/27/why_immutable_collections/)
+* [Objects Should Be Immutable](http://www.yegor256.com/2014/06/09/objects-should-be-immutable.html)
+* [Java theory and practice: To mutate or not to mutate?](http://www.ibm.com/developerworks/library/j-jtp02183/)
+
+For a more thorough discussion on Immutability, I strongly recommend Eric Lippert's blog and his (still-relevant) series about immutability and C#. It even tells you how to implement one of the data structures in this library! Well, kind of, anyway.
+
+* [Eric Lippert: Immutability, Results Page 3](https://blogs.msdn.microsoft.com/ericlippert/tag/immutability/page/3/)
+
+Then again, I do have a few things to say on the subject as well, so I might write something up about it myself too.
 
 ## The Collections
 
-**Imms** provides 6 collections, divided into 3 groups.
+**Imms** provides 5 main collections, divided into 3 groups. These are "building block" type collections and can be used to implement more specialized collections in various ways (in fact, I might do so eventually, if someone else doesn't beat me to it).
 
-### Sequential
+### Sequentials
 Sequential collections store elements in order. An example of a sequential collection is `List<T>`.
+
+The primary sequential collection is `ImmList`, 
 
 **Imms** provides the following sequential collections:
 

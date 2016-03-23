@@ -78,13 +78,13 @@ type SetTests<'e when 'e : comparison>(items : 'e array,  ?seed : int) =
             items.[st .. en] |> Data.source n "RandomData"
 
         let subset n =
-            let mlist = MList.empty
+            let mlist = MutableList.empty
             for i = 0 to n do
                 mlist.Add(s.ByArbitraryOrder(r.Next(0, s.Length)))
             mlist |> Data.source n "Subset"
 
         let disjoint n = 
-            let ml = MList.empty
+            let ml = MutableList.empty
             for i = 0 to n do
                 let ix = r.Next(0, items.Length)
                 if items.[ix] |> s.Contains then
@@ -92,7 +92,7 @@ type SetTests<'e when 'e : comparison>(items : 'e array,  ?seed : int) =
             ml |> Data.source (ml.Count) "Disjoint"
 
         let superset n =
-            let mutable list = s |> MList.ofSeq
+            let mutable list = s |> MutableList.ofSeq
             for i = 0 to n do
                 let ix = r.Next(0, items.Length)
                 list.Add(items.[ix])

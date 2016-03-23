@@ -17,6 +17,9 @@ namespace Imms {
 			Comparer = comparer;
 		}
 
+		/// <summary>
+		///     Returns the number of elements in the collection.
+		/// </summary>
 		public override int Length {
 			get { return Root.Count; }
 		}
@@ -42,6 +45,18 @@ namespace Imms {
 			}
 		}
 
+		/// <summary>
+		/// Returns the index of the specified key, by sort order, or None if the key was not found.
+		/// </summary>
+		/// <param name="key"></param>
+		/// <returns></returns>
+		public Optional<int> IndexOf(T key) {
+			return Root.IndexOf(key);
+		}
+
+		/// <summary>
+		///     Returns true if the collection is empty.
+		/// </summary>
 		public override bool IsEmpty {
 			get { return Root.IsEmpty; }
 		}
@@ -60,6 +75,11 @@ namespace Imms {
 			return new ImmSortedSet<T>(OrderedAvlTree<T, bool>.Node.Empty, cm ?? FastComparer<T>.Default);
 		}
 
+		/// <summary>
+		///     Returns the set-theoretic union between this set and a set-like collection.
+		/// </summary>
+		/// <param name="other">A sequence of values. This operation is much faster if it's a set compatible with this one.</param>
+		/// <returns></returns>
 		public override ImmSortedSet<T> Union(IEnumerable<T> other) {
 			other.CheckNotNull("other");
 			var set = other as ImmSortedSet<T>;
@@ -78,12 +98,22 @@ namespace Imms {
 			return newRoot.Wrap(Comparer);
 		}
 
+		/// <summary>
+		/// Adds a new item to the set, or does nothing if the item already exists.
+		/// </summary>
+		/// <param name="item">The item to add.</param>
+		/// <returns></returns>
 		public override ImmSortedSet<T> Add(T item) {
 			var ret = Root.Root_Add(item, true, Comparer, false, Lineage.Mutable());
 			if (ret == null) return this;
 			return ret.Wrap(Comparer);
 		}
 
+		/// <summary>
+		/// Removes an item from the set, or does nothing if the item does not exist.
+		/// </summary>
+		/// <param name="item">The item to remove.</param>
+		/// <returns></returns>
 		public override ImmSortedSet<T> Remove(T item) {
 			var ret = Root.AvlRemove(item, Lineage.Mutable());
 			if (ret == null) return this;
@@ -95,6 +125,11 @@ namespace Imms {
 			return ret.IsSome ? ret.Value.Key.AsSome() : Optional.None;
 		}
 
+		/// <summary>
+		///     Returns true if the item is contained in the set.
+		/// </summary>
+		/// <param name="item"></param>
+		/// <returns></returns>
 		public override bool Contains(T item) {
 			return Root.Contains(item);
 		}
@@ -123,6 +158,12 @@ namespace Imms {
 			return Root.IsSupersetOf(other.Root);
 		}
 
+		/// <summary>
+		///     Applies the specified function on every item in the collection, from last to first, and stops when the function returns false.
+		/// </summary>
+		/// <param name="function"> The function. </param>
+		/// <returns> </returns>
+		/// <exception cref="ArgumentNullException">Thrown if the argument null.</exception>
 		public override bool ForEachWhile(Func<T, bool> function) {
 			function.CheckNotNull("function");
 			return Root.ForEachWhile((k, v) => function(k));
@@ -156,12 +197,41 @@ namespace Imms {
 			return Root.RemoveMin(Lineage.Mutable()).Wrap(Comparer);
 		}
 
+		/// <summary>
+		/// Returns an enumerator that iterates through the collection.
+		/// </summary>
+		/// <returns>
+		/// A <see cref="T:System.Collections.Generic.IEnumerator`1"/> that can be used to iterate through the collection.
+		/// </returns>
+		/// <filterpriority>1</filterpriority>
 		public override IEnumerator<T> GetEnumerator() {
 			foreach (var item in Root) yield return item.Key;
 		}
 
 		protected override SetRelation RelatesTo(ImmSortedSet<T> other) {
 			return Root.Relation(other.Root);
+		}
+
+		/// <summary>
+		/// Returns a submap containing keys lower than <paramref name="maxItem"/> keys.
+		/// </summary>
+		/// <param name="maxItem"></param>
+		/// <returns></returns>
+		public ImmSortedSet<T> TakeLess(T maxItem) {
+			OrderedAvlTree<T, bool>.Node left, central, right;
+			Root.Split(maxItem, out left, out central, out right, Lineage.Immutable);
+			return left.Wrap(Comparer);
+		}
+
+		/// <summary>
+		/// Returns a submap consisting of keys larger than <paramref name="minItem"/>.
+		/// </summary>
+		/// <param name="minItem"></param>
+		/// <returns></returns>
+		public ImmSortedSet<T> TakeMore(T minItem) {
+			OrderedAvlTree<T, bool>.Node left, central, right;
+			Root.Split(minItem, out left, out central, out right, Lineage.Immutable);
+			return right.Wrap(Comparer);
 		}
 	}
 }

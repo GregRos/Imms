@@ -32,6 +32,9 @@ namespace Imms {
 			get { return this; }
 		}
 
+			/// <summary>
+			///     Returns true if the collection is empty.
+			/// </summary>
 		public override bool IsEmpty {
 			get { return _root.IsEmpty; }
 		}
@@ -45,7 +48,14 @@ namespace Imms {
 			return new ImmMap<TKey, TValue>(HashedAvlTree<TKey, TValue>.Node.Empty, equality ?? FastEquality<TKey>.Default);
 		}
 
-		public override IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() {
+			/// <summary>
+			/// Returns an enumerator that iterates through the collection.
+			/// </summary>
+			/// <returns>
+			/// A <see cref="T:System.Collections.Generic.IEnumerator`1"/> that can be used to iterate through the collection.
+			/// </returns>
+			/// <filterpriority>1</filterpriority>
+			public override IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() {
 			return _root.GetEnumerator();
 		}
 
@@ -53,7 +63,12 @@ namespace Imms {
 			return _root.Root_FindKvp(key);
 		}
 
-		public override Optional<TValue> TryGet(TKey key) {
+			/// <summary>
+			/// Returns the value associated with the specified key, or None if no such key exists.
+			/// </summary>
+			/// <param name="key">The key.</param>
+			/// <returns></returns>
+			public override Optional<TValue> TryGet(TKey key) {
 			return _root.Root_Find(key);
 		}
 
@@ -65,13 +80,11 @@ namespace Imms {
 		}
 
 		/// <summary>
-		///     Removes the specified key from the map.
+		///     Removes the specified key from the map, or does nothing if the key doesn't exist.
 		/// </summary>
 		/// <param name="k">The key.</param>
-		/// <exception cref="KeyNotFoundException">Thrown if the specified key doesn't exist in the map.</exception>
 		/// <returns></returns>
 		public override ImmMap<TKey, TValue> Remove(TKey k) {
-			if (_root.IsEmpty) throw Errors.Is_empty;
 			var removed = _root.Root_Remove(k, Lineage.Mutable());
 			if (removed == null) return this;
 			return removed.WrapMap(_equality);
@@ -87,6 +100,11 @@ namespace Imms {
 			return _root.Intersect(other._root, Lineage.Mutable(), collision).WrapMap(_equality);
 		}
 
+			/// <summary>
+			/// Removes several keys from this key-value map.
+			/// </summary>
+			/// <param name="keys">A sequence of keys to remove. Can be much faster if it's a set compatible with this map.</param>
+			/// <returns></returns>
 		public override ImmMap<TKey, TValue> RemoveRange(IEnumerable<TKey> keys) {
 			keys.CheckNotNull("keys");
 			var set = keys as ImmSet<TKey>;
@@ -94,7 +112,18 @@ namespace Imms {
 			return base.RemoveRange(keys);
 		}
 
-		public override ImmMap<TKey, TValue> Subtract<TValue2>(IEnumerable<KeyValuePair<TKey, TValue2>> other,
+			/// <summary>
+			///     Subtracts the key-value pairs in the specified map from this one, applying the subtraction function on each key shared between the maps.
+			/// </summary>
+			/// <param name="other">A sequence of key-value pairs. This operation is much faster if it's a map compatible with this one.</param>
+			/// <param name="subtraction">Optionally, a subtraction function that generates the value in the resulting key-value map. Otherwise, key-value pairs are always removed.</param>
+			/// <remarks>
+			///	Subtraction over maps is anaologous to Except over sets. 
+			///	If the subtraction function is not specified (or is null), the operation simply subtracts all the keys present in the other map from this one.
+			/// If a subtraction function is supplied, the operation invokes the function on each key-value pair shared with the other map. If the function returns a value,
+			/// that value is used in the return map. If the function returns None, the key is removed from the return map.
+			/// </remarks>
+			public override ImmMap<TKey, TValue> Subtract<TValue2>(IEnumerable<KeyValuePair<TKey, TValue2>> other,
 			ValueSelector<TKey, TValue, TValue2, Optional<TValue>> subtraction = null) {
 				other.CheckNotNull("other");
 			var map = other as ImmMap<TKey, TValue2>;
@@ -127,7 +156,13 @@ namespace Imms {
 			return Add(pair.Item1, pair.Item2);
 		}
 
-		public override bool ForEachWhile(Func<KeyValuePair<TKey, TValue>, bool> function) {
+			/// <summary>
+			///     Applies the specified function on every item in the collection, from last to first, and stops when the function returns false.
+			/// </summary>
+			/// <param name="function"> The function. </param>
+			/// <returns> </returns>
+			/// <exception cref="ArgumentNullException">Thrown if the argument null.</exception>
+			public override bool ForEachWhile(Func<KeyValuePair<TKey, TValue>, bool> function) {
 			function.CheckNotNull("function");
 			return _root.ForEachWhile((eqKey, v) => function(Kvp.Of(eqKey, v)));
 		}

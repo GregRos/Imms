@@ -1,7 +1,7 @@
 ///A module that contains helper functions and methods.
 [<AutoOpen>]
 module Imms.Tests.Caching
-
+open ExtraFunctional
 open Microsoft.FSharp.Quotations
 open FSharpx.Linq.QuotationEvaluation
 open System.Collections.Concurrent
@@ -19,4 +19,3 @@ type private Cache<'q>() =
 let delay2 f arg1 arg2 = fun() -> f arg1 arg2
 
 let memoize q = Cache.Get(q).Value
-

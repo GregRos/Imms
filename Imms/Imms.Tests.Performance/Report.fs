@@ -34,7 +34,7 @@ let private toFullRecord (entry : TestInstanceMeta) =
         DataGenerator = entry.Test.DataSource |> Option.map (fun d -> d.Generator.ToString()) |> Option.orValue ""
         Description = entry.Test |> Meta.tryGetOr "Description" ""
         Ratio = entry.Test |> Meta.tryGet "Ratio"
-        Class = entry.Test.Group
+        Class = entry.Test?Class
     }
 
 
@@ -70,8 +70,10 @@ let toTable (entries : TestInstanceMeta list) =
 let toLog (entries : TestInstanceMeta list) = 
     let context = CsvContext()
     use stream = new StringWriter()
+    let js = Newtonsoft.Json.JsonSerializer.Create()
+    
     let entries = entries |> Seq.map (toFullRecord)
-    context.Write(entries, stream)
+    js.Serialize(stream, entries |> Seq.toArray )
     stream.Flush()
     stream.ToString()
 

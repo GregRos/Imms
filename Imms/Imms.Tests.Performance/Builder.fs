@@ -4,7 +4,7 @@ open Imms.Tests.Performance
 open Imms.Tests
 open ExtraFunctional
 ///An object that binds typed tests to concrete targets and collects fully bound tests ready for execution.
-type internal Builder<'s>(bound : ErasedTest list, targets : DataStructure<'s> list, tests : Test<'s> list) = 
+type internal Builder<'s>(bound : ErasedTest MutableList, targets : DataStructure<'s> MutableList, tests : Test<'s> MutableList) = 
     
     ///All the tests bound by this builder.
     member val Bound = bound
@@ -16,37 +16,49 @@ type internal Builder<'s>(bound : ErasedTest list, targets : DataStructure<'s> l
     member val Tests = tests
     
     ///Adds an unbound test.
-    member inline x.AddTest test = Builder(x.Bound, x.Targets, test :: x.Tests)
+    member inline x.AddTest test = 
+        tests.Add(test)
+        x
     
     ///Adds a concrete target binding for the current collection type.
     ///The first time a target is added to the builder will cause type inference
     ///To bind the builder to a matching type.
     member inline x.AddTarget targ = 
-        Builder(x.Bound, targ :: x.Targets, x.Tests)
+        targets.Add(targ)
+        x
     
     ///Adds a list of concrete target bindings.
     ///The first time a target is added to the builder will cause type inference
     ///To bind the builder to a matching type.
     member x.AddTargets targets2 = 
         let targets2 = targets |> Seq.toList
-        Builder(x.Bound, x.Targets @ targets2, x.Tests)
-    
+        targets.AddRange(targets2)
+        x
+
     ///Adds a list of unbound tests.
     member inline x.AddTests tests2 = 
         let tests2 = tests2 |> Seq.toList
-        Builder(x.Bound, x.Targets, x.Tests @ tests2)
+        tests.AddRange(tests2)
+        x
     
-    ///Uses a cross product to bind each unbound test to each target binding. 
-    ///Returns a new Builder object with an unbound type.
-    member inline x.Next<'next>() = 
+    member inline x.Done =
         let erasedTests = 
             x.Targets
             |> List.cross x.Tests
             |> List.map (fun (test,targ)-> test.Bind targ)
-        Builder<'next>(x.Bound @ erasedTests, [], [])
+
+        x.Targets.Clear()
+        x.Tests.Clear()
+        bound.AddRange(erasedTests)
+
+    ///Uses a cross product to bind each unbound test to each target binding. 
+    ///Returns a new Builder object with an unbound type.
+    member inline x.ForTarget<'next>(newTarget : DataStructure<'next>) = 
+        x.Done
+        Builder<'next>(bound, MutableList.empty, MutableList.empty).AddTarget(newTarget)
     
     ///Returns a new builder initialized with blank caches.
-    static member inline New<'s>() = Builder<'s>([], [], [])
+    static member inline New<'s>() = Builder<'s>(MutableList.empty, MutableList.empty, MutableList.empty)
 
 
 ///A companion module for the Builder object. 
@@ -79,16 +91,9 @@ module internal Builder =
     ///To bind the builder to a matching type.
     let addTargets targs (builder : Builder<_>) = builder.AddTargets targs
     
-    ///Uses a cross product to bind each unbound test to each target binding. 
-    ///Returns a new Builder object with an unbound type.
-    let inline next<'p, 'n> (builder : Builder<'p>) = builder.Next<'n>()
-    
     ///Returns a new builder initialized with blank caches.
     let inline blank<'t> = Builder<'t>.New()
-    
-    ///Returns all the bound tests cached by the builder.
-    ///Doesn't bind the unbound tests/targets currently cached by the builder, if such exist.
-    let inline finish (builder : _ Builder) = builder.Next().Bound
+   
 
     let inline cross partials args = 
         Seq.cross partials args |> Seq.map (fun (test, args) -> test args) |> Seq.toList

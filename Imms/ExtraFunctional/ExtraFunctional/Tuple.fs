@@ -69,6 +69,9 @@ module Tuple =
         let inline  fold (tuple : 'tuple, initial, f) =
             (^tuple : (member Fold : 'state -> ('element -> 'state -> 'state) -> 'state) tuple, initial, f)
 
+        let inline apply1 (tuple : 'tupleF, arg : 'arg) = 
+            (^tupleF : (member Apply : 'arg -> 'tuple) tuple, arg)
+
         let inline  reduce (tuple : 'tuple, f) = 
             (^tuple : (member Reduce : ('element -> 'element -> 'element) -> 'element) tuple, f)
 
@@ -233,9 +236,6 @@ module Tuple =
     ///Reduces over a tuple type. All elements must be of the same type.
     let inline reduce (f : 'element -> 'element -> 'element) (tuple : '``(element * ... * element)``) = 
         Aux.reduce(isTupleSameType tuple, fun a b -> f b a)
-
-    let inline apply1 (arg1 : 'arg1) (tuple : '``(('arg1 -> 'out) ... ('arg1 -> 'out))``) : '``('out * ... * 'out)`` =
-        tuple |> mapAll (fun f -> f arg1)
 
     ///Takes as a parameter a tuple of functions, and invokes the functions with the two arguments, returning a tuple of the results.
     let inline apply2 (arg1 : 'arg1) (arg2 : 'arg2) (tuple : '``(('arg1 -> 'arg2 -> 'out) * ... * ('arg1 -> 'arg2 -> 'out))``) : '``('out * ... 'out)``= 

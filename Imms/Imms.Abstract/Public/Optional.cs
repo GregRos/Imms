@@ -231,8 +231,6 @@ namespace Imms {
 			return !(other == self);
 		}
 
-
-
 		/// <summary>
 		///     Returns a hash code for this optional value instance. If it has an underlying value, the hash code of the underlying value is returned. Otherwise, a hash code of 0 is returned.
 		/// </summary>
@@ -309,6 +307,10 @@ namespace Imms {
 		}
 	}
 
+	
+	/// <summary>
+	/// Contains extension and utility methods for dealing with Optional values.
+	/// </summary>
 	public static class Optional {
 
 		/// <summary>
@@ -342,6 +344,7 @@ namespace Imms {
 	///     Static class with utility and extension methods for optional values.
 	/// </summary>
 	public static class OptionalExt {
+
 		/// <summary>
 		///     Returns an optional value instance wrapping the specified value.
 		/// </summary>

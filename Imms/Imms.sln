@@ -36,7 +36,14 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Imms.Messing.FSharp", "Imms
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Imms.Messing.CSharp", "Imms.Messing.CSharp\Imms.Messing.CSharp.csproj", "{C3BE5E9F-7CA1-4ADB-98C4-39AEB91E2591}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Experimental", "Experimental", "{92EF7C85-2FA4-4BA8-BE07-5EF11A577C92}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Imms.Experimental", "Imms.Experimental\Imms.Experimental.csproj", "{B20CEAD0-6A08-44ED-9B7D-4377B7AA4AD3}"
+EndProject
 Global
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Publish|Any CPU = Publish|Any CPU
@@ -97,6 +104,12 @@ Global
 		{C3BE5E9F-7CA1-4ADB-98C4-39AEB91E2591}.Publish|Any CPU.Build.0 = Release|Any CPU
 		{C3BE5E9F-7CA1-4ADB-98C4-39AEB91E2591}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C3BE5E9F-7CA1-4ADB-98C4-39AEB91E2591}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B20CEAD0-6A08-44ED-9B7D-4377B7AA4AD3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B20CEAD0-6A08-44ED-9B7D-4377B7AA4AD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B20CEAD0-6A08-44ED-9B7D-4377B7AA4AD3}.Publish|Any CPU.ActiveCfg = Release|Any CPU
+		{B20CEAD0-6A08-44ED-9B7D-4377B7AA4AD3}.Publish|Any CPU.Build.0 = Release|Any CPU
+		{B20CEAD0-6A08-44ED-9B7D-4377B7AA4AD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B20CEAD0-6A08-44ED-9B7D-4377B7AA4AD3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -111,5 +124,6 @@ Global
 		{8E19E64B-EB5C-4042-B419-C1A9E9A05997} = {FF0AD0C9-1BDB-43DF-9362-DB80BA7CDBDF}
 		{1A652D10-CCFE-4C81-A729-B9835284488F} = {FF0AD0C9-1BDB-43DF-9362-DB80BA7CDBDF}
 		{C3BE5E9F-7CA1-4ADB-98C4-39AEB91E2591} = {FF0AD0C9-1BDB-43DF-9362-DB80BA7CDBDF}
+		{B20CEAD0-6A08-44ED-9B7D-4377B7AA4AD3} = {92EF7C85-2FA4-4BA8-BE07-5EF11A577C92}
 	EndGlobalSection
 EndGlobal
