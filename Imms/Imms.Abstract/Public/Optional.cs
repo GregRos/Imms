@@ -33,7 +33,7 @@ namespace Imms {
 	/// </summary>
 	/// <typeparam name="T">The type of value.</typeparam>
 	[Serializable]
-	public struct Optional<T> : IEquatable<T>, IEquatable<Optional<T>>, IAnyOptional {
+	public struct Optional<T> : IEquatable<T>, IEquatable<Optional<T>>, IAnyOptional  {
 		static readonly IEqualityComparer<T> Eq = FastEquality<T>.Default;
 
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -340,30 +340,32 @@ namespace Imms {
 		}
 	}
 
+
 	/// <summary>
 	///     Static class with utility and extension methods for optional values.
 	/// </summary>
 	public static class OptionalExt {
 
 		/// <summary>
-		///     Returns an optional value instance wrapping the specified value.
+		///     Returns an optional value instance wrapping the specified value. This method can wrap nulls in Some.
 		/// </summary>
 		/// <typeparam name="T">The type of the value.</typeparam>
 		/// <param name="x">The value to wrap.</param>
 		/// <returns></returns>
-		internal static Optional<T> AsSome<T>(this T x) {
+		public static Optional<T> AsSome<T>(this T x) {
 			return Optional.Some(x);
 		}
-		
+
+
 		/// <summary>
 		/// Converts the specified nullable value to an optional value. Null is represented as None.
 		/// </summary>
 		/// <typeparam name="T">The type of the value.</typeparam>
 		/// <param name="x">The value.</param>
 		/// <returns></returns>
-		internal static Optional<T> AsOptional<T>(this T? x)
+		public static Optional<T> AsOptional<T>(this T? x)
 		where T : struct {
-			return x.HasValue ? x.Value.AsSome() : Optional.None;
+			return x?.AsSome() ?? Optional.None;
 		}
 
 		/// <summary>
@@ -372,21 +374,9 @@ namespace Imms {
 		/// <typeparam name="T">The type of the value.</typeparam>
 		/// <param name="x">The value.</param>
 		/// <returns></returns>
-		public static Optional<T> AsOptional<T>(this T x) {
-			return x == null ? Optional<T>.None : x.AsSome();
-		}
-
-
-
-		/// <summary>
-		///     Converts a nullable value to an optional value. A null value is converted to a None value.
-		/// </summary>
-		/// <param name="value">The nullable value to convert.</param>
-		/// <typeparam name="T">The type to convert. Must be a value type.</typeparam>
-		/// <returns></returns>
-		public static Optional<T> OfNullable<T>(T? value)
-			where T : struct {
-			return value.HasValue ? Optional.Some(value.Value) : Optional.None;
+		public static Optional<T> AsOptional<T>(this T x)
+		{
+			return x?.AsSome() ?? Optional<T>.None;
 		}
 
 		/// <summary>
@@ -409,7 +399,7 @@ namespace Imms {
 		/// <param name="self">The optional value instance.</param>
 		/// <param name="f">The function to apply, returning an optional value of a potentially different type.</param>
 		/// <returns></returns>
-		public static Optional<TOut> Bind<T, TOut>(this Optional<T> self, Func<T, Optional<TOut>> f) {
+		public static Optional<TOut> Map<T, TOut>(this Optional<T> self, Func<T, Optional<TOut>> f) {
 			return self.IsNone ? Optional.NoneOf<TOut>() : f(self.Value);
 		}
 

@@ -45,23 +45,6 @@ namespace Imms.Specialized
 			return Wrap(Inner.Set(priority, list.Value.RemoveAt(itemIndex.Value)));
 		}
 
-		/// <summary>
-		/// Returns a subqueue consisting of items with priority lower than <paramref name="priority"/>.
-		/// </summary>
-		/// <param name="priority"></param>
-		/// <returns></returns>
-		public ImmPriorityQueue<T, TPriority> TakeLess(TPriority priority) {
-			return Wrap(Inner.TakeLess(priority));
-		} 
-
-		/// <summary>
-		/// Returns a subqueue consisting of items with priority higher than <paramref name="priority"/>.
-		/// </summary>
-		/// <param name="priority"></param>
-		/// <returns></returns>
-		public ImmPriorityQueue<T, TPriority> TakeMore(TPriority priority) {
-			return Wrap(Inner.TakeMore(priority));
-		}
 		
 
 	}

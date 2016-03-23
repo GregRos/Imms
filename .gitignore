@@ -38,6 +38,10 @@ x64/
 *.vssscc
 .builds
 
+# Profiling-related files
+*.psess
+*.vspx
+
 # Visual C++ cache files
 ipch/
 *.aps

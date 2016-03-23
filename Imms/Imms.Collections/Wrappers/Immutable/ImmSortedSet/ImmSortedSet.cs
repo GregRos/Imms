@@ -213,25 +213,30 @@ namespace Imms {
 		}
 
 		/// <summary>
-		/// Returns a submap containing keys lower than <paramref name="maxItem"/> keys.
+		/// Returns a slice of the set, bounded by an optional minimum key and an optional maximum key. The bounds are included in the result.
 		/// </summary>
-		/// <param name="maxItem"></param>
 		/// <returns></returns>
-		public ImmSortedSet<T> TakeLess(T maxItem) {
+		public ImmSortedSet<T> Slice(Optional<T> minimum = default(Optional<T>), Optional<T> maximum = default(Optional<T>)) {
+			if (minimum.IsNone && maximum.IsNone) {
+				return this;
+			}
 			OrderedAvlTree<T, bool>.Node left, central, right;
-			Root.Split(maxItem, out left, out central, out right, Lineage.Immutable);
-			return left.Wrap(Comparer);
-		}
-
-		/// <summary>
-		/// Returns a submap consisting of keys larger than <paramref name="minItem"/>.
-		/// </summary>
-		/// <param name="minItem"></param>
-		/// <returns></returns>
-		public ImmSortedSet<T> TakeMore(T minItem) {
-			OrderedAvlTree<T, bool>.Node left, central, right;
-			Root.Split(minItem, out left, out central, out right, Lineage.Immutable);
-			return right.Wrap(Comparer);
+			var currentRoot = Root;
+			if (minimum.IsSome) {
+				currentRoot.Split(minimum.Value, out left, out central, out right, Lineage.Immutable);
+				currentRoot = right;
+				if (central != null) {
+					currentRoot = currentRoot.Root_Add(left.Key, left.Value, Comparer, true, Lineage.Immutable);
+				}
+			}
+			if (maximum.IsSome) {
+				currentRoot.Split(maximum.Value, out left, out central, out right, Lineage.Immutable);
+				currentRoot = left;
+				if (central != null) {
+					currentRoot = currentRoot.Root_Add(central.Key, central.Value, Comparer, true, Lineage.Immutable);
+				}
+			}
+			return currentRoot.Wrap(Comparer);
 		}
 	}
 }

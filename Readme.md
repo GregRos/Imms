@@ -1,11 +1,10 @@
 # Imms
 ---
-
 **Imms** is a library of [persistent](http://en.wikipedia.org/wiki/Persistent_data_structure), and [immutable](http://en.wikipedia.org/wiki/Immutable_object) collections for the .NET framework. 
 
 It is available on [NuGet](https://www.nuget.org/packages/Imms/). The F# integration library is available [here](https://www.nuget.org/packages/Imms.FSharp).
 
-There are a bunch of similar libraries but, well, Imms is just a lot better than them.
+There are a bunch of similar libraries but, well, Imms is better than them in some pretty important respects.
 
 1. **More Functionality:** Imms collections provide more operations than other libraries. A lot of these are unique to immutable collections, such as very fast splitting and concatenation. Others were added for the sake of completeness. For example, maps support key-based joins, ordered sets support slices and retrieval by index, and more.
 
@@ -23,7 +22,7 @@ There are a bunch of similar libraries but, well, Imms is just a lot better than
 
 [LINQ API]:https://msdn.microsoft.com/en-us/library/system.linq.enumerable(v=vs.100).aspx#memberList
 
-[Traditional API]:https://msdn.microsoft.com/en-us/library/6sh2ey19(v=vs.110).aspx#idMethods
+[Traditional API]:https://msdn.microsoft.com/en-us/library/6sh2ey19(v=vs.110).aspx#idMethods-
 
 Currently, all library assemblies require .NET Framework 4.0 Client Profile, and all test assemblies require .NET Framework 4.5.1. The F# libraries require F# 3.0.
 
@@ -62,7 +61,9 @@ The primary sequential collection is `ImmList`,
 **Imms** provides the following sequential collections:
 
  1. **ImmList:** A very versatile sequential collection that supports pretty much every operation you can name, including addition/removal at either end, get and set by index, insert/remove by index, concatenation, splitting, subsequences... all of these are implemented using specialized algorithms that perform up to `O(logn)`.
- 1. **ImmVector:** Offers less functionality than ImmList, but performs a lot better for most operations. It is generally recommended that you use ImmList for most purposes. ImmVector's performance approaches mutable collections for some operations.
+ 1. <span style="color:silver">**ImmVector:** Offers less functionality than ImmList, but performs a lot better for some operations. It is generally recommended that you use ImmList for most purposes. ImmVector's performance approaches mutable collections for some operations.</span>
+
+	This collection is greyed out because it needs a bit more work, performance-wise (it's still great, but it could be better)
 
 ### Sets
 Sets store collections of unique elements. An example of a set is `HashSet<T>`.
@@ -120,7 +121,7 @@ To avoid dangerous and hard to track bugs, **Imms** collections only use the spe
 1. Make sure to use the same handler instance for all **Imms** collections that use that handler. This pattern is made more convenient by extension methods on handlers that lets you use them as 'factories' of collections. An example is `IComparer<T>.CreateSortedSet`.
 2. Override `.Equals` on your custom handler to support functional equality.
 
-If **Imms** decides that the comparison handlers are different, a generic implementation will be used, which can be significantly slower. That is to say, the implementation is as slow as what some other collection libraries use. ◕‿◕
+If **Imms** decides that the comparison handlers are different, a generic implementation will be used, which can be significantly slower. That is to say, the implementation is as slow as what some other collection libraries use.
 
 
 

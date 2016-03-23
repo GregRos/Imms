@@ -91,6 +91,7 @@
     <Compile Include="Implementation\TrieVector\VectorLeaf.cs" />
     <Compile Include="Implementation\TrieVector\VectorNode.cs" />
     <Compile Include="Implementation\TrieVector\VectorParent.cs" />
+    <Compile Include="NamespaceDoc.cs" />
     <Compile Include="Wrappers\Immutable\Common\ImmList.cs" />
     <Compile Include="Wrappers\Immutable\Common\ImmMap.cs" />
     <Compile Include="Wrappers\Immutable\Common\ImmSet.cs" />

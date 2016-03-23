@@ -186,6 +186,7 @@ namespace Imms {
 		/// </summary>
 		/// <param name="index"></param>
 		/// <returns></returns>
+		/// <exception cref="ArgumentOutOfRangeException">If the index is out of range</exception>
 		public KeyValuePair<TKey, TValue> ByOrder(int index) {
 			index.CheckIsBetween("index", -Root.Count, Root.Count - 1);
 			index = index < 0 ? index + Root.Count : index;
@@ -194,7 +195,7 @@ namespace Imms {
 		}
 
 		/// <summary>
-		/// Removes a key from the map.
+		/// Removes a key from the map, or does nothing if the key does not exist.
 		/// </summary>
 		/// <param name="key">The key to remove.</param>
 		/// <returns></returns>
@@ -239,25 +240,30 @@ namespace Imms {
 		} 
 
 		/// <summary>
-		/// Returns a submap containing keys lower than <paramref name="maxKey"/> keys.
+		/// Returns a slice of the map, bounded by an optional minimum key and an optional maximum key. The bounds are included in the result.
 		/// </summary>
-		/// <param name="maxKey"></param>
 		/// <returns></returns>
-		public ImmSortedMap<TKey, TValue> TakeLess(TKey maxKey) {
+		public ImmSortedMap<TKey, TValue> Slice(Optional<TKey> minimum = default(Optional<TKey>), Optional<TKey> maximum = default(Optional<TKey>)) {
+			if (minimum.IsNone && maximum.IsNone) {
+				return this;
+			}
 			OrderedAvlTree<TKey, TValue>.Node left, central, right;
-			Root.Split(maxKey, out left, out central, out right, Lineage.Immutable);
-			return left.WrapMap(Comparer);
-		}
-
-		/// <summary>
-		/// Returns a submap consisting of keys larger than <paramref name="minKey"/>.
-		/// </summary>
-		/// <param name="minKey"></param>
-		/// <returns></returns>
-		public ImmSortedMap<TKey, TValue> TakeMore(TKey minKey) {
-			OrderedAvlTree<TKey, TValue>.Node left, central, right;
-			Root.Split(minKey, out left, out central, out right, Lineage.Immutable);
-			return right.WrapMap(Comparer);
+			var currentRoot = Root;
+			if (minimum.IsSome) {
+				currentRoot.Split(minimum.Value, out left, out central, out right, Lineage.Immutable);
+				currentRoot = right;
+				if (central != null) {
+					currentRoot = currentRoot.Root_Add(left.Key, left.Value, Comparer, true, Lineage.Immutable);
+				}
+			}
+			if (maximum.IsSome) {
+				currentRoot.Split(maximum.Value, out left, out central, out right, Lineage.Immutable);
+				currentRoot = left;
+				if (central != null) {
+					currentRoot = currentRoot.Root_Add(central.Key, central.Value, Comparer, true, Lineage.Immutable);
+				}
+			}
+			return currentRoot.WrapMap(Comparer);
 		}
 	}
 }

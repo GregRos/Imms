@@ -67,6 +67,7 @@
   </Target>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="NamespaceDoc.fs" />
     <Compile Include="Aliases.fs" />
     <Compile Include="Compatibility.fs" />
     <Compile Include="Generic Operators.fs" />
