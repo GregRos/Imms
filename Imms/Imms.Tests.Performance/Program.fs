@@ -13,7 +13,6 @@ open System.Linq
 open System.Windows.Forms
 open System.Drawing
 open System.Drawing.Imaging
-open FSharp.Charting
 open System.CodeDom.Compiler
 open Imms.Tests
 open Imms.FSharp.Implementation
@@ -52,24 +51,11 @@ let runTests (tests : ErasedTest list) =
     let mutable results = []
 
     let results = tests |> List.map (runTest writer)
-    let charts = present results
     let mutable i = 0;
     let basePath = "..\..\Benchmarks\Results"
     let resultFolder, n = getFreeDir basePath "benchmark"
     let logsFolder = resultFolder
-    let chartsFolder = sprintf "%s\Charts" resultFolder
-    Directory.CreateDirectory chartsFolder |> ignore
     
-    for chart, kind, name in charts do
-        let frm = chart.ShowChart()
-        frm.Text <- name
-        frm.Width <- (frm.Width |> float) * 1.5 |> int
-        frm.Height <- (frm.Height |> float) * 1.5 |> int
-        use bmp = new Bitmap(frm.Width, frm.Height)
-        frm.DrawToBitmap(bmp, Rectangle(Point.Empty, bmp.Size))
-        bmp.Save(sprintf "%s\%03d.%A.%s.png" chartsFolder n kind name, ImageFormat.Png)
-        frm.Close()
-        i <- i + 1
     
     let table = results |> Report.toTable
     File.WriteAllText(sprintf "%s\\%03d.table.csv" logsFolder n, table)
@@ -97,7 +83,7 @@ let  main argv =
    // let c = Scripts.mapLike args
     let tests = a // @ b @ c
     
-    let tests = tests |> Seq.take 1 |> Seq.toList // |> List.filter (fun x -> x.Test.Name |> String.containsAny false ["Complex"])
+    let tests = tests // |> List.filter (fun x -> x.Test.Name |> String.containsAny false ["Complex"])
     runTests tests
     0
         

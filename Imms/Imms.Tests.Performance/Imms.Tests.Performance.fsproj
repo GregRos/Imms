@@ -67,7 +67,6 @@
     <Compile Include="Bench.fs" />
     <Compile Include="Wrappers.fs" />
     <Compile Include="Data.Targets.fs" />
-    <Compile Include="Presentation.fs" />
     <Compile Include="Report.fs" />
     <Compile Include="Tests.fs" />
     <Compile Include="Tests.Sequential.fs" />
@@ -80,12 +79,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="CsvHelper">
-      <HintPath>..\..\..\packages\CsvHelper.2.13.4.0\lib\net40-client\CsvHelper.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="CsvHelper" />
-    <Reference Include="FSharp.Charting">
-      <HintPath>..\packages\FSharp.Charting.0.90.13\lib\net40\FSharp.Charting.dll</HintPath>
+      <HintPath>..\..\..\packages\CsvHelper.2.13.5.0\lib\net40-client\CsvHelper.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.Core">
@@ -93,15 +87,15 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharpx.Collections">
-      <HintPath>..\packages\FSharpx.Collections.1.14.0\lib\net40\FSharpx.Collections.dll</HintPath>
+      <HintPath>..\..\..\packages\FSharpx.Collections.1.14.0\lib\net40\FSharpx.Collections.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharpx.Core">
-      <HintPath>..\packages\FSharpx.Core.1.8.41\lib\40\FSharpx.Core.dll</HintPath>
+      <HintPath>..\..\..\packages\FSharpx.Core.1.8.32\lib\40\FSharpx.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="LINQtoCSV">
-      <HintPath>..\..\..\packages\LINQtoCSV.1.4.0.0\lib\net35\LINQtoCSV.dll</HintPath>
+      <HintPath>..\..\..\packages\LINQtoCSV.1.5.0.0\lib\net35\LINQtoCSV.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />

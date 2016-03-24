@@ -69,9 +69,8 @@ let toTable (entries : TestInstanceMeta list) =
     
 let toLog (entries : TestInstanceMeta list) = 
     let context = CsvContext()
-    use stream = new StringWriter()
-    let js = Newtonsoft.Json.JsonSerializer.Create()
-    
+    let js = Newtonsoft.Json.JsonSerializer.Create(null)
+    use stream = new StringWriter()    
     let entries = entries |> Seq.map (toFullRecord)
     js.Serialize(stream, entries |> Seq.toArray )
     stream.Flush()

@@ -269,7 +269,8 @@ module Sys =
         
 ///A module that contains light-weight wrappers for FSharpx collections.
 module FSharpx = 
-    module Vector' = FSharpx.Collections.Vector
+   
+    module Vector' = FSharpx.Collections.PersistentVector
     module Deque' = FSharpx.Collections.Deque
     module RanAccList' = FSharpx.Collections.RandomAccessList
     ///A light-weight wrapper for FSharpx.Vector
@@ -278,7 +279,7 @@ module FSharpx =
         interface seq<'t> with
             member x.GetEnumerator() = (x.inner :> _ seq).GetEnumerator() :> System.Collections.IEnumerator
             member x.GetEnumerator() = (x.inner :> _ seq).GetEnumerator():>System.Collections.Generic.IEnumerator<_>
-        val public inner : FSharpx.Collections.Vector<'t>
+        val public inner : FSharpx.Collections.PersistentVector<'t>
         new (innerp) = {inner = innerp}
         member  x.AddLast v = Vector(x.inner.Conj v)
         member  x.get_Item i = x.inner.[i]
