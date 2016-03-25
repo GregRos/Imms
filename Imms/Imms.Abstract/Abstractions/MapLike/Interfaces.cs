@@ -14,9 +14,6 @@ namespace Imms.Abstract {
 	public abstract partial class AbstractMap<TKey, TValue, TMap> 
 	: IDictionary<TKey, TValue>, IDictionary
 	{
-
-		
-
 		bool IDictionary<TKey, TValue>.Remove(TKey key) {
 			throw Errors.Collection_readonly;
 		}
@@ -115,10 +112,22 @@ namespace Imms.Abstract {
 			}
 		}
 
+		/// <summary>
+		/// Gets an <see cref="T:System.Collections.Generic.ICollection`1"/> containing the keys of the <see cref="T:System.Collections.Generic.IDictionary`2"/>.
+		/// </summary>
+		/// <returns>
+		/// An <see cref="T:System.Collections.Generic.ICollection`1"/> containing the keys of the object that implements <see cref="T:System.Collections.Generic.IDictionary`2"/>.
+		/// </returns>
 		ICollection<TKey> IDictionary<TKey, TValue>.Keys {
 			get { return new FakeCollection<TKey>(Keys, Length); }
 		}
 
+		/// <summary>
+		/// Gets an <see cref="T:System.Collections.Generic.ICollection`1"/> containing the values in the <see cref="T:System.Collections.Generic.IDictionary`2"/>.
+		/// </summary>
+		/// <returns>
+		/// An <see cref="T:System.Collections.Generic.ICollection`1"/> containing the values in the object that implements <see cref="T:System.Collections.Generic.IDictionary`2"/>.
+		/// </returns>
 		ICollection<TValue> IDictionary<TKey, TValue>.Values {
 			get { return new FakeCollection<TValue>(Values, Length); }
 		}
