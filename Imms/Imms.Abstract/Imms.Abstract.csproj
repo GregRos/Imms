@@ -82,7 +82,7 @@
     <Compile Include="Equality and Comparison\FastEquality.cs" />
     <Compile Include="Equality and Comparison\General\LambdaComparer.cs" />
     <Compile Include="Equality and Comparison\General\LambdaEquality.cs" />
-    <Compile Include="Internal\NoValueException.cs" />
+    <Compile Include="Public\NoValueException.cs" />
     <Compile Include="NamespaceDoc.cs" />
     <Compile Include="Properties\ImmsInfo.cs" />
     <Compile Include="Internal\Errors.cs" />

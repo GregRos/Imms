@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Imms.Abstract;
 
 namespace Imms {
@@ -14,6 +15,7 @@ namespace Imms {
 		/// </summary>
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("This member is not meant to be used.", true)]
+		[CompilerGenerated]
 		public IEnumerable<T> AsSeq {
 			get { return this; }
 		}

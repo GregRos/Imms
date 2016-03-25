@@ -272,7 +272,7 @@ namespace Imms.Abstract {
 			ValueSelector<TKey, TValue, TValue2, TValue> collision) {
 			using (var builder = EmptyBuilder) {
 				other.ForEach(pair => {
-					var myKvp = builder.TryGetKvp(pair.Key).OrMaybe(TryGetKvp(pair.Key));
+					var myKvp = builder.TryGetKvp(pair.Key).Or(TryGetKvp(pair.Key));
 					if (myKvp.IsSome) {
 						var kvp = myKvp.Value;
 						var newValue = collision(kvp.Key, kvp.Value, pair.Value);

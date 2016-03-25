@@ -17,7 +17,9 @@ namespace Imms {
 		/// </summary>
 		/// <param name="t"></param>
 		/// <param name="message">An optional extra message.</param>
-		internal NoValueException(Type t = null, string message = "")
-			: base(GetMessage(t, message)) {}
+		public NoValueException(Type t = null, string message = "")
+			: base(GetMessage(t, message)) {
+			
+		}
 	}
 }

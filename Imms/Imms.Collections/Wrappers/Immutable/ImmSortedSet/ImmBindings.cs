@@ -3,7 +3,7 @@ using Imms.Abstract;
 using Imms.Implementation;
 
 namespace Imms {
-	public partial class ImmSortedSet<T> {
+	public partial class ImmSortedSet<T> : ISet<T> {
 		protected override ISetBuilder<T, ImmSortedSet<T>> EmptyBuilder {
 			get { return new Builder(Comparer, OrderedAvlTree<T, bool>.Node.Empty); }
 		}

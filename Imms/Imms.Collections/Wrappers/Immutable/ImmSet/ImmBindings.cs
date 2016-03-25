@@ -3,7 +3,7 @@ using Imms.Abstract;
 using Imms.Implementation;
 
 namespace Imms {
-	public partial class ImmSet<T> {
+	public partial class ImmSet<T> : ISet<T> {
 		protected override ISetBuilder<T, ImmSet<T>> EmptyBuilder {
 			get { return new Builder(EqualityComparer, HashedAvlTree<T, bool>.Node.Empty); }
 		}

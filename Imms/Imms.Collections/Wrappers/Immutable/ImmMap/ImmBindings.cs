@@ -1,10 +1,11 @@
+using System.Collections;
 using System.Collections.Generic;
 using Imms.Abstract;
 using Imms.Implementation;
 
 namespace Imms {
 
-	public sealed partial class ImmMap<TKey, TValue> {
+	public sealed partial class ImmMap<TKey, TValue>  :  IDictionary<TKey, TValue>, IDictionary {
 		protected override IMapBuilder<TKey, TValue, ImmMap<TKey, TValue>> EmptyBuilder {
 			get { return new Builder(Empty(_equality)); }
 		}

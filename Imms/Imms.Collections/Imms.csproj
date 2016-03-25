@@ -51,7 +51,7 @@
     <DefineConstants>
     </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Release\Imms.xml</DocumentationFile>
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <Prefer32Bit>false</Prefer32Bit>
@@ -76,6 +76,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Examples\Optional.cs" />
     <Compile Include="Implementation\Common\Assertions.cs" />
     <Compile Include="Implementation\Common\Marked.cs" />
     <Compile Include="Implementation\FingerTree\Measured.cs" />

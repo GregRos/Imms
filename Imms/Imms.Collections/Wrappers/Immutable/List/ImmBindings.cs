@@ -1,9 +1,10 @@
+using System.Collections;
 using System.Collections.Generic;
 using Imms.Abstract;
 using Imms.Implementation;
 
 namespace Imms {
-	public partial class ImmList<T> {
+	public partial class ImmList<T> :  IList<T>, IList, IEnumerable, IEnumerable<T> {
 		protected override ISequentialBuilder<T, ImmList<T>> EmptyBuilder {
 			get { return new Builder(); }
 		}

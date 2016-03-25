@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime;
+using System.Runtime.CompilerServices;
 using Imms.Abstract;
 #pragma warning disable 618 //Obsolete warning about AnyNone
 
@@ -88,7 +90,7 @@ namespace Imms {
 		/// </summary>
 		/// <param name="other">The other optional value instance.</param>
 		/// <returns></returns>
-		public Optional<T> OrMaybe(Optional<T> other) {
+		public Optional<T> Or(Optional<T> other) {
 			return IsSome ? this : other;
 		}
 
@@ -154,6 +156,15 @@ namespace Imms {
 		public static implicit operator Optional<T>(T v) {
 			return Some(v);
 		}
+
+		/// <summary>
+		///     Unwraps the optional value.
+		/// </summary>
+		/// <param name="v"></param>
+		public static explicit operator T(Optional<T> v) {
+			return v.Value;
+		}
+
 
 		/// <summary>
 		///     Determines equality between optional values, where the underlying value type of the right-hand instance is unknown.
@@ -305,6 +316,8 @@ namespace Imms {
 		public override string ToString() {
 			return IsSome ? Value.ToString() : $"{{None<{typeof (T).PrettyName()}>}}";
 		}
+
+
 	}
 
 	
@@ -352,7 +365,7 @@ namespace Imms {
 		/// <typeparam name="T">The type of the value.</typeparam>
 		/// <param name="x">The value to wrap.</param>
 		/// <returns></returns>
-		public static Optional<T> AsSome<T>(this T x) {
+		internal static Optional<T> AsSome<T>(this T x) {
 			return Optional.Some(x);
 		}
 
@@ -460,6 +473,27 @@ namespace Imms {
 			where T : IComparable<T> {
 			return other.IsSome ? optional.CompareTo(other.Value) : optional.IsNone ? 0 : 1;
 		}
+
+		/// <summary>
+		/// Applies a filter on the underlying value, returning None if the filter returns false.
+		/// </summary>
+		/// <param name="optional"></param>
+		/// <param name="filter"></param>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		public static Optional<T> Filter<T>(this Optional<T> optional, Func<T, bool> filter) {
+			return optional.Map(x => filter(x) ? x.AsSome() : x);
+		}
+
+		/// <summary>
+		/// Flattens a nested optional type, returning either the final underlying value, or None if no such value exists.
+		/// </summary>
+		/// <param name="optional"></param>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		public static Optional<T> Flatten<T>(this Optional<Optional<T>> optional) {
+			return optional.IsSome ? optional.Value : Optional.None;
+		}
 	}
 
 	/// <summary>
@@ -468,6 +502,7 @@ namespace Imms {
 	[EditorBrowsable(EditorBrowsableState.Never)]
 	[Obsolete("This type is not meant to be referenced directly in user code.")]
 	[Serializable]
+	[CompilerGenerated]
 	public class AnyNone : IAnyOptional {
 		/// <summary>
 		/// Returns the instance of AnyNone.
