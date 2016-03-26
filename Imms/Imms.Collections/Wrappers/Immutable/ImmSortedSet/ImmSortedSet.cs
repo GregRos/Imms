@@ -226,7 +226,7 @@ namespace Imms {
 				currentRoot.Split(minimum.Value, out left, out central, out right, Lineage.Immutable);
 				currentRoot = right;
 				if (central != null) {
-					currentRoot = currentRoot.Root_Add(left.Key, left.Value, Comparer, true, Lineage.Immutable);
+					currentRoot = currentRoot.Root_Add(central.Key, central.Value, Comparer, true, Lineage.Immutable);
 				}
 			}
 			if (maximum.IsSome) {
