@@ -5,7 +5,8 @@ using Imms.Abstract;
 using Imms.Implementation;
 
 namespace Imms {
-	public partial class ImmSortedMap<TKey, TValue> : IDictionary<TKey, TValue>, IDictionary {
+	public partial class ImmSortedMap<TKey, TValue> 
+		: IDictionary<TKey, TValue>, IDictionary, IReadOnlyDictionary<TKey, TValue> {
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		protected override IMapBuilder<TKey, TValue, ImmSortedMap<TKey, TValue>> EmptyBuilder {
 			get { return new Builder(Empty(Comparer)); }

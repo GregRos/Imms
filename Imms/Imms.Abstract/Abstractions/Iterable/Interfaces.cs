@@ -6,7 +6,8 @@ using System.Text;
 
 namespace Imms.Abstract
 {
-	public abstract partial class AbstractIterable<TElem, TIterable, TBuilder> : ICollection<TElem>, ICollection {
+	public abstract partial class AbstractIterable<TElem, TIterable, TBuilder> 
+		: ICollection<TElem>, ICollection, IReadOnlyCollection<TElem> {
 		void ICollection<TElem>.Add(TElem item) {
 			throw Errors.Collection_readonly;
 		}
@@ -50,5 +51,13 @@ namespace Imms.Abstract
 		{
 			get { return true; }
 		}
+
+		/// <summary>
+		/// Gets the number of elements in the collection.
+		/// </summary>
+		/// <returns>
+		/// The number of elements in the collection. 
+		/// </returns>
+		int IReadOnlyCollection<TElem>.Count => Length;
 	}
 }

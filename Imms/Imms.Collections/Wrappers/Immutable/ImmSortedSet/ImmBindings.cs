@@ -1,9 +1,10 @@
+using System.Collections;
 using System.Collections.Generic;
 using Imms.Abstract;
 using Imms.Implementation;
 
 namespace Imms {
-	public partial class ImmSortedSet<T> : ISet<T> {
+	public partial class ImmSortedSet<T> : ISet<T>, ICollection<T>, ICollection, IReadOnlyCollection<T> {
 		protected override ISetBuilder<T, ImmSortedSet<T>> EmptyBuilder {
 			get { return new Builder(Comparer, OrderedAvlTree<T, bool>.Node.Empty); }
 		}

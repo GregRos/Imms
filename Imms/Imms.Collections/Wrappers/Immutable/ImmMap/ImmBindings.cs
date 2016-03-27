@@ -5,7 +5,7 @@ using Imms.Implementation;
 
 namespace Imms {
 
-	public sealed partial class ImmMap<TKey, TValue>  :  IDictionary<TKey, TValue>, IDictionary {
+	public sealed partial class ImmMap<TKey, TValue>  :  IDictionary<TKey, TValue>, IDictionary, IReadOnlyDictionary<TKey, TValue> {
 		protected override IMapBuilder<TKey, TValue, ImmMap<TKey, TValue>> EmptyBuilder {
 			get { return new Builder(Empty(_equality)); }
 		}

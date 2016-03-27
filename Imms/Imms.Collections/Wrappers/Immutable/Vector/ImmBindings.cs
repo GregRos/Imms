@@ -5,7 +5,7 @@ using Imms.Abstract;
 using Imms.Implementation;
 
 namespace Imms {
-	public partial class ImmVector<T> : IList<T>, IList {
+	public partial class ImmVector<T> : IList<T>, IList, IReadOnlyList<T> {
 		protected override ISequentialBuilder<T, ImmVector<T>> EmptyBuilder {
 			get { return new Builder(); }
 		}

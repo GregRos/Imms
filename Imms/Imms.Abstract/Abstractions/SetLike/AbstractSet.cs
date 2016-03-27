@@ -36,7 +36,7 @@ namespace Imms.Abstract {
 		}
 
 		/// <summary>
-		/// Identical to <see cref="Union(TSet)"/>.
+		/// Identical to <see cref="Union(IEnumerable{TElem})"/>.
 		/// </summary>
 		/// <param name="items"></param>
 		/// <returns></returns>

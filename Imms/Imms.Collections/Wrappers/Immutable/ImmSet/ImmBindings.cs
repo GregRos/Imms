@@ -1,9 +1,10 @@
+using System.Collections;
 using System.Collections.Generic;
 using Imms.Abstract;
 using Imms.Implementation;
 
 namespace Imms {
-	public partial class ImmSet<T> : ISet<T> {
+	public partial class ImmSet<T> : ISet<T>, ICollection, IReadOnlyCollection<T> {
 		protected override ISetBuilder<T, ImmSet<T>> EmptyBuilder {
 			get { return new Builder(EqualityComparer, HashedAvlTree<T, bool>.Node.Empty); }
 		}

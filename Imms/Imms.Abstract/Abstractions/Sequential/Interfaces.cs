@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace Imms.Abstract {
-	public abstract partial class AbstractSequential<TElem, TList> : IList<TElem>, IList {
+	public abstract partial class AbstractSequential<TElem, TList> : IList<TElem>, IList, IReadOnlyList<TElem> {
 	
 		void IList.RemoveAt(int index) {
 			throw Errors.Collection_readonly;

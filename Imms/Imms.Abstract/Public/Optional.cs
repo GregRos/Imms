@@ -77,24 +77,6 @@ namespace Imms {
 		}
 
 		/// <summary>
-		/// Returns the underlying value, or the specified default value if no underlying value exists.
-		/// </summary>
-		/// <param name="default">The default value, returned if this instance has no value.</param>
-		/// <returns></returns>
-		public T Or(T @default) {
-			return IsSome ? Value : @default;
-		}
-
-		/// <summary>
-		/// Returns this instance if it has an underlying value, and otherwise returns the other optional value instance (whether it has a value or not).
-		/// </summary>
-		/// <param name="other">The other optional value instance.</param>
-		/// <returns></returns>
-		public Optional<T> Or(Optional<T> other) {
-			return IsSome ? this : other;
-		}
-
-		/// <summary>
 		/// Returns true if this optional value is Some.
 		/// </summary>
 		public bool IsSome {
@@ -472,6 +454,26 @@ namespace Imms {
 		public static int CompareTo<T>(this Optional<T> optional, Optional<T> other)
 			where T : IComparable<T> {
 			return other.IsSome ? optional.CompareTo(other.Value) : optional.IsNone ? 0 : 1;
+		}
+
+		/// <summary>
+		/// Returns the underlying value, or the specified default value if no underlying value exists.
+		/// </summary>
+		/// <param name="opt"></param>
+		/// <param name="default">The default value, returned if this instance has no value.</param>
+		/// <returns></returns>
+		public static T Or<T>(this Optional<T> opt, T @default) {
+			return opt.IsSome ? opt.Value : @default;
+		}
+
+		/// <summary>
+		/// Returns this instance if it has an underlying value, and otherwise returns the other optional value instance (whether it has a value or not).
+		/// </summary>
+		/// <param name="self"></param>
+		/// <param name="other">The other optional value instance.</param>
+		/// <returns></returns>
+		public static Optional<T> Or<T>(this Optional<T> self, Optional<T> other) {
+			return self.IsSome ? self : other;
 		}
 
 		/// <summary>
