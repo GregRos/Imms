@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 
 namespace Imms {
 	/// <summary>
 	/// Static class containing utility and extension methods for working with the ImmVector[T] class.
 	/// </summary>
+	[Obsolete("Use ImmList for now.")]
 	public static class ImmVector {
 		/// <summary>
 		/// Returns the empty vector for the specified type.

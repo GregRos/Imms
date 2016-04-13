@@ -9,6 +9,8 @@ using System.Text;
 
 namespace Imms.Abstract {
 
+
+
 	/// <summary>
 	///     A parent class for collections of all sorts (ordered, unordered, set-like, dictionary-like) that support a form of
 	///     iteration.

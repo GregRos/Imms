@@ -1,52 +1,75 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.CodeDom.Compiler;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Imms;
-using Microsoft.FSharp.Core;
+using Imms.Abstract;
 
 namespace Imms.Messing.CSharp {
+	
+	public interface Mixin {
+	}
 
-	public interface IMixin {
+	public interface HasMixins {
 		
 	}
 
-	//instead of implementing IMixin, you implement IHas<Mixin> 
-
-	public interface MForEach<out T> : IMixin {
-		void ForEach(Action<T> iterator);
-
-		bool ForEachWhile(Func<T, bool> iterator);
+	public interface Has<out TMixin> : HasMixins
+		where TMixin : Mixin {
+		TMixin Mixin { get; }
 	}
 
-	interface MForEachBack<out T> : IMixin {
-		void ForEachBack(Action<T> iterator);
+	public static class MixinUtils {
+		public static TMixin Mixout<TMixin>(this Has<TMixin> what)
+			where TMixin : Mixin {
+			return what.Mixin;
+		}
 
-		bool ForEachBackWhile(Func<T, bool> iterator);
-	}
-
-	public interface Has<out TMixin> : IMixin {
-		TMixin Implementation {
-			get;
+		[Obsolete("The object does not have this mixin.", true)]
+		public static TSome Mixout<TSome>(this HasMixins something) where TSome : Mixin  {
+			return default(TSome);
 		}
 	}
 
-	public static class ForEachMixin {
-
+	public abstract class Mixin1 : Mixin {
 	}
+
+	public abstract class Mixin2 : Mixin {
+	}
+
+	public abstract class Mixin3 : Mixin {
+	}
+
+	public class Test : Has<Mixin1>, Has<Mixin2> {
+
+
+		Mixin1 Has<Mixin1>.Mixin => Mixin1Impl.Instance;
+
+		Mixin2 Has<Mixin2>.Mixin => Mixin2Impl.Instance;
+
+		private class Mixin1Impl : Mixin1 {
+			public static readonly Mixin1Impl Instance = new Mixin1Impl();
+		}
+
+		private class Mixin2Impl : Mixin2 {
+			public static readonly Mixin2Impl Instance = new Mixin2Impl();
+		}
+	}
+
+	static class TestThis {
+		public static void run() {
+			var t = new Test();
+			var a = t.Mixout<Mixin1>();
+			var b = t.Mixout<Mixin2>();
+
+		}
+	}
+
 
 	class Program {
 
 
 		static void Main(string[] args) {
-			int? a = 5;
-			object b = null;
-
-			var x = a.AsOptional();
-			var y = 5.AsOptional();
-			FSharpOption<int>.Some()
+			var list = ImmList.FromItems(1);
+			list.Any()
 		}
-
 	}
 }

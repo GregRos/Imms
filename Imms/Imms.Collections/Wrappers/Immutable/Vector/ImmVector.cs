@@ -8,6 +8,7 @@ namespace Imms {
 	///     Implements a random access list.
 	/// </summary>
 	/// <typeparam name="T">The type of value stored in the list.</typeparam>
+	[Obsolete("Use ImmList for now.")]
 	public sealed partial class ImmVector<T> : AbstractSequential<T, ImmVector<T>> {
 
 		

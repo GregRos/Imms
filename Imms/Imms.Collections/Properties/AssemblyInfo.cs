@@ -9,11 +9,7 @@ using Imms;
 
 [assembly: AssemblyTitle("Imms")]
 [assembly: AssemblyDescription(
-	@"High performance persistent and immutable collections for .NET, supporting many operations efficiently.
- 
-Includes a catenable/indexed deque, a high performance vector, sets, and maps/dictionaries. 
-
-Better than anything released for .NET previously (as of this writing, and that I'm aware of). Check out the comparisons in the project website."
+	@"A powerful library of immutable and persistent data structures for the .NET platform."
 	)]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany(ImmsInfo.Author)]

@@ -7,12 +7,12 @@
     <authors>$author$</authors>
     <owners>$author$</owners>
     <licenseUrl>https://raw.githubusercontent.com/GregRos/Imms/master/license.md</licenseUrl>
-    <projectUrl>https://github.com/GregRos/Imms</projectUrl>
+    <projectUrl>https://github.com/Imms/Imms</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
 	<iconUrl>https://raw.githubusercontent.com/GregRos/Imms/master/Icon.png</iconUrl>
 	<summary>High-performance immutable collections for .NET.</summary>
     <description>$description$</description>
-    <releaseNotes>Various minor fixes.</releaseNotes>
+    <releaseNotes>Various changes.</releaseNotes>
     <copyright>Copyright 2016</copyright>
     <tags>collection collections fsharp immutable persistent imms imm functional deque vector map dictionary list queue stack performance set</tags>
   </metadata>

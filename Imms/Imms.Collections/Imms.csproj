@@ -78,7 +78,6 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Examples\Optional.cs" />
     <Compile Include="Implementation\Common\Assertions.cs" />
     <Compile Include="Implementation\Common\Marked.cs" />
     <Compile Include="Implementation\FingerTree\Measured.cs" />

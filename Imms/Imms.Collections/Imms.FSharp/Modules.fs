@@ -3,6 +3,7 @@ open Imms.FSharp
 open Imms.FSharp.Implementation
 open Imms
 open Imms.FSharp.Operators
+#nowarn "44"
 ///A module for working with ImmVector collections -- immutable high-performance vector collections.
 module ImmVector = 
     ///Returns true if the specified collection is empty.
