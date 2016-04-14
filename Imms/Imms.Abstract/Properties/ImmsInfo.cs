@@ -9,6 +9,6 @@ namespace Imms {
 
 		public const string Author = "Gregory Rosenbaum";
 
-		public const string Copyright = "Copyright © Gregory Rosenbaum  2013";
+		public const string Copyright = "Copyright © Gregory Rosenbaum 2013";
 	}
 }

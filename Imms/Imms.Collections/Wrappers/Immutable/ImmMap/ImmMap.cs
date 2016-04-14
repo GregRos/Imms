@@ -146,15 +146,6 @@ namespace Imms {
 			return _root.SymDifference(other._root, Lineage.Mutable()).WrapMap(_equality);
 		}
 
-		/// <summary>
-		/// Adds a new key-value pair (as a tuple) to the map.
-		/// </summary>
-		/// <param name="pair"></param>
-		/// <returns></returns>
-		public ImmMap<TKey, TValue> Add(Tuple<TKey, TValue> pair) {
-			pair.CheckNotNull("pair");
-			return Add(pair.Item1, pair.Item2);
-		}
 
 			/// <summary>
 			///     Applies the specified function on every item in the collection, from last to first, and stops when the function returns false.

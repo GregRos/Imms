@@ -4,72 +4,52 @@ using System.Linq;
 using Imms.Abstract;
 
 namespace Imms.Messing.CSharp {
-	
-	public interface Mixin {
-	}
-
-	public interface HasMixins {
-		
-	}
-
-	public interface Has<out TMixin> : HasMixins
-		where TMixin : Mixin {
-		TMixin Mixin { get; }
-	}
-
-	public static class MixinUtils {
-		public static TMixin Mixout<TMixin>(this Has<TMixin> what)
-			where TMixin : Mixin {
-			return what.Mixin;
-		}
-
-		[Obsolete("The object does not have this mixin.", true)]
-		public static TSome Mixout<TSome>(this HasMixins something) where TSome : Mixin  {
-			return default(TSome);
-		}
-	}
-
-	public abstract class Mixin1 : Mixin {
-	}
-
-	public abstract class Mixin2 : Mixin {
-	}
-
-	public abstract class Mixin3 : Mixin {
-	}
-
-	public class Test : Has<Mixin1>, Has<Mixin2> {
 
 
-		Mixin1 Has<Mixin1>.Mixin => Mixin1Impl.Instance;
-
-		Mixin2 Has<Mixin2>.Mixin => Mixin2Impl.Instance;
-
-		private class Mixin1Impl : Mixin1 {
-			public static readonly Mixin1Impl Instance = new Mixin1Impl();
-		}
-
-		private class Mixin2Impl : Mixin2 {
-			public static readonly Mixin2Impl Instance = new Mixin2Impl();
-		}
-	}
-
-	static class TestThis {
-		public static void run() {
-			var t = new Test();
-			var a = t.Mixout<Mixin1>();
-			var b = t.Mixout<Mixin2>();
-
-		}
-	}
 
 
 	class Program {
 
 
 		static void Main(string[] args) {
-			var list = ImmList.FromItems(1);
-			list.Any()
+			ImmList<int> list = ImmList.Of(0, 1, 2);
+
+			//access to the ends:
+			list = list.AddLast(3).AddFirst(-1);
+			list = list.AddLastRange(new[] {
+				4, 5, 6
+			});
+			//this is executed as a concat operaiton:
+			list = list.AddFirstRange(list);
+			list = list.RemoveLast().RemoveFirst();
+
+			//indexing:
+			int firstItem = list[0];
+			list = list.Update(0, firstItem + 1);
+			list = list.Insert(0, firstItem);
+			
+			//slices:
+			ImmList<int> sublist = list[1, 3]; //slices in range [1, 3], inclusive.
+
+			ImmSet<int> set = ImmSet.Of(0, 1, 2);
+
+			//add and remove:
+			set = set.Add(3).Remove(0);
+			
+			//set-theoretic operations:
+			set = set.Union(new[] {
+				5, 6
+			});
+			set = set.Except(new[] {
+				5
+			});
+			set = set.Intersect(set);
+
+			ImmMap<int, int> map = ImmMap.Of(Kvp.Of(1, 1), Kvp.Of(2, 2), Kvp.Of(3, 3));
+			map = map.Add(4, 4);
+			map = map.Remove(2);
+			int value = map[1];
+
 		}
 	}
 }

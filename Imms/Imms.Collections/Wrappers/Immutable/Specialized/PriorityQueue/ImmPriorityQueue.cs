@@ -30,7 +30,7 @@ namespace Imms.Specialized
 		public ImmPriorityQueue<T, TPriority> Add(T item) {
 			var priority = Appraise(item);
 			var list = Inner.TryGet(priority);
-			var newList = list.IsSome ? list.Value.AddLast(item) : ImmList.FromItems(item);
+			var newList = list.IsSome ? list.Value.AddLast(item) : ImmList.Of(item);
 
 			return Wrap(Inner.Set(priority, newList));
 		}

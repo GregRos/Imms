@@ -25,6 +25,16 @@ namespace Imms {
 		}
 
 		/// <summary>
+		/// Returns a set consisting of the specified items.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="items"></param>
+		/// <returns></returns>
+		public static ImmSet<T> Of<T>(params T[] items) {
+			return Empty<T>().AddRange(items);
+		}
+
+		/// <summary>
 		/// Converts the sequence to an <see cref="ImmSet{T}"/>. Optionally, you may provide an eq comparer.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>

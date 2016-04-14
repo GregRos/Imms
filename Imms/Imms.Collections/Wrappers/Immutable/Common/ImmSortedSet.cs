@@ -38,6 +38,16 @@ namespace Imms {
 		}
 
 		/// <summary>
+		/// Returns a sorted set consisting of the specified items.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="items"></param>
+		/// <returns></returns>
+		public static ImmSortedSet<T> Of<T>(params T[] items) where T : IComparable<T> {
+			return Empty<T>().AddRange(items);
+		}
+
+		/// <summary>
 		/// Converts a sequence of elements to an <see cref="ImmSortedSet{T}"/> using the specified comparer.
 		/// </summary>
 		/// <typeparam name="T">The type of element.</typeparam>

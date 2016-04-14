@@ -42,6 +42,14 @@ namespace Imms {
 		public static ImmSortedMap<TKey, TValue> CreateOrderedMap<TKey, TValue>(this IComparer<TKey> comparer) {
 			return ImmSortedMap<TKey, TValue>.Empty(comparer);
 		}
+		/// <summary>
+		/// Returns a sorted map consisting of the specified key-value pairs.
+		/// </summary>
+		/// <param name="kvps"></param>
+		/// <returns></returns>
+		public static ImmSortedMap<TKey, TValue> Of<TKey, TValue>(params KeyValuePair<TKey, TValue>[] kvps) where TKey : IComparable<TKey> {
+			return Empty<TKey, TValue>().SetRange(kvps);
+		}
 
 		/// <summary>
 		/// Returns an empty ordered map for the specified types using default comparison semantics.

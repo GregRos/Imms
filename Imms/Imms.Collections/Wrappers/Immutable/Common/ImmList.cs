@@ -30,7 +30,7 @@ namespace Imms {
 		/// <typeparam name="T">The type of value.</typeparam>
 		/// <param name="items">The elements from which to create the ImmList.</param>
 		/// <returns></returns>
-		public static ImmList<T> FromItems<T>(params T[] items) {
+		public static ImmList<T> Of<T>(params T[] items) {
 			return items.ToImmList();
 		}
 	}

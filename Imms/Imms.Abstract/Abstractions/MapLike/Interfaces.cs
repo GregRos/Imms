@@ -14,6 +14,17 @@ namespace Imms.Abstract {
 	public abstract partial class AbstractMap<TKey, TValue, TMap> 
 	: IDictionary<TKey, TValue>, IDictionary, IReadOnlyDictionary<TKey, TValue>
 	{
+
+		public static TMap operator +(AbstractMap<TKey, TValue, TMap> left, KeyValuePair<TKey, TValue> kvp) {
+			return left.Add(kvp);
+		}
+
+		public static TMap operator -(AbstractMap<TKey, TValue, TMap> left, TKey key) {
+			return left.Remove(key);
+		}
+
+
+
 		bool IDictionary<TKey, TValue>.Remove(TKey key) {
 			throw Errors.Collection_readonly;
 		}

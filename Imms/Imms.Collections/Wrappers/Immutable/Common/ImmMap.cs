@@ -21,6 +21,17 @@ namespace Imms {
 		}
 
 		/// <summary>
+		/// Returns a map containing the specified key-value pairs.
+		/// </summary>
+		/// <typeparam name="TKey"></typeparam>
+		/// <typeparam name="TValue"></typeparam>
+		/// <param name="kvps"></param>
+		/// <returns></returns>
+		public static ImmMap<TKey, TValue> Of<TKey, TValue>(params KeyValuePair<TKey, TValue>[] kvps) {
+			return Empty<TKey, TValue>().SetRange(kvps);
+		}
+
+		/// <summary>
 		/// Returns an empty ImmMap that uses the specified equality comparer to equate elements.
 		/// </summary>
 		/// <typeparam name="TKey"></typeparam>
