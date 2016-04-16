@@ -19,7 +19,6 @@ namespace Imms.Messing.CSharp {
 			list = list.AddLastRange(new[] {
 				4, 5, 6
 			});
-			//this is executed as a concat operaiton:
 			list = list.AddFirstRange(list);
 			list = list.RemoveLast().RemoveFirst();
 
