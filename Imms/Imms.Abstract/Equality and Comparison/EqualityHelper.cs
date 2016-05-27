@@ -27,8 +27,9 @@ namespace Imms.Abstract {
 
 		static Func<TKey, Optional<TValue>> GetValueSelectorFor<TKey, TValue>(
 			IEnumerable<KeyValuePair<TKey, TValue>> map) {
-			if (map is IDictionary<TKey, TValue>) {
-				var asDict = map as IDictionary<TKey, TValue>;
+			var dict = map as IDictionary<TKey, TValue>;
+			if (dict != null) {
+				var asDict = dict;
 				return k => asDict.ContainsKey(k) ? asDict[k].AsSome() : Optional.None;
 			}
 			return null;

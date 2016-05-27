@@ -15,14 +15,6 @@ namespace Imms.Abstract {
 	: IDictionary<TKey, TValue>, IDictionary, IReadOnlyDictionary<TKey, TValue>
 	{
 
-		public static TMap operator +(AbstractMap<TKey, TValue, TMap> left, KeyValuePair<TKey, TValue> kvp) {
-			return left.Add(kvp);
-		}
-
-		public static TMap operator -(AbstractMap<TKey, TValue, TMap> left, TKey key) {
-			return left.Remove(key);
-		}
-
 
 
 		bool IDictionary<TKey, TValue>.Remove(TKey key) {

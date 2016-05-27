@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Imms;
 using Imms.Abstract;
 
@@ -53,6 +54,12 @@ partial class __ListLikeClass__<T> : AbstractSequential<T, __ListLikeClass__<T>>
 		return base._SelectMany(GetPrototype<TRElem>(), selector);
 	}
 
+
+
+	 public __ListLikeClass__<TResult> GroupJoin<TInner, TKey, TResult>(IEnumerable<TInner> inner, Func<T, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<T, IEnumerable<TInner>, TResult> resultSelector, IEqualityComparer<TKey> eq = null) {
+		 return base._GroupJoin(GetPrototype<TResult>(), inner, outerKeySelector, innerKeySelector, resultSelector, eq);
+	 }
+
 	/// <summary>
 	///     Applies an element selector on every element of the collection, yielding a sequence.
 	///     Applies a result selector on every source element and generated sequence, yielding a result.
@@ -64,7 +71,7 @@ partial class __ListLikeClass__<T> : AbstractSequential<T, __ListLikeClass__<T>>
 	/// <param name="rSelector">The result selector.</param>
 	/// <returns></returns>
 	public __ListLikeClass__<TRElem> SelectMany<TElem2, TRElem>(Func<T, IEnumerable<TElem2>> selector,
-		Func<T, IEnumerable<TElem2>, TRElem> rSelector) {
+		Func<T, TElem2, TRElem> rSelector) {
 		return base._SelectMany(GetPrototype<TRElem>(), selector, rSelector);
 	}
 
@@ -99,11 +106,10 @@ partial class __ListLikeClass__<T> : AbstractSequential<T, __ListLikeClass__<T>>
 	/// <param name="iKeySelector">The inner key selector (for the specified sequence).</param>
 	/// <param name="eq"></param>
 	/// <returns></returns>
-	public __ListLikeClass__<Tuple<T, TInner>> Join<TInner, TKey>(IEnumerable<TInner> inner, Func<T, TKey> oKeySelector,
+	public __ListLikeClass__<KeyValuePair<T, TInner>> Join<TInner, TKey>(IEnumerable<TInner> inner, Func<T, TKey> oKeySelector,
 		Func<TInner, TKey> iKeySelector, IEqualityComparer<TKey> eq = null) {
-		Func<T, TInner, Tuple<T, TInner>> tuple = Tuple.Create;
 
-		return Join(inner, oKeySelector, iKeySelector, tuple, eq);
+		return Join(inner, oKeySelector, iKeySelector, Kvp.Of, eq);
 	}
 
 	/// <summary>
@@ -124,6 +130,26 @@ partial class __ListLikeClass__<T> : AbstractSequential<T, __ListLikeClass__<T>>
 			eq ?? EqualityComparer<TKey>.Default);
 	}
 
+
+	/// <summary>
+	///     Groups the elements of the collection by key, applies a selector on each value, and then applies a result selector
+	///     on each key-group pair. Uses the specified equality comparer.
+	/// </summary>
+	/// <typeparam>
+	///     The type of the key.
+	///     <name>TKey</name>
+	/// </typeparam>
+	/// <typeparam name="TKey">The type of key.</typeparam>
+	/// <typeparam name="TElem2">The element type.</typeparam>
+	/// <param name="keySelector">The key selector.</param>
+	/// <param name="elementSelector">The element selector.</param>
+	/// <param name="eq">The equality comparer.</param>
+	/// <returns></returns>
+	public __ListLikeClass__<KeyValuePair<TKey, IEnumerable<TElem2>>> GroupBy<TKey, TElem2>(Func<T, TKey> keySelector, Func<T, TElem2> elementSelector,
+		IEqualityComparer<TKey> eq = null) {
+		return GroupBy(keySelector, elementSelector, Kvp.Of, eq ?? EqualityComparer<TKey>.Default);
+	}
+
 	/// <summary>
 	///     Groups the elements of the collection by key, applies a selector on each value, and then applies a result selector
 	///     on each key-group pair. Uses the specified equality comparer.
@@ -136,9 +162,9 @@ partial class __ListLikeClass__<T> : AbstractSequential<T, __ListLikeClass__<T>>
 	/// <param name="keySelector">The key selector.</param>
 	/// <param name="eq">The equality comparer.</param>
 	/// <returns></returns>
-	public __ListLikeClass__<Tuple<TKey, IEnumerable<T>>> GroupBy<TKey>(Func<T, TKey> keySelector,
+	public __ListLikeClass__<KeyValuePair<TKey, IEnumerable<T>>> GroupBy<TKey>(Func<T, TKey> keySelector,
 		IEqualityComparer<TKey> eq = null) {
-		return GroupBy(keySelector, x => x, Tuple.Create, eq ?? EqualityComparer<TKey>.Default);
+		return GroupBy(keySelector, x => x, Kvp.Of, eq ?? EqualityComparer<TKey>.Default);
 	}
 
 	/// <summary>

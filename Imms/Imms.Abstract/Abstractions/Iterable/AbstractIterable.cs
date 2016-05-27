@@ -298,6 +298,8 @@ namespace Imms.Abstract {
 			return item;
 		}
 
+
+
 		/// <summary>
 		///     Finds the first item for which the specified selector returns Some.
 		/// </summary>

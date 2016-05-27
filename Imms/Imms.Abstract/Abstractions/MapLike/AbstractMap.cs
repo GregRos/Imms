@@ -229,13 +229,13 @@ namespace Imms.Abstract {
 		/// This method is optimized when the input collection is a map compatible with this one.
 		/// </remarks>
 		/// <returns></returns>
-		public TMap Join<TValue2>(IEnumerable<KeyValuePair<TKey, TValue2>> other,
+		public TMap Intersect<TValue2>(IEnumerable<KeyValuePair<TKey, TValue2>> other,
 			ValueSelector<TKey, TValue, TValue2, TValue> selector) {
 			other.CheckNotNull("other");
 			selector.CheckNotNull("selector");
 			//NOTE: other can be TMap when TValue = TValue2.
 			var map = other as TMap;
-			if (map != null && IsCompatibleWith(map)) return Join(map, (ValueSelector<TKey, TValue, TValue, TValue>) (object) selector);
+			if (map != null && IsCompatibleWith(map)) return Intersect(map, (ValueSelector<TKey, TValue, TValue, TValue>) (object) selector);
 			return Join_Unchecked(other, selector);
 		}
 
@@ -314,7 +314,7 @@ namespace Imms.Abstract {
 		/// If a subtraction function is supplied, the operation invokes the function on each key-value pair shared with the other map. If the function returns a value,
 		/// that value is used in the return map. If the function returns None, the key is removed from the return map.
 		/// </remarks>
-		public virtual TMap Subtract<TValue2>(IEnumerable<KeyValuePair<TKey, TValue2>> other,
+		public virtual TMap Except<TValue2>(IEnumerable<KeyValuePair<TKey, TValue2>> other,
 			ValueSelector<TKey, TValue, TValue2, Optional<TValue>> subtraction = null) {
 			if (subtraction == null && ReferenceEquals(other, this)) {
 				return Empty;
@@ -323,7 +323,7 @@ namespace Imms.Abstract {
 
 			//NOTE: other can be a TMap when TValue2 = TValue! ReSharper can't seem to understand this...
 			var map = other as TMap;
-			if (map != null && IsCompatibleWith(map)) return Subtract(map, (ValueSelector<TKey, TValue, TValue, Optional<TValue>>) (object) subtraction);
+			if (map != null && IsCompatibleWith(map)) return Except(map, (ValueSelector<TKey, TValue, TValue, Optional<TValue>>) (object) subtraction);
 
 			return Subtract_Unchecked(other, subtraction);
 		}
@@ -369,13 +369,13 @@ namespace Imms.Abstract {
 		/// 
 		/// This operation returns all key-value pairs present in either map. If a key is shared between both maps, the collision resolution function is applied to determine the value in the result map.
 		/// </remarks>
-		public virtual TMap Merge(IEnumerable<KeyValuePair<TKey, TValue>> other, ValueSelector<TKey, TValue, TValue, TValue> collision = null) {
+		public virtual TMap Union(IEnumerable<KeyValuePair<TKey, TValue>> other, ValueSelector<TKey, TValue, TValue, TValue> collision = null) {
 			other.CheckNotNull("other");
 			if (collision == null && ReferenceEquals(this, other)) {
 				return this;
 			}
 			var map = other as TMap;
-			if (map != null && IsCompatibleWith(map)) return Merge(map, collision);
+			if (map != null && IsCompatibleWith(map)) return Union(map, collision);
 			return Merge_Unchecked(other, collision);
 		}
 
@@ -426,7 +426,7 @@ namespace Imms.Abstract {
 		/// </exception>
 		public TMap AddRange(IEnumerable<KeyValuePair<TKey, TValue>> other) {
 			other.CheckNotNull("other");
-			return Merge(other, (k, v1, v2) => { throw Errors.Key_exists(k); });
+			return Union(other, (k, v1, v2) => { throw Errors.Key_exists(k); });
 		}
 
 		/// <summary>
@@ -437,7 +437,7 @@ namespace Imms.Abstract {
 		/// <exception cref="ArgumentException"></exception>
 		public TMap SetRange(IEnumerable<KeyValuePair<TKey, TValue>> other) {
 			other.CheckNotNull("other");
-			return Merge(other);
+			return Union(other);
 		}
 
 		TMap Merge_Unchecked(IEnumerable<KeyValuePair<TKey, TValue>> other,
@@ -467,7 +467,7 @@ namespace Imms.Abstract {
 		/// <param name="collision">
 		///     Optionally, a collision resolution function. If null, data in the other map overwrites data in the current map.
 		/// </param>
-		protected virtual TMap Merge(TMap other, ValueSelector<TKey, TValue, TValue, TValue> collision = null) {
+		protected virtual TMap Union(TMap other, ValueSelector<TKey, TValue, TValue, TValue> collision = null) {
 			other.CheckNotNull("other");
 			return Merge_Unchecked(other, collision);
 		}
@@ -479,7 +479,7 @@ namespace Imms.Abstract {
 		/// </summary>
 		/// <param name="other">The other.</param>
 		/// <param name="collision">The collision.</param>
-		protected virtual TMap Join(TMap other, ValueSelector<TKey, TValue, TValue, TValue> collision = null) {
+		protected virtual TMap Intersect(TMap other, ValueSelector<TKey, TValue, TValue, TValue> collision = null) {
 			other.CheckNotNull("other");
 			return Join_Unchecked(other, collision);
 		}
@@ -495,7 +495,7 @@ namespace Imms.Abstract {
 		///     A substraction selector that determines the new value (if any) when a collision occurs. If
 		///     null, colliding keys are removed.
 		/// </param>
-		protected virtual TMap Subtract(TMap other, ValueSelector<TKey, TValue, TValue, Optional<TValue>> subtraction = null) {
+		protected virtual TMap Except(TMap other, ValueSelector<TKey, TValue, TValue, Optional<TValue>> subtraction = null) {
 			other.CheckNotNull("other");
 			return Subtract_Unchecked(other, subtraction);
 		}
@@ -520,7 +520,7 @@ namespace Imms.Abstract {
 			var map = other as TMap;
 			if (map != null && IsCompatibleWith(map)) return Difference(map);
 			var otherMap = this.ToIterable(other);
-			return Subtract(otherMap).Merge(otherMap.Subtract(this));
+			return Except(otherMap).Union(otherMap.Except(this));
 		}
 
 		/// <summary>
@@ -529,7 +529,7 @@ namespace Imms.Abstract {
 		/// <param name="other">The other.</param>
 		protected virtual TMap Difference(TMap other) {
 			other.CheckNotNull("other");
-			return Subtract(other).Merge(other.Subtract(this));
+			return Except(other).Union(other.Except(this));
 		}
 
 		/// <summary>

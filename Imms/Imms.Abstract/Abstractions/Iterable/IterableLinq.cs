@@ -153,6 +153,8 @@ namespace Imms.Abstract
 																   }, eq);
 		}
 
+
+
 		/// <summary>
 		/// (Implemnetation) The GroupJoin operator. Results are returned as a key-value map, and group elements are stored as an iterator.
 		/// </summary>
@@ -252,7 +254,7 @@ namespace Imms.Abstract
 		/// <param name="bFactory"></param>
 		/// <param name="comparer"></param>
 		/// <returns></returns>
-		protected internal virtual TRList _OrderBy<TRList>(TRList bFactory, IComparer<TElem> comparer)
+		protected virtual TRList _OrderBy<TRList>(TRList bFactory, IComparer<TElem> comparer)
 			where TRList : IBuilderFactory<ISequentialBuilder<TElem, TRList>>
 		{
 			bFactory.CheckNotNull("bFactory");
@@ -331,7 +333,7 @@ namespace Imms.Abstract
 		/// <param name="rSelector"> </param>
 		/// <returns> </returns>
 		protected virtual TRSeq _SelectMany<TRElem, TRSeq, TElem2>(TRSeq bFactory, Func<TElem, IEnumerable<TElem2>> selector,
-																  Func<TElem, IEnumerable<TElem2>, TRElem> rSelector)
+																  Func<TElem, TElem2, TRElem> rSelector)
 			where TRSeq : IBuilderFactory<IIterableBuilder<TRElem, TRSeq>>
 		{
 			bFactory.CheckNotNull("bFactory");
@@ -342,10 +344,13 @@ namespace Imms.Abstract
 				ForEach(v =>
 						{
 							var vs = selector(v);
-							builder.Add(rSelector(v, vs));
+							vs.ForEach(item => {
+								builder.Add(rSelector(v, item));
+							});
 						});
 				return builder.Produce();
 			}
 		}
+
 	}
 }

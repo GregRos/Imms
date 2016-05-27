@@ -70,10 +70,10 @@ namespace Imms {
 		/// 
 		/// This operation returns all key-value pairs present in either map. If a key is shared between both maps, the collision resolution function is applied to determine the value in the result map.
 		/// </remarks>
-		public override ImmSortedMap<TKey, TValue> Merge(IEnumerable<KeyValuePair<TKey, TValue>> other, ValueSelector<TKey, TValue, TValue, TValue> collision = null) {
+		public override ImmSortedMap<TKey, TValue> Union(IEnumerable<KeyValuePair<TKey, TValue>> other, ValueSelector<TKey, TValue, TValue, TValue> collision = null) {
 			other.CheckNotNull("other");
 			var map = other as ImmSortedMap<TKey, TValue>;
-			if (map != null && IsCompatibleWith(map)) return Merge(map, collision);
+			if (map != null && IsCompatibleWith(map)) return Union(map, collision);
 			int len;
 			var arr = other.ToArrayFast(out len);
 			var cmp = Comparers.KeyComparer<KeyValuePair<TKey, TValue>, TKey>(x => x.Key, Comparer);
@@ -130,12 +130,12 @@ namespace Imms {
 			return Root.ForEachWhile((k, v) => function(Kvp.Of(k, v)));
 		}
 
-		protected override ImmSortedMap<TKey, TValue> Merge(ImmSortedMap<TKey, TValue> other,
+		protected override ImmSortedMap<TKey, TValue> Union(ImmSortedMap<TKey, TValue> other,
 			ValueSelector<TKey, TValue, TValue, TValue> collision = null) {
 			return Root.Union(other.Root, collision, Lineage.Mutable()).WrapMap(Comparer);
 		}
 
-		protected override ImmSortedMap<TKey, TValue> Join(ImmSortedMap<TKey, TValue> other,
+		protected override ImmSortedMap<TKey, TValue> Intersect(ImmSortedMap<TKey, TValue> other,
 			ValueSelector<TKey, TValue, TValue, TValue> collision = null) {
 			return Root.Intersect(other.Root, Lineage.Mutable(), collision).WrapMap(Comparer);
 		}
@@ -167,17 +167,17 @@ namespace Imms {
 		/// If a subtraction function is supplied, the operation invokes the function on each key-value pair shared with the other map. If the function returns a value,
 		/// that value is used in the return map. If the function returns None, the key is removed from the return map.
 		/// </remarks>
-		public override ImmSortedMap<TKey, TValue> Subtract<TValue2>(IEnumerable<KeyValuePair<TKey, TValue2>> other,
+		public override ImmSortedMap<TKey, TValue> Except<TValue2>(IEnumerable<KeyValuePair<TKey, TValue2>> other,
 			ValueSelector<TKey, TValue, TValue2, Optional<TValue>> subtraction = null) {
 			other.CheckNotNull("other");
 			var map = other as ImmSortedMap<TKey, TValue2>;
 			if (map != null && Comparer.Equals(map.Comparer)) {
 				return Root.Except(map.Root, Lineage.Mutable(), subtraction).WrapMap(Comparer);
 			}
-			return base.Subtract(other, subtraction);
+			return base.Except(other, subtraction);
 		}
 
-		protected override ImmSortedMap<TKey, TValue> Subtract(ImmSortedMap<TKey, TValue> other, ValueSelector<TKey, TValue, TValue, Optional<TValue>> subtraction = null) {
+		protected override ImmSortedMap<TKey, TValue> Except(ImmSortedMap<TKey, TValue> other, ValueSelector<TKey, TValue, TValue, Optional<TValue>> subtraction = null) {
 			return Root.Except(other.Root, Lineage.Mutable(), subtraction).WrapMap(Comparer);
 		}
 

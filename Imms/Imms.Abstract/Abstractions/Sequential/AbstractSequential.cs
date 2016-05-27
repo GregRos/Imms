@@ -373,6 +373,47 @@ namespace Imms.Abstract {
 			return ForEachWhile(function.HideIndex());
 		}
 
+
+		/// <summary>
+		/// Orders the elements in this collection using the specified ordering.
+		/// </summary>
+		/// <param name="ordering">The ordering to use.</param>
+		/// <returns></returns>
+		public virtual TList OrderBy(IComparer<TElem> ordering) {
+			return _OrderBy(this, ordering);
+		}
+
+		/// <summary>
+		/// Orders the sequence using the specified key selector.
+		/// </summary>
+		/// <typeparam name="TKey1">The type of the key.</typeparam>
+		/// <param name="selector1">The selector</param>
+		/// <returns></returns>
+		public TList OrderBy<TKey1>(Func<TElem, TKey1> selector1) {
+			var comparer1 = Comparer<TKey1>.Default;
+			return OrderBy(comparer1.BySelector(selector1));
+		}
+
+		/// <summary>
+		/// Orders the sequence using the specified key selector.
+		/// </summary>
+		/// <typeparam name="TKey1">The type of the key.</typeparam>
+		/// <param name="selector1">The selector</param>
+		/// <returns></returns>
+		public TList OrderByDescending<TKey1>(Func<TElem, TKey1> selector1) {
+			var comparer1 = Comparer<TKey1>.Default;
+			return OrderBy(comparer1.BySelector(selector1).Invert());
+		}
+
+		/// <summary>
+		/// Orders the sequence using the specified orderings, in order of precedence.
+		/// </summary>
+		/// <param name="orderings">The orderings.</param>
+		/// <returns></returns>
+		public TList OrderBy(params IComparer<TElem>[] orderings) {
+			return OrderBy(orderings.Combine());
+		}
+
 		/// <summary>
 		///     Applies an accumulator on each element in the sequence. Begins by applying the accumulator on the first two
 		///     elements. Runs from last to first.

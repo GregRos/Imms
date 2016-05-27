@@ -4,6 +4,7 @@ open Imms.FSharp.Implementation
 open LINQtoCSV
 open CsvHelper
 open ExtraFunctional
+open YamlDotNet.Serialization
 type FullRecord = 
     {
         Test : string
@@ -69,10 +70,10 @@ let toTable (entries : TestInstanceMeta list) =
     
 let toLog (entries : TestInstanceMeta list) = 
     let context = CsvContext()
-    let js = Newtonsoft.Json.JsonSerializer.Create(null)
+    let ys = YamlDotNet.Serialization.Serializer(SerializationOptions.Roundtrip)
     use stream = new StringWriter()    
     let entries = entries |> Seq.map (toFullRecord)
-    js.Serialize(stream, entries |> Seq.toArray )
+    ys.Serialize(stream, entries)
     stream.Flush()
     stream.ToString()
 

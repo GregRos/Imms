@@ -1,0 +1,126 @@
+<#@ template debug="true" hostspecific="true" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".fs" #>
+<#@ include file="Helpers.ttinclude"#><# if (!RanAlready) {
+		RanAlready = true;
+		return TransformText().Replace("\t", "    ");
+	}
+#>
+namespace Imms.FSharp
+open Imms.FSharp
+open Imms.FSharp.Implementation
+open Imms
+open Imms.FSharp.Operators
+///A module for working with ImmVector collections -- immutable high-performance vector collections.
+module ImmVector = 
+<#=IncludeWithParameters("Sequential.ttinclude", new[] {Tu("TypeName", "ImmVector<'v>"), Tu("ElementName", "'v")},1 )#>
+
+///A module for working with ImmList collections -- immutable sequential collections supporting many operations.
+module ImmList =
+	///Adds an element to the beginning of the collection.
+	let addFirst value (collection:'elem ImmList) = collection.AddFirst(value)
+	///inserts an element at the specified index.
+	let insert index value (collection :'elem ImmList) = collection.Insert(index,value)
+	///removes the element at the specified index.
+	let removeAt index (collection :'elem ImmList) = collection.RemoveAt(index) 
+<#=IncludeWithParameters("Sequential.ttinclude", 
+new[] {
+	Tu("TypeName", "ImmList<'v>"), 
+	Tu("ElementName", "'v")
+},1)#>
+	
+///A module for working with ImmSet collections -- immutable hash-based sets.
+module ImmSet = 
+	///Returns an empty ImmSet that uses the specified equality comparer.
+	let emptyWith(Eq : IEq<'elem>) = ImmSet<'elem>.Empty(Eq)
+	///Returns an empty ImmSet that uses the default equality comparer for the type.
+	let empty<'v when 'v : equality> = ImmSet<'v>.Empty()
+	///Constructs an ImmSet from a sequence, using the default equality comparer for the type.
+	let ofSeq (vs : seq<'k> when 'k : equality) = ImmSet.ToImmSet(vs)
+	///Constructs an ImmSet from a sequence, using the specified equality comparer.
+	let ofSeqWith eq vs = ImmSet.ToImmSet(vs, eq)
+<#=IncludeWithParameters("Set.ttinclude", 
+new[] {
+	Tu("TypeName", "ImmSet<'k>"), 
+	Tu("ElementName", "'k")
+},1)#>
+///A module for working with ImmSortedSet collections -- immutable ordered sets.
+module ImmSortedSet = 
+	///Returns an empty ImmSortedSet that uses the default comparer for the type.
+	let empty<'k when 'k : comparison> = ImmSortedSet<'k>.Empty(null)
+	///Returns an empty ImmSortedSet that uses the specified comparer.
+	let emptyWith(cm : ICmp<'elem>) = ImmSortedSet<'elem>.Empty(cm)
+	///Constructs an ImmSortedSet from a sequence, using the default comparer for the type.
+	let ofSeq (vs : 'a seq when 'a : comparison) = ImmSortedSet.ToImmSortedSet(vs, null)
+	///Constructs an ImmSortedSet from a sequence, using the specified comparer.
+	let ofSeqWith cmp vs = ImmSortedSet.ToImmSortedSet(vs, cmp)
+	///Returns the ith element of the set, by sort order.
+	let byOrder i (set : _ ImmSortedSet) = set.ByOrder i
+	///Returns the minimal element of the set.
+	let min (set : _ ImmSortedSet) = set.MinItem
+	///Returns the maximal element of the set.
+	let max (set : _ ImmSortedSet) = set.MaxItem
+	///Removes the minimal element of the set.
+	let removeMin (set :_ ImmSortedSet) = set.RemoveMin()
+	///Removes the maximal element of the set.
+	let removeMax (set :_ ImmSortedSet) = set.RemoveMax()
+<#=IncludeWithParameters("Set.ttinclude", 
+new[] {
+	Tu("TypeName", "ImmSortedSet<'k>"), 
+	Tu("ElementName", "'k")
+},1)#>
+///A module for working with ImmMap collections -- immutable hash-based maps.
+module ImmMap =
+	///Returns an empty ImmMap that uses the specified equality comparer.
+	let emptyWith(eq : Eq<'key>) = ImmMap<'key,'value>.Empty(eq)
+	///Returns an empty ImmMap that uses the default equality comparer for the type.
+	let empty<'key,'value when 'key : equality> = ImmMap<'key,'value>.Empty()
+	///Constructs an ImmMap from a sequence of ordered pairs, using the default equality comparer for the type.
+	let ofPairsSeq (vs : seq<'key * 'value> when 'key : equality) = ImmMap.Empty() /++ (vs |> Seq.map Kvp)
+	///Constructs an ImmSet from a sequence of key-value pairs, using the default equality comparer for the type.
+	let ofKvpSeq (vs : seq<Kvp<'key,'value>> when 'key : equality) = ImmMap.ToImmMap(vs)
+	///Constructs an ImmMap from a sequence of key-value pairs, using the specified equality comparer.
+	let ofKvpSeqWith eq vs = ImmMap.ToImmMap(vs, eq)
+	///Constructs an ImmMap from a sequence of ordered pairs, using the specified equality comparer.
+	let ofPairsSeqWith eq (vs : seq<'key * 'value>) = ImmMap.Empty(eq).AddRange(vs |> Seq.map Kvp) 
+<#=IncludeWithParameters("Map.ttinclude", 
+new[] {
+	Tu("TypeName", "ImmMap<'k, 'v>"), 
+	Tu("KeyName", "'k"),
+	Tu("ValueName", "'v")
+},1)#>
+///A module for working with ImmSortedMap collections -- immutable comparison-based maps.
+module ImmSortedMap = 
+	///Returns an empty ImmSortedMap that uses the default comparer for the type.
+	let empty<'key, 'value when 'key : comparison> = ImmSortedMap<'key, 'value>.Empty(null)
+	///Returns an empty ImmSortedMap that uses the specified comparer.
+	let emptyWith(cm : Cmp<'key>) = ImmSortedMap<'key,'value>.Empty(cm)
+	///Constructs an ImmSortedMap from a sequence of ordered pairs, using the default comparer for the type.
+	let ofPairsSeq (vs : seq<'key * 'value> when 'key : comparison) = ImmSortedMap.Empty(null) /++ (vs |> Seq.map Kvp)
+	///Constructs an ImmSortedMap from a sequence of key-value pairs, using the default comparer for the type.
+	let ofKvpSeq (vs : seq<Kvp<'key,'value>> when 'key : comparison) = ImmSortedMap.Empty(null) /++ (vs)
+	///Constructs an ImmSortedMap from a sequence of key-value pairs, using the specified comparer.
+	let ofKvpSeqWith cmp vs = ImmSortedMap.ToImmSortedMap(vs, cmp)
+	///Constructs an ImmSortedMap from a sequence of ordered pairs, using the specified comparer.
+	let ofSeqWith cmp (vs : seq<'key * 'value>) = ImmSortedMap.Empty(cmp).AddRange(vs |> Seq.map Kvp)
+	///Returns the nth element of the map, by sort order.
+	let byOrder n (map : ImmSortedMap<_,_>) = map.ByOrder n |> Kvp.ToTuple
+	///Returns the minimal element of the map.
+	let min (map : ImmSortedMap<_,_>) = map.MinItem |> Kvp.ToTuple
+	///Returns the maximal element of the map.
+	let max (map : ImmSortedMap<_,_>) = map.MaxItem |> Kvp.ToTuple
+	///Removes the minimal element of the map.
+	let removeMin (map : ImmSortedMap<_,_>) = map.RemoveMin()
+	///Removes the maximal element of the map.
+	let removeMax (map : ImmSortedMap<_,_>) = map.RemoveMax()
+<#=IncludeWithParameters("Map.ttinclude", 
+new[] {
+	Tu("TypeName", "ImmSortedMap<'k, 'v>"), 
+	Tu("KeyName", "'k"),
+	Tu("ValueName", "'v")
+},1)#>
+	
+

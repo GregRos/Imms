@@ -98,5 +98,23 @@ namespace Imms.Abstract {
 		public static int CompuateSeqHashCode<T>(this IEnumerable<T> self, IEqualityComparer<T> eq = null) {
 			return EqualityHelper.SeqHashCode(self, eq);
 		}
+
+		public static IComparer<T> BySelector<T, TKey>(this IComparer<TKey> comparer, Func<T, TKey> selector) {
+			return Comparer<T>.Create((a, b) => comparer.Compare(selector(a), selector(b)));
+		} 
+
+		public static IComparer<T> Combine<T>(this IComparer<T>[] others) {
+			return Comparer<T>.Create((a, b) => {
+				foreach (var comparer in others) {
+					var v = comparer.Compare(a, b);
+					if (v != 0) return v;
+				}
+				return 0;
+			});
+		}
+
+		public static IComparer<T> Invert<T>(this IComparer<T> comparer) {
+			return Comparer<T>.Create((a, b) => -comparer.Compare(a, b));
+		} 
 	}
 }
