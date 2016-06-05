@@ -73,8 +73,7 @@ let sequential(args : BaseArgs) =
 
     builder.AddTests(
         [
-            [AddFirst;AddLast;RemoveLast;RemoveFirst;InsertRandom;RemoveRandom; SetRandom; Iter; GetRandom] <-| iters;
-            [EitherEndAccess; FrontEndAccess] <-| iters / 10;
+            [AddFirst;AddLast;RemoveLast;RemoveFirst;InsertRandom;RemoveRandom; SetRandom; Iter; GetRandom; IterDirectN] <-| iters;
             [AddLastRange; AddFirstRange; InsertRangeRandom] <-| data_iters;
             [Take; Skip] <-| bulkIters;
             [IterDirect] <-| 1
@@ -84,8 +83,7 @@ let sequential(args : BaseArgs) =
 
     builder.AddTests(
         [
-            [AddLast;RemoveLast; SetRandom; Iter; GetRandom] <-| iters;
-            [FrontEndAccess] <-| iters / 10;
+            [AddLast;RemoveLast; SetRandom; Iter; GetRandom; IterDirectN] <-| iters;
             [AddLastRange; AddFirstRange; InsertRangeRandom] <-| data_iters;
             [Take] <-| bulkIters;
             [IterDirect] <-| 1
@@ -97,8 +95,7 @@ let sequential(args : BaseArgs) =
 
     builder.AddTests(
         [
-            [AddFirst;AddLast;RemoveLast;RemoveFirst;InsertRandom;RemoveRandom; SetRandom; Iter; GetRandom] <-| iters;
-            [EitherEndAccess; FrontEndAccess] <-| iters / 10;
+            [AddFirst;AddLast;RemoveLast;RemoveFirst;InsertRandom;RemoveRandom; SetRandom; Iter; GetRandom; IterDirectN] <-| iters;
             [AddLastRange; AddFirstRange; InsertRangeRandom] <-| data_iters;
             [Take; Skip] <-| bulkIters;
             [IterDirect] <-| 1
@@ -113,8 +110,7 @@ let sequential(args : BaseArgs) =
 
     builder.AddTests(
         [
-            [AddLast;RemoveLast; SetRandom; Iter; GetRandom] <-| iters;
-            [FrontEndAccess] <-| iters / 10;
+            [AddLast;RemoveLast; SetRandom; Iter; GetRandom; IterDirectN] <-| iters;
             [AddLastRange] <-| data_iters;
             [IterDirect] <-| 1
         ] |> List.collect id).Done
@@ -133,7 +129,7 @@ let mapLike(args : AdvancedArgs<_>) =
     let removeRatio = args.RemoveRatio
     let inline standard_tests() =
         [
-            [GetKeyRandom; Iter; RemoveKey] <-| iters;
+            [GetKeyRandom; Iter; RemoveKey; IterDirectN] <-| iters;
             [AddKeyRandom] <-| (bulkIters, data);
             [IterDirect] <-| full_iters;
             [AddKeys] <-| (bulkIters, dataKvp);

@@ -44,7 +44,7 @@ let inline take n col     = (^s : (member Take : int -> ^s) col,n)
 ///Calls an instance InsertRange method.
 let inline insertRange i data col  = (^s : (member InsertRange : int * 't -> 's) col, i, data)
 
-let inline iterWhile f col         = (^s : (member ForEachWhile : Func<'v, bool> -> 't) col, Func<'v, bool>(f))
+let inline iterWhile f col           = (^s : (member ForEachWhile : Func<'v, bool> -> 't) col, Func<'v, bool>(f))
 let inline contains k col          = (^s : (member ContainsKey : 'k -> bool) col, k)
 let inline setContains k col       = (^s : (member Contains : 'k -> bool) col, k)
 let inline add k v col             = (^s : (member Add : 'k * 'v -> 's) col,k,v)

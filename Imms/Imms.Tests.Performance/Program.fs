@@ -59,8 +59,8 @@ let runTests (tests : ErasedTest list) =
     
     let table = results |> Report.toTable
     File.WriteAllText(sprintf "%s\\%03d.table.csv" logsFolder n, table)
-    let log = results |> Report.toLog
-    File.WriteAllText(sprintf "%s\\%03d.log.csv" logsFolder n, log)
+    let log = results |> Report.toJSON
+    File.WriteAllText(sprintf "%s\\%03d.log.json" logsFolder n, log)
 
 open Scripts
 [<EntryPoint>]
@@ -68,11 +68,11 @@ let  main argv =
     
     let args = 
         Scripts.AdvancedArgs<_>(
-           Simple_Iterations = 10000,
-           Target_Size = 100000,
-           DataSource_Size = 1000,
+           Simple_Iterations = 20000,
+           Target_Size = 10000,
+           DataSource_Size = 10000,
            Full_Iterations = 1,
-           DataSource_Iterations = 3,
+           DataSource_Iterations = 2,
            Generator1 = Seqs.Numbers.length(1, 10),
            Generator2 =  Seqs.Numbers.length(1, 10),
            RemoveRatio = 0.6

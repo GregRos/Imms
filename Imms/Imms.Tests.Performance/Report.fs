@@ -68,9 +68,11 @@ let toTable (entries : TestInstanceMeta list) =
     stringw.Flush()
     stringw.ToString()                               
     
-let toLog (entries : TestInstanceMeta list) = 
+open Newtonsoft.Json
+let toJSON (entries : TestInstanceMeta list) = 
     let context = CsvContext()
-    let ys = YamlDotNet.Serialization.Serializer(SerializationOptions.Roundtrip)
+    let ys = JsonSerializer()
+    ys.Formatting <- Formatting.Indented
     use stream = new StringWriter()    
     let entries = entries |> Seq.map (toFullRecord)
     ys.Serialize(stream, entries)

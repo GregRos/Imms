@@ -8,6 +8,14 @@ open System.Linq
 open Imms.FSharp.Implementation
 open Imms.Tests.Performance
 
+let inline iterN n col =
+    let mutable i = 0
+    let step x = 
+        i <- i + 1
+        i < n
+    col |> Ops.iterWhile step
+
+
 let inline Iter iters = 
     let inline test col = 
         let s = col |> Ops.asSeq
@@ -30,6 +38,23 @@ let inline IterDirect iters =
         for i = 1 to iters do
             col |> Ops.iter
     simpleTest("Iterate", iters, test)
+
+let inline IterDirectN iters =
+    let inline test col = 
+        let len = col |> Ops.length
+        let mutable i = 0
+        while i < iters do
+            let dif = iters - i
+            let thisIters =
+                if dif > len then
+                    len
+                else
+                    dif
+            i <- i + dif
+            col |> iterN thisIters |> ignore
+    simpleTest("IterateN", iters, test)
+                    
+
     
 
 

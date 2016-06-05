@@ -3,7 +3,10 @@ open Imms.FSharp
 open Imms.FSharp.Implementation
 open Imms
 open Imms.FSharp.Operators
+open System
+#nowarn"44"
 ///A module for working with ImmVector collections -- immutable high-performance vector collections.
+[<ObsoleteAttribute>]
 module ImmVector = 
     ///Returns true if the specified collection is empty.
     let isEmpty (collection : ImmVector<'v>) = collection.IsEmpty

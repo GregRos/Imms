@@ -2,7 +2,22 @@ namespace Imms.Tests.Performance.Wrappers
 open System
 open Imms.Abstract
 #nowarn"20"
+
+module Common = 
+    let forEachWhile ( a : Func<_,_>) (x : seq<_>) =
+        let mutable go = true
+        use mutable iterator = x.GetEnumerator()
+        let mutable result = true
+        while go do
+            if iterator.MoveNext() then
+                go <- a.Invoke(iterator.Current)
+            else
+                go <- false
+                result <- false
+        result    
+
 ///A module with light-weight wrappers for the various System.Collections.Immutable classes.
+
 
 module Imms = 
     open Imms
@@ -21,6 +36,7 @@ module Imms =
         member  x.Length = x.inner.Length
         member  x.AsSeq = x.inner :> _ seq
         member  x.ForEach (a : Action<_>) = x.inner.ForEach (a)
+        member x.ForEachWhile(a : Func<_,_>) = x.inner.ForEachWhile(a)
         member  x.Keys = x.keys
         static member  FromSeq(s : 't seq) = 
             let mutable mp = [for item in s -> Kvp.Of(item, item)].ToImmMap() |> fun x -> ImmMap(x)
@@ -39,6 +55,7 @@ module Imms =
         member  x.AddRange (sq : KeyValuePair<_,_> seq) = OrderedMap<_>(x.inner.SetRange sq)
         member  x.RemoveRange sq = OrderedMap<_>(x.inner.RemoveRange sq)
         member  x.Remove item = OrderedMap(x.inner.Remove item)
+        member x.ForEachWhile(a : Func<_,_>) = x.inner.ForEachWhile(a)
         member  x.AsSeq = x.inner :> _ seq
         member  x.get_Item k = x.inner.TryGet(k).Value
         member  x.Keys = x.keys
@@ -60,6 +77,7 @@ module Imms =
         member  x.AddRange sq = Set(x.inner.Union sq)
         member  x.Length = x.inner.Length
         member  x.RemoveRange sq = Set(x.inner.Except sq)
+        member x.ForEachWhile(a : Func<_,_>) = x.inner.ForEachWhile(a)
         member  x.Union (o : Set<'t>) = Set(o.inner.Union x.inner)
         member  x.Intersect (s : Set<'t>) = Set(s.inner.Intersect x.inner)
         member  x.Except (s : Set<'t>) = Set(s.inner.Except x.inner)
@@ -84,6 +102,7 @@ module Imms =
         member  x.ForEach (a : Action<'t>) = x.inner.ForEach a
         member  x.AsSeq = x.inner :> _ seq
         member  x.AddRange sq = OrderedSet(x.inner.Union sq)
+        member x.ForEachWhile(a : Func<_,_>) = x.inner.ForEachWhile(a)
         member  x.Length = x.inner.Length
         member  x.RemoveRange sq = OrderedSet(x.inner.Except sq)
         member  x.Union (o : OrderedSet<'t>) = OrderedSet(x.inner.Union o.inner)
@@ -115,6 +134,7 @@ module Sys =
         member  x.AddFirst v          = List(x.inner.Insert(0, v)) 
         member  x.AddLastRange vs     = List(x.inner.AddRange(vs)) 
         member  x.AddFirstRange vs    = List(x.inner.InsertRange(0, vs)) 
+        member x.ForEachWhile(a : Func<_,_>) = x.inner.TrueForAll(Predicate(a.Invoke))
         member  x.RemoveLast()          = List(x.inner.RemoveAt(x.inner.Count - 1)) 
         member  x.RemoveFirst()         = List(x.inner.RemoveAt(0))
         member  x.Slice(a,b)           = List(x.inner.GetRange(a, a+b))
@@ -166,6 +186,7 @@ module Sys =
         member  x.AsSeq = x.inner :> _ seq
         member  x.ForEach (a : Action<_>) = 
             for item in x.inner do a.Invoke(item)
+        member x.ForEachWhile(a : Func<_,_>) = x.inner |> Common.forEachWhile a
         member  x.Add(k,v) = Dict(x.inner.SetItem(k,v))
         member  x.Length = x.inner.Count
         member  x.Remove item = Dict(x.inner.Remove item)
@@ -191,6 +212,8 @@ module Sys =
         new (innerp) = {inner = innerp}
         member  x.Add(k,v) = SortedDict(x.inner.SetItem(k,v))
         member  x.AddRange (sq : KeyValuePair<_,_> seq) = SortedDict(x.inner.SetItems sq)
+        member x.ForEachWhile(a : Func<_,_>) = x.inner |> Common.forEachWhile a
+
         member  x.Remove item = SortedDict(x.inner.Remove item)
         member  x.Length = x.inner.Count
         member  x.RemoveRange sq = 
@@ -224,6 +247,7 @@ module Sys =
         member  x.ForEach (a : Action<_>) = 
             for item in x.inner do a.Invoke(item)
         member  x.Length = x.inner.Count
+        member x.ForEachWhile(a : Func<_,_>) = x.inner |> Common.forEachWhile a
         member  x.AddRange (s : 't seq) = Set(x.inner.Union s)
         member  x.RemoveRange (s : 't seq) = Set(x.inner.Except s)
         member  x.Union (o : Set<'t>) = Set(x.inner.Union o.inner)
@@ -250,6 +274,7 @@ module Sys =
         member  x.Contains(k) = x.inner.Contains k
         member  x.AddRange sq = SortedSet(x.inner.Union sq)
         member  x.RemoveRange sq = SortedSet(x.inner.Except sq)
+        member x.ForEachWhile(a : Func<_,_>) = x.inner |> Common.forEachWhile a
         member  x.Length = x.inner.Count
         member  x.AsSeq = x.inner :> _ seq
         member  x.ForEach (a : Action<_>) = 
@@ -285,6 +310,7 @@ module FSharpx =
         member  x.get_Item i = x.inner.[i]
         member  x.Update(i,v) = Vector(x.inner.Update(i,v))
         member  x.RemoveLast() = Vector(x.inner |> Vector'.initial)
+        member x.ForEachWhile(a : Func<_,_>) = x.inner |> Common.forEachWhile a
         member  x.GetEnumerator() = (x.inner :> seq<_>).GetEnumerator()
         member  x.AddLastList vs = Vector(Vector'.append x.inner vs)
         member  x.Length = x.inner.Length
@@ -311,6 +337,7 @@ module FSharpx =
         member  x.RemoveLast() = Deque(x.inner.Unconj |> fst)
         member  x.IsEmpty = x.inner.IsEmpty
         member  x.RemoveFirst() = Deque(x.inner.Uncons |> snd)
+        member x.ForEachWhile(a : Func<_,_>) = x.inner |> Common.forEachWhile a
         member  x.AsSeq = x.inner |> seq
         member  x.ForEach (f : Action<_>) =
             for item in x.inner do
@@ -351,6 +378,8 @@ module FSharp =
         member  x.Remove k = Map<_>(x.inner.Remove(k))
         member  x.Contains k = x.inner.ContainsKey k
         member  x.Length = x.inner.Count
+        member x.ForEachWhile(a : Func<_,_>) = x.inner |> Common.forEachWhile a
+
         member  x.get_Item k = x.inner.[k]
         member  x.Keys = x.keys
         member  x.RemoveRange sq = 
