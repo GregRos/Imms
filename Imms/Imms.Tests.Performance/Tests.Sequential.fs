@@ -43,15 +43,29 @@ let inline RemoveLast iters =
         for i = 1 to iters do
             if col |> Ops.isEmpty then col <- col'
             col <- col |> Ops.removeLast
-    simpleTest("RemoveLast", iters, test) <+. Class "DequeSingle"
+    simpleTest("RemoveLast", iters, test)
     
+let inline First iters = 
+    let inline test col = 
+        for i = 1 to iters do 
+            let x = col |> Ops.first
+            ()
+    simpleTest("First", iters, test) 
+
+let inline Last iters = 
+    let inline test col = 
+        for i = 1 to iters do 
+            let x = col |> Ops.last
+            ()
+    simpleTest("Last", iters, test) 
+
 let inline RemoveFirst iters = 
     let inline test col' = 
         let mutable col = col'
         for i = 1 to iters do
             if col |> Ops.isEmpty then col <- col'
             col <- col |> Ops.removeFirst
-    simpleTest("RemoveFirst", iters, test) <+. Class "DequeSingle"
+    simpleTest("RemoveFirst", iters, test)
     
 let inline GetRandom iters = 
     let inline test col = 
@@ -84,7 +98,8 @@ let inline SetRandom iters =
             col |> Ops.set cur 0
     simpleTest("Update", iters, test) <+. Desc("Randomly updates items by index from the entire collection.")
 
-let inline Take iters = 
+let inline Take(iters, mag) = 
+    let mag = float mag
     let inline test col = 
         let count = 
             col
@@ -95,12 +110,13 @@ let inline Take iters =
         let mutable col = col
         for i = 1 to iters do
             let mult = pdata.[i]
-            let cur = int (count * mult)
+            let cur = int (mag * mult)
             col |> Ops.take cur
     simpleTest("Take", iters, test) 
     <+. Desc("Returns a starting subsequence consisting of a random number of items (from the entire collection), {iters} times.") 
     
-let inline Skip iters = 
+let inline Skip(iters,mag) = 
+    let mag = float mag
     let inline test col = 
         let count = 
             col
@@ -111,7 +127,7 @@ let inline Skip iters =
         let mutable col = col
         for i = 1 to iters do
             let mult = pdata.[i]
-            let cur = int (count * mult)
+            let cur = int (mag * mult)
             col |> Ops.skip cur
     simpleTest("Skip", iters, test)
 

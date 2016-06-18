@@ -56,11 +56,11 @@ let runTests (tests : ErasedTest list) =
     let resultFolder, n = getFreeDir basePath "benchmark"
     let logsFolder = resultFolder
     
-    
-    let table = results |> Report.toTable
-    File.WriteAllText(sprintf "%s\\%03d.table.csv" logsFolder n, table)
     let log = results |> Report.toJSON
-    File.WriteAllText(sprintf "%s\\%03d.log.json" logsFolder n, log)
+    let filename = sprintf "%s\\%03d.log.json" logsFolder n
+    File.WriteAllText(filename, log)
+    let curDir = Path.Combine(Environment.CurrentDirectory, filename)
+    printfn "Wrote report to %s" curDir
 
 open Scripts
 [<EntryPoint>]

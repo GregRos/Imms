@@ -133,6 +133,8 @@ module Sys =
         member  x.AddLast v           = List(x.inner.Add(v))
         member  x.AddFirst v          = List(x.inner.Insert(0, v)) 
         member  x.AddLastRange vs     = List(x.inner.AddRange(vs)) 
+        member x.First = x.inner.[0]
+        member x.Last = x.inner.[x.inner.Count - 1]
         member  x.AddFirstRange vs    = List(x.inner.InsertRange(0, vs)) 
         member x.ForEachWhile(a : Func<_,_>) = x.inner.TrueForAll(Predicate(a.Invoke))
         member  x.RemoveLast()          = List(x.inner.RemoveAt(x.inner.Count - 1)) 
@@ -316,6 +318,8 @@ module FSharpx =
         member  x.Length = x.inner.Length
         member  x.IsEmpty = x.inner.IsEmpty
         member  x.AsSeq = x.inner |> seq
+        member x.First = x.inner.[0]
+        member x.Last = x.inner.[x.inner.Length - 1]
         member  x.ForEach (f : Action<_>) =
             for item in x.inner do
                 f.Invoke(item)
@@ -337,6 +341,8 @@ module FSharpx =
         member  x.RemoveLast() = Deque(x.inner.Unconj |> fst)
         member  x.IsEmpty = x.inner.IsEmpty
         member  x.RemoveFirst() = Deque(x.inner.Uncons |> snd)
+        member x.First = x.inner.Head
+        member x.Last = x.inner.Last
         member x.ForEachWhile(a : Func<_,_>) = x.inner |> Common.forEachWhile a
         member  x.AsSeq = x.inner |> seq
         member  x.ForEach (f : Action<_>) =

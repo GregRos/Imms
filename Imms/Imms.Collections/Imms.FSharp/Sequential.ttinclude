@@ -90,4 +90,4 @@ let removeLast (collection :'elem ImmVector) = collection.RemoveLast()
 let update index value (collection : <#=TypeName #>) = collection.Update(index, value)
 
 ///Maps over the collection.
-let ofSeq vs = empty.AddLastRange vs
+let ofSeq vs = empty.AddLastRange (vs : _ seq)

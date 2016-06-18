@@ -64,7 +64,7 @@ namespace Imms.Tests.Performance
     type TestMeta(Name : string,  Iters : int, DataSource : DataStructureMeta option) = 
         inherit MetaContainer()
         [<IsMeta>]
-        member val Name = Name with get
+        member val Name = Name with get, set
         [<IsMeta>]
         member val Iters = Iters with get
         [<IsMeta>]

@@ -71,11 +71,21 @@ let sequential(args : BaseArgs) =
 
     //if you make a mistake (e.g. assign a collection a test it doesn't support) there will be a compilation error.
 
+
+    let subseqParams = 
+        let maxedSize = min args.Target_Size args.DataSource_Size
+        let dif = args.DataSource_Size - maxedSize
+        if dif = 0 then bulkIters, maxedSize else        
+            let itersFactor = args.DataSource_Size / dif
+            let newIters = bulkIters * itersFactor
+            int newIters, maxedSize
     builder.AddTests(
         [
-            [AddFirst;AddLast;RemoveLast;RemoveFirst;InsertRandom;RemoveRandom; SetRandom; Iter; GetRandom; IterDirectN] <-| iters;
+            [AddFirst;AddLast;RemoveLast;RemoveFirst;InsertRandom;RemoveRandom; SetRandom; Iter; GetRandom; IterDirectN; First; Last] <-| iters;
             [AddLastRange; AddFirstRange; InsertRangeRandom] <-| data_iters;
-            [Take; Skip] <-| bulkIters;
+            [AddLastRange] <-|(bulkIters, Data.Imms.List dataSourceInit) |> List.chain_iter (fun x -> x.Name <- "Concat"); 
+            [InsertRangeRandom] <-|(bulkIters, Data.Imms.List dataSourceInit) |> List.chain_iter (fun x -> x.Name <- "InsertConcat"); 
+            [Take; Skip] <-| subseqParams
             [IterDirect] <-| 1
         ] |> List.collect id).Done
 
@@ -83,9 +93,11 @@ let sequential(args : BaseArgs) =
 
     builder.AddTests(
         [
-            [AddLast;RemoveLast; SetRandom; Iter; GetRandom; IterDirectN] <-| iters;
+            [AddLast;RemoveLast; SetRandom; Iter; GetRandom; IterDirectN; First; Last] <-| iters;
             [AddLastRange; AddFirstRange; InsertRangeRandom] <-| data_iters;
-            [Take] <-| bulkIters;
+            [AddLastRange] <-|(bulkIters, Data.Imms.Vector dataSourceInit) |> List.chain_iter (fun x -> x.Name <- "Concat");
+            [InsertRangeRandom] <-|(bulkIters, Data.Imms.Vector dataSourceInit) |> List.chain_iter (fun x -> x.Name <- "InsertConcat"); 
+            [Take; Skip] <-| subseqParams
             [IterDirect] <-| 1
         ] |> List.collect id).Done
 
@@ -95,9 +107,11 @@ let sequential(args : BaseArgs) =
 
     builder.AddTests(
         [
-            [AddFirst;AddLast;RemoveLast;RemoveFirst;InsertRandom;RemoveRandom; SetRandom; Iter; GetRandom; IterDirectN] <-| iters;
+            [AddFirst;AddLast;RemoveLast;RemoveFirst;InsertRandom;RemoveRandom; SetRandom; Iter; GetRandom; IterDirectN; First; Last] <-| iters;
             [AddLastRange; AddFirstRange; InsertRangeRandom] <-| data_iters;
-            [Take; Skip] <-| bulkIters;
+            [AddLastRange] <-|(bulkIters, Data.Sys.List dataSourceInit) |> List.chain_iter (fun x -> x.Name <- "Concat");
+            [InsertRangeRandom] <-|(bulkIters, Data.Sys.List dataSourceInit) |> List.chain_iter (fun x -> x.Name <- "InsertConcat"); 
+            [Take; Skip] <-| subseqParams
             [IterDirect] <-| 1
         ] |> List.collect id).Done
 
@@ -110,7 +124,7 @@ let sequential(args : BaseArgs) =
 
     builder.AddTests(
         [
-            [AddLast;RemoveLast; SetRandom; Iter; GetRandom; IterDirectN] <-| iters;
+            [AddLast;RemoveLast; SetRandom; Iter; GetRandom; IterDirectN; First; Last] <-| iters;
             [AddLastRange] <-| data_iters;
             [IterDirect] <-| 1
         ] |> List.collect id).Done

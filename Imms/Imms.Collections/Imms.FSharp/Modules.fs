@@ -3,10 +3,7 @@ open Imms.FSharp
 open Imms.FSharp.Implementation
 open Imms
 open Imms.FSharp.Operators
-open System
-#nowarn"44"
 ///A module for working with ImmVector collections -- immutable high-performance vector collections.
-[<ObsoleteAttribute>]
 module ImmVector = 
     ///Returns true if the specified collection is empty.
     let isEmpty (collection : ImmVector<'v>) = collection.IsEmpty
@@ -127,7 +124,7 @@ module ImmVector =
     let update index value (collection : ImmVector<'v>) = collection.Update(index, value)
     
     ///Maps over the collection.
-    let ofSeq vs = empty.AddLastRange vs
+    let ofSeq vs = empty.AddLastRange (vs : _ seq)
 
 ///A module for working with ImmList collections -- immutable sequential collections supporting many operations.
 module ImmList =
@@ -256,7 +253,7 @@ module ImmList =
     let update index value (collection : ImmList<'v>) = collection.Update(index, value)
     
     ///Maps over the collection.
-    let ofSeq vs = empty.AddLastRange vs
+    let ofSeq vs = empty.AddLastRange (vs : _ seq)
     
 ///A module for working with ImmSet collections -- immutable hash-based sets.
 module ImmSet = 
