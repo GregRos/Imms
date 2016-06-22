@@ -102,7 +102,7 @@ namespace Imms.Implementation {
 				if (IsEmpty) return null;
 				if (Eq.Equals(findKey, Key)) return Next;
 				var newNext = Next.Remove(findKey, lineage);
-
+				if (newNext == null) return null;
 				return WithNext(newNext, lineage);
 			}
 

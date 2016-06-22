@@ -66,24 +66,46 @@ open Scripts
 [<EntryPoint>]
 let  main argv =  
     
-    let args = 
+    let seqArgs = 
         Scripts.AdvancedArgs<_>(
            Simple_Iterations = 20000,
            Target_Size = 10000,
            DataSource_Size = 10000,
            Full_Iterations = 1,
            DataSource_Iterations = 2,
-           Generator1 = Seqs.Numbers.length(1, 10),
-           Generator2 =  Seqs.Numbers.length(1, 10),
+           Generator1 = Seqs.Numbers.length(1, 23),
+           Generator2 =  Seqs.Numbers.length(1, 23),
            RemoveRatio = 0.6
         )
 
-    let a = Scripts.sequential args
-   // let b = Scripts.setLike args
-   // let c = Scripts.mapLike args
-    let tests = a // @ b @ c
+    let seqArgs = 
+        Scripts.BaseArgs (
+            Simple_Iterations = 20000,
+            DataSource_Size = 10000,
+            Target_Size = 10000,
+            Full_Iterations = 1,
+            DataSource_Iterations = 2
+        )
+
+    let setArgs = 
+        Scripts.AdvancedArgs<_>(
+           Simple_Iterations = 50000,
+           Target_Size = 1000,
+           DataSource_Size = 10000,
+           Full_Iterations = 1,
+           DataSource_Iterations = 3,
+           Generator1 = Seqs.Strings.distinctLetters(1, 10) ,
+           Generator2 =  Seqs.Strings.distinctLetters(1, 10),
+           RemoveRatio = 0.6
+        )
+
+    let a = Scripts.sequential seqArgs
+    let b = Scripts.setLike setArgs
+    let c = Scripts.mapLike setArgs
+    //let c = Scripts.mapLike args
+    let tests = a @  b @ c
     
-    let tests = tests // |> List.filter (fun x -> x.Test.Name |> String.containsAny false ["Complex"])
+    let tests = tests// |> List.filter (fun x -> x.Test.Name |> String.containsAny false ["Union"])
     runTests tests
     0
         

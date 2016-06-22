@@ -3,7 +3,9 @@ open Imms.FSharp
 open Imms.FSharp.Implementation
 open Imms
 open Imms.FSharp.Operators
+open System
 ///A module for working with ImmVector collections -- immutable high-performance vector collections.
+#nowarn"0044"
 module ImmVector = 
     ///Returns true if the specified collection is empty.
     let isEmpty (collection : ImmVector<'v>) = collection.IsEmpty
@@ -556,19 +558,19 @@ module ImmMap =
     
     ///Merges this map with the specified sequence of key-value pairs, viewed as another map, using the specified function to resolve collisions.
     let merge kvps f (map : ImmMap<'k, 'v>) =
-        map.Union(kvps, toValSelector f)
+        map.Merge(kvps, toValSelector f)
     
     ///Joins this map with a sequence of key-value pairs, viewed as another map, using the specified function to resolve collisions.
     let join kvps f (map : ImmMap<'k, 'v>) =
-        map.Intersect(kvps, toValSelector f)
+        map.Join(kvps, toValSelector f)
     
     ///Removes all the keys present in a sequence of key-value pairs, taken as another map. The value type of the map may be different.
     let minus kvps (map : ImmMap<'k, 'v>) =
-        map.Except(kvps)
+        map.Subtract(kvps)
     
     ///Applies a subtraction function on each key-value pair present in both this map, and the specified other map. If the function returns None, the key is removed.
     let minusWith kvps f (map : ImmMap<'k, 'v>) =
-        map.Except(kvps, (fun a b c -> f a b c |> toOption) |> toValSelector)
+        map.Subtract(kvps, (fun a b c -> f a b c |> toOption) |> toValSelector)
     
     let mapEquals other (map : ImmMap<'k, 'v>) =
         map.MapEquals(other)
@@ -714,19 +716,19 @@ module ImmSortedMap =
     
     ///Merges this map with the specified sequence of key-value pairs, viewed as another map, using the specified function to resolve collisions.
     let merge kvps f (map : ImmSortedMap<'k, 'v>) =
-        map.Union(kvps, toValSelector f)
+        map.Merge(kvps, toValSelector f)
     
     ///Joins this map with a sequence of key-value pairs, viewed as another map, using the specified function to resolve collisions.
     let join kvps f (map : ImmSortedMap<'k, 'v>) =
-        map.Intersect(kvps, toValSelector f)
+        map.Join(kvps, toValSelector f)
     
     ///Removes all the keys present in a sequence of key-value pairs, taken as another map. The value type of the map may be different.
     let minus kvps (map : ImmSortedMap<'k, 'v>) =
-        map.Except(kvps)
+        map.Subtract(kvps)
     
     ///Applies a subtraction function on each key-value pair present in both this map, and the specified other map. If the function returns None, the key is removed.
     let minusWith kvps f (map : ImmSortedMap<'k, 'v>) =
-        map.Except(kvps, (fun a b c -> f a b c |> toOption) |> toValSelector)
+        map.Subtract(kvps, (fun a b c -> f a b c |> toOption) |> toValSelector)
     
     let mapEquals other (map : ImmSortedMap<'k, 'v>) =
         map.MapEquals(other)

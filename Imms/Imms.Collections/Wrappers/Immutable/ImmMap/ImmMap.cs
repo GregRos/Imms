@@ -90,12 +90,12 @@ namespace Imms {
 			return removed.WrapMap(_equality);
 		}
 
-		protected override ImmMap<TKey, TValue> Union(ImmMap<TKey, TValue> other,
+		protected override ImmMap<TKey, TValue> Merge(ImmMap<TKey, TValue> other,
 			ValueSelector<TKey, TValue, TValue, TValue> collision = null) {
 			return _root.Union(other._root, Lineage.Mutable(), collision).WrapMap(_equality);
 		}
 
-		protected override ImmMap<TKey, TValue> Intersect(ImmMap<TKey, TValue> other,
+		protected override ImmMap<TKey, TValue> Join(ImmMap<TKey, TValue> other,
 			ValueSelector<TKey, TValue, TValue, TValue> collision = null) {
 			return _root.Intersect(other._root, Lineage.Mutable(), collision).WrapMap(_equality);
 		}
@@ -123,22 +123,22 @@ namespace Imms {
 			/// If a subtraction function is supplied, the operation invokes the function on each key-value pair shared with the other map. If the function returns a value,
 			/// that value is used in the return map. If the function returns None, the key is removed from the return map.
 			/// </remarks>
-			public override ImmMap<TKey, TValue> Except<TValue2>(IEnumerable<KeyValuePair<TKey, TValue2>> other,
+			public override ImmMap<TKey, TValue> Subtract<TValue2>(IEnumerable<KeyValuePair<TKey, TValue2>> other,
 			ValueSelector<TKey, TValue, TValue2, Optional<TValue>> subtraction = null) {
 				other.CheckNotNull("other");
 			var map = other as ImmMap<TKey, TValue2>;
-			if (map != null && _equality.Equals(map._equality)) return Except(map,subtraction);
-			return base.Except(other, subtraction);
+			if (map != null && _equality.Equals(map._equality)) return Subtract(map,subtraction);
+			return base.Subtract(other, subtraction);
 		}
 
-		ImmMap<TKey, TValue> Except<TValue2>(ImmMap<TKey, TValue2> other,
+		ImmMap<TKey, TValue> Subtract<TValue2>(ImmMap<TKey, TValue2> other,
 			ValueSelector<TKey, TValue, TValue2, Optional<TValue>> subtraction = null) {
 				other.CheckNotNull("other");
 			return _root.Except(other._root, Lineage.Mutable(), subtraction).WrapMap(_equality);
 		}
 
-		protected override ImmMap<TKey, TValue> Except(ImmMap<TKey, TValue> other, ValueSelector<TKey, TValue, TValue, Optional<TValue>> subtraction = null) {
-			return Except(other, subtraction);
+		protected override ImmMap<TKey, TValue> Subtract(ImmMap<TKey, TValue> other, ValueSelector<TKey, TValue, TValue, Optional<TValue>> subtraction = null) {
+			return Subtract(other, subtraction);
 		}
 
 		protected override ImmMap<TKey, TValue> Difference(ImmMap<TKey, TValue> other) {

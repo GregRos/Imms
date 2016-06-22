@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Imms.Implementation;
-
+#pragma warning disable 44
 namespace Imms {
 	/// <summary>
 	///     Provides extension methods for converting between, to, and from Imm data structures.

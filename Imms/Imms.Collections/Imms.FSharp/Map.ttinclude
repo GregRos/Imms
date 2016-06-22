@@ -65,19 +65,19 @@ let removeRange ks (map : <#=typeName#>) =
 
 ///Merges this map with the specified sequence of key-value pairs, viewed as another map, using the specified function to resolve collisions.
 let merge kvps f (map : <#=typeName#>) =
-    map.Union(kvps, toValSelector f)
+    map.Merge(kvps, toValSelector f)
 
 ///Joins this map with a sequence of key-value pairs, viewed as another map, using the specified function to resolve collisions.
 let join kvps f (map : <#=typeName#>) =
-    map.Intersect(kvps, toValSelector f)
+    map.Join(kvps, toValSelector f)
 
 ///Removes all the keys present in a sequence of key-value pairs, taken as another map. The value type of the map may be different.
 let minus kvps (map : <#=typeName#>) =
-    map.Except(kvps)
+    map.Subtract(kvps)
 
 ///Applies a subtraction function on each key-value pair present in both this map, and the specified other map. If the function returns None, the key is removed.
 let minusWith kvps f (map : <#=typeName#>) =
-    map.Except(kvps, (fun a b c -> f a b c |> toOption) |> toValSelector)
+    map.Subtract(kvps, (fun a b c -> f a b c |> toOption) |> toValSelector)
 
 let mapEquals other (map : <#=typeName#>) =
     map.MapEquals(other)

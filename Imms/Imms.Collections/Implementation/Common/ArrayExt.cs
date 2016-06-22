@@ -29,15 +29,18 @@ namespace Imms.Implementation {
 			var lastValue = arr[0];
 			var erased = 0;
 			var i = 1;
+			var writeIndex = 1;
 			while (i < len) {
-				if (equalityFunc(arr[i], lastValue)) {
-					if (i < len - 1) arr[i] = arr[i + 1];
-					len--;
-				} else {
+				if (!equalityFunc(arr[i], lastValue)) {
 					lastValue = arr[i];
-					i++;
+					if (writeIndex != i) {
+						arr[writeIndex] = arr[i];
+					}
+					writeIndex++;
 				}
+				i++;
 			}
+			len = writeIndex;
 		}
 
 		/// <summary>

@@ -93,6 +93,8 @@ module internal Builder =
     
     ///Returns a new builder initialized with blank caches.
     let inline blank<'t> = Builder<'t>.New()
+
+    let inline fin (builder : Builder<_>) = builder.Done
    
 
     let inline cross partials args = 

@@ -85,6 +85,13 @@ module Imms =
         member  x.IsSetEqual (s : Set<'t>) = x.inner.SetEquals(s.inner)
         member  x.IsProperSuperset (s : Set<'t>) = x.inner.IsProperSupersetOf(s.inner)
         member  x.IsProperSubset (s : Set<'t>) = x.inner.IsProperSubsetOf(s.inner)
+        member  x.Union o = Set(x.inner.Union o)
+        member  x.Intersect o = Set(x.inner.Intersect o)
+        member  x.Except o = Set(x.inner.Except o)
+        member  x.SymmetricDifference o = Set(x.inner.Difference o)
+        member  x.IsSetEqual o = x.inner.SetEquals(o)
+        member x.IsProperSuperset o = x.inner.IsProperSupersetOf(o)
+        member x.IsProperSubset o = x.inner.IsProperSubsetOf(o)
         member  x.Keys = x.keys
         static member  FromSeq(s : 't seq) = 
             let mutable set = Set(s.ToImmSet())
@@ -106,12 +113,23 @@ module Imms =
         member  x.Length = x.inner.Length
         member  x.RemoveRange sq = OrderedSet(x.inner.Except sq)
         member  x.Union (o : OrderedSet<'t>) = OrderedSet(x.inner.Union o.inner)
+        
         member  x.Intersect (s : OrderedSet<'t>) = OrderedSet(x.inner.Intersect s.inner)
         member  x.Except (s : OrderedSet<'t>) = OrderedSet(x.inner.Except s.inner)
         member  x.SymmetricDifference (s : OrderedSet<'t>) = OrderedSet(x.inner.Difference s.inner)
+        
         member  x.IsSetEqual (s : OrderedSet<'t>) = x.inner.SetEquals(s.inner)
         member  x.IsProperSuperset (s : OrderedSet<'t>) = x.inner.IsProperSupersetOf(s.inner)
         member  x.IsProperSubset (s : OrderedSet<'t>) = x.inner.IsProperSubsetOf(s.inner)
+        member  x.Union o = OrderedSet(x.inner.Union o)
+        member  x.Intersect o = OrderedSet(x.inner.Intersect o)
+        member  x.Except o = OrderedSet(x.inner.Except o)
+        member  x.SymmetricDifference o = OrderedSet(x.inner.Difference o)
+        member  x.IsSetEqual o = x.inner.SetEquals(o)
+        member x.IsProperSuperset o = x.inner.IsProperSupersetOf(o)
+        member x.IsProperSubset o = x.inner.IsProperSubsetOf(o)
+
+      
         member  x.Keys = x.keys
         static member  FromSeq(s : 't seq) = 
             let mutable set = OrderedSet(s.ToImmSortedSet())
@@ -252,6 +270,7 @@ module Sys =
         member x.ForEachWhile(a : Func<_,_>) = x.inner |> Common.forEachWhile a
         member  x.AddRange (s : 't seq) = Set(x.inner.Union s)
         member  x.RemoveRange (s : 't seq) = Set(x.inner.Except s)
+
         member  x.Union (o : Set<'t>) = Set(x.inner.Union o.inner)
         member  x.Intersect (s : Set<'t>) = Set(x.inner.Intersect s.inner)
         member  x.Except (s : Set<'t>) = Set(x.inner.Except s.inner)
@@ -259,6 +278,14 @@ module Sys =
         member  x.IsSetEqual (s : Set<'t>) = x.inner.SetEquals(s.inner)
         member  x.IsProperSuperset (s : Set<'t>) = x.inner.IsProperSupersetOf(s.inner)
         member  x.IsProperSubset (s : Set<'t>) = x.inner.IsProperSubsetOf(s.inner)
+
+        member  x.Union o = Set(x.inner.Union o)
+        member  x.Intersect o = Set(x.inner.Intersect o)
+        member  x.Except o = Set(x.inner.Except o)
+        member  x.SymmetricDifference o = Set(x.inner.SymmetricExcept o)
+        member  x.IsSetEqual o = x.inner.SetEquals(o)
+        member x.IsProperSuperset o = x.inner.IsProperSupersetOf(o)
+        member x.IsProperSubset o = x.inner.IsProperSubsetOf(o)
         static member  FromSeq(s : 't seq) = 
             let mutable set = Set(s.ToImmutableHashSet())
             set.keys <- s |> Seq.toArray
@@ -288,6 +315,15 @@ module Sys =
         member  x.IsSetEqual (s : SortedSet<'t>) = x.inner.SetEquals(s.inner)
         member  x.IsProperSuperset (s : SortedSet<'t>) = x.inner.IsProperSupersetOf(s.inner)
         member  x.IsProperSubset (s : SortedSet<'t>) = x.inner.IsProperSubsetOf(s.inner)
+
+        member  x.Union o = SortedSet(x.inner.Union o)
+        member  x.Intersect o = SortedSet(x.inner.Intersect o)
+        member  x.Except o = SortedSet(x.inner.Except o)
+        member  x.SymmetricDifference o = SortedSet(x.inner.SymmetricExcept o)
+        member  x.IsSetEqual o = x.inner.SetEquals(o)
+        member x.IsProperSuperset o = x.inner.IsProperSupersetOf(o)
+        member x.IsProperSubset o = x.inner.IsProperSubsetOf(o)
+
         static member  FromSeq(s : 't seq) = 
             let mutable set = SortedSet(s.ToImmutableSortedSet())
             set.keys <- s |> Seq.toArray
@@ -422,6 +458,7 @@ module FSharp =
         member  x.Contains(k) = x.inner.Contains k
         member  x.Length = x.inner.Count
         member  x.AsSeq = x.inner :> _ seq
+        member  x.ForEachWhile (f : Func<'t, bool>) = x.inner |> Set.forall (f.Invoke)
         member  x.ForEach (a : Action<_>) = 
             for item in x.inner do a.Invoke(item)
         member  x.Union (o : Set<'t>) = Set(x.inner |> Set.union o.inner)
@@ -431,6 +468,17 @@ module FSharp =
         member  x.IsSetEqual (s : Set<'t>) = x.inner.Equals(s.inner)
         member  x.IsProperSuperset (s : Set<'t>) = x.inner.IsProperSupersetOf(s.inner)
         member  x.IsProperSubset (s : Set<'t>) = x.inner.IsProperSubsetOf(s.inner)
+
+        member  x.Union o = Set(x.inner |> Set.union (o |> Set.ofSeq))
+        member  x.Intersect o = Set(x.inner |> Set.intersect (o |> Set.ofSeq))
+        member  x.Except o = Set(Set.difference x.inner (o |> Set.ofSeq))
+        member  x.SymmetricDifference o = 
+            let set = o |> Set.ofSeq
+            Set((x.inner |> Set.difference set) + (set |> Set.difference x.inner))
+        member  x.IsSetEqual o = x.inner.Equals(o |> Set.ofSeq)
+        member x.IsProperSuperset o = x.inner.IsProperSupersetOf(o |> Set.ofSeq)
+        member x.IsProperSubset o = x.inner.IsProperSubsetOf(o |> Set.ofSeq)
+
         member  x.AddRange vs = 
             let mutable col = x.inner
             for item in vs do

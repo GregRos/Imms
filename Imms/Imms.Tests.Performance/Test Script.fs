@@ -178,30 +178,48 @@ let setLike(args : AdvancedArgs<_>) = //(set1, set2, iters, src1, src2) =
     let targetInit = (args.Target_Size,args.Generator1)
     let removeRatio = args.RemoveRatio
     let arr = Data.Basic.Array dataSourceInit
-    let inline standard_tests makeSet= 
+    let bulkInit = bulkIters, arr
+    let inline elementTests() = 
         [
-            [UnionWithSet; IntersectWithSet; ExceptWithSet; SymDifferenceWithSet;
-             ProperSubset; ProperSuperset; SetEquals] <-| (bulkIters, makeSet dataSourceInit);
             [AddSetItem] <-| (bulkIters, arr);
-            [Contains; RemoveSetItem; Iter] <-| bulkIters;
-            [RemoveSetItems] <-| (bulkIters, removeRatio);
-            [IterDirect] <-| full_iters
+            [RemoveSetItem; Contains; Iter; IterDirectN] <-| iters;
         ] |> List.collect id
 
-    let builder = Builder.blank
-    builder
-        .ForTarget(Data.Sys.Set targetInit)
-        .AddTests(standard_tests <| Data.Sys.Set) 
-        .ForTarget(Data.FSharp.Set targetInit)
-        .AddTests(standard_tests <| Data.FSharp.Set)
-        .ForTarget(Data.Imms.Set targetInit)
-        .AddTests(standard_tests <| Data.Imms.Set)
-        .ForTarget(Data.Imms.OrderedSet targetInit)
-        .AddTests(standard_tests <| Data.Imms.OrderedSet)
-        .ForTarget(Data.Sys.SortedSet targetInit)
-        .AddTests(standard_tests <| Data.Sys.SortedSet)
-        .Done
 
+    let inline dataTests f tag = 
+        [
+            [UnionWithSet; IntersectWithSet; ExceptWithSet; SymDifferenceWithSet] <-| (bulkIters, f dataSourceInit)
+        ] |> List.collect id |> List.chain_iter (fun test -> test.Name <- tag + "_" + test.Name)
+
+    let builder = 
+        Builder.blank
+         .ForTarget(Data.Sys.Set targetInit)
+         .AddTests(elementTests())
+         .AddTests(dataTests Data.Sys.Set "Set")
+         .AddTests(dataTests Data.Basic.Array "Array")
+
+         .ForTarget(Data.Sys.SortedSet targetInit)
+         .AddTests(elementTests())
+         .AddTests(dataTests Data.Sys.SortedSet "Set")
+         .AddTests(dataTests Data.Basic.Array "Array")
+        
+         .ForTarget(Data.FSharp.Set targetInit)
+         .AddTests(elementTests())
+         .AddTests(dataTests Data.FSharp.Set "Set")
+         .AddTests(dataTests Data.Basic.Array "Array")
+
+         .ForTarget(Data.Imms.Set targetInit)
+         .AddTests(elementTests())
+         .AddTests(dataTests Data.Imms.Set "Set")
+         .AddTests(dataTests Data.Basic.Array "Array")
+
+         .ForTarget(Data.Imms.OrderedSet targetInit)
+         .AddTests(elementTests())
+         .AddTests(dataTests Data.Imms.OrderedSet "Set")
+         .AddTests(dataTests Data.Basic.Array "Array")
+
+        
+    builder.Done
     builder.Bound |> List.ofSeq 
 
     

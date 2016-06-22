@@ -114,13 +114,13 @@ namespace Imms.Abstract
 		}
 
 		/// <summary>
-		/// Takes a sequence of key-value pairs and removes all keys present in the sequence from the map. Identical to <see cref="Except"/>.
+		/// Takes a sequence of key-value pairs and removes all keys present in the sequence from the map. Identical to <see cref="Subtract"/>.
 		/// </summary>
 		/// <param name="left">The map.</param>
 		/// <param name="kvps">The key-value pairs.</param>
 		/// <returns></returns>
 		public static TMap operator -(AbstractMap<TKey, TValue, TMap> left, IEnumerable<KeyValuePair<TKey, TValue>> kvps) {
-			return left.Except(kvps);
+			return left.Subtract(kvps);
 		}
 
 	}

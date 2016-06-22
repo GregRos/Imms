@@ -100,7 +100,7 @@ namespace Imms.Tests.Performance
         let rnd = Random()
         module Strings = 
             let letters(min,max)= 
-                let s = seq {while true do yield rnd.String(min, max)} |> Seq.cache
+                let s = seq {while true do yield rnd.String(min, max) Chars.alphanumeric} |> Seq.cache
                 DataGenerator("Strings of Letters by Length",s)
                     <+. Meta("Range", (min,max))
 
