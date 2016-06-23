@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Imms {
 	internal static class ImmsInfo {
-		public const string Version = "0.6.2";
+		public const string Version = "0.7.0";
 
 		public const string Author = "Gregory Rosenbaum";
 
