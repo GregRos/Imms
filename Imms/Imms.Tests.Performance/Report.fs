@@ -17,14 +17,17 @@ type FullRecord =
         Target_InitialGenerator : string
         DataGenerator : string
         Description : string
-        Class : string
         Ratio : float option
     }
 
 
 let private toFullRecord (entry : TestInstanceMeta) = 
     {
-        FullRecord.Test = entry.Test.Name
+        FullRecord.Test = 
+            if entry.Test.TargetType.Length > 0 then
+                sprintf "%s-%s" entry.Test.TargetType entry.Test.Name
+            else
+                entry.Test.Name
         Target = entry.Target.Name
         Target_InitialSize = entry.Target.Count
         Iterations = entry.Test.Iters
@@ -35,7 +38,6 @@ let private toFullRecord (entry : TestInstanceMeta) =
         DataGenerator = entry.Test.DataSource |> Option.map (fun d -> d.Generator.ToString()) |> Option.orValue ""
         Description = entry.Test |> Meta.tryGetOr "Description" ""
         Ratio = entry.Test |> Meta.tryGet "Ratio"
-        Class = entry.Test?Class
     }
 
 

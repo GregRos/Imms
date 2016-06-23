@@ -10,6 +10,7 @@ open Imms.FSharp.Implementation
 open Imms.FSharp
 open ExtraFunctional
 open System.Diagnostics
+#nowarn"0044"
 type CollisionFunc<'k, 'v> = ('k -> 'v -> 'v -> 'v)
 type SubtractionFunc<'k, 'v> = ('k -> 'v -> 'v -> 'v option)
 [<AbstractClass>]

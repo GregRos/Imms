@@ -61,8 +61,10 @@ namespace Imms.Tests.Performance
             let ds = DataStructure(name, kind, count, generator, library,(fun count -> generator.Generate |> Seq.take count |> ctor))
             ds
 
-    type TestMeta(Name : string,  Iters : int, DataSource : DataStructureMeta option) = 
+    type TestMeta(Name : string, TargetType : string,  Iters : int, DataSource : DataStructureMeta option) = 
         inherit MetaContainer()
+        [<IsMeta>]
+        member val TargetType = TargetType with get
         [<IsMeta>]
         member val Name = Name with get, set
         [<IsMeta>]
@@ -86,8 +88,8 @@ namespace Imms.Tests.Performance
 
     ///An unbound test for a specific collection type.
     [<AbstractClass>]
-    type Test<'s>(Name : string, Iterations : int, ?DataSource : DataStructureMeta) = 
-        inherit TestMeta(Name, Iterations, DataSource)
+    type Test<'s>(Name : string, TargetType : string, Iterations : int, ?DataSource : DataStructureMeta) = 
+        inherit TestMeta(Name, TargetType, Iterations, DataSource)
         abstract Test : 's -> unit
         member x.Bind (target : DataStructure<'s>) = 
             let test = x.Test
@@ -121,13 +123,13 @@ namespace Imms.Tests.Performance
                 let s = seq {while true do yield rnd.Double(min,max)} |> Seq.cache
                 DataGenerator("Floating Point by Length", s) <+. Meta("Range", (min,max))
 
-    type SimpleTest<'s>(Name : string,  Iters : int, test : 's -> unit)= 
-        inherit Test<'s>(Name, Iters)
+    type SimpleTest<'s>(Name : string, TargetType : string, Iters : int, test : 's -> unit)= 
+        inherit Test<'s>(Name, TargetType, Iters)
         override x.Test s = test s
 
     type DataSourceTest<'e, 's>
-        (Name : string, Iters : int, Source : DataStructure<'e>, test : 's -> unit) =
-        inherit Test<'s>(Name, Iters, Source)
+        (Name : string, TargetType : string,Iters : int, Source : DataStructure<'e>, test : 's -> unit) =
+        inherit Test<'s>(Name, TargetType, Iters, Source)
         member val DataLoaded = Source.Object
         member val Iterations = Iters
         member val Count = Source.Count
@@ -138,11 +140,11 @@ namespace Imms.Tests.Performance
         let inline Class str = Meta("Class", str)
         let inline Desc str = Meta("Description", str)
         let rnd = System.Random()
-        let inline simpleTest(name,iters,test) = 
-            SimpleTest(name, iters, test) <+. Class("") :> Test<_>
+        let inline simpleTest(name,target,iters,test) = 
+            SimpleTest(name, target, iters, test) <+. Class("") :> Test<_>
           
-        let inline dataSourceTest(name,iters, dataSource : DataStructure<_>, test) =
-            DataSourceTest(name, iters, dataSource, test) <+. Class("") :> Test<_>
+        let inline dataSourceTest(name,target,iters, dataSource : DataStructure<_>, test) =
+            DataSourceTest(name,target,iters, dataSource, test) <+. Class("") :> Test<_>
 
         let mutable PercentileData = Seqs.Numbers.float(0., 1.).Generate |> Seq.take (pown 10 6) |> Seq.toArray
 

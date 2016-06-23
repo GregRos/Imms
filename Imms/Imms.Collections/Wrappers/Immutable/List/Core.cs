@@ -53,18 +53,6 @@ namespace Imms {
 		}
 
 
-		/// <summary>
-		///     Returns a new collection containing a slice of the current collection, from index to index. The indexes may be
-		///     negative.
-		/// </summary>
-		/// <param name="from"> The initial index. </param>
-		/// <param name="to"> The final index.</param>
-		public new ImmList<T> this[int @from, int to] {
-			get {
-				return base[from, to];
-			}
-		}
-
 
 
 		/// <summary>

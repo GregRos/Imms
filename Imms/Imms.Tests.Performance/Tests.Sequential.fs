@@ -5,6 +5,8 @@ open Imms.FSharp.Implementation
 #nowarn "66"
 #nowarn "20"
 
+let simpleTest(t, iters, test) = simpleTest(t, "Seq", iters, test)
+let dataSourceTest(t, iters, data, test)= dataSourceTest(t, "Seq", iters, data, test)
 let inline AddFirst iters = 
     let inline test col = 
         let mutable col = col
@@ -115,6 +117,25 @@ let inline Take(iters, mag) =
     simpleTest("Take", iters, test) 
     <+. Desc("Returns a starting subsequence consisting of a random number of items (from the entire collection), {iters} times.") 
     
+let inline Slice(iters, mag) = 
+    let mag = float mag
+    let inline test col = 
+        let count = 
+            col
+            |> Ops.length
+            |> float
+            
+        let pdata = PercentileData
+        let mutable col = col
+        for i = 1 to iters do
+            let mult = pdata.[i]
+            let i1 = mult * count
+            let maxCount = min (mag) (count - i1)
+            let curCount = mult * maxCount
+            col |> Ops.slice (int i1) (i1 + curCount |> int)
+    simpleTest("Slice", iters, test) 
+    <+. Desc("Returns a starting subsequence consisting of a random number of items (from the entire collection), {iters} times.") 
+
 let inline Skip(iters,mag) = 
     let mag = float mag
     let inline test col = 
@@ -186,60 +207,4 @@ let inline InsertRangeRandom(iters, data : DataStructure<_>) =
             let cur = int (count * mult)
             col <- col |> Ops.insertRange cur dataLoaded
             count <- count + cnt
-    dataSourceTest("Insert Range", iters, data, test)
-
-
-let inline EitherEndAccess(iters) =
-    let sqrtIters = sqrt (float iters) |> int
-    let testData = [|0 .. sqrtIters|]
-    let inline test col =      
-        for i = 1 to iters do
-            let mutable colx = col
-            colx <- colx |> Ops.addFirst 0
-            colx <- colx |> Ops.addFirst 0
-            colx <- colx |> Ops.addLast 0
-            colx <- colx |> Ops.removeLast
-            colx <- colx |> Ops.removeFirst
-
-            for i = 1 to sqrtIters do
-                colx <- colx |> Ops.addFirst 0
-
-            for i = 1 to sqrtIters do
-                colx <- colx |> Ops.addLast 0
-
-            let mutable colz = colx
-            for i = 1 to 2 * sqrtIters do
-                colz <- colz |> Ops.removeLast
-
-            colz <- colx
-            colz <- colz |> Ops.addFirstRange testData
-            for i = 1 to 2 * sqrtIters do
-                colz <- colz |> Ops.removeFirst
-
-            colz <- colz |> Ops.addLastRange testData
-            colz <- colz |> Ops.addFirstRange testData
-                
-
-    simpleTest("EitherEndAccess", iters, test)
-
-let inline FrontEndAccess(iters) =
-    let sqrtIters = sqrt (float iters) |> int
-    let testData = [|0 .. 4 * sqrtIters|]
-    let inline test col = 
-        for i = 1 to iters do
-            let mutable colx = col
-            colx <- colx |> Ops.addLast 0
-            colx <- colx |> Ops.removeLast
-
-            for i = 1 to sqrtIters do
-                colx <- colx |> Ops.addLast 0
-
-            let mutable colz = colx
-
-            colz <- colx
-            for i = 1 to 2 * sqrtIters do
-                colz <- colz |> Ops.removeLast
-
-            colz <- colz |> Ops.addLastRange testData
-
-    simpleTest("FrontEndAccess", iters, test)
+    dataSourceTest("InsertRange", iters, data, test)

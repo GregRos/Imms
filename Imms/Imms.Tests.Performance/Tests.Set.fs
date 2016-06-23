@@ -5,6 +5,8 @@ open Imms.FSharp.Implementation
 #nowarn "66"
 #nowarn "20"
 open System.Linq
+let simpleTest(t, iters, test) = simpleTest(t, "Set", iters, test)
+let dataSourceTest(t, iters, data, test)= dataSourceTest(t, "Set", iters, data, test)
 let inline getAllKeys t = ((^t : (member Keys : 'a array) t))
 let inline UnionWithSet(iters, source : _ DataStructure) = 
     let data = source.Object

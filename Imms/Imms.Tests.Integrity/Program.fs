@@ -7,7 +7,6 @@ open System
 open System.Linq
 open System.IO
 open ExtraFunctional
-open Imms.FSharp.Operators
 open Imms
 type MultiTextWriter(writers : TextWriter list) = 
     inherit TextWriter()
@@ -79,13 +78,13 @@ let g a b = 1
 
 [<EntryPoint>]
 let main argv = 
-    let fl = ImmList<_>.Empty <+ 1
+    let fl = ImmList<_>.Empty + 1
     let s = fl.Select(fun x -> x + 1)
     let dsf = s.First
     let fs = File.OpenWrite("log.txt")
     let writer = Console.Out
     let allTests initial param ds = 
-        seqTests initial param // @ setTests initial param ds @ mapTests initial param ds
+        seqTests initial param  @ setTests initial param ds @ mapTests initial param ds
     let r = Random()
     let mutable tests = []
     for i = 0 to 0 do

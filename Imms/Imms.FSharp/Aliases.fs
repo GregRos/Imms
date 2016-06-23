@@ -13,4 +13,4 @@ type Cmp<'a> = System.Collections.Generic.Comparer<'a>
 ///Alias for KeyValuePair<'key, 'value>
 type Kvp<'key, 'value> = System.Collections.Generic.KeyValuePair<'key, 'value>
 ///Alias for IEnumerator<'a>
-type Iter<'a> = System.Collections.Generic.IEnumerator<'a>
+type IIter<'a> = System.Collections.Generic.IEnumerator<'a>

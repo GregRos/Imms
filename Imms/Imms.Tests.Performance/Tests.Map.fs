@@ -5,7 +5,8 @@ open Imms.FSharp.Implementation
 open System.Linq
 #nowarn "66"
 #nowarn "20"
-
+let simpleTest(t, iters, test) = simpleTest(t, "Map", iters, test)
+let dataSourceTest(t, iters, data, test)= dataSourceTest(t, "Map", iters, data, test)
 let inline getAllKeys t = ((^t : (member Keys : 'a array) t))
 
 let inline AddKeyRandom(iters, data : DataStructure<_>) = 
@@ -62,3 +63,16 @@ let inline GetKeyRandom iters =
             ()
     simpleTest("Lookup", iters, test)
 
+let inline ContainsKey iters = 
+    let inline test col = 
+        let keys = getAllKeys col
+        let len = keys.Length - 1
+                    |> float
+        let mutable col = col
+        for i = 1 to iters do
+            let mult = PercentileData.[i]
+            let cur = mult * len
+            let key = keys.[int cur]
+            let x = col |> Ops.contains key
+            ()
+    simpleTest("Contains", iters, test)

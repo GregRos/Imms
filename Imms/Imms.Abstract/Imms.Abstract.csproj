@@ -66,8 +66,6 @@
     <Compile Include="Abstractions\Iterable\IterableLinq.cs" />
     <Compile Include="Abstractions\MapLike\IAnyMapBuilder.cs" />
     <Compile Include="Abstractions\MapLike\Interfaces.cs" />
-    <Compile Include="Abstractions\Mixins\MForEach.cs" />
-    <Compile Include="Abstractions\Mixins\Mixin.cs" />
     <Compile Include="Abstractions\Operators\AbstractSet.cs" />
     <Compile Include="Abstractions\Sequential\Debugging.cs" />
     <Compile Include="Abstractions\Sequential\Interfaces.cs" />

@@ -85,7 +85,7 @@ let sequential(args : BaseArgs) =
             [AddLastRange; AddFirstRange; InsertRangeRandom] <-| data_iters;
             [AddLastRange] <-|(bulkIters, Data.Imms.List dataSourceInit) |> List.chain_iter (fun x -> x.Name <- "Concat"); 
             [InsertRangeRandom] <-|(bulkIters, Data.Imms.List dataSourceInit) |> List.chain_iter (fun x -> x.Name <- "InsertConcat"); 
-            [Take; Skip] <-| subseqParams
+            [Take; Skip; Slice] <-| subseqParams
             [IterDirect] <-| 1
         ] |> List.collect id).Done
 
@@ -97,7 +97,7 @@ let sequential(args : BaseArgs) =
             [AddLastRange; AddFirstRange; InsertRangeRandom] <-| data_iters;
             [AddLastRange] <-|(bulkIters, Data.Imms.Vector dataSourceInit) |> List.chain_iter (fun x -> x.Name <- "Concat");
             [InsertRangeRandom] <-|(bulkIters, Data.Imms.Vector dataSourceInit) |> List.chain_iter (fun x -> x.Name <- "InsertConcat"); 
-            [Take; Skip] <-| subseqParams
+            [Take; Skip; Slice] <-| subseqParams
             [IterDirect] <-| 1
         ] |> List.collect id).Done
 
@@ -111,7 +111,7 @@ let sequential(args : BaseArgs) =
             [AddLastRange; AddFirstRange; InsertRangeRandom] <-| data_iters;
             [AddLastRange] <-|(bulkIters, Data.Sys.List dataSourceInit) |> List.chain_iter (fun x -> x.Name <- "Concat");
             [InsertRangeRandom] <-|(bulkIters, Data.Sys.List dataSourceInit) |> List.chain_iter (fun x -> x.Name <- "InsertConcat"); 
-            [Take; Skip] <-| subseqParams
+            [Take; Skip; Slice] <-| subseqParams
             [IterDirect] <-| 1
         ] |> List.collect id).Done
 
@@ -143,9 +143,8 @@ let mapLike(args : AdvancedArgs<_>) =
     let removeRatio = args.RemoveRatio
     let inline standard_tests() =
         [
-            [GetKeyRandom; Iter; RemoveKey; IterDirectN] <-| iters;
+            [GetKeyRandom; Iter; RemoveKey; ContainsKey; IterDirectN] <-| iters;
             [AddKeyRandom] <-| (bulkIters, data);
-            [IterDirect] <-| full_iters;
             [AddKeys] <-| (bulkIters, dataKvp);
             [RemoveKeys] <-| (bulkIters, removeRatio)
         ] |> List.collect id

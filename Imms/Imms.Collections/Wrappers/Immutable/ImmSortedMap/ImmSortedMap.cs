@@ -59,33 +59,6 @@ namespace Imms {
 		}
 
 		/// <summary>
-		///     Merges the two maps, applying the selector function for keys appearing in both maps.
-		/// </summary>
-		/// <param name="other">The other.</param>
-		/// <param name="collision">
-		///     The collision resolution function. If null, the values in the other map overwrite the values in this map.
-		/// </param>
-		/// <remarks>
-		/// The merge operation is analogous to a union operation over sets. 
-		/// 
-		/// This operation returns all key-value pairs present in either map. If a key is shared between both maps, the collision resolution function is applied to determine the value in the result map.
-		/// </remarks>
-		public override ImmSortedMap<TKey, TValue> Merge(IEnumerable<KeyValuePair<TKey, TValue>> other, ValueSelector<TKey, TValue, TValue, TValue> collision = null) {
-			other.CheckNotNull("other");
-			var map = other as ImmSortedMap<TKey, TValue>;
-			if (map != null && IsCompatibleWith(map)) return Merge(map, collision);
-			int len;
-			var arr = other.ToArrayFast(out len);
-			var cmp = Comparers.KeyComparer<KeyValuePair<TKey, TValue>, TKey>(x => x.Key, Comparer);
-			Array.Sort(arr, 0, len, cmp);
-			arr.RemoveDuplicatesInSortedArray((a, b) => Comparer.Compare(a.Key, b.Key) == 0, ref len);
-			var lineage = Lineage.Mutable();
-			var node = OrderedAvlTree<TKey, TValue>.Node.FromSortedArray(arr, 0, len - 1, Comparer, lineage);
-			var newRoot = Root.Union(node, collision, lineage);
-			return newRoot.WrapMap(Comparer);
-		}
-
-		/// <summary>
 		/// Returns an empty <see cref="ImmSortedMap{TKey,TValue}"/> using the specified comparer.
 		/// </summary>
 		/// <param name="comparer"></param>

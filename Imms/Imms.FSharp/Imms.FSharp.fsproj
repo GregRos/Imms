@@ -72,7 +72,6 @@
     <Compile Include="Aliases.fs" />
     <Compile Include="Compatibility.fs" />
     <Compile Include="Generic Operators.fs" />
-    <Compile Include="Operators.fs" />
     <Compile Include="..\Imms.Collections\Imms.FSharp\Modules.fs">
       <Link>Modules.fs</Link>
     </Compile>

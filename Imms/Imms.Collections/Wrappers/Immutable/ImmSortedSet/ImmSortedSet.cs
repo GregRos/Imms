@@ -76,29 +76,6 @@ namespace Imms {
 		}
 
 		/// <summary>
-		///     Returns the set-theoretic union between this set and a set-like collection.
-		/// </summary>
-		/// <param name="other">A sequence of values. This operation is much faster if it's a set compatible with this one.</param>
-		/// <returns></returns>
-		public override ImmSortedSet<T> Union(IEnumerable<T> other) {
-			other.CheckNotNull("other");
-			var set = other as ImmSortedSet<T>;
-			if (set != null && IsCompatibleWith(set)) return Union(set);
-			//this trick can't really be repeated with a non-ordered set...
-			//or least I haven't figured it out yet. Basically, converts the sequence into an array, sorts it on its own
-			//And then builds a tree out of it. Then it unions it with the main tree. This improves performance by a fair bit
-			//Even if the data structure isn't an array already.
-			int len;
-			var arr = other.ToArrayFast(out len);
-			Array.Sort(arr, 0, len, Comparer);
-			arr.RemoveDuplicatesInSortedArray((a, b) => Comparer.Compare(a, b) == 0, ref len);
-			var lineage = Lineage.Mutable();
-			var node = OrderedAvlTree<T, bool>.Node.FromSortedArraySet(arr, 0, len - 1, Comparer, lineage);
-			var newRoot = node.Union(Root, null, lineage);
-			return newRoot.Wrap(Comparer);
-		}
-
-		/// <summary>
 		/// Adds a new item to the set, or does nothing if the item already exists.
 		/// </summary>
 		/// <param name="item">The item to add.</param>

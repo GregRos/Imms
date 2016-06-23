@@ -4,7 +4,6 @@ open Imms
 open Imms.FSharp
 open System
 open Imms.FSharp.Implementation
-open Imms.FSharp.Operators
 type internal collection_ops<'elem, 'many, 'col> = 
     {
         left_combine : 'elem -> 'many -> 'many
@@ -51,30 +50,30 @@ type GenericBuilder<'elem, 'many, 'col> internal (ops : collection_ops<'elem, 'm
 
 let inline internal seq_build (final : 's -> 'r) : collection_ops<'elem, 's, 'r>= 
     {
-        left_combine = fun elem many -> elem ^+> many
+        left_combine = fun elem many -> many |> Ops.addFirst elem
         empty = Ops.getEmpty
-        of_seq = fun sq -> Ops.getEmpty() <++ sq
-        right_combine = fun elem many -> many <+ elem
-        concat = fun (many1, many2) -> many1 <++ many2
+        of_seq = fun sq -> Ops.getEmpty() |> Ops.addLastRange sq
+        right_combine = fun elem many -> many |> Ops.addLast elem
+        concat = fun (many1, many2) -> many1 |> Ops.addLastRange many2
         final = final
     }
 
 let inline internal set_build c : collection_ops<'elem, 's, 's> =
     {
-        left_combine = fun elem many -> many /+ elem
+        left_combine = fun elem many -> many |> Ops.addSet elem
         empty = fun () -> Ops.getEmptyWith c
         of_seq = fun sq -> Ops.union sq (Ops.getEmptyWith c)
-        right_combine = fun elem many -> many /+ elem
-        concat = fun (many1,many2) -> many1 /++ many2
+        right_combine = fun elem many -> many |> Ops.addSet elem
+        concat = fun (many1,many2) -> many1 |> Ops.addSetMany many2
         final = id
     }
 
 let inline internal map_build c : collection_ops<Kvp<'k,'v>, 's, 's> =
     {
-        left_combine = fun e many -> many /+ e
+        left_combine = fun e many -> many |> Ops.addSet e
         empty = fun () -> (Ops.getEmptyWith c : 's)
-        of_seq = fun sq -> (Ops.getEmptyWith c : 's) /++ sq
-        right_combine = fun elem many -> many /+ elem
+        of_seq = fun sq -> (Ops.getEmptyWith c : 's) |> Ops.addRange sq
+        right_combine = fun elem many -> many |> Ops.addSet elem
         concat = fun (many1,many2) -> many1 |> Ops.addRange many2
         final = id
     }

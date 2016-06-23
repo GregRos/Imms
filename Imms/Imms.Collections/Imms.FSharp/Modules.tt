@@ -13,7 +13,7 @@ namespace Imms.FSharp
 open Imms.FSharp
 open Imms.FSharp.Implementation
 open Imms
-open Imms.FSharp.Operators
+#nowarn"0044"
 ///A module for working with ImmVector collections -- immutable high-performance vector collections.
 module ImmVector = 
 <#=IncludeWithParameters("Sequential.ttinclude", new[] {Tu("TypeName", "ImmVector<'v>"), Tu("ElementName", "'v")},1 )#>
@@ -79,7 +79,7 @@ module ImmMap =
 	///Returns an empty ImmMap that uses the default equality comparer for the type.
 	let empty<'key,'value when 'key : equality> = ImmMap<'key,'value>.Empty()
 	///Constructs an ImmMap from a sequence of ordered pairs, using the default equality comparer for the type.
-	let ofPairsSeq (vs : seq<'key * 'value> when 'key : equality) = ImmMap.Empty() /++ (vs |> Seq.map Kvp)
+	let ofPairsSeq (vs : seq<'key * 'value> when 'key : equality) = ImmMap.Empty() + (vs |> Seq.map Kvp)
 	///Constructs an ImmSet from a sequence of key-value pairs, using the default equality comparer for the type.
 	let ofKvpSeq (vs : seq<Kvp<'key,'value>> when 'key : equality) = ImmMap.ToImmMap(vs)
 	///Constructs an ImmMap from a sequence of key-value pairs, using the specified equality comparer.
@@ -99,9 +99,9 @@ module ImmSortedMap =
 	///Returns an empty ImmSortedMap that uses the specified comparer.
 	let emptyWith(cm : Cmp<'key>) = ImmSortedMap<'key,'value>.Empty(cm)
 	///Constructs an ImmSortedMap from a sequence of ordered pairs, using the default comparer for the type.
-	let ofPairsSeq (vs : seq<'key * 'value> when 'key : comparison) = ImmSortedMap.Empty(null) /++ (vs |> Seq.map Kvp)
+	let ofPairsSeq (vs : seq<'key * 'value> when 'key : comparison) = ImmSortedMap.Empty(null) + (vs |> Seq.map Kvp)
 	///Constructs an ImmSortedMap from a sequence of key-value pairs, using the default comparer for the type.
-	let ofKvpSeq (vs : seq<Kvp<'key,'value>> when 'key : comparison) = ImmSortedMap.Empty(null) /++ (vs)
+	let ofKvpSeq (vs : seq<Kvp<'key,'value>> when 'key : comparison) = ImmSortedMap.Empty(null) + (vs)
 	///Constructs an ImmSortedMap from a sequence of key-value pairs, using the specified comparer.
 	let ofKvpSeqWith cmp vs = ImmSortedMap.ToImmSortedMap(vs, cmp)
 	///Constructs an ImmSortedMap from a sequence of ordered pairs, using the specified comparer.

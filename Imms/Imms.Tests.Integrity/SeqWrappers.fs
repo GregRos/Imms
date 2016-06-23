@@ -11,7 +11,7 @@ open Imms
 open Imms.FSharp.Implementation
 open Imms.FSharp
 open System.Diagnostics
-
+#nowarn"0044"
 [<AbstractClass>]
 type ColWrapper<'v>(name : string) = 
     inherit TargetMetadata(name)

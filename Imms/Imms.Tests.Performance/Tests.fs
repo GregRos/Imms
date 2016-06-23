@@ -7,7 +7,8 @@ open System.Collections.Immutable
 open System.Linq
 open Imms.FSharp.Implementation
 open Imms.Tests.Performance
-
+let simpleTest(t, iters, test) = simpleTest(t, "", iters, test)
+let dataSourceTest(t, iters, data, test)= dataSourceTest(t, "", iters, data, test)
 let inline iterN n col =
     let mutable i = 0
     let step x = 
