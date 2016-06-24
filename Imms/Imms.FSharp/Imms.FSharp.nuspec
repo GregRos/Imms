@@ -7,7 +7,7 @@
     <authors>Gregory Rosenbaum</authors>
     <owners>Gregory Rosenbaum</owners>
     <licenseUrl>https://raw.githubusercontent.com/GregRos/Imms/master/license.md</licenseUrl>
-    <projectUrl>https://github.com/Imms/Imms</projectUrl>
+    <projectUrl>http://imms.github.io/</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <iconUrl>https://raw.githubusercontent.com/GregRos/Imms/master/Icon.png</iconUrl>
     <summary>Provides F# integration for Imms collections.</summary>

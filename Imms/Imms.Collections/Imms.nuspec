@@ -7,7 +7,7 @@
     <authors>$author$</authors>
     <owners>$author$</owners>
     <licenseUrl>https://raw.githubusercontent.com/GregRos/Imms/master/license.md</licenseUrl>
-    <projectUrl>https://github.com/Imms/Imms</projectUrl>
+    <projectUrl>http://imms.github.io/</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
 	<iconUrl>https://raw.githubusercontent.com/GregRos/Imms/master/Icon.png</iconUrl>
 	<summary>High-performance immutable collections for .NET.</summary>

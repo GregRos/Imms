@@ -4,4 +4,4 @@
 
 It is available on [NuGet](https://www.nuget.org/packages/Imms/). The F# integration library is available [here](https://www.nuget.org/packages/Imms.FSharp).
 
-### More info on the [Imms website](imms.github.io).
+### More info on the [Imms website](http://imms.github.io).
