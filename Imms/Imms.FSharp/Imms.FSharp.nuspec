@@ -6,10 +6,10 @@
     <title>Imms.FSharp</title>
     <authors>Gregory Rosenbaum</authors>
     <owners>Gregory Rosenbaum</owners>
-    <licenseUrl>https://raw.githubusercontent.com/GregRos/Imms/master/license.md</licenseUrl>
+    <licenseUrl>https://raw.githubusercontent.com/Imms/Imms/master/license.md</licenseUrl>
     <projectUrl>http://imms.github.io/</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <iconUrl>https://raw.githubusercontent.com/GregRos/Imms/master/Icon.png</iconUrl>
+    <iconUrl>https://raw.githubusercontent.com/Imms/Imms/master/Icon.png</iconUrl>
     <summary>Provides F# integration for Imms collections.</summary>
     <description>
       This library provides F# integration for the Imms immutable collections library.

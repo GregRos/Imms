@@ -6,13 +6,9 @@ open Imms
 open System
 open ExtraFunctional
 open System.Diagnostics
-open LINQtoCSV
 open System.Collections.Immutable
 open System.IO
 open System.Linq
-open System.Windows.Forms
-open System.Drawing
-open System.Drawing.Imaging
 open System.CodeDom.Compiler
 open Imms.Tests
 open Imms.FSharp.Implementation

@@ -8,10 +8,12 @@ namespace Imms
 	using Imms;
 	using Imms.Abstract;
 	
-	partial class ImmList<T> : AbstractSequential<T, ImmList<T>> {
+	partial class ImmList<T> : AbstractSequential<T, ImmList<T>>
+	{
 		private static readonly ImmList<T> Instance = new ImmList<T>();
 	
-		private ImmList() {
+		private ImmList()
+		{
 		}
 	
 	
@@ -21,7 +23,8 @@ namespace Imms
 		/// <typeparam name="TRElem">The type of the result element.</typeparam>
 		/// <param name="selector">The selector.</param>
 		/// <returns></returns>
-		public ImmList<TRElem> Select<TRElem>(Func<T, TRElem> selector) {
+		public ImmList<TRElem> Select<TRElem>(Func<T, TRElem> selector)
+		{
 			return base._Select(GetPrototype<TRElem>(), selector);
 		}
 	
@@ -32,7 +35,8 @@ namespace Imms
 		/// <typeparam name="TRElem">The type of the output collection element.</typeparam>
 		/// <param name="selector">The selector.</param>
 		/// <returns></returns>
-		public ImmList<TRElem> Select<TRElem>(Func<T, Optional<TRElem>> selector) {
+		public ImmList<TRElem> Select<TRElem>(Func<T, Optional<TRElem>> selector)
+		{
 			return base._Choose(GetPrototype<TRElem>(), selector);
 		}
 	
@@ -43,7 +47,8 @@ namespace Imms
 		/// <typeparam name="TRElem">The type of the output collection element.</typeparam>
 		/// <param name="selector">The selector.</param>
 		/// <returns></returns>
-		public ImmList<TRElem> Choose<TRElem>(Func<T, Optional<TRElem>> selector) {
+		public ImmList<TRElem> Choose<TRElem>(Func<T, Optional<TRElem>> selector)
+		{
 			return base._Choose(GetPrototype<TRElem>(), selector);
 		}
 	
@@ -54,15 +59,30 @@ namespace Imms
 		/// <typeparam name="TRElem">The type of the ouput collection elem.</typeparam>
 		/// <param name="selector">The selector.</param>
 		/// <returns></returns>
-		public ImmList<TRElem> SelectMany<TRElem>(Func<T, IEnumerable<TRElem>> selector) {
+		public ImmList<TRElem> SelectMany<TRElem>(Func<T, IEnumerable<TRElem>> selector)
+		{
 			return base._SelectMany(GetPrototype<TRElem>(), selector);
 		}
 	
 	
 	
-		 public ImmList<TResult> GroupJoin<TInner, TKey, TResult>(IEnumerable<TInner> inner, Func<T, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<T, IEnumerable<TInner>, TResult> resultSelector, IEqualityComparer<TKey> eq = null) {
-			 return base._GroupJoin(GetPrototype<TResult>(), inner, outerKeySelector, innerKeySelector, resultSelector, eq);
-		 }
+		/// <summary>
+		/// Groups the elements of this collection and a sequence based on equality of keys, and groups the results. The specified equality comparer is used to compare keys, if provided.
+		/// </summary>
+		/// <typeparam name="TInner">The type of the input sequence.</typeparam>
+		/// <typeparam name="TKey">The type of the key used to join the results.</typeparam>
+		/// <typeparam name="TResult">The type of the result element.</typeparam>
+		/// <param name="inner">The input sequence.</param>
+		/// <param name="outerKeySelector">The key selector for the current collection.</param>
+		/// <param name="innerKeySelector">The key selector for the input sequence.</param>
+		/// <param name="resultSelector">The result selector that aggregates all the results.</param>
+		/// <param name="eq">An optional equality comparer. If null, the default is used.</param>
+		/// <returns></returns>
+		public ImmList<TResult> GroupJoin<TInner, TKey, TResult>(IEnumerable<TInner> inner, Func<T, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<T, IEnumerable<TInner>, TResult> resultSelector, IEqualityComparer<TKey> eq = null)
+		{
+	
+			return base._GroupJoin(GetPrototype<TResult>(), inner, outerKeySelector, innerKeySelector, resultSelector, eq);
+		}
 	
 		/// <summary>
 		///     Applies an element selector on every element of the collection, yielding a sequence.
@@ -75,7 +95,8 @@ namespace Imms
 		/// <param name="rSelector">The result selector.</param>
 		/// <returns></returns>
 		public ImmList<TRElem> SelectMany<TElem2, TRElem>(Func<T, IEnumerable<TElem2>> selector,
-			Func<T, TElem2, TRElem> rSelector) {
+			Func<T, TElem2, TRElem> rSelector)
+		{
 			return base._SelectMany(GetPrototype<TRElem>(), selector, rSelector);
 		}
 	
@@ -94,7 +115,8 @@ namespace Imms
 		/// <returns></returns>
 		public ImmList<TRElem> Join<TRElem, TInner, TKey>(IEnumerable<TInner> inner, Func<T, TKey> oKeySelector,
 			Func<TInner, TKey> iKeySelector, Func<T, TInner, TRElem> rSelector,
-			IEqualityComparer<TKey> eq = null) {
+			IEqualityComparer<TKey> eq = null)
+		{
 			return base._Join(GetPrototype<TRElem>(), inner, oKeySelector, iKeySelector, rSelector,
 				eq ?? EqualityComparer<TKey>.Default);
 		}
@@ -111,7 +133,8 @@ namespace Imms
 		/// <param name="eq"></param>
 		/// <returns></returns>
 		public ImmList<KeyValuePair<T, TInner>> Join<TInner, TKey>(IEnumerable<TInner> inner, Func<T, TKey> oKeySelector,
-			Func<TInner, TKey> iKeySelector, IEqualityComparer<TKey> eq = null) {
+			Func<TInner, TKey> iKeySelector, IEqualityComparer<TKey> eq = null)
+		{
 	
 			return Join(inner, oKeySelector, iKeySelector, Kvp.Of, eq);
 		}
@@ -129,7 +152,8 @@ namespace Imms
 		/// <param name="eq">The equality comparer.</param>
 		/// <returns></returns>
 		public ImmList<TRElem> GroupBy<TRElem, TElem2, TKey>(Func<T, TKey> keySelector, Func<T, TElem2> valueSelector,
-			Func<TKey, IEnumerable<TElem2>, TRElem> rSelector, IEqualityComparer<TKey> eq = null) {
+			Func<TKey, IEnumerable<TElem2>, TRElem> rSelector, IEqualityComparer<TKey> eq = null)
+		{
 			return base._GroupBy(GetPrototype<TRElem>(), keySelector, valueSelector, rSelector,
 				eq ?? EqualityComparer<TKey>.Default);
 		}
@@ -150,7 +174,8 @@ namespace Imms
 		/// <param name="eq">The equality comparer.</param>
 		/// <returns></returns>
 		public ImmList<KeyValuePair<TKey, IEnumerable<TElem2>>> GroupBy<TKey, TElem2>(Func<T, TKey> keySelector, Func<T, TElem2> elementSelector,
-			IEqualityComparer<TKey> eq = null) {
+			IEqualityComparer<TKey> eq = null)
+		{
 			return GroupBy(keySelector, elementSelector, Kvp.Of, eq ?? EqualityComparer<TKey>.Default);
 		}
 	
@@ -167,7 +192,8 @@ namespace Imms
 		/// <param name="eq">The equality comparer.</param>
 		/// <returns></returns>
 		public ImmList<KeyValuePair<TKey, IEnumerable<T>>> GroupBy<TKey>(Func<T, TKey> keySelector,
-			IEqualityComparer<TKey> eq = null) {
+			IEqualityComparer<TKey> eq = null)
+		{
 			return GroupBy(keySelector, x => x, Kvp.Of, eq ?? EqualityComparer<TKey>.Default);
 		}
 	
@@ -176,7 +202,8 @@ namespace Imms
 		/// </summary>
 		/// <typeparam name="TRElem">The return element type.</typeparam>
 		/// <returns></returns>
-		public ImmList<TRElem> Cast<TRElem>() {
+		public ImmList<TRElem> Cast<TRElem>()
+		{
 			return base._Cast<TRElem, ImmList<TRElem>>(GetPrototype<TRElem>());
 		}
 	
@@ -188,7 +215,8 @@ namespace Imms
 		/// <param name="initial">The initial value for the accumulator.</param>
 		/// <param name="accumulator">The accumulator.</param>
 		/// <returns></returns>
-		public ImmList<TRElem> Scan<TRElem>(TRElem initial, Func<TRElem, T, TRElem> accumulator) {
+		public ImmList<TRElem> Scan<TRElem>(TRElem initial, Func<TRElem, T, TRElem> accumulator)
+		{
 			return base._Scan(GetPrototype<TRElem>(), initial, accumulator);
 		}
 	
@@ -200,7 +228,8 @@ namespace Imms
 		/// <param name="initial">The initial value for the accumulator.</param>
 		/// <param name="accumulator">The accumulator.</param>
 		/// <returns></returns>
-		public ImmList<TRElem> ScanBack<TRElem>(TRElem initial, Func<TRElem, T, TRElem> accumulator) {
+		public ImmList<TRElem> ScanBack<TRElem>(TRElem initial, Func<TRElem, T, TRElem> accumulator)
+		{
 			return base._ScanBack(GetPrototype<TRElem>(), initial, accumulator);
 		}
 	
@@ -212,21 +241,24 @@ namespace Imms
 		/// <param name="other">The other collection. The right-hand parameter of the selector.</param>
 		/// <param name="selector">The selector used to select the result.</param>
 		/// <returns></returns>
-		public ImmList<TRElem> Zip<TElem2, TRElem>(IEnumerable<TElem2> other, Func<T, TElem2, TRElem> selector) {
+		public ImmList<TRElem> Zip<TElem2, TRElem>(IEnumerable<TElem2> other, Func<T, TElem2, TRElem> selector)
+		{
 			return base._Zip(GetPrototype<TRElem>(), other, selector);
 		}
 	
-			/// <summary>
+		/// <summary>
 		/// Zips this collection with another one, returning a collection of pairs.
 		/// </summary>
 		/// <typeparam name="TElem2">The type of element of the 2nd collection.</typeparam>
 		/// <param name="other">The other collection. The right-hand parameter of the selector.</param>
 		/// <returns></returns>
-		public ImmList<Tuple<T, TElem2>> Zip<TElem2>(IEnumerable<TElem2> other) {
+		public ImmList<Tuple<T, TElem2>> Zip<TElem2>(IEnumerable<TElem2> other)
+		{
 			return Zip(other, Tuple.Create);
 		}
 	
-		private ImmList<TElem2> GetPrototype<TElem2>() {
+		private ImmList<TElem2> GetPrototype<TElem2>()
+		{
 			return ImmList<TElem2>.Instance;
 		}
 	}

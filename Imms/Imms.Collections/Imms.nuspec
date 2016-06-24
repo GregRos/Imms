@@ -6,10 +6,10 @@
     <title>$title$</title>
     <authors>$author$</authors>
     <owners>$author$</owners>
-    <licenseUrl>https://raw.githubusercontent.com/GregRos/Imms/master/license.md</licenseUrl>
+    <licenseUrl>https://raw.githubusercontent.com/Imms/Imms/master/license.md</licenseUrl>
     <projectUrl>http://imms.github.io/</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-	<iconUrl>https://raw.githubusercontent.com/GregRos/Imms/master/Icon.png</iconUrl>
+	<iconUrl>https://raw.githubusercontent.com/Imms/Imms/master/Icon.png</iconUrl>
 	<summary>High-performance immutable collections for .NET.</summary>
     <description>$description$</description>
     <releaseNotes>A number of API changes and bug fixes.</releaseNotes>

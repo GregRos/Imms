@@ -7,6 +7,7 @@ type IterationControl<'v> =
 | Stop
 | Yield of 'v
 | Ignore
+
 let getEnumerator (a :_ seq) = a.GetEnumerator()
 
 let rev (s :_ seq) =

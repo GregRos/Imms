@@ -4,10 +4,12 @@ using System.Linq;
 using Imms;
 using Imms.Abstract;
 
-partial class __ListLikeClass__<T> : AbstractSequential<T, __ListLikeClass__<T>> {
+partial class __ListLikeClass__<T> : AbstractSequential<T, __ListLikeClass__<T>>
+{
 	private static readonly __ListLikeClass__<T> Instance = new __ListLikeClass__<T>();
 
-	private __ListLikeClass__() {
+	private __ListLikeClass__()
+	{
 	}
 
 
@@ -17,7 +19,8 @@ partial class __ListLikeClass__<T> : AbstractSequential<T, __ListLikeClass__<T>>
 	/// <typeparam name="TRElem">The type of the result element.</typeparam>
 	/// <param name="selector">The selector.</param>
 	/// <returns></returns>
-	public __ListLikeClass__<TRElem> Select<TRElem>(Func<T, TRElem> selector) {
+	public __ListLikeClass__<TRElem> Select<TRElem>(Func<T, TRElem> selector)
+	{
 		return base._Select(GetPrototype<TRElem>(), selector);
 	}
 
@@ -28,7 +31,8 @@ partial class __ListLikeClass__<T> : AbstractSequential<T, __ListLikeClass__<T>>
 	/// <typeparam name="TRElem">The type of the output collection element.</typeparam>
 	/// <param name="selector">The selector.</param>
 	/// <returns></returns>
-	public __ListLikeClass__<TRElem> Select<TRElem>(Func<T, Optional<TRElem>> selector) {
+	public __ListLikeClass__<TRElem> Select<TRElem>(Func<T, Optional<TRElem>> selector)
+	{
 		return base._Choose(GetPrototype<TRElem>(), selector);
 	}
 
@@ -39,7 +43,8 @@ partial class __ListLikeClass__<T> : AbstractSequential<T, __ListLikeClass__<T>>
 	/// <typeparam name="TRElem">The type of the output collection element.</typeparam>
 	/// <param name="selector">The selector.</param>
 	/// <returns></returns>
-	public __ListLikeClass__<TRElem> Choose<TRElem>(Func<T, Optional<TRElem>> selector) {
+	public __ListLikeClass__<TRElem> Choose<TRElem>(Func<T, Optional<TRElem>> selector)
+	{
 		return base._Choose(GetPrototype<TRElem>(), selector);
 	}
 
@@ -50,15 +55,30 @@ partial class __ListLikeClass__<T> : AbstractSequential<T, __ListLikeClass__<T>>
 	/// <typeparam name="TRElem">The type of the ouput collection elem.</typeparam>
 	/// <param name="selector">The selector.</param>
 	/// <returns></returns>
-	public __ListLikeClass__<TRElem> SelectMany<TRElem>(Func<T, IEnumerable<TRElem>> selector) {
+	public __ListLikeClass__<TRElem> SelectMany<TRElem>(Func<T, IEnumerable<TRElem>> selector)
+	{
 		return base._SelectMany(GetPrototype<TRElem>(), selector);
 	}
 
 
 
-	 public __ListLikeClass__<TResult> GroupJoin<TInner, TKey, TResult>(IEnumerable<TInner> inner, Func<T, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<T, IEnumerable<TInner>, TResult> resultSelector, IEqualityComparer<TKey> eq = null) {
-		 return base._GroupJoin(GetPrototype<TResult>(), inner, outerKeySelector, innerKeySelector, resultSelector, eq);
-	 }
+	/// <summary>
+	/// Groups the elements of this collection and a sequence based on equality of keys, and groups the results. The specified equality comparer is used to compare keys, if provided.
+	/// </summary>
+	/// <typeparam name="TInner">The type of the input sequence.</typeparam>
+	/// <typeparam name="TKey">The type of the key used to join the results.</typeparam>
+	/// <typeparam name="TResult">The type of the result element.</typeparam>
+	/// <param name="inner">The input sequence.</param>
+	/// <param name="outerKeySelector">The key selector for the current collection.</param>
+	/// <param name="innerKeySelector">The key selector for the input sequence.</param>
+	/// <param name="resultSelector">The result selector that aggregates all the results.</param>
+	/// <param name="eq">An optional equality comparer. If null, the default is used.</param>
+	/// <returns></returns>
+	public __ListLikeClass__<TResult> GroupJoin<TInner, TKey, TResult>(IEnumerable<TInner> inner, Func<T, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<T, IEnumerable<TInner>, TResult> resultSelector, IEqualityComparer<TKey> eq = null)
+	{
+
+		return base._GroupJoin(GetPrototype<TResult>(), inner, outerKeySelector, innerKeySelector, resultSelector, eq);
+	}
 
 	/// <summary>
 	///     Applies an element selector on every element of the collection, yielding a sequence.
@@ -71,7 +91,8 @@ partial class __ListLikeClass__<T> : AbstractSequential<T, __ListLikeClass__<T>>
 	/// <param name="rSelector">The result selector.</param>
 	/// <returns></returns>
 	public __ListLikeClass__<TRElem> SelectMany<TElem2, TRElem>(Func<T, IEnumerable<TElem2>> selector,
-		Func<T, TElem2, TRElem> rSelector) {
+		Func<T, TElem2, TRElem> rSelector)
+	{
 		return base._SelectMany(GetPrototype<TRElem>(), selector, rSelector);
 	}
 
@@ -90,7 +111,8 @@ partial class __ListLikeClass__<T> : AbstractSequential<T, __ListLikeClass__<T>>
 	/// <returns></returns>
 	public __ListLikeClass__<TRElem> Join<TRElem, TInner, TKey>(IEnumerable<TInner> inner, Func<T, TKey> oKeySelector,
 		Func<TInner, TKey> iKeySelector, Func<T, TInner, TRElem> rSelector,
-		IEqualityComparer<TKey> eq = null) {
+		IEqualityComparer<TKey> eq = null)
+	{
 		return base._Join(GetPrototype<TRElem>(), inner, oKeySelector, iKeySelector, rSelector,
 			eq ?? EqualityComparer<TKey>.Default);
 	}
@@ -107,7 +129,8 @@ partial class __ListLikeClass__<T> : AbstractSequential<T, __ListLikeClass__<T>>
 	/// <param name="eq"></param>
 	/// <returns></returns>
 	public __ListLikeClass__<KeyValuePair<T, TInner>> Join<TInner, TKey>(IEnumerable<TInner> inner, Func<T, TKey> oKeySelector,
-		Func<TInner, TKey> iKeySelector, IEqualityComparer<TKey> eq = null) {
+		Func<TInner, TKey> iKeySelector, IEqualityComparer<TKey> eq = null)
+	{
 
 		return Join(inner, oKeySelector, iKeySelector, Kvp.Of, eq);
 	}
@@ -125,7 +148,8 @@ partial class __ListLikeClass__<T> : AbstractSequential<T, __ListLikeClass__<T>>
 	/// <param name="eq">The equality comparer.</param>
 	/// <returns></returns>
 	public __ListLikeClass__<TRElem> GroupBy<TRElem, TElem2, TKey>(Func<T, TKey> keySelector, Func<T, TElem2> valueSelector,
-		Func<TKey, IEnumerable<TElem2>, TRElem> rSelector, IEqualityComparer<TKey> eq = null) {
+		Func<TKey, IEnumerable<TElem2>, TRElem> rSelector, IEqualityComparer<TKey> eq = null)
+	{
 		return base._GroupBy(GetPrototype<TRElem>(), keySelector, valueSelector, rSelector,
 			eq ?? EqualityComparer<TKey>.Default);
 	}
@@ -146,7 +170,8 @@ partial class __ListLikeClass__<T> : AbstractSequential<T, __ListLikeClass__<T>>
 	/// <param name="eq">The equality comparer.</param>
 	/// <returns></returns>
 	public __ListLikeClass__<KeyValuePair<TKey, IEnumerable<TElem2>>> GroupBy<TKey, TElem2>(Func<T, TKey> keySelector, Func<T, TElem2> elementSelector,
-		IEqualityComparer<TKey> eq = null) {
+		IEqualityComparer<TKey> eq = null)
+	{
 		return GroupBy(keySelector, elementSelector, Kvp.Of, eq ?? EqualityComparer<TKey>.Default);
 	}
 
@@ -163,7 +188,8 @@ partial class __ListLikeClass__<T> : AbstractSequential<T, __ListLikeClass__<T>>
 	/// <param name="eq">The equality comparer.</param>
 	/// <returns></returns>
 	public __ListLikeClass__<KeyValuePair<TKey, IEnumerable<T>>> GroupBy<TKey>(Func<T, TKey> keySelector,
-		IEqualityComparer<TKey> eq = null) {
+		IEqualityComparer<TKey> eq = null)
+	{
 		return GroupBy(keySelector, x => x, Kvp.Of, eq ?? EqualityComparer<TKey>.Default);
 	}
 
@@ -172,7 +198,8 @@ partial class __ListLikeClass__<T> : AbstractSequential<T, __ListLikeClass__<T>>
 	/// </summary>
 	/// <typeparam name="TRElem">The return element type.</typeparam>
 	/// <returns></returns>
-	public __ListLikeClass__<TRElem> Cast<TRElem>() {
+	public __ListLikeClass__<TRElem> Cast<TRElem>()
+	{
 		return base._Cast<TRElem, __ListLikeClass__<TRElem>>(GetPrototype<TRElem>());
 	}
 
@@ -184,7 +211,8 @@ partial class __ListLikeClass__<T> : AbstractSequential<T, __ListLikeClass__<T>>
 	/// <param name="initial">The initial value for the accumulator.</param>
 	/// <param name="accumulator">The accumulator.</param>
 	/// <returns></returns>
-	public __ListLikeClass__<TRElem> Scan<TRElem>(TRElem initial, Func<TRElem, T, TRElem> accumulator) {
+	public __ListLikeClass__<TRElem> Scan<TRElem>(TRElem initial, Func<TRElem, T, TRElem> accumulator)
+	{
 		return base._Scan(GetPrototype<TRElem>(), initial, accumulator);
 	}
 
@@ -196,7 +224,8 @@ partial class __ListLikeClass__<T> : AbstractSequential<T, __ListLikeClass__<T>>
 	/// <param name="initial">The initial value for the accumulator.</param>
 	/// <param name="accumulator">The accumulator.</param>
 	/// <returns></returns>
-	public __ListLikeClass__<TRElem> ScanBack<TRElem>(TRElem initial, Func<TRElem, T, TRElem> accumulator) {
+	public __ListLikeClass__<TRElem> ScanBack<TRElem>(TRElem initial, Func<TRElem, T, TRElem> accumulator)
+	{
 		return base._ScanBack(GetPrototype<TRElem>(), initial, accumulator);
 	}
 
@@ -208,21 +237,24 @@ partial class __ListLikeClass__<T> : AbstractSequential<T, __ListLikeClass__<T>>
 	/// <param name="other">The other collection. The right-hand parameter of the selector.</param>
 	/// <param name="selector">The selector used to select the result.</param>
 	/// <returns></returns>
-	public __ListLikeClass__<TRElem> Zip<TElem2, TRElem>(IEnumerable<TElem2> other, Func<T, TElem2, TRElem> selector) {
+	public __ListLikeClass__<TRElem> Zip<TElem2, TRElem>(IEnumerable<TElem2> other, Func<T, TElem2, TRElem> selector)
+	{
 		return base._Zip(GetPrototype<TRElem>(), other, selector);
 	}
 
-		/// <summary>
+	/// <summary>
 	/// Zips this collection with another one, returning a collection of pairs.
 	/// </summary>
 	/// <typeparam name="TElem2">The type of element of the 2nd collection.</typeparam>
 	/// <param name="other">The other collection. The right-hand parameter of the selector.</param>
 	/// <returns></returns>
-	public __ListLikeClass__<Tuple<T, TElem2>> Zip<TElem2>(IEnumerable<TElem2> other) {
+	public __ListLikeClass__<Tuple<T, TElem2>> Zip<TElem2>(IEnumerable<TElem2> other)
+	{
 		return Zip(other, Tuple.Create);
 	}
 
-	private __ListLikeClass__<TElem2> GetPrototype<TElem2>() {
+	private __ListLikeClass__<TElem2> GetPrototype<TElem2>()
+	{
 		return __ListLikeClass__<TElem2>.Instance;
 	}
 }

@@ -4,6 +4,7 @@ open System.Collections.Immutable
 open Imms.Tests.Performance.Wrappers
 open System.Linq
 open Imms
+#nowarn"0044"
 [<AutoOpen>]
 module internal Shorthand = 
     let data ctor kind library name size gen = DataStructure.Create(name,kind, size, library, gen, ctor)

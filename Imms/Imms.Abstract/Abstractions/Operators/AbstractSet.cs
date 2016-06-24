@@ -74,7 +74,7 @@ namespace Imms.Abstract
 	partial class AbstractMap<TKey, TValue, TMap> {
 
 		/// <summary>
-		/// Adds the key-value pair to the map, overwriting any existing pair. Identical to <see cref="Set"/>.
+		/// Adds the key-value pair to the map, overwriting any existing pair. Identical to <see cref="Set(TKey,TValue)"/>.
 		/// </summary>
 		/// <param name="left">The map.</param>
 		/// <param name="kvp">The key-value pair.</param>
@@ -114,7 +114,7 @@ namespace Imms.Abstract
 		}
 
 		/// <summary>
-		/// Takes a sequence of key-value pairs and removes all keys present in the sequence from the map. Identical to <see cref="Subtract"/>.
+		/// Takes a sequence of key-value pairs and removes all keys present in the sequence from the map. Identical to <see cref="Subtract{T}"/>.
 		/// </summary>
 		/// <param name="left">The map.</param>
 		/// <param name="kvps">The key-value pairs.</param>

@@ -1,10 +1,7 @@
 module Imms.Tests.Performance.Report
 open System.IO
 open Imms.FSharp.Implementation
-open LINQtoCSV
-open CsvHelper
 open ExtraFunctional
-open YamlDotNet.Serialization
 type FullRecord = 
     {
         Test : string
@@ -40,41 +37,10 @@ let private toFullRecord (entry : TestInstanceMeta) =
         Ratio = entry.Test |> Meta.tryGet "Ratio"
     }
 
-
-let toTable (entries : TestInstanceMeta list) =
-    use stringw = new StringWriter()
-    use csv = new CsvWriter(stringw)
-    let missingText = "X"
-    for kind, tests in entries |> Seq.groupBy(fun x -> x.Target.Kind) do
-        csv.WriteField("Tests For:")
-        csv.WriteField(sprintf "%A" kind)
-        csv.NextRecord()
-        csv.WriteField("Collection/Test")
-        let byName = tests |> Seq.map (fun x -> x.Test.Name) |> Seq.distinct |> Seq.sort |> Seq.toArray
-        byName |> Seq.iter (csv.WriteField)
-        csv.NextRecord()
-        let byTarget = 
-            tests 
-            |> Seq.groupBy (fun x -> x.Target.Name) 
-            |> Seq.sortBy (snd >> Seq.head >> (fun x -> x.Target.Library))
-
-        for name,group in byTarget do
-            csv.WriteField name
-            for testName in byName do
-                let myTest = group |> Seq.tryFind (fun x -> x.Test.Name = testName)
-                match myTest with
-                | Some test -> csv.WriteField(test.Time.ToString())
-                | None -> csv.WriteField(missingText)
-            csv.NextRecord()
-        csv.NextRecord()
-    stringw.Flush()
-    stringw.ToString()                               
-    
 open Newtonsoft.Json
 let toJSON (entries : TestInstanceMeta list) = 
-    let context = CsvContext()
     let ys = JsonSerializer()
-    ys.Formatting <- Formatting.Indented
+    ys.Formatting <- Formatting.Indented 
     use stream = new StringWriter()    
     let entries = entries |> Seq.map (toFullRecord)
     ys.Serialize(stream, entries)

@@ -7,7 +7,7 @@ open System
 open Imms.FSharp.Implementation
 
 open Imms.FSharp.Implementation.BuilderTypes
-
+#nowarn"0044"
 let private array_ops<'elem> : collection_ops<'elem, 'elem ImmList, 'elem ImmVector> = seq_build (fun list -> list.ToImmVector())
 
 let private list_ops<'elem> : collection_ops<'elem, 'elem ImmList, 'elem ImmList> = seq_build id

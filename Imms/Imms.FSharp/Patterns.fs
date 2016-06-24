@@ -3,6 +3,7 @@
 module Imms.FSharp.Patterns
 open Imms
 open Imms.FSharp.Implementation
+
 ///Compatibility active pattern for matching Imms's Optional type.
 let (|ImmSome|ImmNone|) (optional : Imms.Optional<'T>) = 
     if optional.IsSome then 
@@ -29,11 +30,13 @@ let inline (|Last2|_|) o =
         let last2 = rest1 |> Ops.last
         let rest2 = rest1 |>Ops.removeLast
         Some(rest2, last2, last1)
+
 ///Decomposes a collection by 3 elements, from the end.
 let inline (|Last3|_|) o = 
     match o with
     | Last1(Last2(tail, item1,item2),item3) -> Some(tail, item1,item2,item3)
     | _ -> None
+
 ///Decomposes a collection by 4 elements, from the end.
 let inline (|Last4|_|) o = 
     match o with

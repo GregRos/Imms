@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Imms.Abstract;
-
+#pragma warning disable 618
 namespace Imms {
 	[DebuggerDisplay("{DebuggerDisplay,nq}")]
 	[DebuggerTypeProxy(typeof (VectorDebugView<>))]

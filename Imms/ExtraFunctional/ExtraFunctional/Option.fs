@@ -1,8 +1,9 @@
 ﻿namespace ExtraFunctional
 module Option = 
     let orValue (v : 'v) = function Some u -> u | None -> v
+    let orMaybe (v : 'v option) = function Some u -> Some u | None -> v
+    let asNull = Option.toObj
     let cast<'a,'b> (opt : 'a option) : 'b option = opt |> Option.map (fun a -> a :> obj :?> 'b)
-    let asNull (opt : 'a option) = if opt.IsSome then opt.Value else null
     
 [<AutoOpen>]
 module OptionExt =
