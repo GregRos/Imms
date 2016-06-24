@@ -14,7 +14,7 @@
     <description>
       This library provides F# integration for the Imms immutable collections library.
     </description>
-    <releaseNotes>First release since rename.</releaseNotes>
+    <releaseNotes>A number of changes, including bug fixes and API changes.</releaseNotes>
     <copyright>Copyright 2016</copyright>
     <tags>collection collections fsharp immutable persistent imms imm functional deque vector map dictionary list queue stack performance set</tags>
     <dependencies>

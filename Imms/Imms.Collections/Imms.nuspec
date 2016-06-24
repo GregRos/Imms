@@ -12,7 +12,7 @@
 	<iconUrl>https://raw.githubusercontent.com/GregRos/Imms/master/Icon.png</iconUrl>
 	<summary>High-performance immutable collections for .NET.</summary>
     <description>$description$</description>
-    <releaseNotes>Various changes.</releaseNotes>
+    <releaseNotes>A number of API changes and bug fixes.</releaseNotes>
     <copyright>Copyright 2016</copyright>
     <tags>collection collections fsharp immutable persistent imms imm functional deque vector map dictionary list queue stack performance set</tags>
   </metadata>
